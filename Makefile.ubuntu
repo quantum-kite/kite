@@ -1,0 +1,47 @@
+# MODEL=ISING|SG L=8|16... make -e
+# ENTROPY=CFP|BERG|EXACT DINAMICS=SSF|NFOLD|CLUSTER ./comando
+# -std=c99 
+
+OS := $(shell uname)
+
+#hdf5-tools and libeigen3-dev needed on ubuntu
+OS := $(shell uname)
+
+CC = h5c++ -Wall -DEIGEN_DONT_PARALLELIZE -g -march=native  -O3 -ffast-math
+CFLAGS =   -fopenmp -std=gnu++11 
+CINCLUDE = -ISrc -I/usr/include  -I/usr/include/eigen3  
+CLIBS = -L/usr/lib/x86_64-linux-gnu -lhdf5_cpp -lhdf5
+
+
+
+VPATH = .
+OBJS = *.o
+
+MEM1 = 4
+MEM2 = 4
+EFERMI = 0.0
+REDUCTION  = 1
+MUSIZE = 512
+NMEDIAS = 1
+
+all:    clean
+	cd Src; $(CC) $(CFLAGS) $(CINCLUDE)  -DMEM1=$(MEM1) -DMEM2=$(MEM2) -DMUSIZE=$(MUSIZE) -DNMEDIAS=$(NMEDIAS) -c *.cpp  
+	@echo "linking..."
+	cd Src; $(CC) $(CLIBS) $(CFLAGS) $(CINCLUDE) $(OBJS)  -o ../pp
+	rm -f Src/*.o
+	cd ..
+
+
+
+debug:  clean  
+	cd Src; $(CC) $(CFLAGS) $(CINCLUDE) $(CDEFS)  -DMEM1=$(MEM1) -DMEM2=$(MEM2) -c *.cpp   -g
+	@echo "linking..."
+	cd Src; $(CC) $(CLIBS) $(CFLAGS) $(CINCLUDE) $(CDEFS) $(OBJS)  -o ../pp -g
+	cd ..
+
+clean:
+	rm -f Src/*.o Src/*~ core *~
+
+
+tratar: clean
+	$(CC) -Wall $(CLIBS) $(CFLAGS) $(CINCLUDE) $(CDEFS)  -DMEM1=$(MEM1) -DMEM2=$(MEM2) -DREDUCTION=$(REDUCTION) -DEFERMI=$(EFERMI) tratar.cpp  -o tratar
