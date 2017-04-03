@@ -79,3 +79,6 @@ fabric.properties
 
 # Checkpoints of jupyter notebook
 .ipynb_checkpoints/
+
+# all hdf5 files
+*.h5
