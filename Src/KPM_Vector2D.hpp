@@ -17,6 +17,7 @@ public:
   using KPM_VectorBasis<T,2>::GlobalBorder;
   using KPM_VectorBasis<T,2>::aux_wr;
   using KPM_VectorBasis<T,2>::aux_test;
+  using KPM_VectorBasis<T,2>::inc_index;
   
   KPM_Vector(int mem, Hamiltonian <T,2> & h1, LatticeStructure <2>  & r1, std::vector<T> & B , std::vector<T> & GB) : KPM_VectorBasis<T,2>(mem, h1, r1, B, GB){
     unsigned d;
@@ -39,7 +40,7 @@ public:
     MemIndEnd[d][0] = z.set({0,0,0}).index;
     MemIndBeg[d][1] = z.set({0, int(r.Ld[1]) - 2, 0}).index;
     MemIndEnd[d][1] = z.set({0, int(r.Ld[1]) - 1, 0}).index;
-    printf("%d %d %d %d\n", MemIndBeg[d][0], MemIndBeg[d][1], MemIndEnd[d][0], MemIndEnd[d][1]);
+
     
     dist.set({0,0,0});
     for(d = 0 ; d < 2; d++)
@@ -57,7 +58,6 @@ public:
   };
   
   void initiate_vector() {
-
     index = 0;
     Coordinates<long, 3> x(r.Ld);
     for(unsigned io = 0; io < r.Orb; io++)
@@ -65,7 +65,7 @@ public:
 	for(unsigned i0 = 1; i0 < r.Ld[0] - 1; i0++)
 	  v(x.set({i0,i1,io}).index, index) = rng.init()/value_type(sqrt(r.Size));
   };
-
+  
   template < unsigned MULT> 
   void Multiply(const int model) {
     /*
@@ -75,9 +75,10 @@ public:
       MULT = 1 : For the case of the KPM_iteration
     */
     Coordinates<unsigned,3> x(r.Ld);
+    Coordinates<int,3> z1(r.Ld), z2(r.Ld);
     const unsigned STRIDE0 = 4;    
     const unsigned STRIDE1 = 4;
-    
+    inc_index();
     T * phi0 = v.col(index).data();
     T * phiM1 = v.col((memory + index - 1) % memory ).data();
     T * phiM2 = v.col((memory + index - 2) % memory ).data();
@@ -96,32 +97,22 @@ public:
 	      for(unsigned j = j0; j < j1; j += std )
 		for(unsigned i = j; i < j + STRIDE0 ; i++)
 		  phi0[i] = - value_type(MULT) * phiM2[i];
-	      
+
 	      for(unsigned ib = 0; ib < h.NHoppings[io]; ib++)
 		{
 		  const int  d1 = h.d(ib, io);
-		  const T    t1 =  value_type(MULT + 1) * h.t(ib, io);
+		  const T    t1 =  value_type(MULT + 1) * h.t[model](ib, io);
 		  
 		  for(unsigned j = j0; j < j1; j += std )
-		    {
-		      T * p0 = phi0 + j;
-		      T * p1 = phiM1 + j + d1;
-		      
-		      for(unsigned i = j; i < j + STRIDE0 ; i++)
-			p0[i] += t1 * p1[i];
-		    }
+		    for(unsigned i = j; i < j + STRIDE0 ; i++)
+		      phi0[i] += t1 * phiM1[i + d1];
 		}
 	    }
       }
-    
+
     Exchange_Boundaries();    
   };
 
-  void setCoord(unsigned i0, unsigned i1, unsigned io) {
-    r.coord[0] = i0;
-    r.coord[1] = i1;
-    r.coord[2] = io;
-  }
     
   void Exchange_Boundaries() {
     const unsigned D = 2u;
@@ -130,9 +121,9 @@ public:
     //
     Coordinates<unsigned,3> x(r.Ld); 
     T  *phi1 = v.col(index).data();
-
     
-    for(unsigned d = 0; d <  D; d++)  // We will transfer the orientations perpendicular  to d
+    
+    for(unsigned d = 0; d <  0*D; d++)  // We will transfer the orientations perpendicular  to d
       {
 	unsigned int BSize = r.Orb * max[d];
 	unsigned d1 = (d + 1) % D;
@@ -149,13 +140,6 @@ public:
 	    }
 	
 	// Copy to the  shared memory
-#pragma omp critical
-	{
-	  std::cout << Border.size() << std::endl;
-	  for(unsigned i = 0; i < Border.size(); i++)
-	    std::cout << Border.at(i) << " ";
-	  std::cout << std::endl;
-	}
 	std::copy( Border.begin(), Border.begin() + 2 * BSize, GlobalBorder.begin() + 2 * BSize * r.thread_id );
 
 

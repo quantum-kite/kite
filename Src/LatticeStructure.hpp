@@ -29,7 +29,12 @@ struct Coordinates {
 	p *= T(L[i]);
       }
   }
-
+  void print() {
+    for(unsigned i = 0; i < D ; i++)
+      std::cout << coord[i] << " ";
+    std::cout << std::endl;
+  }
+  
   template <typename T1>
   Coordinates & set(std::initializer_list<T1> a_args)  {
     int k = 0;
@@ -65,7 +70,13 @@ struct Coordinates {
     set_index(coord);
     return *this;
   }
-  
+
+  Coordinates & subtract( Coordinates<T,D> & x) {
+    for(int i = 0; i < int(D); i++)
+      coord[i] = coord[i] - x.coord[i];
+    set_index(coord);
+    return *this;
+  }
 
   
 };
@@ -78,7 +89,9 @@ private:
 public:
   unsigned Sized;
   unsigned Size;
-  double r[D][D];
+
+  double rLat[D][D];   // first index is the vector the second the component in cartesian coordinates 
+  double (*rOrb)[D];
   unsigned nd[D + 1];
   unsigned n_threads;
   
@@ -99,7 +112,11 @@ public:
   {
     H5::H5File *file = new H5::H5File(name, H5F_ACC_RDONLY);
     get_hdf5<unsigned>(&Orb, file, (char *) "/NOrbitals");
-    get_hdf5<double>(&r[0][0], file, (char *) "/LattVector");
+    get_hdf5<double>(&rLat[0][0], file, (char *) "/LattVector");
+    
+    rOrb =  (double(*)[D]) malloc(Orb * D * sizeof(double) );
+    get_hdf5<double>(&rOrb[0][0], file, (char *) "/OrbPositions");
+    
     get_hdf5<unsigned>(Lt, file, (char *) "/L");
     get_hdf5<unsigned>(Bd, file, (char *) "/Boundaries");
     get_hdf5<unsigned>(nd, file, (char *) "/Divisions");
@@ -108,12 +125,7 @@ public:
     N = 1;
     Nt = 1;
     n_threads = 1;
-    for(int i = 0; i < int(D); i++)
-      {
-	for(int j = 0; j < int(D); j++)
-	  std::cout << r[i][j] << " ";
-	std::cout << std::endl;
-      }
+
     for(unsigned i = 0; i < D; i++)
       {
 	
@@ -163,28 +175,3 @@ public:
   }
 };
 
-/*
-  int convert_distances(int n,  Eigen::VectorXi & dr_convert) {
-  int io = n % Orb;
-  int iv = n / Orb;
-  int dfinal;
-  
-  for( int i = 0; i < dim; i++)
-  {
-  dr_convert(i) = (iv % 3) - 1;
-  iv /= 3;
-  std::cout << dr_convert(i)  << " "; 
-  }
-  std::cout << " ---- " << io << std::endl;
-  
-  dfinal = io * Nd;
-  
-  int mult = 1;
-  for( int i = 0; i < dim; i++)
-  {
-  dfinal += mult * dr_convert(i);
-  mult *= Ld[i];
-  }    
-  return dfinal;
-  };
- */
