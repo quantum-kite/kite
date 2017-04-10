@@ -82,3 +82,6 @@ fabric.properties
 
 # all hdf5 files
 *.h5
+
+# Python cache files
+__pycache__
