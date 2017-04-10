@@ -37,14 +37,15 @@ class Simulation;
 #include "Kpm_Vector2D.hpp"
 #include "Simulation.hpp"
 
+typedef int indextype;
 
-//#include "Hamiltonian2D.hpp"
 
 
 int main(int argc, char *argv[])
 {  
   /* Define General characteristics of the data */ 
-  int precision = 1, is_complex = 0, dim;
+  int precision = 1, dim, is_complex;
+
   H5::H5File *file = new H5::H5File(argv[1], H5F_ACC_RDONLY);
   get_hdf5(&is_complex, file, (char *) "/IS_COMPLEX");
   get_hdf5(&precision, file, (char *) "/PRECISION");
@@ -61,7 +62,7 @@ int main(int argc, char *argv[])
     exit(0);
   
   int index =   dim - 1 + 3 * precision + is_complex * 3 * 3; 
-  
+
   switch (index ) {
     /*
      * Float Real 
@@ -114,7 +115,7 @@ int main(int argc, char *argv[])
     
     /*
      * Complex 
-     */
+     
   case 9:
     {
       class GlobalSimulation <std::complex<float>, 1u> h(argv[1]);
@@ -160,6 +161,7 @@ int main(int argc, char *argv[])
       class GlobalSimulation <std::complex<long double>, 3u> h(argv[1]);
       break;
     }
+    */
   default:
     exit(0);
   } 

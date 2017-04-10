@@ -12,7 +12,6 @@ protected:
   
   
 public:
-
   Eigen::Matrix <T, Eigen::Dynamic,  Eigen::Dynamic > v;
   KPM_VectorBasis(int mem, Hamiltonian <T,D> & h1, LatticeStructure <D>  & r1, std::vector<T> & B, std::vector<T> & GB) :
     memory(mem), h(h1), r(r1), rng(h1.rng), Border(B), GlobalBorder(GB) {
@@ -53,6 +52,7 @@ public:
   template <unsigned MULT>
   void Multiply(const int model){};
   void test_boundaries_system() {};
+  void Exchange_Boundaries() {};
   inline void  HaIteration( const int model) { Multiply<0>(model); };
   inline void  ChIteration( const int model) { Multiply<1>(model); };
   
