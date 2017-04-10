@@ -1,3 +1,5 @@
+Lattice building script is used for making and exporting the lattice.
+
 # A list of things that should be implemented
 
 ### ~~Add labels for onsite potential:~~
