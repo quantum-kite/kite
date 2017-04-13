@@ -2,17 +2,66 @@ import numpy as np
 import h5py as hp
 
 
+class Modifications:
+    def __init__(self, **kwargs):
+        self._magnetic_field = kwargs.get('magnetic_field', False)
+        self._rec_width = 0
+        self._rec_mean_value = 0
+        self._gauss_width = 0
+        self._gauss_mean_value = 0
+
+        available_distr = ['rectangular', 'gaussian']
+        disorder_realisation = kwargs.get('disorder', {})
+        if not disorder_realisation:
+            self._rectangular = False
+            self._gaussian = False
+        elif disorder_realisation['name'] == available_distr[0]:
+            self._rectangular = True
+            self._gaussian = False
+            self._rec_width = disorder_realisation['width']
+            self._rec_mean_value = disorder_realisation['mean_value']
+        elif disorder_realisation['name'] == available_distr[1]:
+            self._rectangular = False
+            self._gaussian = True
+            self._gauss_width = disorder_realisation['width']
+            self._gauss_mean_value = disorder_realisation['mean_value']
+        else:
+            print('Available distributions are \n', list(available_distr))
+            raise SystemExit('Selected distribution not available for the calculation! ')
+
+    @property
+    def magnetic_field(self):  # -> magnetic_field:
+        """Returns true if magnetic field is on, else off."""
+        return self._magnetic_field
+
+    @property
+    def rectangular(self):  # -> rectangular disorder realisation:
+        """Returns True if rectangular disorder realisation, it's width and mean value."""
+        return {'bool': self._rectangular, 'width': self._rec_width, 'mean_value': self._rec_mean_value}
+
+    @property
+    def gaussian(self):  # -> gausian disorder realisation:
+        """Returns True if gaussian disorder realisation, it's width and mean value."""
+        return {'bool': self._gaussian, 'width':  self._gauss_width, 'mean_value':  self._gauss_mean_value}
+
+
 class Calculation:
     def __init__(self, fname='DOS', num_moments=1, num_random=1, num_disorder=1):
         available_functions = {'DOS', 'CondXX', 'CondXY', 'OptCond', 'SpinCond'}
+        fun_number = {'DOS': 1, 'CondXX': 2, 'CondXY': 3, 'OptCond': 4, 'SpinCond': 5}
         if fname not in available_functions:
             print('Available functions are \n', list(available_functions))
             raise SystemExit('Function not available for the calculation! ')
+        self._number = fun_number[fname]
         self._fname = fname
         self._num_moments = num_moments
         self._num_random = num_random
         self._num_disorder = num_disorder
 
+    @property
+    def number(self):  # -> function number:
+        """Returns the predefined number of desired function."""
+        return self._number
 
     @property
     def name(self):  # -> function name:
@@ -94,7 +143,7 @@ class Config:
         return self._htype
 
 
-def export_lattice(lattice, config, calculation, filename):
+def export_lattice(lattice, config, calculation, modification, filename):
     # get the lattice vectors and set the size of space (1D, 2D or 3D) as the total number of vectors.
     vectors = lattice.vectors
     space_size = len(vectors)
@@ -176,15 +225,32 @@ def export_lattice(lattice, config, calculation, filename):
         # onsite potential at each atom
         grp.create_dataset('Onsite', data=onsite.real.astype(config.type))
     # labels for the onsite potential
-    if len(lattice.onsite_labels):
-        grp.create_dataset('OnsiteLabels', data=lattice.onsite_labels)
+
+    # Disorder group which has 'rectangular' and 'gaussian subgroups'
+    # all of them have mean value and width
+    grp_dis = f.create_group('Disorder')
+    rec = modification.rectangular
+
+    dis_type = grp_dis.create_group('rectangular')
+    int(rec['bool'])
+
+    dis_type.create_dataset('bool', data=int(rec['bool']), dtype='u4')
+    dis_type.create_dataset('width', data=rec['width'])
+    dis_type.create_dataset('mean_value', data=rec['mean_value'])
+
+    rec = modification.gaussian
+    dis_type = grp_dis.create_group('gaussian')
+    dis_type.create_dataset('bool', data=int(rec['bool']), dtype='u4')
+    dis_type.create_dataset('width', data=rec['width'])
+    dis_type.create_dataset('mean_value', data=rec['mean_value'])
+
     # magnetic field
-    if lattice.magnetic_field:
-        grp.create_dataset('MagneticField', data=int(lattice.magnetic_field), dtype='u4')
+    if modification.magnetic_field:
+        grp.create_dataset('MagneticField', data=int(modification.magnetic_field), dtype='u4')
 
     # Calculation
     grpc = f.create_group('Calculation')
-    grpc.create_dataset('FunctionName', data=calculation.name)
+    grpc.create_dataset('FunctionNum', data=calculation.number)
     grpc.create_dataset('NumMoments', data=calculation.moments)
     grpc.create_dataset('NumRandoms', data=calculation.randoms)
     grpc.create_dataset('NumDisorder', data=calculation.disorder)

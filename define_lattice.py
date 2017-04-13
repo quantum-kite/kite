@@ -10,6 +10,39 @@ from pybinding.repository.graphene import a_cc, a, t, t_nn
 pb.pltutils.use_style()
 
 
+def graphene_basic(onsite=(0, 0)):
+    """Return the basic lattice specification for monolayer graphene with nearest neighbor"""
+
+    # without importing anything
+    a = 0.24595  # [nm] unit cell length
+    a_cc = 0.142  # [nm] carbon-carbon distance
+    t = -2.8  # [eV] nearest neighbour hopping
+
+    # create a lattice with 2 primitive vectors
+    lat = pb.Lattice(
+        a1=[a, 0],
+        a2=[a / 2, a / 2 * sqrt(3)]
+    )
+
+    # Add sublattices
+    lat.add_sublattices(
+        # name, position, and onsite potential
+        ('A', [0, -a_cc / 2], onsite[0]),
+        ('B', [0, a_cc / 2], onsite[1])
+    )
+
+    # Add hoppings
+    lat.add_hoppings(
+        # inside the main cell, between which atoms, and the value
+        ([0, 0], 'A', 'B', t),
+        # between neighboring cells, between which atoms, and the value
+        ([1, -1], 'A', 'B', t),
+        ([0, -1], 'A', 'B', t)
+    )
+
+    return lat
+
+
 def monolayer_graphene(nearest_neighbors=1, onsite=(0, 0), **kwargs):
     """Return the lattice specification for monolayer graphene"""
 
@@ -23,7 +56,7 @@ def monolayer_graphene(nearest_neighbors=1, onsite=(0, 0), **kwargs):
     # the number of orbitals can be different, and the only limitation is that the hopping element between the two sites
     #  needs to be of the size num_orbitals_a x num_orbitals_b.
     num_orbitals_a = np.asarray(onsite[0]).shape[0]
-    num_orbitals_b = np.asarray(onsite[0]).shape[0]
+    num_orbitals_b = np.asarray(onsite[1]).shape[0]
 
     # register name for hoppings
     lat.register_hopping_energies({
@@ -71,13 +104,4 @@ def monolayer_graphene(nearest_neighbors=1, onsite=(0, 0), **kwargs):
 
     lat.min_neighbors = 2
 
-    available_distr = {'rectangular', 'gaussian'}
-    onsite_label = kwargs.get('onsite_labels', '[]')
-    if len(onsite_label):
-        if onsite_label not in available_distr:
-            print('Available distributions are \n', list(available_distr))
-            raise SystemExit('Selected distribution not available for the calculation! ')
-
-    lat.onsite_labels = onsite_label
-    lat.magnetic_field = kwargs.get('magnetic_field', 'False')
     return lat
