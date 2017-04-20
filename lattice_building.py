@@ -3,19 +3,21 @@ import define_lattice as dl
 import export_lattice as ex
 
 
-# define lattice of monolayer graphene by setting the number of nearest neighbors and onsite energies at atoms.
-# - onsite energies can be a number, array, or matrix, where for the last case off-diagonal terms represent orbital
-# hoppings at the same lattice site.
-lattice = dl.monolayer_graphene(nearest_neighbors=1, onsite=([[1, 1], [1, 2]], [[1, 1], [1, 2]]))
+# define lattice of monolayer graphene with 1[nm] interatomic distance and t=1/3[eV] hopping,
+# or graphene_basic with regular parameters.
+# INFO: all examples are defined in define_lattice.py script
+# graphene_monolayer example accepts onstite energie at different sublattices, which can be a matrix, defining more
+# orbitals per each sublattice(atom)
 
-# plotting the lattice
-lattice.plot()
-plt.show()
+# lattice = dl.square_lattice()
+lattice = dl.graphene_initial()
+# lattice = dl.graphene_basic()
 
 # number of decomposition parts in each direction of matrix.
 nx = ny = 1
 # number of unit cells in each direction.
 lx = ly = 1
+
 # make config object which caries info about
 # - the number of decomposition parts [nx, ny],
 # - lengths of structure [lx, ly]
@@ -40,7 +42,11 @@ calculation = ex.Calculation(fname='DOS', num_moments=1024, num_random=50, num_d
 # - disorder realisation, for now you can chose between 'rectangular' and 'gaussian' distribution and choose its mean
 # value and width
 # - magnetic field can be set to True. Default case is False. In exported file it's converted to 1 and 0.
-modification = ex.Modifications(disorder={'name': 'rectangular', 'width': 2, 'mean_value': 1})
+modification = ex.Modifications(disorder={'name': 'rectangular', 'width': 2, 'mean_value': 1}, magnetic_field=True)
 
 # export the lattice from the lattice object, config and calculation object and the name of the file
-ex.export_lattice(lattice, config, calculation, modification, 'test.h5')
+ex.export_lattice(lattice, config, calculation, modification, 'test_f.h5')
+
+# plotting the lattice
+lattice.plot()
+plt.show()

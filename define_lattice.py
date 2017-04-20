@@ -10,6 +10,57 @@ from pybinding.repository.graphene import a_cc, a, t, t_nn
 pb.pltutils.use_style()
 
 
+def square_lattice():
+    d = 0.2  # [nm] unit cell length
+    t = 1  # [eV] hopping energy
+
+    # create a simple 2D lattice with vectors a1 and a2
+    lat = pb.Lattice(a1=[d, 0], a2=[0, d])
+    lat.add_sublattices(
+        ('A', [0, 0])  # add an atom called 'A' at position [0, 0]
+    )
+
+    lat.add_hoppings(
+        # (relative_index, from_sublattice, to_sublattice, energy)
+        ([0, 1], 'A', 'A', t),
+        ([1, 0], 'A', 'A', t)
+    )
+
+    return lat
+
+
+def graphene_initial(onsite=(0, 0)):
+    """Return the basic lattice specification for monolayer graphene with nearest neighbor"""
+
+    theta = np.pi / 3
+    a1 = np.array([1 + np.cos(theta), np.sin(theta)])
+    a2 = np.array([0, 2 * np.sin(theta)])
+
+    # create a lattice with 2 primitive vectors
+    lat = pb.Lattice(
+        a1=a1,
+        a2=a2
+    )
+
+    # Add sublattices
+    lat.add_sublattices(
+        # name, position, and onsite potential
+        ('A', [0, 0], onsite[0]),
+        ('B', [1, 0], onsite[1])
+    )
+
+    # Add hoppings
+    lat.add_hoppings(
+        # inside the main cell, between which atoms, and the value
+        ([0, 0], 'A', 'B', 1/3),
+        # between neighboring cells, between which atoms, and the value
+        ([-1, 0], 'A', 'B', 1/3),
+        ([-1, 1], 'A', 'B', 1/3)
+    )
+
+    return lat
+
+
 def graphene_basic(onsite=(0, 0)):
     """Return the basic lattice specification for monolayer graphene with nearest neighbor"""
 
@@ -43,7 +94,7 @@ def graphene_basic(onsite=(0, 0)):
     return lat
 
 
-def monolayer_graphene(nearest_neighbors=1, onsite=(0, 0), **kwargs):
+def monolayer_graphene(onsite=(0, 0), **kwargs):
     """Return the lattice specification for monolayer graphene"""
 
     # create a lattice with 2 primitive vectors
@@ -81,26 +132,6 @@ def monolayer_graphene(nearest_neighbors=1, onsite=(0, 0), **kwargs):
         ([1, -1], 'A', 'B', 't'),
         ([0, -1], 'A', 'B', 't')
     )
-
-    if nearest_neighbors >= 2:
-        lat.add_hoppings(
-            ([0, -1], 'A', 'A', 't_nn'),
-            ([0, -1], 'B', 'B', 't_nn'),
-            ([1, -1], 'A', 'A', 't_nn'),
-            ([1, -1], 'B', 'B', 't_nn'),
-            ([1, 0], 'A', 'A', 't_nn'),
-            ([1, 0], 'B', 'B', 't_nn'),
-        )
-
-    if nearest_neighbors >= 3:
-        lat.add_hoppings(
-            [(1, -2), 'A', 'B', 't_nnn'],
-            [(1, 0), 'A', 'B', 't_nnn'],
-            [(-1, 0), 'A', 'B', 't_nnn'],
-        )
-
-    if nearest_neighbors >= 4:
-        raise RuntimeError('No more')
 
     lat.min_neighbors = 2
 

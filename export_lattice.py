@@ -1,6 +1,7 @@
 import numpy as np
 import h5py as hp
 
+from scipy.sparse import coo_matrix
 
 class Modifications:
     def __init__(self, **kwargs):
@@ -42,7 +43,7 @@ class Modifications:
     @property
     def gaussian(self):  # -> gausian disorder realisation:
         """Returns True if gaussian disorder realisation, it's width and mean value."""
-        return {'bool': self._gaussian, 'width':  self._gauss_width, 'mean_value':  self._gauss_mean_value}
+        return {'bool': self._gaussian, 'width': self._gauss_width, 'mean_value': self._gauss_mean_value}
 
 
 class Calculation:
@@ -145,54 +146,108 @@ class Config:
 
 def export_lattice(lattice, config, calculation, modification, filename):
     # get the lattice vectors and set the size of space (1D, 2D or 3D) as the total number of vectors.
-    vectors = lattice.vectors
-    space_size = len(vectors)
 
-    # get all the onsite values (as numbers or matrices) to the onsite array.
-    onsite = []
+    vectors = np.asarray(lattice.vectors)
+    space_size = vectors.shape[0]
+    vectors = vectors[:, 0:space_size]
+
+    # hamiltonian is complex 1 or real 0
+    complx = int(config.comp)
+
     # get all positions to the position array.
     position = []
     # get number of orbitals at each atom.
     num_orbitals = []
 
-    # iterate through all the sublattices and count num of orbitals
-    # read onsite potential, and positions.
+    # iterate through all the sublattices and add onsite energies to hoppings list
+    # count num of orbitals and read the positions.
+    hoppings = []
     for name, sub in lattice.sublattices.items():
-        num_orbitals.append(np.asarray(sub.energy).shape[0])
-        onsite.append(sub.energy)
+        # num of orbitals at each sublattice is equal to size of onsite energy
+        num_energies = np.asarray(sub.energy).shape[0]
+        num_orbitals.append(num_energies)
+        # position is a list of vectors of size space_size
         position.append(sub.position[0:space_size])
-    onsite = np.array(onsite)
+        # define hopping dict from relative hopping index from and to id (relative number of sublattice in relative
+        # index lattice) and onsite energy
+        hopping = {'relative_index': np.zeros(space_size, dtype=np.int32), 'from_id': sub.alias_id,
+                   'to_id': sub.alias_id, 'hopping_energy': sub.energy}
+        hoppings.append(hopping)
+
+    num_orbitals = np.asarray(num_orbitals)
     position = np.array(position)
 
-    hoppings_id = []
-    hoppings = []
-    # hopping_id matrix is made of the following data:
-    # - each row is representing one hopping element,
-    # - first space_size elements (1, 2, or 3) represent the relative lattice index with respect
-    #   to the [0, 0, 0] lattice,
-    # - next 2 numbers show the relative index of the atom in the lattice [0, 0, 0] from which the hopping comes
-    #   and the relative index of the atom in the lattice given at the beginning of the row where the hopping goes.
-    # - final two numbers are the number of rows and cols of hopping matrix which represent the number of orbitals of
-    #   atom "from" and atom "to" between which the hopping happens.
-
-    # hopping matrix with each row represents one hopping element (in case of the matrix the hopping is flatened
-    # to fit the row) with properties given in the same row of matrix hopping_id.
+    # iterate through all the hoppings and add hopping energies to hoppings list
     for name, hop in lattice.hoppings.items():
         hopping_energy = hop.energy
         for term in hop.terms:
-            hoppings_id.append(np.hstack((term.relative_index[0:space_size].flatten(),
-                                          term.from_id, term.to_id, hopping_energy.shape)))
-            hoppings.append(hopping_energy.flatten())
+            hopping = {'relative_index': term.relative_index[0:space_size], 'from_id': term.from_id,
+                       'to_id': term.to_id, 'hopping_energy': hopping_energy}
+            hoppings.append(hopping)
+            # if the unit cell is [0, 0]
+            if np.linalg.norm(term.relative_index[0:space_size]) == 0:
+                hopping = {'relative_index': term.relative_index[0:space_size], 'from_id': term.to_id,
+                           'to_id': term.from_id, 'hopping_energy': np.conj(hopping_energy)}
+                hoppings.append(hopping)
+            # if the unit cell [i, j] is different than [0, 0] and also -[i, j] hoppings with opposite direction
+            if np.linalg.norm(term.relative_index[0:space_size]):
+                hopping = {'relative_index': -term.relative_index[0:space_size], 'from_id': term.to_id,
+                           'to_id': term.from_id, 'hopping_energy': np.conj(hopping_energy)}
+                hoppings.append(hopping)
 
-    hoppings = np.array(hoppings)
-    hoppings_id = np.array(hoppings_id)
+    orbital_from = []
+    orbital_to = []
+    orbital_hop = []
+    # number of orbitals before this sublattice
+    orbitals_before = np.cumsum(num_orbitals) - num_orbitals
+
+    # iterate through all hoppings, and define unique orbital hoppings
+    # orbital_to in unit cell [i, j] is defined  as [i, j] x [1, 3] + relative_orbital_num*3**2 2D
+    # orbital_to in unit cell [i, j, k] is defined  as [i, j, k] x [1, 3, 9] + relative_orbital_num*3**3 3D
+    # relative index of orbital_from is unique as only hoppings from the orbitals in the initial unit cell are exported
+    for h in hoppings:
+        hopping_energy = h['hopping_energy']
+        it = np.nditer(hopping_energy, flags=['multi_index'])
+
+        while not it.finished:
+            relative_move = np.dot(h['relative_index'] + 1, 3**np.linspace(0, space_size - 1, space_size, dtype=np.int32))
+            if hopping_energy.size > 1:
+                orbital_from.append(orbitals_before[h['from_id']] + it.multi_index[0])
+                orbital_to.append(relative_move + (orbitals_before[h['to_id']] + it.multi_index[1])*3**space_size)
+            else:
+                orbital_from.append(h['from_id'])
+                orbital_to.append(relative_move + h['to_id']*3**space_size)
+
+            orbital_hop.append(it[0] if complx else np.real(it[0]))
+            it.iternext()
+
+    # extract t - hoppings where each row coresponds to hopping from row number orbital and d - for each hopping it's
+    # unique identifier
+    t_list = []
+    d_list = []
+    # make a sparse matrix from orbital_hop, and (orbital_from, orbital_to) as it's easier to take nonzero hoppings from
+    # sparse matrix
+    matrix = coo_matrix((orbital_hop, (orbital_from, orbital_to)), shape=(np.max(orbital_from)+1, np.max(orbital_to)+1))
+    # num_hoppings is a vector where each value corresponds to num of hoppings from orbital equal to it's index
+    num_hoppings = np.zeros(matrix.shape[0])
+    # iterate through all rows of matrix, number of row = number of orbital from
+    for i in range(matrix.shape[0]):
+        # all hoppings from orbital i
+        row_mat = matrix.getrow(i)
+        # number of hoppings from orbital i
+        num_hoppings[i] = row_mat.size
+
+        t_list.append(row_mat.data)
+        d_list.append(row_mat.indices)
+
+    t = np.asarray(t_list)
+    d = np.asarray(d_list)
 
     f = hp.File(filename, 'w')
-    # hamiltonian is complex 1 or real 0
-    complx = int(config.comp)
-    f.create_dataset('IsComplex', data=complx)
+
+    f.create_dataset('IsComplex', data=complx, dtype='u4')
     # precision of hamiltonian float, double, long double
-    f.create_dataset('Precision', data=config.prec)
+    f.create_dataset('Precision', data=config.prec, dtype='u4')
     # number of repetitions in each of the directions
     f.create_dataset('Length', data=config.leng, dtype='u4')
     # periodic boundary conditions, 0 - no, 1 - yes.
@@ -211,47 +266,47 @@ def export_lattice(lattice, config, calculation, modification, filename):
     # Hamiltonian group
     grp = f.create_group('Hamiltonian')
     # Hamiltonian group
-    grp.create_dataset('HoppingsID', data=hoppings_id)
+    grp.create_dataset('NHopping', data=num_hoppings, dtype='u4')
     # number of orbitals at each atom
-    grp.create_dataset('NumOrbitals', data=num_orbitals)
+    grp.create_dataset('NumOrbitals', data=num_orbitals, dtype='u4')
+    # distance
+    grp.create_dataset('d', data=d)
+
     if complx:
         # hoppings
-        grp.create_dataset('Hoppings', data=hoppings.astype(config.type))
-        # onsite
-        grp.create_dataset('Onsite', data=onsite.astype(config.type))
+        grp.create_dataset('Hoppings', data=t.astype(config.type))
+        # # onsite
+        # grp.create_dataset('Onsite', data=onsite.astype(config.type))
     else:
         # hoppings
-        grp.create_dataset('Hoppings', data=hoppings.real.astype(config.type))
-        # onsite potential at each atom
-        grp.create_dataset('Onsite', data=onsite.real.astype(config.type))
-    # labels for the onsite potential
+        grp.create_dataset('Hoppings', data=t.real.astype(config.type))
+        # # onsite potential at each atom
+        # grp.create_dataset('Onsite', data=onsite.real.astype(config.type))
 
     # Disorder group which has 'rectangular' and 'gaussian subgroups'
     # all of them have mean value and width
     grp_dis = f.create_group('Disorder')
+
     rec = modification.rectangular
-
     dis_type = grp_dis.create_group('rectangular')
-    int(rec['bool'])
-
     dis_type.create_dataset('bool', data=int(rec['bool']), dtype='u4')
-    dis_type.create_dataset('width', data=rec['width'])
-    dis_type.create_dataset('mean_value', data=rec['mean_value'])
+    dis_type.create_dataset('width', data=rec['width'], dtype=np.float64)
+    dis_type.create_dataset('mean_value', data=rec['mean_value'], dtype=np.float64)
 
     rec = modification.gaussian
     dis_type = grp_dis.create_group('gaussian')
     dis_type.create_dataset('bool', data=int(rec['bool']), dtype='u4')
-    dis_type.create_dataset('width', data=rec['width'])
-    dis_type.create_dataset('mean_value', data=rec['mean_value'])
+    dis_type.create_dataset('width', data=rec['width'], dtype=np.float64)
+    dis_type.create_dataset('mean_value', data=rec['mean_value'], dtype=np.float64)
 
     # magnetic field
     if modification.magnetic_field:
         grp.create_dataset('MagneticField', data=int(modification.magnetic_field), dtype='u4')
 
-    # Calculation
+    # Calculation function defined with num_moments, num_random vectors, and num_disorder realisations
     grpc = f.create_group('Calculation')
-    grpc.create_dataset('FunctionNum', data=calculation.number)
-    grpc.create_dataset('NumMoments', data=calculation.moments)
-    grpc.create_dataset('NumRandoms', data=calculation.randoms)
-    grpc.create_dataset('NumDisorder', data=calculation.disorder)
+    grpc.create_dataset('FunctionNum', data=calculation.number, dtype='u4')
+    grpc.create_dataset('NumMoments', data=calculation.moments, dtype='u4')
+    grpc.create_dataset('NumRandoms', data=calculation.randoms, dtype='u4')
+    grpc.create_dataset('NumDisorder', data=calculation.disorder, dtype='u4')
     f.close()
