@@ -245,18 +245,18 @@ def export_lattice(lattice, config, calculation, modification, filename):
 
     f = hp.File(filename, 'w')
 
-    f.create_dataset('IsComplex', data=complx, dtype='u4')
+    f.create_dataset('IS_COMPLEX', data=complx, dtype='u4')
     # precision of hamiltonian float, double, long double
-    f.create_dataset('Precision', data=config.prec, dtype='u4')
+    f.create_dataset('PRECISION', data=config.prec, dtype='u4')
     # number of repetitions in each of the directions
-    f.create_dataset('Length', data=config.leng, dtype='u4')
+    f.create_dataset('L', data=config.leng, dtype='u4')
     # periodic boundary conditions, 0 - no, 1 - yes.
     bound = config.bound
     f.create_dataset('Boundaries', data=bound, dtype='u4')
     # number of divisions of the in each direction of hamiltonian. nx x ny = num_threads
     f.create_dataset('Divisions', data=config.div, dtype='u4')
     # space dimension of the lattice 1D, 2D, 3D
-    f.create_dataset('Dim', data=space_size, dtype='u4')
+    f.create_dataset('DIM', data=space_size, dtype='u4')
     # lattice vectors. Size is same as DIM
     f.create_dataset('LattVector', data=vectors, dtype=np.float64)
     # position for each atom
