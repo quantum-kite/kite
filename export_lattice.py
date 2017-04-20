@@ -266,7 +266,7 @@ def export_lattice(lattice, config, calculation, modification, filename):
     # Hamiltonian group
     grp = f.create_group('Hamiltonian')
     # Hamiltonian group
-    grp.create_dataset('NHopping', data=num_hoppings, dtype='u4')
+    grp.create_dataset('NHoppings', data=num_hoppings, dtype='u4')
     # number of orbitals at each atom
     grp.create_dataset('NumOrbitals', data=num_orbitals, dtype='u4')
     # distance
