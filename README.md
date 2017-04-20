@@ -1,4 +1,19 @@
 Lattice building script is used for making and exporting the lattice.
+# Building Lattice
+  the builing is defined in 3 scripts,
+
+  lattice_building.py - user changes this, defines the data he needs, lattice,
+  disorder and field modifications, calculation type, size, periodicity..
+
+  define_lattice.py - script with available lattices, user can use one from
+  here, or define similar by it's own.
+
+  export_lattice.py - user doesn't need to think about this, changes the format
+  of pybinding lattice to our, and exports everything needed.
+
+  Building_script - jupyter notebook script -  imports the define_lattice.py and
+  export_lattice.py and does the user specified building same as in
+  lattice_building.py
 
 # Implemented things
 
