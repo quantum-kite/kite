@@ -14,6 +14,7 @@ lattice = dl.graphene_initial()
 # lattice = dl.graphene_basic()
 
 # number of decomposition parts in each direction of matrix.
+# TODO: Add a warning for limitation of decomposition parts 
 nx = ny = 1
 # number of unit cells in each direction.
 lx = ly = 1
