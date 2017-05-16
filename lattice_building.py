@@ -25,6 +25,8 @@ lx = ly = 1
 # - boundary conditions, setting True as periodic boundary conditions, and False elsewise,
 # - info if the exported hopping and onsite data should be complex,
 # - info of the precision of the exported hopping and onsite data, 0 - float, 1 - double, and 2 - long double.
+
+# TODO: Remove boundaries if there is no choice?
 config = ex.Config(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True], is_complex=False, precision=1)
 
 # make calculation object which caries info about
