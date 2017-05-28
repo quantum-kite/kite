@@ -258,11 +258,11 @@ def export_lattice(lattice, config, calculation, modification, filename):
     # space dimension of the lattice 1D, 2D, 3D
     f.create_dataset('DIM', data=space_size, dtype='u4')
     # lattice vectors. Size is same as DIM
-    f.create_dataset('LattVector', data=vectors, dtype=np.float64)
+    f.create_dataset('LattVectors', data=vectors, dtype=np.float64)
     # position for each atom
-    f.create_dataset('AtomPositions', data=position, dtype=np.float64)
+    f.create_dataset('OrbPositions', data=position, dtype=np.float64)
     # total number of atom
-    f.create_dataset('NumAtoms', data=position.shape[0], dtype='u4')
+    f.create_dataset('NOrbitals', data=position.shape[0], dtype='u4')
     # Hamiltonian group
     grp = f.create_group('Hamiltonian')
     # Hamiltonian group

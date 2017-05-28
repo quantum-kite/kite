@@ -1,6 +1,12 @@
 
 # A list of things that should be implemented
 
+# Changing the structure of the lattice
+The C++ code only has the Orbital degree of freedom
+So we should write "NOrbitals" and "OrbitalPositions" instead of "AtomPositions", "/Hamiltonian/NumOrbital" and "NumAtoms".
+For now I just Change the labels of "AtomPositions",  "NumAtoms" because graphene has one orbital in each atom.
+
+
 ### ~~Add labels for onsite potential:~~
  ~~- For now only constant values exported from python script are supported.
  Add the labels for the rectangular and gaussian distribution.~~

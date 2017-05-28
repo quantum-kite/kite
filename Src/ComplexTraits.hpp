@@ -1,4 +1,21 @@
 #include <type_traits>
+/*
+  Auxiliar code to define specialized methods in templated classes depending on the argument T is complex:
+
+  template <typename U = T>
+  typename std::enable_if<is_tt<std::complex, U>::value, U>::type aux_wr(unsigned long x ) {
+  CODE
+  }; 
+
+  or non-complex:
+   template <typename U = T>
+   typename std::enable_if<!is_tt<std::complex, U>::value, U>::type aux_wr(unsigned long x ) {
+    CODE
+  };
+  
+  Get the template argument of a complex:
+  typedef typename extract_value_type<T>::value_type value_type;
+ */
 
 template <template <class...> class TT, class... Args>
 std::true_type is_tt_impl(TT<Args...>);

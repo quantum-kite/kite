@@ -18,18 +18,17 @@
 #include <cmath>
 #include <math.h>
 #include <initializer_list>
-#include "ComplexTraits.hpp"
+
 
 
 #define MEMORY 10
 #define PATTERNS 4
 
-template<typename T>
-void get_hdf5(T * l, H5::H5File *  file,  char * name);
 
 template<typename T, unsigned D>
 class Simulation;
-
+#include "ComplexTraits.hpp"
+#include "myHDF5.hpp"
 #include "Random.hpp"
 #include "LatticeStructure.hpp"
 #include "Hamiltonian.hpp"
@@ -113,8 +112,6 @@ int main(int argc, char *argv[])
       break;
     }
     
-    /*
-     * Complex 
      
   case 9:
     {
@@ -161,7 +158,7 @@ int main(int argc, char *argv[])
       class GlobalSimulation <std::complex<long double>, 3u> h(argv[1]);
       break;
     }
-    */
+
   default:
     exit(0);
   } 

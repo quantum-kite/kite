@@ -22,12 +22,15 @@ public:
   void set_index(int i) {index = i;};
   void inc_index() {index = (index + 1) % memory;};  
   unsigned get_index(){return index;};
+
+  // Define aux_wr for complex T 
   template <typename U = T>
   typename std::enable_if<is_tt<std::complex, U>::value, U>::type aux_wr(unsigned long x ) {
     typedef typename extract_value_type<U>::value_type value_type;
     return U(value_type(x), value_type(2*x));
   };
-  
+
+  // Define aux_wr for non complex T 
   template <typename U = T>
   typename std::enable_if<!is_tt<std::complex, U>::value, U>::type aux_wr(unsigned long x ) {
     return U(x);

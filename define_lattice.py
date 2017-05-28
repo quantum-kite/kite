@@ -46,7 +46,7 @@ def graphene_initial(onsite=(0, 0)):
     lat.add_sublattices(
         # name, position, and onsite potential
         ('A', [0, 0], onsite[0]),
-        ('B', [1, 0], onsite[1])
+        ('B', [1, 0.], onsite[1])
     )
 
     # Add hoppings

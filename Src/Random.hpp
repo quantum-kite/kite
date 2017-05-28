@@ -14,7 +14,11 @@ public:
     rng.seed(seq);
   };
   
-  double uniform() {return dist(rng); };
+  double uniform(double  mean, double  width) {
+    // mean  : mean value
+    // width : root mean square deviation
+    return mean + sqrt(3.) * width * (2 * dist(rng)  - 1);
+  };
   
   template <typename U = T>
   typename std::enable_if<is_tt<std::complex, U>::value, U>::type init() {

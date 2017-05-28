@@ -7,7 +7,7 @@ class GlobalSimulation {
 private:
   std::vector<T> Border;
   LatticeStructure <D> rglobal;
-  Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> mu;
+  Eigen::Array <T, Eigen::Dynamic, Eigen::Dynamic> mu;
   const int MUSIZE;
 public:
   GlobalSimulation( char *name ) : rglobal(name), MUSIZE(100) {    
@@ -34,18 +34,18 @@ class Simulation  {
   Hamiltonian<T,D> h;
   std::vector<T> Border;
   std::vector<T> & GlobalBorder;
-  Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> mu;
-  Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> & mu_global;
+  Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic> mu;
+  Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic> & mu_global;
   char *filename;
 public:
   Simulation(LatticeStructure <D> rglobal,
 	     char *name ,
 	     std::vector<T> & borders,
-	     Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> & m ) :
+	     Eigen::Array <T, Eigen::Dynamic, Eigen::Dynamic> & m ) :
     r(rglobal), h(rnd, r, name), GlobalBorder(borders), mu_global(m), filename(name)  {
     r.thread_id = omp_get_thread_num();    
     Border.resize(GlobalBorder.size()/r.n_threads);
-    mu = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic > :: Zero(mu_global.rows(), mu_global.cols()); 
+    mu = Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic > :: Zero(mu_global.rows(), mu_global.cols()); 
   };
   
   
@@ -64,13 +64,13 @@ public:
 	phi.Exchange_Boundaries();
 
 	phi.template Multiply<0>(0);
-	mu.block(0,0,1,2) +=  (phi0.v.adjoint() * phi.v - mu.block(0,0,1,2))/value_type(medias + 1);
+	mu.matrix().block(0,0,1,2) +=  (phi0.v.adjoint() * phi.v - mu.matrix().block(0,0,1,2))/value_type(medias + 1);
 	
 	for(int m = 2; m < mu.cols(); m += 2)
 	  {	    
 	    phi.template Multiply<1>(0);
 	    phi.template Multiply<1>(0);
-	    mu.block(0,m,1,2) +=  (phi0.v.adjoint() * phi.v - mu.block(0,m,1,2))/value_type(medias + 1);
+	    mu.matrix().block(0,m,1,2) +=  (phi0.v.adjoint() * phi.v - mu.matrix().block(0,m,1,2))/value_type(medias + 1);
 	  }		
       }
 #pragma omp critical
@@ -79,39 +79,7 @@ public:
 #pragma omp master
     {
       H5::H5File file = H5::H5File(filename, H5F_ACC_RDWR);
-      Eigen::MatrixXd  dMUR = Eigen::MatrixXd::Zero(1,mu_global.cols()); //mu_global.real();
-      Eigen::MatrixXd  dMUI = Eigen::MatrixXd::Zero(1,mu_global.cols()); //mu_global.imag();
-      H5::DataSet dataset;
-      H5::DataSpace dataspace;
-      H5::IntType datatype(H5::PredType::NATIVE_DOUBLE );
-      H5::DSetCreatPropList plist;
-      const int RANK = 1;
-      hsize_t    dims[RANK], chunk_dims[RANK]; // dataset dimensions
-
-      for(int i = 0; i < mu_global.cols(); i++)
-	{
-	  dMUR(0,i) = std::real(mu_global(0,i));
-	  dMUI(0,i) = std::imag(mu_global(0,i));
-	}
-      
-      dims[0] = chunk_dims[0] = mu_global.cols();
-
-      
-      dataspace = H5::DataSpace( RANK, dims );
-      plist.setChunk(RANK, chunk_dims);
-    
-     
-      dataspace = H5::DataSpace( 1, dims );
-      plist.setChunk(1, chunk_dims);
-      plist.setDeflate(6);
-      //dataset = file.createDataSet( "MUR", datatype, dataspace );
-      dataset = file.openDataSet( "MUR");
-      dataset.write(dMUR.data(), H5::PredType::NATIVE_DOUBLE );  
-      //dataset = file.createDataSet( "MUI", datatype, dataspace );
-      dataset = file.openDataSet( "MUI");
-      dataset.write(dMUI.data(), H5::PredType::NATIVE_DOUBLE );  
-  
-
+      write_hdf5(mu_global, file, "MU");
       file.close();
     }
 #pragma omp barrier

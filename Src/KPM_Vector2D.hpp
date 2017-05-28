@@ -96,9 +96,9 @@ public:
 	      
 	      for(unsigned j = j0; j < j1; j += std )
 		for(unsigned i = j; i < j + STRIDE0 ; i++)
-		  phi0[i] = - value_type(MULT) * phiM2[i];
+		  phi0[i] = - value_type(MULT) * phiM2[i] +  value_type(MULT + 1) * phiM1[i] * h.U(i,0);;
 
-	      for(unsigned ib = 0; ib < h.NHoppings[io]; ib++)
+	      for(unsigned ib = 0; ib < h.NHoppings(io); ib++)
 		{
 		  const int  d1 = h.d(ib, io);
 		  const T    t1 =  value_type(MULT + 1) * h.t[model](ib, io);

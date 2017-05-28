@@ -67,6 +67,7 @@ struct Coordinates {
   Coordinates & add( Coordinates<T,D> & x) {
     for(int i = 0; i < int(D); i++)
       coord[i] = (L[i] + coord[i] + x.coord[i]) % L[i];
+
     set_index(coord);
     return *this;
   }
@@ -87,36 +88,36 @@ struct LatticeStructure {
 private:
 
 public:
-  unsigned Sized;
-  unsigned Size;
+  unsigned Sized; // Size of vector for each subdomain (with ghosts)
+  unsigned Size; // Size of vector for each subdomain (without ghosts)
 
-  double rLat[D][D];   // first index is the vector the second the component in cartesian coordinates 
-  double (*rOrb)[D];
-  unsigned nd[D + 1];
-  unsigned n_threads;
+  Eigen::Matrix<double, D, D> rLat;  // The vectors are organized by columns 
+  Eigen::MatrixXd rOrb;
   
-  unsigned Lt[D+1];
-  unsigned Ld[D+1];
-  unsigned ld[D+1];
-  unsigned Bd[D+1];
+  unsigned nd[D + 1]; // Number of domains in each dimension (the last dimension corresponding with Orbitals are not decomposed)
+  unsigned n_threads; // Number of threads
+  
+  unsigned Lt[D+1]; // Dimensions of the global sample
+  unsigned Ld[D+1]; // Dimensions of each sub-domain (domain  + ghosts) 
+  unsigned ld[D+1]; // Dimensions of each sub-domain (domain  + ghosts) 
+  unsigned Bd[D+1]; // Information about periodic or non-periodic boundary conditions
 
-  unsigned long Nt;
-  unsigned Nd;
-  unsigned N;
+  unsigned long Nt; // Number of lattice postions of the global sample
+  unsigned Nd; // Number of lattice postions of the sub-domain with ghosts
+  unsigned N; // Number of lattice postions of the sub-domain without ghosts
   
-  unsigned Orb;
-  unsigned thread_id;
+  unsigned Orb; // Number of orbitals
+  unsigned thread_id; // thread identification
 
   
   LatticeStructure(char *name )
   {
     H5::H5File *file = new H5::H5File(name, H5F_ACC_RDONLY);
     get_hdf5<unsigned>(&Orb, file, (char *) "/NOrbitals");
-    get_hdf5<double>(&rLat[0][0], file, (char *) "/LattVector");
-    
-    rOrb =  (double(*)[D]) malloc(Orb * D * sizeof(double) );
-    get_hdf5<double>(&rOrb[0][0], file, (char *) "/OrbPositions");
-    
+    get_hdf5<double>(rLat.data(), file, (char *) "/LattVectors");    
+    rOrb = Eigen::MatrixXd::Zero(Orb,D);
+    get_hdf5<double>(rOrb.data(), file, (char *) "/OrbPositions");
+
     get_hdf5<unsigned>(Lt, file, (char *) "/L");
     get_hdf5<unsigned>(Bd, file, (char *) "/Boundaries");
     get_hdf5<unsigned>(nd, file, (char *) "/Divisions");
