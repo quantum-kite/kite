@@ -19,30 +19,31 @@ Lattice building script is used for making and exporting the lattice.
 
 # Implemented things
 
-### ~~Convert pybinding format to common format used in C++~~
 
-### ~~Add  onsite disorder:~~
- - For now only constant values as onsite potential and the labels for the
- rectangular/uniform and gaussian distribution are supported.
- Both distributions have mean value and width.
+# Changing the structure of the lattice
+The pybinding format is successfully convert to the format of the C++ code.
 
-### ~~Magnetic field:~~
+### ~~Add disorder:~~
+ - Disorder is added to the plain lattice. (Previously this point was called onsite potential, it's the same.)
+
+### ~~Magnetic field On/Off:~~
  - Add magnetic field support. For now only on and off due to PBC.
 
 ### ~~Chose between the functions that you want to calculate:~~
- - Other strings that the labels result in an error.   
-  - labels are DOS, CondXX, CondXY, OptCond, SpinCond
-  - DOS (number of disorder, num of moments, num of random vectors) 'DOS' == 1,
-  - Conductivity (number of disorder, num of moments, num of random vectors)
-  'CondXX' == 2, 'CondXY' ==   3,
-  - Optical Conductivity (number of disorder, num of moments, num of random
-    vectors), 'OptCond' == 4
-  - Spin Dependent Conductivity (number of disorder, num of moments, num of
-    random vectors), 'SpinCond' == 5.
+ - Other strings that the labels should result in errors.   
+ - labels are DOS, CondXX, CondXY, SpinCond
+ - DOS (number of disorder, num of moments, num of random vectors),
+ - Conductivity (number of disorder, num of moments, num of random vectors),
+ - Optical Conductivity (number of disorder, num of moments, num of random vectors),
+ - Spin Dependent Conductivity (number of disorder, num of moments, num of random vectors).
+
+### ~~Pauli matrices.~~
+  - These matrices can be found in pybinding.constants.pauli.
+
+## Define ploting from the resulted data
 
 # A list of things that could/should be implemented
 
 ### Define plotting from the resulted data
-### Add vacancy disorder modifications
 ### Add the choice of magnetic field to the user.
   - In case of periodic boundary conditions give available values.
