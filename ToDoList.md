@@ -5,7 +5,7 @@
 The pybinding format is successfully convert to the format of the C++ code.
 
 ### ~~Add disorder:~~
- - Disorder is added to the plain lattice. (Previouslly this point was called onsite potential, it's the same.)
+ - Disorder is added to the plain lattice. (Previously this point was called onsite potential, it's the same.)
 
 ### ~~Magnetic field On/Off:~~
  - Add magnetic field support. For now only on and off due to PBC.
