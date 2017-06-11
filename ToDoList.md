@@ -2,18 +2,15 @@
 # A list of things that should be implemented
 
 # Changing the structure of the lattice
-The C++ code only has the Orbital degree of freedom
-So we should write "NOrbitals" and "OrbitalPositions" instead of "AtomPositions", "/Hamiltonian/NumOrbital" and "NumAtoms".
-For now I just Change the labels of "AtomPositions",  "NumAtoms" because graphene has one orbital in each atom.
+The pybinding format is successfully convert to the format of the C++ code.
 
+### ~~Add disorder:~~
+ - Disorder is added to the plain lattice. (Previouslly this point was called onsite potential, it's the same.)
 
-### ~~Add labels for onsite potential:~~
- ~~- For now only constant values exported from python script are supported.
- Add the labels for the rectangular and gaussian distribution.~~
- Labels are added. Other strings than the labels results in errors.
-
-### ~~Magnetic field:~~
+### ~~Magnetic field On/Off:~~
  - Add magnetic field support. For now only on and off due to PBC.
+## Magnetic field arbitrary:
+ - Implementation of arbitrary magnetic field.
 
 ### ~~Chose between the functions that you want to calculate:~~
  - Other strings that the labels should result in errors.   
@@ -23,4 +20,7 @@ For now I just Change the labels of "AtomPositions",  "NumAtoms" because graphen
  - Optical Conductivity (number of disorder, num of moments, num of random vectors),
  - Spin Dependent Conductivity (number of disorder, num of moments, num of random vectors).
 
-### Define ploting from the resulted data
+### ~~Pauli matrices.~~
+  - These matrices can be found in pybinding.constants.pauli.
+
+## Define ploting from the resulted data
