@@ -40,12 +40,12 @@ def graphene_initial(onsite=(0, 0)):
     # disorder vector of the same size as the number of orbitals. Type of disorder available are Gaussian,
     # Deterministic and Uniform. Each of the needs the have mean value, and standard deviation, where standard deviation
     # of deterministic disorder should be 0.
-
     disorder = ex.Disorder(lat)
     disorder.add_disorder('A', 'Gaussian', 1., 2.)
     disorder.add_disorder('B', 'Uniform', 1., 2.)
-    return lat, disorder
 
+    # if there is disorder it should be returned separately from the lattice
+    return lat, disorder
 
 lattice, disorder = graphene_initial()
 
@@ -76,14 +76,12 @@ configuration = ex.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries
 # - number of disorder realisations.
 calculation = ex.Calculation(fname=['DOS', 'CondXX'], num_moments=[1024, 24], num_random=[50, 50], num_disorder=[5, 2])
 
-# make modification object which caries info about
-# - disorder realisation, for now you can chose between 'rectangular' and 'gaussian' distribution and choose its mean
-# value and width
+# make modification object which caries info about (TODO: Other modifications can be added here)
 # - magnetic field can be set to True. Default case is False. In exported file it's converted to 1 and 0.
-modification = ex.Modification(disorder={'name': 'rectangular', 'width': 2, 'mean_value': 1}, magnetic_field=True)
+modification = ex.Modification(magnetic_field=True)
 
 # export the lattice from the lattice object, config and calculation object and the name of the file
-# the disorder is optional
+# the disorder is optional. If there is disorder in the lattice for now it should be given separately
 ex.export_lattice(lattice, configuration, calculation, modification, 'test_f.h5', disorder=disorder)
 
 # plotting the lattice
