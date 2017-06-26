@@ -29,10 +29,10 @@ def graphene_initial(onsite=(0, 0)):
     # Add hoppings
     lat.add_hoppings(
         # inside the main cell, between which atoms, and the value
-        ([0, 0], 'A', 'B', 1 / 3),
+        ([0, 0], 'A', 'B', 1 / 4),
         # between neighboring cells, between which atoms, and the value
-        ([-1, 0], 'A', 'B', 1 / 3),
-        ([-1, 1], 'A', 'B', 1 / 3)
+        ([-1, 0], 'A', 'B', 1 / 4),
+        ([-1, 1], 'A', 'B', 1 / 4)
     )
 
     # Add disorder
@@ -41,8 +41,8 @@ def graphene_initial(onsite=(0, 0)):
     # Deterministic and Uniform. Each of the needs the have mean value, and standard deviation, where standard deviation
     # of deterministic disorder should be 0.
     disorder = ex.Disorder(lat)
-    disorder.add_disorder('A', 'Gaussian', 1., 2.)
-    disorder.add_disorder('B', 'Uniform', 1., 2.)
+    disorder.add_disorder('A', 'Gaussian', 0.01, 0.02)
+    disorder.add_disorder('B', 'Gaussian', 0.01, 0.02)
 
     # if there is disorder it should be returned separately from the lattice
     return lat, disorder
@@ -51,9 +51,9 @@ lattice, disorder = graphene_initial()
 
 # number of decomposition parts in each direction of matrix.
 
-nx = ny = 1
+nx = ny = 2
 # number of unit cells in each direction.
-lx = ly = 1
+lx = ly = 32
 
 # make config object which caries info about
 # - the number of decomposition parts [nx, ny],
@@ -62,7 +62,7 @@ lx = ly = 1
 # - info if the exported hopping and onsite data should be complex,
 # - info of the precision of the exported hopping and onsite data, 0 - float, 1 - double, and 2 - long double.
 configuration = ex.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
-                                 is_complex=False, precision=1)
+                                 is_complex=True, precision=1)
 
 # make calculation object which caries info about
 # - the name of the function
@@ -74,7 +74,7 @@ configuration = ex.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries
 # - number of moments for the calculation,
 # - number of different random vector realisations,
 # - number of disorder realisations.
-calculation = ex.Calculation(fname=['DOS', 'CondXX'], num_moments=[1024, 24], num_random=[50, 50], num_disorder=[5, 2])
+calculation = ex.Calculation(fname=['DOS', 'CondXX'], num_moments=[8192, 24], num_random=[1, 1], num_disorder=[64, 2])
 
 # make modification object which caries info about (TODO: Other modifications can be added here)
 # - magnetic field can be set to True. Default case is False. In exported file it's converted to 1 and 0.

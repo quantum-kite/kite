@@ -54,6 +54,8 @@ public:
   void initiate_vector() {};
   template <unsigned MULT>
   void Multiply(const int model){};
+  template <unsigned MULT>
+  void Multiply2(const int model){};
   void test_boundaries_system() {};
   void Exchange_Boundaries() {};
   inline void  HaIteration( const int model) { Multiply<0>(model); };

@@ -5,7 +5,7 @@
 OS := $(shell uname)
 
 ifeq ($(OS),Darwin)
-CC = g++-mp-6  -DEIGEN_DONT_PARALLELIZE -Wall  -fdiagnostics-color=always -march=native  -O2 #-ffast-math #-ftree-vectorize  -ftree-vectorizer-verbose=7 -fopt-info-vec-missed
+CC = g++-mp-6  -DEIGEN_DONT_PARALLELIZE -Wall  -fdiagnostics-color=always  -O2 #-ffast-math #-ftree-vectorize  -ftree-vectorizer-verbose=7 -fopt-info-vec-missed
 else
 CC = g++ -Wall -DEIGEN_DONT_PARALLELIZE -g -march=native  -O3 -ffast-math 
 

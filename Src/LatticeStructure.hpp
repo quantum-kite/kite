@@ -90,6 +90,7 @@ private:
 public:
   unsigned Sized; // Size of vector for each subdomain (with ghosts)
   unsigned Size; // Size of vector for each subdomain (without ghosts)
+  unsigned long Sizet; // Size of full Hilbert Space
 
   Eigen::Matrix<double, D, D> rLat;  // The vectors are organized by columns 
   Eigen::MatrixXd rOrb;
@@ -145,6 +146,7 @@ public:
     
     Size = N * Orb;
     Sized = Nd * Orb;
+    Sizet = Nt * Orb;
     thread_id = omp_get_thread_num();
   };
 

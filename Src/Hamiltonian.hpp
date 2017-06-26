@@ -10,8 +10,14 @@ public:
   
   Eigen::Array< int, Eigen::Dynamic, Eigen::Dynamic> d;          // Distance
   Eigen::Array<   T, Eigen::Dynamic, Eigen::Dynamic> t[D + 1];   // Hopping values
-  Eigen::Array<   T, Eigen::Dynamic, Eigen::Dynamic> U ;   // Hopping values
-  Eigen::Array<unsigned, Eigen::Dynamic, 1 >         NHoppings;
+  Eigen::Array<   T, Eigen::Dynamic, Eigen::Dynamic> U ;         // Hopping values
+  Eigen::Array<unsigned, Eigen::Dynamic, 1 >  NHoppings;
+  std::vector <int> orb_num;
+  std::vector <int> model;
+  std::vector <double> mu;
+  std::vector <double> sigma;
+
+  
   
   Hamiltonian (KPMRandom <T> & rng1, LatticeStructure <D> & r1,  char *name) : rng(rng1), r(r1) {
     Eigen::Matrix<double, D, 1> dr;
@@ -23,7 +29,7 @@ public:
     Eigen::Map<Eigen::Matrix<int,D, 1>> v(b3.coord);
 	    
 #pragma omp critical
-    {        
+    {
       H5::H5File *file = new H5::H5File(name, H5F_ACC_RDONLY);
       get_hdf5<unsigned>(NHoppings.data(), file, (char *) "/Hamiltonian/NHoppings");
       
@@ -55,12 +61,65 @@ public:
 	    for(unsigned dim = 0; dim < D; dim++)
 	      t[1 + dim](i,io) = t[0](i,io) * T( dr(dim) );	      
 	  }
-      U = Eigen::Array<   T, Eigen::Dynamic, Eigen::Dynamic> (r.Sized, 1);
-      for(unsigned i = 0; i < r.Sized; i++)
-	U(i,0) = rng.uniform( double(0.), double(0.1) );
+            
+      U = Eigen::Array<   T, Eigen::Dynamic, Eigen::Dynamic> :: Zero(r.Sized, 1);
+
+      /*
+       * Gaussian      : 1
+       * Uniform       : 2
+       * Deterministic : 3
+       */
+            
+      H5::DataSet dataset      = H5::DataSet(file->openDataSet("/Hamiltonian/Disorder/OrbitalNum"));
+      H5::DataSpace dataspace  = dataset.getSpace();
+      size_t m                 = dataspace.getSimpleExtentNpoints();
+      orb_num.resize(m);
+      model.resize(m);
+      mu.resize(m);
+      sigma.resize(m);
+      get_hdf5<int>(orb_num.data(), file, (char *) "/Hamiltonian/Disorder/OrbitalNum");               // read the orbitals that have local disorder
+      get_hdf5<int> (model.data(), file, (char *) "/Hamiltonian/Disorder/OnsiteDisorderModelType");   // read the the type        of local disorder
+      get_hdf5<double> (mu.data(), file, (char *) "/Hamiltonian/Disorder/OnsiteDisorderMeanValue");   // read the the mean value
+      get_hdf5<double> (sigma.data(), file, (char *) "/Hamiltonian/Disorder/OnsiteDisorderMeanStdv"); // read the the variance
       file->close();
     }
-  };  
+
+    //    distribute_local_disorder();
+    
+  };
+
+  void distribute_local_disorder()
+  {
+    for(unsigned i = 0; i < mu.size(); i++)
+      {
+	int o = orb_num.at(i);
+	switch (model.at(i)) {
+	case 1:
+	  {
+	    for(unsigned j = 0; j < r.Nd; j++ )
+	      U(r.Nd*o +  j, 0) = rng.gaussian( mu.at(i), sigma.at(i) );
+	  }
+	  break;
+	case 2:
+	  {
+	    for(unsigned j = 0; j < r.Nd; j++ )
+	      U(r.Nd*o +  j, 0) =   rng.uniform( mu.at(i), sigma.at(i));
+	  }
+	  break;
+	  
+	default:
+	  {
+	    for(unsigned j = 0; j < r.Nd; j++ )
+	      U(r.Nd*o +  j, 0) = mu.at(i);
+	  }
+	  break;
+	}
+	
+      }
+  }
 };
+
+
+
 
 #endif

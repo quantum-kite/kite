@@ -38,7 +38,7 @@ typename std::enable_if<!is_tt<std::complex, T>::value, void>::type get_hdf5(T *
 
 template <typename T>
 typename std::enable_if<!is_tt<std::complex, T>::value, void>::type write_hdf5(const Eigen::Array<T, -1, -1 > & mu,
-									       H5::H5File &  file,
+									       H5::H5File *  file,
 									       const std::string  name) {
   hsize_t    dims[2], chunk_dims[2]; // dataset dimensions
   dims[0] = chunk_dims[0] = mu.cols();
@@ -51,10 +51,10 @@ typename std::enable_if<!is_tt<std::complex, T>::value, void>::type write_hdf5(c
   
   try {
     H5::Exception::dontPrint();
-    dataset = file.createDataSet(name, DataTypeFor<T>::value, dataspace);
+    dataset = file->createDataSet(name, DataTypeFor<T>::value, dataspace);
   }
   catch (H5::FileIException E) { 
-    dataset = file.openDataSet(name);
+    dataset = file->openDataSet(name);
   }
   
   dataset.write(mu.data(), DataTypeFor<T>::value);
@@ -63,7 +63,7 @@ typename std::enable_if<!is_tt<std::complex, T>::value, void>::type write_hdf5(c
 
 template <typename T>
 typename std::enable_if<is_tt<std::complex, T>::value, void>::type write_hdf5(const Eigen::Array<T, -1, -1 > & mu,
-									      H5::H5File &  file,
+									      H5::H5File * file,
 									      const std::string name) {
   hsize_t    dims[2], chunk_dims[2]; // dataset dimensions
   dims[0] = chunk_dims[0] = mu.cols();
@@ -82,10 +82,10 @@ typename std::enable_if<is_tt<std::complex, T>::value, void>::type write_hdf5(co
   
   try {
     H5::Exception::dontPrint();
-    dataset = file.createDataSet(name, complex_datatype, dataspace);
+    dataset = file->createDataSet(name, complex_datatype, dataspace);
   }
   catch (H5::FileIException E) { 
-    dataset = file.openDataSet( name);
+    dataset = file->openDataSet( name);
   }
   
   dataset.write(mu.data(), complex_datatype);

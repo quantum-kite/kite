@@ -32,8 +32,8 @@ class Simulation;
 #include "Random.hpp"
 #include "LatticeStructure.hpp"
 #include "Hamiltonian.hpp"
-#include "Kpm_Vector.hpp"
-#include "Kpm_Vector2D.hpp"
+#include "KPM_Vector.hpp"
+#include "KPM_Vector2D.hpp"
 #include "Simulation.hpp"
 
 typedef int indextype;

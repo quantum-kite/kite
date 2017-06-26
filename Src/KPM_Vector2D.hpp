@@ -63,7 +63,7 @@ public:
     for(unsigned io = 0; io < r.Orb; io++)
       for(unsigned i1 = 1; i1 < r.Ld[1] - 1; i1++)
 	for(unsigned i0 = 1; i0 < r.Ld[0] - 1; i0++)
-	  v(x.set({i0,i1,io}).index, index) = rng.init()/value_type(sqrt(r.Size));
+	  v(x.set({i0,i1,io}).index, index) = rng.init()/value_type(sqrt(r.Sizet));
   };
   
   template < unsigned MULT> 
@@ -96,7 +96,7 @@ public:
 	      
 	      for(unsigned j = j0; j < j1; j += std )
 		for(unsigned i = j; i < j + STRIDE0 ; i++)
-		  phi0[i] = - value_type(MULT) * phiM2[i] +  value_type(MULT + 1) * phiM1[i] * h.U(i,0);;
+		  phi0[i] = - value_type(MULT) * phiM2[i] +  value_type(MULT + 1) * phiM1[i] * h.U(i,0);
 
 	      for(unsigned ib = 0; ib < h.NHoppings(io); ib++)
 		{
@@ -109,10 +109,33 @@ public:
 		}
 	    }
       }
-
+    
     Exchange_Boundaries();    
   };
 
+
+  template < unsigned MULT> 
+  void Multiply2(const int model) {
+    
+    inc_index();
+    T * phi0 = v.col(index).data();
+    T * phiM1 = v.col((memory + index - 1) % memory ).data();
+    T * phiM2 = v.col((memory + index - 2) % memory ).data();
+    
+    for(int io = 0; io < int(r.Orb); io++)
+      for(int iy = 1; iy < int(r.Ld[1]) - 1; iy++)
+	for(int ix = 1; ix < int(r.Ld[0]) - 1; ix++)
+	  {
+	    int i = ix + iy * r.Ld[0] + io * r.Nd;  
+	    phi0[i] = - value_type(MULT) * phiM2[i];
+	    for(unsigned ib = 0; ib < h.NHoppings(io); ib++)
+	      phi0[i] +=  value_type(MULT + 1) * h.t[model](ib, io) * phiM1[i + h.d(ib, io) ];
+	  }
+
+    
+    Exchange_Boundaries();    
+  };
+  
     
   void Exchange_Boundaries() {
     const unsigned D = 2u;
@@ -123,7 +146,7 @@ public:
     T  *phi1 = v.col(index).data();
     
     
-    for(unsigned d = 0; d <  0*D; d++)  // We will transfer the orientations perpendicular  to d
+    for(unsigned d = 0; d <  D; d++)  // We will transfer the orientations perpendicular  to d
       {
 	unsigned int BSize = r.Orb * max[d];
 	unsigned d1 = (d + 1) % D;

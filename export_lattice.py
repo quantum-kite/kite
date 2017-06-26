@@ -397,10 +397,10 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
     # TODO: Change this comparison
     if disorder != 0:
         grp_dis = grp.create_group('Disorder')
-        grp_dis.create_dataset('OnsiteDisorderModelType', data=disorder._type_id)
-        grp_dis.create_dataset('OrbitalNum', data=disorder._orbital)
-        grp_dis.create_dataset('OnsiteDisorderMeanValue', data=disorder._mean)
-        grp_dis.create_dataset('OnsiteDisorderMeanStdv', data=disorder._stdv)
+        grp_dis.create_dataset('OnsiteDisorderModelType', data=disorder._type_id, dtype=np.int32)
+        grp_dis.create_dataset('OrbitalNum', data=disorder._orbital, dtype=np.int32)
+        grp_dis.create_dataset('OnsiteDisorderMeanValue', data=disorder._mean,dtype=np.float64)
+        grp_dis.create_dataset('OnsiteDisorderMeanStdv', data=disorder._stdv,dtype=np.float64)
 
     # Calculation function defined with num_moments, num_random vectors, and num_disorder realisations
     grpc = f.create_group('Calculation')
