@@ -47,8 +47,8 @@ int main(int argc, char *argv[])
 
   H5::H5File *file = new H5::H5File(argv[1], H5F_ACC_RDONLY);
   get_hdf5(&is_complex, file, (char *) "/IS_COMPLEX");
-  get_hdf5(&precision, file, (char *) "/PRECISION");
-  get_hdf5(&dim, file, (char *) "/DIM");
+  get_hdf5(&precision,  file, (char *) "/PRECISION");
+  get_hdf5(&dim,        file, (char *) "/DIM");
   
   file->close();
   if(dim < 1 || dim > 3)

@@ -41,8 +41,8 @@ def graphene_initial(onsite=(0, 0)):
     # Deterministic and Uniform. Each of the needs the have mean value, and standard deviation, where standard deviation
     # of deterministic disorder should be 0.
     disorder = ex.Disorder(lat)
-    disorder.add_disorder('A', 'Gaussian', 0.01, 0.02)
-    disorder.add_disorder('B', 'Gaussian', 0.01, 0.02)
+    disorder.add_disorder('A', 'Deterministic', 0.01, 0)
+    disorder.add_disorder('B', 'Deterministic', 0.01, 0)
 
     # if there is disorder it should be returned separately from the lattice
     return lat, disorder

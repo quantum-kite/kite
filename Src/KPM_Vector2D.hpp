@@ -31,6 +31,7 @@ public:
     
     MemIndBeg[d][0] = z.set({1,1,0}).index;    
     MemIndEnd[d][0] = z.set({0,1,0}).index;
+
     MemIndBeg[d][1] = z.set({int(r.Ld[0]) - 2, 1, 0}).index;
     MemIndEnd[d][1] = z.set({int(r.Ld[0]) - 1, 1, 0}).index; 
 
@@ -67,7 +68,7 @@ public:
   };
   
   template < unsigned MULT> 
-  void Multiply(const int model) {
+  void Multiply() {
     /*
       Mosaic Multiplication using a TILE of STRIDE x STRIDE 
       Right Now We expect that both ld[0] and ld[1]  are multiple of STRIDE
@@ -86,6 +87,7 @@ public:
     for(unsigned io = 0; io < r.Orb; io++)
       {
 	const unsigned ip = io * x.basis[2] ;
+	const unsigned  dd = (h.Anderson_orb_address[io] - io)*r.Nd;
 	
 	for(unsigned i1 = 1; i1 < r.Ld[1] - 1; i1 += STRIDE1  )
 	  for(unsigned i0 = 1; i0 < r.Ld[0] - 1; i0 += STRIDE0 )
@@ -96,12 +98,25 @@ public:
 	      
 	      for(unsigned j = j0; j < j1; j += std )
 		for(unsigned i = j; i < j + STRIDE0 ; i++)
-		  phi0[i] = - value_type(MULT) * phiM2[i] +  value_type(MULT + 1) * phiM1[i] * h.U(i,0);
-
-	      for(unsigned ib = 0; ib < h.NHoppings(io); ib++)
+		  phi0[i] = - value_type(MULT) * phiM2[i];
+	      
+	      if( h.Anderson_orb_address[io] >= 0)
 		{
-		  const int  d1 = h.d(ib, io);
-		  const T    t1 =  value_type(MULT + 1) * h.t[model](ib, io);
+		  for(unsigned j = j0; j < j1; j += std )
+		    for(unsigned i = j; i < j + STRIDE0 ; i++)
+		      phi0[i] += value_type(MULT + 1) * phiM1[i] * h.U_Anderson.at(i - dd);
+		}
+	      else if (h.Anderson_orb_address[io] == - 1)
+		{
+		  for(unsigned j = j0; j < j1; j += std )
+		    for(unsigned i = j; i < j + STRIDE0 ; i++)
+		      phi0[i] += value_type(MULT + 1) * phiM1[i] * h.U_Orbital.at(io);
+		}
+	      
+	      for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
+		{
+		  const int  d1 = h.hr.distance(ib, io);
+		  const T    t1 =  value_type(MULT + 1) * h.hr.value(ib, io);
 		  
 		  for(unsigned j = j0; j < j1; j += std )
 		    for(unsigned i = j; i < j + STRIDE0 ; i++)
@@ -109,13 +124,12 @@ public:
 		}
 	    }
       }
-    
     Exchange_Boundaries();    
   };
 
 
   template < unsigned MULT> 
-  void Multiply2(const int model) {
+  void Multiply2() {
     
     inc_index();
     T * phi0 = v.col(index).data();
@@ -129,7 +143,7 @@ public:
 	    int i = ix + iy * r.Ld[0] + io * r.Nd;  
 	    phi0[i] = - value_type(MULT) * phiM2[i];
 	    for(unsigned ib = 0; ib < h.NHoppings(io); ib++)
-	      phi0[i] +=  value_type(MULT + 1) * h.t[model](ib, io) * phiM1[i + h.d(ib, io) ];
+	      phi0[i] +=  value_type(MULT + 1) * h.t(ib, io) * phiM1[i + h.d(ib, io) ];
 	  }
 
     
@@ -192,6 +206,7 @@ public:
     
     Coordinates<long, 3> z(r.Lt);
     Coordinates<long, 3> x(r.Ld);
+    
     for(long  io = 0; io < (long) r.Ld[2]; io++)
       for(long i1 = 1; i1 < (long) r.Ld[1] - 1 ; i1++)
 	for(long i0 = 1; i0 < (long) r.Ld[0] - 1 ; i0++)

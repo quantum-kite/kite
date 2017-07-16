@@ -53,13 +53,13 @@ public:
   
   void initiate_vector() {};
   template <unsigned MULT>
-  void Multiply(const int model){};
+  void Multiply(){};
   template <unsigned MULT>
-  void Multiply2(const int model){};
+  void Multiply2(){};
   void test_boundaries_system() {};
   void Exchange_Boundaries() {};
-  inline void  HaIteration( const int model) { Multiply<0>(model); };
-  inline void  ChIteration( const int model) { Multiply<1>(model); };
+  inline void  HaIteration() { Multiply<0>(); };
+  inline void  ChIteration() { Multiply<1>(); };
   
 };
 

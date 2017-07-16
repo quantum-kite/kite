@@ -2,6 +2,10 @@
 #define _SIMULATION_HPP
 
 
+
+
+
+
 template <typename T,unsigned D>
 class GlobalSimulation {
 private:
@@ -105,7 +109,7 @@ public:
     long average = 0;
     for(int disorder = 0; disorder < NDisorder; disorder++)
       {
-	h.distribute_local_disorder();
+	h.distribute_AndersonDisorder();
 	for(int randV = 0; randV < NRandomV; randV++)
 	  {
 	    phi0.initiate_vector();
@@ -113,13 +117,13 @@ public:
 	    phi.v.col(0) = phi0.v.col(0);
 	    phi.Exchange_Boundaries();
 	    
-	    phi.template Multiply<0>(0);
+	    phi.template Multiply<0>();
 	    mu.matrix().block(0,0,1,2) +=  (phi0.v.adjoint() * phi.v - mu.matrix().block(0,0,1,2))/value_type(average + 1);
 	    
 	    for(int m = 2; m < mu.cols(); m += 2)
 	      {	    
-		phi.template Multiply<1>(0);
-		phi.template Multiply<1>(0);
+		phi.template Multiply<1>();
+		phi.template Multiply<1>();
 		mu.matrix().block(0,m,1,2) +=  (phi0.v.adjoint() * phi.v - mu.matrix().block(0,m,1,2))/value_type(average + 1);
 	      }
 	    average++;

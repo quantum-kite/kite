@@ -5,6 +5,7 @@ struct Coordinates {
   T coord[D] = {};
   unsigned (&L)[D];
   T basis[D];
+  
   Coordinates(T x, unsigned (&b)[D] ) : L(b) {
     buildBasis();
     set_coord(x);
@@ -78,8 +79,6 @@ struct Coordinates {
     set_index(coord);
     return *this;
   }
-
-  
 };
 
 
@@ -100,7 +99,7 @@ public:
   
   unsigned Lt[D+1]; // Dimensions of the global sample
   unsigned Ld[D+1]; // Dimensions of each sub-domain (domain  + ghosts) 
-  unsigned ld[D+1]; // Dimensions of each sub-domain (domain  + ghosts) 
+  unsigned ld[D+1]; // Dimensions of each sub-domain (domain) 
   unsigned Bd[D+1]; // Information about periodic or non-periodic boundary conditions
 
   unsigned long Nt; // Number of lattice postions of the global sample
@@ -169,7 +168,8 @@ public:
   };
 
   template <typename T1>
-  void  buildGlobalCoordinates(Coordinates<T1, D + 1> & global) {   
+  void  buildGlobalCoordinates(Coordinates<T1, D + 1> & global) {
+    // This function receive a Coordinate in some basis  
     Coordinates<T1, D + 1> xd(nd);
     xd.set_coord(T1(thread_id));
     for(unsigned i = 0; i < D; i++)
