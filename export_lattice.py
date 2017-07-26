@@ -250,21 +250,19 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
     # hamiltonian is complex 1 or real 0
     complx = int(config.comp)
 
-    # get all atom positions to the position array.
-    position_atoms = []
-    # get number of orbitals at each atom.
-    num_orbitals = []
-
     # iterate through all the sublattices and add onsite energies to hoppings list
     # count num of orbitals and read the atom positions.
     hoppings = []
+    # get number of orbitals at each atom.
     num_orbitals = np.zeros(lattice.nsub, dtype=np.int64)
+    # get all atom positions to the position array.
+    position_atoms = np.zeros([lattice.nsub, space_size], dtype=np.int64)
     for name, sub in lattice.sublattices.items():
         # num of orbitals at each sublattice is equal to size of onsite energy
         num_energies = np.asarray(sub.energy).shape[0]
         num_orbitals[sub.alias_id] = num_energies
         # position_atoms is a list of vectors of size space_size
-        position_atoms.append(sub.position[0:space_size])
+        position_atoms[sub.alias_id, :] = sub.position[0:space_size]
         # define hopping dict from relative hopping index from and to id (relative number of sublattice in relative
         # index lattice) and onsite
         hopping = {'relative_index': np.zeros(space_size, dtype=np.int32), 'from_id': sub.alias_id,
