@@ -19,8 +19,6 @@
 #include <math.h>
 #include <initializer_list>
 
-
-
 #define MEMORY 10
 #define PATTERNS 4
 

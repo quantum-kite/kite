@@ -1,11 +1,6 @@
 #ifndef _SIMULATION_HPP
 #define _SIMULATION_HPP
 
-
-
-
-
-
 template <typename T,unsigned D>
 class GlobalSimulation {
 private:
@@ -62,8 +57,9 @@ public:
     omp_set_num_threads(rglobal.n_threads);
 #pragma omp parallel default(shared)
     {
-      Simulation<T,D> simul(rglobal, name, Border, mu);
-      
+      LatticeStructure <D> r(rglobal);                     // Create a local copy of the lattice Structure 
+      r.thread_id = omp_get_thread_num();        
+      Simulation<T,D> simul(r, name, Border, mu);      
       if(DOS) simul.Measure_Dos(NRandomV.at(index_dos), NDisorder.at(index_dos) );
     }
 
