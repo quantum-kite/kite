@@ -3,20 +3,15 @@ class KPM_VectorBasis {
 protected:
   int index;
   const int memory;
-  const Hamiltonian <T,D> & h;
-  LatticeStructure <D> & r;
-  KPMRandom <T> & rng;
-
-  std::vector<T> & Border;
-  std::vector<T> & GlobalBorder;
+  Simulation<T,D> & simul;
   
   
 public:
   Eigen::Matrix <T, Eigen::Dynamic,  Eigen::Dynamic > v;
-  KPM_VectorBasis(int mem, Hamiltonian <T,D> & h1, LatticeStructure <D>  & r1, std::vector<T> & B, std::vector<T> & GB) :
-    memory(mem), h(h1), r(r1), rng(h1.rng), Border(B), GlobalBorder(GB) {
+  KPM_VectorBasis(int mem,  Simulation<T,D> & sim) :
+    memory(mem), simul(sim) {
     index  = 0;
-    v = Eigen::Matrix <T, Eigen::Dynamic,  Eigen::Dynamic >::Zero(r.Sized, memory);
+    v = Eigen::Matrix <T, Eigen::Dynamic,  Eigen::Dynamic >::Zero(simul.r.Sized, memory);
   };
   
   void set_index(int i) {index = i;};
@@ -48,8 +43,8 @@ public:
 template <typename T, unsigned D>
 class KPM_Vector : public KPM_VectorBasis <T,D> {
 public:
-  KPM_Vector(int mem, Hamiltonian <T,D> & h1, LatticeStructure <D>  & r1, std::vector<T> & B, std::vector<T> & GB ) :
-    KPM_VectorBasis<T,D>(mem, h1, r1, B, GB ){};
+  KPM_Vector(int mem, Simulation<T,D> & sim) :
+    KPM_VectorBasis<T,D>(mem,sim){};
   
   void initiate_vector() {};
   template <unsigned MULT>
@@ -60,7 +55,8 @@ public:
   void Exchange_Boundaries() {};
   inline void  HaIteration() { Multiply<0>(); };
   inline void  ChIteration() { Multiply<1>(); };
-  
+  void Velocity( T *, T *, int );
+  T VelocityInternalProduct( T *  , T * , int);  
 };
 
 

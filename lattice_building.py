@@ -53,7 +53,7 @@ lattice, disorder = graphene_initial()
 
 nx = ny = 2
 # number of unit cells in each direction.
-lx = ly = 32
+lx = ly = 256
 
 # make config object which caries info about
 # - the number of decomposition parts [nx, ny],
@@ -74,7 +74,7 @@ configuration = ex.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries
 # - number of moments for the calculation,
 # - number of different random vector realisations,
 # - number of disorder realisations.
-calculation = ex.Calculation(fname=['DOS', 'CondXX'], num_moments=[8192, 24], num_random=[1, 1], num_disorder=[64, 2])
+calculation = ex.Calculation(fname=['DOS', 'CondXX'], num_moments=[1024, 24], num_random=[1, 1], num_disorder=[64, 2])
 
 # make modification object which caries info about (TODO: Other modifications can be added here)
 # - magnetic field can be set to True. Default case is False. In exported file it's converted to 1 and 0.

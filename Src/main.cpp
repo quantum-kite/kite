@@ -25,6 +25,7 @@
 
 template<typename T, unsigned D>
 class Simulation;
+#include "Global.hpp"
 #include "ComplexTraits.hpp"
 #include "myHDF5.hpp"
 #include "Random.hpp"

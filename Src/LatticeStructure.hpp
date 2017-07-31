@@ -112,16 +112,20 @@ public:
   
   LatticeStructure(char *name )
   {
-    H5::H5File *file = new H5::H5File(name, H5F_ACC_RDONLY);
-    get_hdf5<unsigned>(&Orb, file, (char *) "/NOrbitals");
-    get_hdf5<double>(rLat.data(), file, (char *) "/LattVectors");    
-    rOrb = Eigen::MatrixXd::Zero(Orb,D);
-    get_hdf5<double>(rOrb.data(), file, (char *) "/OrbPositions");
-
-    get_hdf5<unsigned>(Lt, file, (char *) "/L");
-    get_hdf5<unsigned>(Bd, file, (char *) "/Boundaries");
-    get_hdf5<unsigned>(nd, file, (char *) "/Divisions");
-    file->close();
+    
+#pragma omp critical
+    {
+      H5::H5File *file = new H5::H5File(name, H5F_ACC_RDONLY);
+      get_hdf5<unsigned>(&Orb, file, (char *) "/NOrbitals");
+      get_hdf5<double>(rLat.data(), file, (char *) "/LattVectors");    
+      rOrb = Eigen::MatrixXd::Zero(Orb,D);
+      get_hdf5<double>(rOrb.data(), file, (char *) "/OrbPositions");
+      
+      get_hdf5<unsigned>(Lt, file, (char *) "/L");
+      get_hdf5<unsigned>(Bd, file, (char *) "/Boundaries");
+      get_hdf5<unsigned>(nd, file, (char *) "/Divisions");
+      file->close();
+    }
     Nd = 1;
     N = 1;
     Nt = 1;

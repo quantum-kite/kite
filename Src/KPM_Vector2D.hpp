@@ -5,21 +5,19 @@ private:
   unsigned MemIndBeg[2][2];
   unsigned MemIndEnd[2][2];
   unsigned block[2][2];
+  LatticeStructure<2u> & r;
+  Hamiltonian<T,2u> & h;
 public:
   typedef typename extract_value_type<T>::value_type value_type;
-  using KPM_VectorBasis<T,2>::r;
-  using KPM_VectorBasis<T,2>::rng;
+  using KPM_VectorBasis<T,2>::simul;
   using KPM_VectorBasis<T,2>::index;
   using KPM_VectorBasis<T,2>::v;
   using KPM_VectorBasis<T,2>::memory;
-  using KPM_VectorBasis<T,2>::h;
-  using KPM_VectorBasis<T,2>::Border;
-  using KPM_VectorBasis<T,2>::GlobalBorder;
   using KPM_VectorBasis<T,2>::aux_wr;
   using KPM_VectorBasis<T,2>::aux_test;
   using KPM_VectorBasis<T,2>::inc_index;
   
-  KPM_Vector(int mem, Hamiltonian <T,2> & h1, LatticeStructure <2>  & r1, std::vector<T> & B , std::vector<T> & GB) : KPM_VectorBasis<T,2>(mem, h1, r1, B, GB){
+  KPM_Vector(int mem, Simulation<T,2> & sim) : KPM_VectorBasis<T,2>(mem, sim), r(sim.r), h(sim.h){
     unsigned d;
     Coordinates <int, 3> z(r.Ld);
     Coordinates <int, 3> x(r.nd), dist(r.nd);
@@ -64,7 +62,7 @@ public:
     for(unsigned io = 0; io < r.Orb; io++)
       for(unsigned i1 = 1; i1 < r.Ld[1] - 1; i1++)
 	for(unsigned i0 = 1; i0 < r.Ld[0] - 1; i0++)
-	  v(x.set({i0,i1,io}).index, index) = rng.init()/value_type(sqrt(r.Sizet));
+	  v(x.set({i0,i1,io}).index, index) = simul.rnd.init()/value_type(sqrt(r.Sizet));
   };
   
   template < unsigned MULT> 
@@ -116,7 +114,7 @@ public:
 	      for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
 		{
 		  const int  d1 = h.hr.distance(ib, io);
-		  const T    t1 =  value_type(MULT + 1) * h.hr.value(ib, io);
+		  const T    t1 =  value_type(MULT + 1) * h.hr.hopping(ib, io);
 		  
 		  for(unsigned j = j0; j < j1; j += std )
 		    for(unsigned i = j; i < j + STRIDE0 ; i++)
@@ -127,6 +125,75 @@ public:
     Exchange_Boundaries();    
   };
 
+  
+  void Velocity( T * phi0, T * phiM1, int axis)
+  {
+    Coordinates<unsigned,3> x(r.Ld);
+    const unsigned STRIDE0 = 4;    
+    const unsigned STRIDE1 = 4;
+    
+    for(unsigned io = 0; io < r.Orb; io++)
+      {
+	const unsigned ip = io * x.basis[2];
+	for(unsigned i1 = 1; i1 < r.Ld[1] - 1; i1 += STRIDE1  )
+	  for(unsigned i0 = 1; i0 < r.Ld[0] - 1; i0 += STRIDE0 )
+	    {
+	      const unsigned std = x.basis[1];
+	      const unsigned j0 = ip + i0 + i1 * std;
+	      const unsigned j1 = j0 + STRIDE1 * std;
+	      
+	      for(unsigned j = j0; j < j1; j += std )
+		for(unsigned i = j; i < j + STRIDE0 ; i++)
+		  phi0[i] = 0;
+	      
+	      for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
+		{
+		  const int  d1 = h.hr.distance(ib, io);
+		  const T    t1 = h.hr.V[axis](ib, io);
+		  
+		  for(unsigned j = j0; j < j1; j += std )
+		    for(unsigned i = j; i < j + STRIDE0 ; i++)
+		      phi0[i] += t1 * phiM1[i + d1];
+		}
+	    }
+      }
+  };
+  
+  T VelocityInternalProduct( T * bra, T * ket, int axis)
+  {
+    Coordinates<unsigned,3> x(r.Ld);
+    const unsigned STRIDE0 = 4;    
+    const unsigned STRIDE1 = 4;
+    typedef typename extract_value_type<T>::value_type value_type;
+    T sum;
+    sum *= value_type(0.);
+    
+    for(unsigned io = 0; io < r.Orb; io++)
+      {
+	const unsigned ip = io * x.basis[2];
+	for(unsigned i1 = 1; i1 < r.Ld[1] - 1; i1 += STRIDE1  )
+	  for(unsigned i0 = 1; i0 < r.Ld[0] - 1; i0 += STRIDE0 )
+	    {
+	      const unsigned std = x.basis[1];
+	      const unsigned j0 = ip + i0 + i1 * std;
+	      const unsigned j1 = j0 + STRIDE1 * std;
+	      
+	      
+	      for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
+		{
+		  const int  d1 = h.hr.distance(ib, io);
+		  const T    t1 = h.hr.V[axis](ib, io);
+		  
+		  for(unsigned j = j0; j < j1; j += std )
+		    for(unsigned i = j; i < j + STRIDE0 ; i++)
+		      sum += std::conj(bra[i]) * t1 * ket[i + d1];
+		}
+	    }
+      }
+    return sum;
+  };
+
+  
 
   template < unsigned MULT> 
   void Multiply2() {
@@ -173,17 +240,17 @@ public:
 	      unsigned I        = MemIndBeg[d][b] + io * x.basis[D] - st;
 
 	      for(unsigned i = 0; i < max[d]; i++ )
-		Border.at(bi + i) = phi1[ I += st ];
+		simul.ghosts.at(bi + i) = phi1[ I += st ];
 	    }
 	
 	// Copy to the  shared memory
-	std::copy( Border.begin(), Border.begin() + 2 * BSize, GlobalBorder.begin() + 2 * BSize * r.thread_id );
+	std::copy( simul.ghosts.begin(), simul.ghosts.begin() + 2 * BSize, simul.Global.ghosts.begin() + 2 * BSize * r.thread_id );
 
 
 #pragma omp barrier
 	
 	for(unsigned b = 0; b < 2; b++)
-	  std::copy(GlobalBorder.begin() + block[d][b] , GlobalBorder.begin() + block[d][b] +  BSize, Border.begin() + (1-b) * BSize );
+	  std::copy(simul.Global.ghosts.begin() + block[d][b] , simul.Global.ghosts.begin() + block[d][b] +  BSize, simul.ghosts.begin() + (1-b) * BSize );
 #pragma omp barrier
 	
 	for(unsigned io = 0; io < r.Orb; io++) // Copy back from the shared memory
@@ -193,7 +260,7 @@ public:
 	      unsigned I        = MemIndEnd[d][b] + io * x.basis[D] - st;
 	      
 	      for(unsigned i = 0; i < max[d]; i++ )
-		phi1[ I += st ] =  Border.at(bi + i);
+		phi1[ I += st ] =  simul.ghosts.at(bi + i);
 	    }
       } 
   };

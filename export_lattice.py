@@ -379,7 +379,7 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
     # Hamiltonian group
     grp.create_dataset('NHoppings', data=num_hoppings, dtype='u4')
     # distance
-    grp.create_dataset('d', data=d, dtype='u4')
+    grp.create_dataset('d', data=d, dtype='i4')
 
     if complx:
         # hoppings
