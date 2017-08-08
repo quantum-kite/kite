@@ -122,6 +122,34 @@ public:
 		}
 	    }
       }
+
+
+    // Structural disorder contribution
+    
+    for(unsigned i = 0; i <  h.hd.position.size(); i++)
+      {
+	unsigned ip = h.hd.position[i];
+	for(unsigned j = 0; j < h.hd.hopping.size(); j++)
+	  {
+	    unsigned i1 = ip + h.hd.node_position[h.hd.element1[j]];
+	    unsigned i2 = ip + h.hd.node_position[h.hd.element2[j]];
+	    phi0[i2] += value_type(MULT + 1) * h.hd.hopping[j] * phiM1[i1];
+	  }
+	
+	for(unsigned j = 0; j < h.hd.U.size(); j++)
+	  {
+	    unsigned i1 = ip + h.hd.node_position[h.hd.element[j]];
+	    phi0[i1] += value_type(MULT + 1) * h.hd.U[j] * phiM1[i1];
+	  }
+      }
+
+    //  Broken impurities
+    for(unsigned i = 0; i < h.hd.border_element1.size(); i++)
+      phi0[h.hd.border_element1[i]] += value_type(MULT + 1) * h.hd.border_hopping[i] * phiM1[h.hd.border_element2[i]];
+
+    for(unsigned i = 0; i < h.hd.border_element.size(); i++)
+      phi0[h.hd.border_element[i]] += value_type(MULT + 1) * h.hd.border_U[i] * phiM1[h.hd.border_element[i]];
+	
     Exchange_Boundaries();    
   };
 
@@ -278,7 +306,7 @@ public:
       for(long i1 = 1; i1 < (long) r.Ld[1] - 1 ; i1++)
 	for(long i0 = 1; i0 < (long) r.Ld[0] - 1 ; i0++)
 	  {
-	    r.buildGlobalCoordinates( z.set({i0, i1, io}));
+	    r.convertCoordinates(z, x.set({i0,i1,io}) );
 	    v(x.set({i0,i1,io}).index, 0) = aux_wr(z.index);
 	  }
     
@@ -290,7 +318,7 @@ public:
 	{
 	  for(long i0 = 0; i0 < (long) r.Ld[0]; i0++)
 	    {
-	      r.buildGlobalCoordinates( z.set({i0, i1, io}) );
+	      r.convertCoordinates(z, x.set({i0,i1,io}) );
 	      x.set({i0,i1,io});
 	      T val = aux_wr(z.index); 
 	      if( aux_test(v(x.index , 0), val ) )

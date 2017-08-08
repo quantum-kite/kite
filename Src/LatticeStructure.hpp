@@ -172,13 +172,54 @@ public:
   };
 
   template <typename T1>
-  void  buildGlobalCoordinates(Coordinates<T1, D + 1> & global) {
-    // This function receive a Coordinate in some basis  
-    Coordinates<T1, D + 1> xd(nd);
-    xd.set_coord(T1(thread_id));
-    for(unsigned i = 0; i < D; i++)
-      global.coord[i] =  (global.L[i] + global.coord[i] + xd.coord[i] * ld[i] - 1  ) % global.L[i];
-    global.set_index(global.coord);
+  void  convertCoordinates(Coordinates<T1, D + 1> & dest, Coordinates<T1, D + 1> & source)
+  {
+    /*
+      Convert between the types basis defined in the LatticeStructure
+    */
+    Coordinates<T1, D + 1> xd(T1(thread_id), nd);
+    // Convert from Ld to Lt
+    if( std::equal(std::begin(source.L), std::end(source.L), std::begin(Ld)) && std::equal(std::begin(dest.L), std::end(dest.L), std::begin(Lt)))
+      {
+	for(unsigned i = 0; i < D; i++)
+	  dest.coord[i] =  source.coord[i] + xd.coord[i] * ld[i] - 1 ;
+	dest.set_index(dest.coord);
+      }
+    // Convert from ld to Lt
+    if( std::equal(std::begin(source.L), std::end(source.L), std::begin(ld)) && std::equal(std::begin(dest.L), std::end(dest.L), std::begin(Lt)))
+      {
+	for(unsigned i = 0; i < D; i++)
+	  dest.coord[i] =  source.coord[i] + xd.coord[i] * ld[i];
+	dest.set_index(dest.coord);
+      }
+
+    // Convert from ld to Ld
+    if( std::equal(std::begin(source.L), std::end(source.L), std::begin(ld)) && std::equal(std::begin(dest.L), std::end(dest.L), std::begin(Ld)))
+      {
+	for(unsigned i = 0; i < D; i++)
+	  dest.coord[i] =  source.coord[i] + 1 ;
+	dest.set_index(dest.coord);
+      }
+
+
+    // Convert from Lt to ld
+    if( std::equal(std::begin(source.L), std::end(source.L), std::begin(Lt)) && std::equal(std::begin(dest.L), std::end(dest.L), std::begin(ld)))
+      {
+	for(unsigned i = 0; i < D; i++)
+	  dest.coord[i] =  source.coord[i] - xd.coord[i] * ld[i];
+	dest.set_index(dest.coord);
+      }
+  };
+  
+  unsigned domain_number (long index) {
+    Coordinates<long, D + 1> LATT(Lt);
+    Coordinates<long, D + 1> n(nd);
+    LATT.set_coord(index);
+    for (unsigned i = 0; i < D; i++)
+      LATT.coord[i] /= ld[i];
+    LATT.coord[D] = 0;
+    return unsigned(n.set_index(LATT.coord).index);
   }
+
 };
 

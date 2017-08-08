@@ -32,8 +32,18 @@ struct extract_value_type
 };
 
 template<template<typename, typename ...> class X, typename T, typename ...Args>
-struct extract_value_type<X<T, Args...>>   //specialization                                                                                                                    
+struct extract_value_type<X<T, Args...>>   //specialization                                                                                                        
 {
   typedef T value_type;
 };
 
+template <typename T>
+typename std::enable_if<!is_tt<std::complex, T>::value, T>::type assign_value(double x, double y) {
+  return T(x);
+};
+
+template <typename T>
+typename std::enable_if<is_tt<std::complex, T>::value, T>::type assign_value(double x, double y) {
+  typedef typename extract_value_type<T>::value_type value_type;
+  return T(value_type(x),value_type(y));
+};

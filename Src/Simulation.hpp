@@ -90,7 +90,7 @@ public:
     long average = 0;
     for(int disorder = 0; disorder < NDisorder; disorder++)
       {
-	h.distribute_AndersonDisorder();
+	h.generate_disorder();
 	for(int randV = 0; randV < NRandomV; randV++)
 	  {
 	    phi0.initiate_vector();

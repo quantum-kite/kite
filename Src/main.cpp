@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
   
   if(is_complex < 0 || is_complex > 1)
     exit(0);
-  
+
   int index =   dim - 1 + 3 * precision + is_complex * 3 * 3; 
 
   switch (index ) {
