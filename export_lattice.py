@@ -343,7 +343,7 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
     # fix the size of hopping and distance matrices, where the number of columns is max number of hoppings
     max_hop = int(np.max(num_hoppings))
     d = np.zeros((matrix.shape[0], max_hop))
-    t = np.zeros((matrix.shape[0], max_hop))
+    t = np.zeros((matrix.shape[0], max_hop), dtype=matrix.data.dtype)
     for i_row, d_row in enumerate(d_list):
         t_row = t_list[i_row]
         d[i_row, :len(d_row)] = d_row
