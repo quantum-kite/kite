@@ -4,6 +4,103 @@ import h5py as hp
 from scipy.sparse import coo_matrix
 
 
+# Class that introduces Bond Disorder into the initially built lattice.
+# The exported dataset BondDisorder has the following groups:
+# - Concentration: concentration of disorder,
+# - NumDisorder: number of unique bond changes,
+# - DisorderHopping: values of the new hopping, with 2 columns and NumDisorder rows where the hoppings in different
+# columns are conjugated values
+# - OrbitalFrom matrix of orbital from which the hopping is starting, size is the same the size of DisorderHopping
+# matrix. Different columns are for both the orbital id of the initial and conjugated hopping.
+# - OrbitalTo matrix of orbital to which the hopping goes to, size is the same the size of DisorderHopping
+# matrix. Different columns are for both the orbital id of the initial and conjugated hopping.
+class BondDisorder:
+    def __init__(self, lattice, concentration):
+
+        self._concentration = concentration
+        # number of atoms in the disordered structure
+        self._num_disorder = 0
+        # affected orbitals
+        self._orbital_from = []
+        self._orbital_to = []
+        self._disorder_hopping = []
+
+        num_orbitals = np.zeros(lattice.nsub, dtype=np.uint64)
+        for name, sub in lattice.sublattices.items():
+            # num of orbitals at each sublattice is equal to size of onsite energy
+            num_energies = np.asarray(sub.energy).shape[0]
+            num_orbitals[sub.alias_id] = num_energies
+        self._num_orbitals_total = np.sum(np.asarray(num_orbitals))
+        self._num_orbitals = np.asarray(num_orbitals)
+        self._num_orbitals_before = np.cumsum(np.asarray(num_orbitals)) - num_orbitals
+        self._lattice = lattice
+
+    def add_bond_disorder(self, *disorder):
+
+        for dis in disorder:
+            self._num_disorder += 1
+            self.add_local_bond_disorder(*dis)
+
+    def add_local_bond_disorder(self, relative_index, from_sub, to_sub, hoppings):
+
+        orbital_from = []
+        orbital_to = []
+        orbital_hop = []
+
+        vectors = np.asarray(self._lattice.vectors)
+        space_size = vectors.shape[0]
+
+        names, sublattices = zip(*self._lattice.sublattices.items())
+
+        if from_sub not in names:
+            raise SystemExit('Desired initial sublattice doesnt exist in the chosen lattice! ')
+        if to_sub not in names:
+            raise SystemExit('Desired final sublattice doesnt exist in the chosen lattice! ')
+
+        indx_from = names.index(from_sub)
+        lattice_sub_from = sublattices[indx_from]
+
+        indx_to = names.index(to_sub)
+        lattice_sub_to = sublattices[indx_to]
+
+        from_sub_id = lattice_sub_from.alias_id
+        # size_orb_from = self._num_orbitals[from_sub_id]
+        to_sub_id = lattice_sub_to.alias_id
+        # size_orb_to = self._num_orbitals[to_sub_id]
+
+        h = np.nditer(hoppings, flags=['multi_index'])
+        while not h.finished:
+            relative_move = np.dot(np.asarray(relative_index) + 1,
+                                   3 ** np.linspace(0, space_size - 1, space_size, dtype=np.int32))
+
+            if isinstance(hoppings, np.ndarray):
+                orbital_from.append(self._num_orbitals_before[from_sub_id] + h.multi_index[0])
+                orbital_to.append(relative_move +
+                                  (self._num_orbitals_before[to_sub_id] + h.multi_index[1]) * 3 ** space_size)
+                # conjugate
+                orbital_from.append(self._num_orbitals_before[to_sub_id] + h.multi_index[0])
+                orbital_to.append(relative_move +
+                                  (self._num_orbitals_before[from_sub_id] + h.multi_index[1]) * 3 ** space_size)
+                orbital_hop.append(h[0])
+                orbital_hop.append(np.conj(h[0]))
+            else:
+                orbital_from.append(self._num_orbitals_before[from_sub_id])
+                orbital_to.append(
+                    relative_move + (self._num_orbitals_before[to_sub_id]) * 3 ** space_size)
+                # conjugate
+                orbital_from.append(self._num_orbitals_before[to_sub_id])
+                orbital_to.append(
+                    relative_move + (self._num_orbitals_before[from_sub_id]) * 3 ** space_size)
+                orbital_hop.append(h[0])
+                orbital_hop.append((h[0].conjugate()))
+
+            h.iternext()
+
+        self._orbital_from.append(orbital_from)
+        self._orbital_to.append(orbital_to)
+        self._disorder_hopping.append(orbital_hop)
+
+
 # Class that introduces Disorder into the initially built lattice.
 # The informations about the disorder are the type, mean value, and standard deviation. The function that you could use
 # in the bulding of the lattice is add_disorder. The class method takes care of the shape of the disorder chosen (it
@@ -35,8 +132,8 @@ class Disorder:
     # class method that introduces the disorder to the lattice
     def add_disorder(self, sublattice, type, mean_value, standard_deviation):
         if isinstance(type, list):
-            for name in sublattice:
-                self.add_local_disorder(name, type, mean_value, standard_deviation)
+            for indx, name in enumerate(sublattice):
+                self.add_local_disorder(name, type[indx], mean_value[indx], standard_deviation[indx])
         else:
             for name in sublattice:
                 self.add_local_disorder(name, [type], [mean_value], [standard_deviation])
@@ -243,6 +340,8 @@ class Configuration:
 def export_lattice(lattice, config, calculation, modification, filename, **kwargs):
     # get the lattice vectors and set the size of space (1D, 2D or 3D) as the total number of vectors.
     disorder = kwargs.get('disorder', 0)
+    disorder_bonds = kwargs.get('disorder_bonds', 0)
+
     vectors = np.asarray(lattice.vectors)
     space_size = vectors.shape[0]
     vectors = vectors[:, 0:space_size]
@@ -305,7 +404,6 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
         hopping_energy = h['hopping_energy']
         it = np.nditer(hopping_energy, flags=['multi_index'])
         while not it.finished:
-
             relative_move = np.dot(h['relative_index'] + 1,
                                    3 ** np.linspace(0, space_size - 1, space_size, dtype=np.int32))
             # if hopping_energy.size > 1:
@@ -397,8 +495,23 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
         grp_dis = grp.create_group('Disorder')
         grp_dis.create_dataset('OnsiteDisorderModelType', data=disorder._type_id, dtype=np.int32)
         grp_dis.create_dataset('OrbitalNum', data=disorder._orbital, dtype=np.int32)
-        grp_dis.create_dataset('OnsiteDisorderMeanValue', data=disorder._mean,dtype=np.float64)
-        grp_dis.create_dataset('OnsiteDisorderMeanStdv', data=disorder._stdv,dtype=np.float64)
+        grp_dis.create_dataset('OnsiteDisorderMeanValue', data=disorder._mean, dtype=np.float64)
+        grp_dis.create_dataset('OnsiteDisorderMeanStdv', data=disorder._stdv, dtype=np.float64)
+
+    if disorder_bonds != 0:
+        grp_dis = grp.create_group('BondDisorder')
+        grp_dis.create_dataset('Concentration', data=np.asarray(disorder_bonds._concentration), dtype=np.float64)
+        grp_dis.create_dataset('NumDisorder', data=disorder_bonds._num_disorder, dtype=np.int32)
+        grp_dis.create_dataset('OrbitalFrom', data=np.asarray(disorder_bonds._orbital_from), dtype=np.int32)
+        grp_dis.create_dataset('OrbitalTo', data=np.asarray(disorder_bonds._orbital_to), dtype=np.int32)
+
+        disorder_hopping = disorder_bonds._disorder_hopping
+        if complx:
+            # hoppings
+            grp_dis.create_dataset('DisorderHopping', data=np.asarray(disorder_hopping).astype(config.type))
+        else:
+            # hoppings
+            grp_dis.create_dataset('DisorderHopping', data=np.asarray(disorder_hopping).real.astype(config.type))
 
     # Calculation function defined with num_moments, num_random vectors, and num_disorder realisations
     grpc = f.create_group('Calculation')
