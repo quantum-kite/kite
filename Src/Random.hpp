@@ -17,7 +17,7 @@ public:
     std::array<int, 624> seed_data;
     std::generate(seed_data.begin(), seed_data.end(), std::ref(r));
     std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
-    rng.seed(seq);
+    rng.seed(seq); 
   };
 
   double get() {

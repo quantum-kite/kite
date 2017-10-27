@@ -15,12 +15,17 @@
 #include <complex>
 #include <iostream>
 #include <chrono>
+#include <thread>
 #include <cmath>
 #include <math.h>
 #include <initializer_list>
 
-#define MEMORY 10
-#define PATTERNS 4
+#define MEMORY   10
+#define PATTERNS  4
+#define NGHOSTS   2
+#ifndef STRIDE
+#define STRIDE    128
+#endif
 
 
 template<typename T, unsigned D>

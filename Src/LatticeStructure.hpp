@@ -85,11 +85,11 @@ struct Coordinates {
 template <unsigned D>
 struct LatticeStructure {
 private:
-
+  
 public:
-  unsigned Sized; // Size of vector for each subdomain (with ghosts)
-  unsigned Size; // Size of vector for each subdomain (without ghosts)
-  unsigned long Sizet; // Size of full Hilbert Space
+  std::size_t Sized; // Size of vector for each subdomain (with ghosts)
+  std::size_t Size; // Size of vector for each subdomain (without ghosts)
+  std::size_t Sizet; // Size of full Hilbert Space
 
   Eigen::Matrix<double, D, D> rLat;  // The vectors are organized by columns 
   Eigen::MatrixXd rOrb;
@@ -101,18 +101,15 @@ public:
   unsigned Ld[D+1]; // Dimensions of each sub-domain (domain  + ghosts) 
   unsigned ld[D+1]; // Dimensions of each sub-domain (domain) 
   unsigned Bd[D+1]; // Information about periodic or non-periodic boundary conditions
-
-  unsigned long Nt; // Number of lattice postions of the global sample
-  unsigned Nd; // Number of lattice postions of the sub-domain with ghosts
-  unsigned N; // Number of lattice postions of the sub-domain without ghosts
-  
+  unsigned lStr[D + 1];
+  std::size_t Nt; // Number of lattice postions of the global sample
+  std::size_t Nd; // Number of lattice postions of the sub-domain with ghosts
+  std::size_t N; // Number of lattice postions of the sub-domain without ghosts
+  std::size_t NStr; // Number of lattice postions of the sub-domain without ghosts
   unsigned Orb; // Number of orbitals
   unsigned thread_id; // thread identification
-
   
-  LatticeStructure(char *name )
-  {
-    
+  LatticeStructure(char *name ) {
 #pragma omp critical
     {
       H5::H5File *file = new H5::H5File(name, H5F_ACC_RDONLY);
@@ -129,22 +126,25 @@ public:
     Nd = 1;
     N = 1;
     Nt = 1;
+    NStr = 1;
     n_threads = 1;
-
+    
     for(unsigned i = 0; i < D; i++)
       {
-	
 	ld[i] = Lt[i]/nd[i];
-	Ld[i] = ld[i] + 2;
+	Ld[i] = ld[i] + 2*NGHOSTS;
+	lStr[i] = ld[i]/STRIDE;
 	Nd *= Ld[i];
 	N  *= ld[i];
-	Nt *= ((unsigned long) Lt[i] );
+	Nt *= Lt[i] ;
+	NStr *= lStr[i] ;
 	n_threads *= nd[i];
       }
     
     Lt[D] = Orb;
     Ld[D] = Orb;
     ld[D] = Orb;
+    lStr[D] = Orb;
     nd[D] = 1;
     
     Size = N * Orb;
@@ -152,37 +152,38 @@ public:
     Sizet = Nt * Orb;
     thread_id = omp_get_thread_num();
   };
-
+  
   unsigned get_BorderSize() {
     unsigned size;
     switch (D) {
     case 1 :
-      size = 2 * Orb * n_threads;
+      size = 2 * Orb * n_threads * NGHOSTS;
       break;
     case 2:
-      size = 2 * std::max(Ld[0],ld[1]) * Orb * n_threads;
+      size = 2 * std::max(Ld[0],ld[1]) * Orb * n_threads * NGHOSTS;
       break;
     case 3:
-      size = (2 * std::max(Ld[0] * Ld[1], std::max(Ld[0] * ld[2] , ld[1]*ld[2]) ) * Orb * n_threads);
+      size = (2 * std::max(Ld[0] * Ld[1], std::max(Ld[0] * ld[2] , ld[1]*ld[2]) ) * Orb * n_threads) * NGHOSTS;
       break;
     default:
       exit(0);
     }
     return size;
   };
-
+  
   template <typename T1>
   void  convertCoordinates(Coordinates<T1, D + 1> & dest, Coordinates<T1, D + 1> & source)
   {
     /*
-      Convert between the types basis defined in the LatticeStructure
-    */
+     * Convert between the types basis defined in the LatticeStructure
+     */
     Coordinates<T1, D + 1> xd(T1(thread_id), nd);
     // Convert from Ld to Lt
     if( std::equal(std::begin(source.L), std::end(source.L), std::begin(Ld)) && std::equal(std::begin(dest.L), std::end(dest.L), std::begin(Lt)))
       {
 	for(unsigned i = 0; i < D; i++)
-	  dest.coord[i] =  source.coord[i] + xd.coord[i] * ld[i] - 1 ;
+	  dest.coord[i] =  (source.coord[i] + xd.coord[i] * ld[i] - NGHOSTS + Lt[i])%Lt[i] ;
+	dest.coord[D] = source.coord[D];
 	dest.set_index(dest.coord);
       }
     // Convert from ld to Lt
@@ -190,25 +191,57 @@ public:
       {
 	for(unsigned i = 0; i < D; i++)
 	  dest.coord[i] =  source.coord[i] + xd.coord[i] * ld[i];
+	dest.coord[D] = source.coord[D];
 	dest.set_index(dest.coord);
       }
-
+    
     // Convert from ld to Ld
     if( std::equal(std::begin(source.L), std::end(source.L), std::begin(ld)) && std::equal(std::begin(dest.L), std::end(dest.L), std::begin(Ld)))
       {
 	for(unsigned i = 0; i < D; i++)
-	  dest.coord[i] =  source.coord[i] + 1 ;
+	  dest.coord[i] =  source.coord[i] + NGHOSTS ;
+	dest.coord[D] = source.coord[D];
 	dest.set_index(dest.coord);
       }
-
-
+    
+    
     // Convert from Lt to ld
     if( std::equal(std::begin(source.L), std::end(source.L), std::begin(Lt)) && std::equal(std::begin(dest.L), std::end(dest.L), std::begin(ld)))
       {
 	for(unsigned i = 0; i < D; i++)
 	  dest.coord[i] =  source.coord[i] - xd.coord[i] * ld[i];
+	dest.coord[D] = source.coord[D];
 	dest.set_index(dest.coord);
       }
+
+    // Convert from Lt to Ld
+    if( std::equal(std::begin(source.L), std::end(source.L), std::begin(Lt)) && std::equal(std::begin(dest.L), std::end(dest.L), std::begin(Ld)))
+      {
+	for(unsigned i = 0; i < D; i++)
+	  dest.coord[i] =  source.coord[i] - xd.coord[i] * ld[i] + NGHOSTS;
+	dest.coord[D] = source.coord[D];
+	dest.set_index(dest.coord);
+      }
+    
+    // Convert from Ld to LStr
+    if( std::equal(std::begin(source.L), std::end(source.L), std::begin(Ld)) && std::equal(std::begin(dest.L), std::end(dest.L), std::begin(lStr)))
+      {
+	for(unsigned i = 0; i < D; i++)
+	  dest.coord[i] =  (source.coord[i] -NGHOSTS)/STRIDE;
+	dest.coord[D] = 0;
+	dest.set_index(dest.coord);
+      }
+
+
+    // Convert from ld to LStr
+    if( std::equal(std::begin(source.L), std::end(source.L), std::begin(ld)) && std::equal(std::begin(dest.L), std::end(dest.L), std::begin(lStr)))
+      {
+	for(unsigned i = 0; i < D; i++)
+	  dest.coord[i] =  source.coord[i]/STRIDE; 
+	dest.coord[D] = 0;
+	dest.set_index(dest.coord);
+      }
+    
   };
   
   unsigned domain_number (long index) {
@@ -221,5 +254,36 @@ public:
     return unsigned(n.set_index(LATT.coord).index);
   }
 
+  void print_coordinates(std::size_t pos1, std::size_t pos2)
+  {
+    Coordinates<long, D + 1> Latt1(Ld);
+    Coordinates<long, D + 1> Latt2(Ld);
+    Eigen::Matrix<double, D, 1> r1, r2;
+    Eigen::Map<Eigen::Matrix<std::ptrdiff_t, D, 1>> v1(Latt1.coord), v2(Latt2.coord); // Column vectors
+    Latt1.set_coord(pos1);
+    Latt2.set_coord(pos2);
+    
+    r1 = rOrb.col(Latt1.coord[D]) + rLat * v1.template cast<double>();
+    r2 = rOrb.col(Latt2.coord[D]) + rLat * v2.template cast<double>();
+    std::cout << r1.transpose() << std::endl;
+    std::cout << r2.transpose() << std::endl << std::endl;
+  }
+
+  bool test_ghosts(  Coordinates<std::size_t, D + 1> & Latt) {
+    bool teste = 1;
+  
+    for(int j = 0; j < int(D); j++)
+      if(teste && (Latt.coord[j] < NGHOSTS || Latt.coord[j] >= std::ptrdiff_t(Ld[j] - NGHOSTS)) )
+	teste = 0;                                        // node is in the ghosts!
+      else  if(Latt.coord[j] < 0 || Latt.coord[j] > std::ptrdiff_t(Ld[j] - 1))
+	{
+	  std::cout << "Big Mistake" << std::endl;
+	  std::cout.flush();
+	}
+    return teste;
+  }
+    
+
+  
 };
 

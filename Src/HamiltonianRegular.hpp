@@ -2,8 +2,8 @@ template <typename T, unsigned D>
 struct Periodic_Operator {
   Simulation<T,D> & simul;
   // Non-diagonal component of the operator
-  Eigen::Array<unsigned, Eigen::Dynamic, 1 >         NHoppings;         // Number of elements different from Zero from each orbital
-  Eigen::Array< int, Eigen::Dynamic, Eigen::Dynamic> distance;          // Distance in the basis 
+  Eigen::Array<unsigned,    Eigen::Dynamic, 1 >            NHoppings;         // Number of elements different from Zero from each orbital
+  Eigen::Array<std::ptrdiff_t, Eigen::Dynamic, Eigen::Dynamic> distance;          // Distance in the basis 
   Eigen::Array<   T, Eigen::Dynamic, Eigen::Dynamic> hopping;           // Hopping
   Eigen::Array<   T, Eigen::Dynamic, Eigen::Dynamic> V[D];              // Velocity
   
@@ -15,14 +15,20 @@ struct Periodic_Operator {
       H5::H5File *file = new H5::H5File(sim.name, H5F_ACC_RDONLY);
       get_hdf5<unsigned>(NHoppings.data(), file, (char *) "/Hamiltonian/NHoppings");
 
-      int max  = NHoppings.maxCoeff();
-      distance = Eigen::Matrix< int, Eigen::Dynamic, Eigen::Dynamic>  (max, sim.r.Orb);
-      hopping    = Eigen::Matrix<   T, Eigen::Dynamic, Eigen::Dynamic>(max, sim.r.Orb);
+      std::size_t max  = NHoppings.maxCoeff();
+      distance = Eigen::Matrix< std::ptrdiff_t, Eigen::Dynamic, Eigen::Dynamic>  (max, sim.r.Orb);
+      Eigen::Matrix< int, Eigen::Dynamic, Eigen::Dynamic> dist = Eigen::Matrix< int, Eigen::Dynamic, Eigen::Dynamic>  (max, sim.r.Orb);
+      hopping  = Eigen::Matrix<   T, Eigen::Dynamic, Eigen::Dynamic>(max, sim.r.Orb);
+      
       for(unsigned i = 0; i < D; i++)
         V[i]    = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>(max, sim.r.Orb);
-      
+
       get_hdf5<T>(hopping.data(), file, (char *) "/Hamiltonian/Hoppings");          // Read Hoppings
-      get_hdf5<int>(distance.data(), file, (char *) "/Hamiltonian/d");              // Read the distances
+      get_hdf5<int>(dist.data(), file, (char *) "/Hamiltonian/d");                  // Read the distances
+      
+      for(std::size_t i = 0; i < max; i++ )
+	for(std::size_t j = 0; j <  sim.r.Orb; j++ )      
+	  distance(i,j) = dist(i,j);
       delete file;
       Convert_Build(sim.r);
     }
@@ -35,8 +41,8 @@ struct Periodic_Operator {
     std::fill_n(l, D, 3);
     l[D]  = r.Orb;
     
-    Coordinates<int, D + 1> b3(l), Ld(r.Ld);    
-    Eigen::Map<Eigen::Matrix<int,D, 1>> v(b3.coord);
+    Coordinates<std::ptrdiff_t, D + 1> b3(l), Ld(r.Ld);    
+    Eigen::Map<Eigen::Matrix<std::ptrdiff_t,D, 1>> v(b3.coord);
     
     for(unsigned io = 0; io < r.Orb; io++)
       for(unsigned  i = 0; i < NHoppings(io); i++)

@@ -39,6 +39,9 @@ public:
     get_hdf5<int>(NRandomV.data(),   file, (char *)   "/Calculation/NumRandoms");
     get_hdf5<int>(NMoments.data(),   file, (char *)   "/Calculation/NumMoments");
     get_hdf5<int>(NDisorder.data(),  file, (char *)   "/Calculation/NumDisorder");
+    for(unsigned i = 0; i < NMoments.size(); i++)
+      NMoments.at(i) = 2*(NMoments.at(i)/2);
+
     delete dataspace;
     delete dataset;
     delete file;
@@ -49,7 +52,6 @@ public:
       while(Quantities.at(index_dos) != 1) index_dos++;
       Global.mu = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic > :: Zero(1, NMoments.at(index_dos));
     }
-
 
     omp_set_num_threads(rglobal.n_threads);
 #pragma omp parallel default(shared)
@@ -84,11 +86,14 @@ public:
     typedef typename extract_value_type<T>::value_type value_type;
     Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic> mu = Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic > :: Zero(Global.mu.rows(), Global.mu.cols());
     KPM_Vector<T,D>  phi0(1, *this);
-    KPM_Vector<T,D>  phi(2, *this);
+    KPM_Vector<T,D>  phi (2, *this);
 
     //    phi0.test_boundaries_system();
+
+#pragma omp barrier
     long average = 0;
-    for(int disorder = 0; disorder < NDisorder; disorder++)
+
+    for(int disorder = 0; disorder <  NDisorder; disorder++)
       {
 	h.generate_disorder();
 	for(int randV = 0; randV < NRandomV; randV++)
@@ -109,20 +114,22 @@ public:
 	      }
 	    average++;
 	  }
-      }
 
 #pragma omp critical
-    Global.mu += mu;
+	Global.mu += mu;
 #pragma omp barrier
-
-    
+	
+	
 #pragma omp master
-    {
-      H5::H5File * file = new H5::H5File(name, H5F_ACC_RDWR);
-      write_hdf5(Global.mu, file, "MU");
-      delete file;
-    }
-#pragma omp barrier
+	{
+	  H5::H5File * file = new H5::H5File(name, H5F_ACC_RDWR);
+	  write_hdf5(Global.mu, file, "MU");
+	  delete file;
+	  Global.mu.setZero();
+	}
+#pragma omp barrier	
+      }
+#pragma omp barrier	
   }
 };
 

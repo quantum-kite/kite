@@ -1,12 +1,14 @@
 template <typename T>
 class KPM_Vector <T, 2> : public KPM_VectorBasis <T,2> {
 private:
-  unsigned max[2];
-  unsigned MemIndBeg[2][2];
-  unsigned MemIndEnd[2][2];
-  unsigned block[2][2];
-  LatticeStructure<2u> & r;
-  Hamiltonian<T,2u> & h;
+  std::size_t             max[2];
+  std::size_t MemIndBeg[2][2][2];
+  std::size_t MemIndEnd[2][2][2];
+  std::size_t        block[2][2];
+  std::size_t          stride[2];
+  std::size_t   stride_ghosts[2];
+  LatticeStructure<2u>       & r;
+  Hamiltonian<T,2u>          & h;
 public:
   typedef typename extract_value_type<T>::value_type value_type;
   using KPM_VectorBasis<T,2>::simul;
@@ -19,49 +21,46 @@ public:
   
   KPM_Vector(int mem, Simulation<T,2> & sim) : KPM_VectorBasis<T,2>(mem, sim), r(sim.r), h(sim.h){
     unsigned d;
-    Coordinates <int, 3> z(r.Ld);
+    Coordinates <std::size_t, 3>     z(r.Ld);
     Coordinates <int, 3> x(r.nd), dist(r.nd);
 
-
+    for(std::size_t io = 0; io < r.Orb; io++)
+      {
+	d = 0;
+	max[d] =  r.ld[1];
+	stride[d]  = r.Ld[0];
+	stride_ghosts[d] = 1;
+	MemIndBeg[d][0][io] = z.set({std::size_t(NGHOSTS),               std::size_t(NGHOSTS), io}).index;   // From the index Starting here --- Right
+	MemIndEnd[d][0][io] = z.set({std::size_t(0),                     std::size_t(NGHOSTS), io}).index;   //   To the index Starting here --- Right
+	MemIndBeg[d][1][io] = z.set({std::size_t(r.Ld[0] - 2 * NGHOSTS), std::size_t(NGHOSTS), io}).index;   // From the index Starting here --- Left
+	MemIndEnd[d][1][io] = z.set({std::size_t(r.Ld[0] - NGHOSTS),     std::size_t(NGHOSTS), io}).index;   //   To the index Starting here --- Left
+	
+	d = 1;
+	max[d] =  r.Ld[0];
+	stride[d] = 1;
+	stride_ghosts[d] = r.Ld[0];
+	MemIndBeg[d][0][io] = z.set({std::size_t(0), std::size_t(NGHOSTS),             io}).index;          // From the index Starting here --- Bottom
+	MemIndEnd[d][0][io] = z.set({std::size_t(0), std::size_t(0),                   io}).index;          //   To the index Starting here --- Bottom
+	MemIndBeg[d][1][io] = z.set({std::size_t(0), std::size_t(r.Ld[1] - 2*NGHOSTS), io}).index;          // From the index Starting here --- Top
+	MemIndEnd[d][1][io] = z.set({std::size_t(0), std::size_t(r.Ld[1] - NGHOSTS),   io}).index;          //   To the index Starting here --- Top
+      }
     
-    d = 0;
-    max[d] =  r.ld[1];
-    
-    MemIndBeg[d][0] = z.set({1,1,0}).index;    
-    MemIndEnd[d][0] = z.set({0,1,0}).index;
-
-    MemIndBeg[d][1] = z.set({int(r.Ld[0]) - 2, 1, 0}).index;
-    MemIndEnd[d][1] = z.set({int(r.Ld[0]) - 1, 1, 0}).index; 
-
-    d = 1;
-    max[d] =  r.Ld[0];
-    MemIndBeg[d][0] = z.set({0,1,0}).index;    
-    MemIndEnd[d][0] = z.set({0,0,0}).index;
-    MemIndBeg[d][1] = z.set({0, int(r.Ld[1]) - 2, 0}).index;
-    MemIndEnd[d][1] = z.set({0, int(r.Ld[1]) - 1, 0}).index;
-
-    
-    dist.set({0,0,0});
     for(d = 0 ; d < 2; d++)
       for(unsigned b  = 0 ; b < 2; b++)
 	{
+	  dist.set({0,0,0});
 	  dist.coord[d] = int(b) * 2 - 1;
 	  block[d][b] = x.set_coord( int(r.thread_id) ).add(dist).index;
-	  dist.coord[d] = 0;
 	}
-    
-    for(int d = 0; d < 2; d++ )
-      for(int b = 0; b < 2; b++ )
-        block[d][b] = block[d][b] * 2 * r.Orb * max[d] +   b * r.Orb * max[d]; 
     initiate_vector();
   };
   
   void initiate_vector() {
     index = 0;
-    Coordinates<long, 3> x(r.Ld);
-    for(unsigned io = 0; io < r.Orb; io++)
-      for(unsigned i1 = 1; i1 < r.Ld[1] - 1; i1++)
-	for(unsigned i0 = 1; i0 < r.Ld[0] - 1; i0++)
+    Coordinates<std::size_t, 3> x(r.Ld);
+    for(std::size_t io = 0; io < r.Orb; io++)
+      for(std::size_t i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1++)
+	for(std::size_t i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0++)
 	  v(x.set({i0,i1,io}).index, index) = simul.rnd.init()/value_type(sqrt(r.Sizet));
   };
   
@@ -73,114 +72,146 @@ public:
       MULT = 0 : For the case of the Velocity/Hamiltonian
       MULT = 1 : For the case of the KPM_iteration
     */
-    Coordinates<unsigned,3> x(r.Ld);
-    Coordinates<int,3> z1(r.Ld), z2(r.Ld);
-    const unsigned STRIDE0 = 4;    
-    const unsigned STRIDE1 = 4;
+
+    Coordinates<std::size_t,3> x(r.Ld);
+    std::size_t i0, i1;
     inc_index();
     T * phi0 = v.col(index).data();
     T * phiM1 = v.col((memory + index - 1) % memory ).data();
     T * phiM2 = v.col((memory + index - 2) % memory ).data();
     
-    for(unsigned io = 0; io < r.Orb; io++)
+    for(auto istr = h.hd.cross_mozaic_indexes.begin(); istr != h.hd.cross_mozaic_indexes.end() ; istr++)
       {
-	const unsigned ip = io * x.basis[2] ;
-	const unsigned  dd = (h.Anderson_orb_address[io] - io)*r.Nd;
-	
-	for(unsigned i1 = 1; i1 < r.Ld[1] - 1; i1 += STRIDE1  )
-	  for(unsigned i0 = 1; i0 < r.Ld[0] - 1; i0 += STRIDE0 )
+	i0 = ((*istr) % (r.lStr[0]) ) * STRIDE + NGHOSTS;
+	i1 = ((*istr) / r.lStr[0] ) * STRIDE + NGHOSTS;
+	for(std::size_t io = 0; io < r.Orb; io++)
+	  {
+	    const std::size_t ip = io * x.basis[2] ;
+	    const std::size_t std = x.basis[1];
+	    const std::size_t j0 = ip + i0 + i1 * std;
+	    const std::size_t j1 = j0 + STRIDE * std;
+	    
+	    for(std::size_t j = j0; j < j1; j += std )
+	      for(std::size_t i = j; i < j + STRIDE ; i++)
+		phi0[i] = - value_type(MULT) * phiM2[i];
+	    
+	  }
+      }
+    
+    
+    for( i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1 += STRIDE  )
+      for( i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0 += STRIDE )
+	{
+	  // Periodic component of the Hamiltonian + Anderson disorder
+	  std::size_t istr = (i1 - NGHOSTS) /STRIDE * r.lStr[0] + (i0 - NGHOSTS)/ STRIDE;
+	  
+	  for(std::size_t io = 0; io < r.Orb; io++)
 	    {
-	      const unsigned std = x.basis[1];
-	      const unsigned j0 = ip + i0 + i1 * std;
-	      const unsigned j1 = j0 + STRIDE1 * std;
-	      
-	      for(unsigned j = j0; j < j1; j += std )
-		for(unsigned i = j; i < j + STRIDE0 ; i++)
-		  phi0[i] = - value_type(MULT) * phiM2[i];
-	      
+	      const std::size_t ip = io * x.basis[2] ;
+	      const std::size_t dd = (h.Anderson_orb_address[io] - io)*r.Nd;
+	      const std::size_t std = x.basis[1];
+	      const std::size_t j0 = ip + i0 + i1 * std;
+	      const std::size_t j1 = j0 + STRIDE * std;
+
+	      // Initialize phi0
+	      if(h.hd.cross_mozaic.at(istr))
+		for(std::size_t j = j0; j < j1; j += std )
+		  for(std::size_t i = j; i < j + STRIDE ; i++)
+		    phi0[i] = - value_type(MULT) * phiM2[i];
+
+	      // Anderson disorder
 	      if( h.Anderson_orb_address[io] >= 0)
 		{
-		  for(unsigned j = j0; j < j1; j += std )
-		    for(unsigned i = j; i < j + STRIDE0 ; i++)
+		  for(std::size_t j = j0; j < j1; j += std )
+		    for(std::size_t i = j; i < j + STRIDE ; i++)
 		      phi0[i] += value_type(MULT + 1) * phiM1[i] * h.U_Anderson.at(i - dd);
 		}
 	      else if (h.Anderson_orb_address[io] == - 1)
 		{
-		  for(unsigned j = j0; j < j1; j += std )
-		    for(unsigned i = j; i < j + STRIDE0 ; i++)
+		  for(std::size_t j = j0; j < j1; j += std )
+		    for(std::size_t i = j; i < j + STRIDE ; i++)
 		      phi0[i] += value_type(MULT + 1) * phiM1[i] * h.U_Orbital.at(io);
 		}
-	      
+	      // Hoppings
 	      for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
 		{
-		  const int  d1 = h.hr.distance(ib, io);
-		  const T    t1 =  value_type(MULT + 1) * h.hr.hopping(ib, io);
+		  const std::ptrdiff_t  d1 = h.hr.distance(ib, io);
+		  const T t1 =  value_type(MULT + 1) * h.hr.hopping(ib, io);
 		  
-		  for(unsigned j = j0; j < j1; j += std )
-		    for(unsigned i = j; i < j + STRIDE0 ; i++)
+		  for(std::size_t j = j0; j < j1; j += std )
+		    for(std::size_t i = j; i < j + STRIDE ; i++)
 		      phi0[i] += t1 * phiM1[i + d1];
 		}
 	    }
-      }
-
-
-    // Structural disorder contribution
+	  
+	  // Structural disorder contribution
+	  
+	  
+	  for(std::size_t i = 0; i <  h.hd.position.at(istr).size(); i++)
+	    {
+	      std::size_t ip = h.hd.position.at(istr)[i];
+	      for(unsigned k = 0; k < h.hd.hopping.size(); k++)
+		{
+		  std::size_t k1 = ip + h.hd.node_position[h.hd.element1[k]];
+		  std::size_t k2 = ip + h.hd.node_position[h.hd.element2[k]];
+		  phi0[k1] += value_type(MULT + 1) * h.hd.hopping[k] * phiM1[k2];
+		}
+	      
+	      for(std::size_t k = 0; k < h.hd.U.size(); k++)
+		{
+		  std::size_t k1 = ip + h.hd.node_position[h.hd.element[k]];
+		  phi0[k1] += value_type(MULT + 1) * h.hd.U[k] * phiM1[k1];
+		}
+	    }
+	}
     
-    for(unsigned i = 0; i <  h.hd.position.size(); i++)
-      {
-	unsigned ip = h.hd.position[i];
-	for(unsigned j = 0; j < h.hd.hopping.size(); j++)
-	  {
-	    unsigned i1 = ip + h.hd.node_position[h.hd.element1[j]];
-	    unsigned i2 = ip + h.hd.node_position[h.hd.element2[j]];
-	    phi0[i2] += value_type(MULT + 1) * h.hd.hopping[j] * phiM1[i1];
-	  }
-	
-	for(unsigned j = 0; j < h.hd.U.size(); j++)
-	  {
-	    unsigned i1 = ip + h.hd.node_position[h.hd.element[j]];
-	    phi0[i1] += value_type(MULT + 1) * h.hd.U[j] * phiM1[i1];
-	  }
-      }
-
     //  Broken impurities
-    for(unsigned i = 0; i < h.hd.border_element1.size(); i++)
-      phi0[h.hd.border_element1[i]] += value_type(MULT + 1) * h.hd.border_hopping[i] * phiM1[h.hd.border_element2[i]];
-
-    for(unsigned i = 0; i < h.hd.border_element.size(); i++)
-      phi0[h.hd.border_element[i]] += value_type(MULT + 1) * h.hd.border_U[i] * phiM1[h.hd.border_element[i]];
-	
-    Exchange_Boundaries();    
+    
+    for(std::size_t i = 0; i < h.hd.border_element1.size(); i++)
+      {
+	std::size_t i1 = h.hd.border_element1[i];
+	std::size_t i2 = h.hd.border_element2[i];
+	phi0[i1] += value_type(MULT + 1) * h.hd.border_hopping[i] * phiM1[i2];
+      }
+    
+    
+    for(std::size_t i = 0; i < h.hd.border_element.size(); i++)
+      {
+	std::size_t i1 = h.hd.border_element[i];
+	phi0[i1] += value_type(MULT + 1) * h.hd.border_U[i] * phiM1[i1];
+      }
+    
+    Exchange_Boundaries();
   };
-
+  
   
   void Velocity( T * phi0, T * phiM1, int axis)
   {
     Coordinates<unsigned,3> x(r.Ld);
-    const unsigned STRIDE0 = 4;    
-    const unsigned STRIDE1 = 4;
+    const std::size_t STRIDE0 = 4;    
+    const std::size_t STRIDE1 = 4;
     
-    for(unsigned io = 0; io < r.Orb; io++)
+    for(std::size_t io = 0; io < r.Orb; io++)
       {
-	const unsigned ip = io * x.basis[2];
-	for(unsigned i1 = 1; i1 < r.Ld[1] - 1; i1 += STRIDE1  )
-	  for(unsigned i0 = 1; i0 < r.Ld[0] - 1; i0 += STRIDE0 )
+	const std::size_t ip = io * x.basis[2];
+	for(std::size_t i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1 += STRIDE1  )
+	  for(std::size_t i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0 += STRIDE0 )
 	    {
-	      const unsigned std = x.basis[1];
-	      const unsigned j0 = ip + i0 + i1 * std;
-	      const unsigned j1 = j0 + STRIDE1 * std;
+	      const std::size_t std = x.basis[1];
+	      const std::size_t j0 = ip + i0 + i1 * std;
+	      const std::size_t j1 = j0 + STRIDE1 * std;
 	      
-	      for(unsigned j = j0; j < j1; j += std )
-		for(unsigned i = j; i < j + STRIDE0 ; i++)
+	      for(std::size_t j = j0; j < j1; j += std )
+		for(std::size_t i = j; i < j + STRIDE0 ; i++)
 		  phi0[i] = 0;
 	      
-	      for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
+	      for(std::size_t ib = 0; ib < h.hr.NHoppings(io); ib++)
 		{
-		  const int  d1 = h.hr.distance(ib, io);
+		  const std::ptrdiff_t d1 = h.hr.distance(ib, io);
 		  const T    t1 = h.hr.V[axis](ib, io);
 		  
-		  for(unsigned j = j0; j < j1; j += std )
-		    for(unsigned i = j; i < j + STRIDE0 ; i++)
+		  for(std::size_t j = j0; j < j1; j += std )
+		    for(std::size_t i = j; i < j + STRIDE0 ; i++)
 		      phi0[i] += t1 * phiM1[i + d1];
 		}
 	    }
@@ -189,31 +220,31 @@ public:
   
   T VelocityInternalProduct( T * bra, T * ket, int axis)
   {
-    Coordinates<unsigned,3> x(r.Ld);
-    const unsigned STRIDE0 = 4;    
-    const unsigned STRIDE1 = 4;
+    Coordinates<std::size_t,3> x(r.Ld);
+    const std::size_t STRIDE0 = 4;    
+    const std::size_t STRIDE1 = 4;
     typedef typename extract_value_type<T>::value_type value_type;
     T sum;
     sum *= value_type(0.);
     
-    for(unsigned io = 0; io < r.Orb; io++)
+    for(std::size_t io = 0; io < r.Orb; io++)
       {
-	const unsigned ip = io * x.basis[2];
-	for(unsigned i1 = 1; i1 < r.Ld[1] - 1; i1 += STRIDE1  )
-	  for(unsigned i0 = 1; i0 < r.Ld[0] - 1; i0 += STRIDE0 )
+	const std::size_t ip = io * x.basis[2];
+	for(std::size_t i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1 += STRIDE1  )
+	  for(std::size_t i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0 += STRIDE0 )
 	    {
-	      const unsigned std = x.basis[1];
-	      const unsigned j0 = ip + i0 + i1 * std;
-	      const unsigned j1 = j0 + STRIDE1 * std;
+	      const std::size_t std = x.basis[1];
+	      const std::size_t j0 = ip + i0 + i1 * std;
+	      const std::size_t j1 = j0 + STRIDE1 * std;
 	      
 	      
-	      for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
+	      for(std::size_t ib = 0; ib < h.hr.NHoppings(io); ib++)
 		{
-		  const int  d1 = h.hr.distance(ib, io);
+		  const  std::ptrdiff_t  d1 = h.hr.distance(ib, io);
 		  const T    t1 = h.hr.V[axis](ib, io);
 		  
-		  for(unsigned j = j0; j < j1; j += std )
-		    for(unsigned i = j; i < j + STRIDE0 ; i++)
+		  for(std::size_t j = j0; j < j1; j += std )
+		    for(std::size_t i = j; i < j + STRIDE0 ; i++)
 		      sum += std::conj(bra[i]) * t1 * ket[i + d1];
 		}
 	    }
@@ -231,22 +262,89 @@ public:
     T * phiM1 = v.col((memory + index - 1) % memory ).data();
     T * phiM2 = v.col((memory + index - 2) % memory ).data();
     
-    for(int io = 0; io < int(r.Orb); io++)
-      for(int iy = 1; iy < int(r.Ld[1]) - 1; iy++)
-	for(int ix = 1; ix < int(r.Ld[0]) - 1; ix++)
+    for(std::size_t io = 0; io < int(r.Orb); io++)
+      for(std::size_t iy = NGHOSTS; iy < int(r.Ld[1]) - NGHOSTS; iy++)
+	for(std::size_t ix = NGHOSTS; ix < int(r.Ld[0]) - NGHOSTS; ix++)
 	  {
-	    int i = ix + iy * r.Ld[0] + io * r.Nd;  
+	    std::size_t i = ix + iy * r.Ld[0] + io * r.Nd;  
 	    phi0[i] = - value_type(MULT) * phiM2[i];
-	    for(unsigned ib = 0; ib < h.NHoppings(io); ib++)
+	    for(std::size_t ib = 0; ib < h.NHoppings(io); ib++)
 	      phi0[i] +=  value_type(MULT + 1) * h.t(ib, io) * phiM1[i + h.d(ib, io) ];
 	  }
-
+    
     
     Exchange_Boundaries();    
   };
   
-    
+
   void Exchange_Boundaries() {
+    /*
+      I have four boundaries to exchange with the other threads.
+      First I will copy the lines along the a[1] direction to a consecutive shared vector
+    */
+#pragma omp barrier    
+    Coordinates<std::size_t,3u> x(r.Ld), z(r.Lt);
+    T  *phi = v.col(index).data();
+    
+    
+    for(unsigned d = 0; d < 2; d++)
+      {
+	
+	std::size_t BSize = r.Orb * max[d] * NGHOSTS;
+	T * ghosts_left = & simul.ghosts[0];
+	T * ghosts_right = & simul.ghosts[BSize];
+    
+	for(std::size_t io = 0; io < r.Orb; io++)
+	  {
+	    std::size_t il = MemIndBeg[d][0][io];
+	    std::size_t ir = MemIndBeg[d][1][io];
+	    
+	    for(std::size_t i = 0; i < max[d]; i++)
+	      {
+		for(unsigned ig = 0; ig < NGHOSTS; ig++)
+		  {
+		    ghosts_left [i + (ig + NGHOSTS*io) * max[d] ] = phi[il + ig*stride_ghosts[d]];
+		    ghosts_right[i + (ig + NGHOSTS*io) * max[d] ] = phi[ir + ig*stride_ghosts[d]];
+		  }
+		
+		il += stride[d];
+		ir += stride[d];
+	      }
+	  }
+	
+	// Copy the boundaries to the shared memory
+	std::copy( ghosts_left, ghosts_left + 2 * BSize, simul.Global.ghosts.begin() + 2 * BSize * r.thread_id );	  
+#pragma omp barrier
+	auto neigh_left = simul.Global.ghosts.begin() + 2 * block[d][0] * BSize;
+	auto neigh_right  = simul.Global.ghosts.begin() + 2 * block[d][1] * BSize;
+	std::copy(neigh_right,         neigh_right + BSize , ghosts_right );     // From the left to the right
+	std::copy(neigh_left + BSize,  neigh_left + 2*BSize, ghosts_left  )  ;   // From the right to the left
+
+#pragma omp barrier	
+	for(std::size_t io = 0; io < r.Orb; io++)
+	  {
+	    std::size_t il = MemIndEnd[d][0][io];
+	    std::size_t ir = MemIndEnd[d][1][io];
+	    
+	    for(std::size_t i = 0; i < max[d]; i++)
+	      {
+		for(int ig = 0; ig < NGHOSTS; ig++)
+		  {
+		    phi[il + ig*stride_ghosts[d]] = ghosts_left [i + (ig + NGHOSTS*io) * max[d]];
+		    phi[ir + ig*stride_ghosts[d]] = ghosts_right[i + (ig + NGHOSTS*io) * max[d]];
+		  }
+		
+		il += stride[d];
+		ir += stride[d];
+	      }
+	  }
+      }
+  }
+  
+
+  /*  
+  void Exchange_Boundaries() {
+
     const unsigned D = 2u;
     //
     // Exchange the Borders of phi.v.col(index)
@@ -257,24 +355,25 @@ public:
     
     for(unsigned d = 0; d <  D; d++)  // We will transfer the orientations perpendicular  to d
       {
-	unsigned int BSize = r.Orb * max[d];
+	unsigned int BSize = r.Orb * max[d] * NGHOSTS;
 	unsigned d1 = (d + 1) % D;
 	const int st = x.basis[d1]; 
 	
 	for(unsigned io = 0; io < r.Orb; io++)
 	  for(unsigned b = 0; b < 2u; b++)
 	    {
-	      const unsigned bi = (io + b * r.Orb) * max[d];
+	      const unsigned bi = (io + b * r.Orb) * max[d] * NGHOSTS;
 	      unsigned I        = MemIndBeg[d][b] + io * x.basis[D] - st;
-
 	      for(unsigned i = 0; i < max[d]; i++ )
 		simul.ghosts.at(bi + i) = phi1[ I += st ];
 	    }
+
+
 	
 	// Copy to the  shared memory
 	std::copy( simul.ghosts.begin(), simul.ghosts.begin() + 2 * BSize, simul.Global.ghosts.begin() + 2 * BSize * r.thread_id );
 
-
+	
 #pragma omp barrier
 	
 	for(unsigned b = 0; b < 2; b++)
@@ -291,20 +390,21 @@ public:
 		phi1[ I += st ] =  simul.ghosts.at(bi + i);
 	    }
       } 
+
   };
-  
+    */  
   void test_boundaries_system() {
 
     /*
       This  function tests if the boudaries exchange are well implemented 
     */
     
-    Coordinates<long, 3> z(r.Lt);
-    Coordinates<long, 3> x(r.Ld);
+    Coordinates<std::size_t, 3> z(r.Lt);
+    Coordinates<std::size_t, 3> x(r.Ld);
     
-    for(long  io = 0; io < (long) r.Ld[2]; io++)
-      for(long i1 = 1; i1 < (long) r.Ld[1] - 1 ; i1++)
-	for(long i0 = 1; i0 < (long) r.Ld[0] - 1 ; i0++)
+    for(std::size_t  io = 0; io < (std::size_t) r.Ld[2]; io++)
+      for(std::size_t i1 = NGHOSTS; i1 < (std::size_t) r.Ld[1] - NGHOSTS ; i1++)
+	for(std::size_t i0 = NGHOSTS; i0 < (std::size_t) r.Ld[0] - NGHOSTS ; i0++)
 	  {
 	    r.convertCoordinates(z, x.set({i0,i1,io}) );
 	    v(x.set({i0,i1,io}).index, 0) = aux_wr(z.index);
@@ -313,17 +413,28 @@ public:
     Exchange_Boundaries();
 
 #pragma omp critical
-    for(long  io = 0; io < (long) r.Ld[2]; io++)
-      for(long i1 = 0; i1 < (long) r.Ld[1]; i1++)
-	{
-	  for(long i0 = 0; i0 < (long) r.Ld[0]; i0++)
-	    {
-	      r.convertCoordinates(z, x.set({i0,i1,io}) );
-	      x.set({i0,i1,io});
-	      T val = aux_wr(z.index); 
-	      if( aux_test(v(x.index , 0), val ) )
-		std::cout << "Problems---->" << v(x.index , 0) << " " << val << std::endl;
-	    };
-	}
+    {
+
+      for(std::size_t  io = 0; io < (std::size_t) r.Ld[2]; io++)
+	for(std::size_t i1 = 0; i1 < (std::size_t) r.Ld[1] ; i1++)
+	  {
+	    for(std::size_t i0 = 0; i0 < (std::size_t) r.Ld[0]; i0++)
+	      {
+		r.convertCoordinates(z, x.set({i0,i1,io}) );
+		T val = aux_wr(z.index); 
+		if( aux_test(v(x.index , 0), val ) )
+		  {
+		    // std::cout << "Problems---->" << v(x.index , 0) << " " << val << std::endl;
+		    std::cout << "\t wrong " << std::real(v(x.index , 0)) << " " << z.index << " " << x.index << "\t\t";
+		    x.print();
+		    
+		  }
+	      };
+	    std::cout.flush();
+	  }
+      std::cout << "out of the test " << r.thread_id << std::endl;
+      std::cout.flush();
+    }
+
   };
 };

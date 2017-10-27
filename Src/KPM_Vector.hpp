@@ -20,14 +20,14 @@ public:
 
   // Define aux_wr for complex T 
   template <typename U = T>
-  typename std::enable_if<is_tt<std::complex, U>::value, U>::type aux_wr(unsigned long x ) {
+  typename std::enable_if<is_tt<std::complex, U>::value, U>::type aux_wr(std::size_t x ) {
     typedef typename extract_value_type<U>::value_type value_type;
     return U(value_type(x), value_type(2*x));
   };
 
   // Define aux_wr for non complex T 
   template <typename U = T>
-  typename std::enable_if<!is_tt<std::complex, U>::value, U>::type aux_wr(unsigned long x ) {
+  typename std::enable_if<!is_tt<std::complex, U>::value, U>::type aux_wr(std::size_t x) {
     return U(x);
   };
   

@@ -18,10 +18,10 @@ CLIBS = -L/usr/local/hdf5/lib/ -L/usr/lib/x86_64-linux-gnu/hdf5/serial
 CLIBS += -lhdf5_hl_cpp -lhdf5_cpp -lhdf5_hl -lhdf5  
 VPATH = .
 OBJS = *.o
-
+stride=4
 
 all:    clean
-	cd Src; $(CC) $(CFLAGS) $(CINCLUDE) -c *.cpp  
+	cd Src; $(CC) $(CFLAGS) $(CINCLUDE) -DSTRIDE=$(stride) -c *.cpp  
 	@echo "linking..."
 	cd Src; $(CC) $(OBJS) $(CLIBS) $(CFLAGS) -o ../pp
 	rm -f Src/*.o
