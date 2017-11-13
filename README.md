@@ -1,4 +1,5 @@
-Lattice building script is used for making and exporting the lattice.
+Lattice building script is used for making and exporting the lattice. Recent changes, and the features implemented in
+the scripts that are used for making and exporting different system from Pybinding to the C++ code are shown here.
 # Building Lattice
   the building is defined in 3 scripts,
 
