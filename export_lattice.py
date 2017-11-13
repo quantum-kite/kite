@@ -4,27 +4,44 @@ import h5py as hp
 from scipy.sparse import coo_matrix
 
 
-# Class that introduces Bond Disorder into the initially built lattice.
-# The exported dataset BondDisorder has the following groups:
+# Class that introduces Structural Disorder into the initially built lattice.
+# The exported dataset StructuralDisorder has the following groups:
 # - Concentration: concentration of disorder,
-# - NumDisorder: number of unique bond changes,
-# - DisorderHopping: values of the new hopping, with 2 columns and NumDisorder rows where the hoppings in different
-# columns are conjugated values
-# - OrbitalFrom matrix of orbital from which the hopping is starting, size is the same the size of DisorderHopping
-# matrix. Different columns are for both the orbital id of the initial and conjugated hopping.
-# - OrbitalTo matrix of orbital to which the hopping goes to, size is the same the size of DisorderHopping
-# matrix. Different columns are for both the orbital id of the initial and conjugated hopping.
-class BondDisorder:
+# - NumBondDisorder: number of bond changes,
+# - NumOnsiteDisorder: number of onsite energy,
+# The disorder is represented through nodes, where each node represents and maps a single orbital.
+# - NumNodes: total number of orbitals included in the disorded,
+# - NodePosition: orbital associated with the node,
+# - NodeFrom, and NodeTo: bond from and to with 2 columns and NumBondDisorder rows, where the second column is complex
+# conjugated hopping,
+# - RH0: values of the new hopping, with 2 columns and NumBondDisorder rows where the hoppings in different
+# columns are conjugated values,
+# - NodeOnsite: array of nodes that have onsite disorder,
+# - U0: value of the onsite disorder.
+
+class StructuralDisorder:
     def __init__(self, lattice, concentration):
 
         self._concentration = concentration
         # number of atoms in the disordered structure
-        self._num_disorder = 0
+        self._num_bond_disorder_per_type = []
+        self._num_onsite_disorder_per_type = []
         # affected orbitals
         self._orbital_from = []
         self._orbital_to = []
-        self._disorder_hopping = []
+        self._orbital_onsite = []
 
+        self._idx_node = 0
+        self._disorder_hopping = []
+        self._disorder_onsite = []
+
+        self._nodes_from = []
+        self._nodes_to = []
+        self._nodes_onsite = []
+
+        self._num_nodes = 0
+        self._nodes_map = dict()
+        self._node_orbital = []
         num_orbitals = np.zeros(lattice.nsub, dtype=np.uint64)
         for name, sub in lattice.sublattices.items():
             # num of orbitals at each sublattice is equal to size of onsite energy
@@ -35,13 +52,46 @@ class BondDisorder:
         self._num_orbitals_before = np.cumsum(np.asarray(num_orbitals)) - num_orbitals
         self._lattice = lattice
 
-    def add_bond_disorder(self, *disorder):
+    def add_structural_disorder(self, *disorder):
+        self._nodes_map = dict()
 
+        num_bond_disorder_per_type = 0
+        num_onsite_disorder_per_type = 0
         for dis in disorder:
-            self._num_disorder += 1
-            self.add_local_bond_disorder(*dis)
+            if len(dis) == 5:
+                num_bond_disorder_per_type += 1
+                self.add_local_bond_disorder(*dis)
+            else:
+                if len(dis) == 3:
+                    num_onsite_disorder_per_type += 1
+                    self.add_local_onsite_disorder(*dis)
+                else:
+                    raise SystemExit('Disorder should be added in a form of bond disorder:'
+                                     '\n([rel. unit cell from], sublattice_from, [rel. unit cell to], sublattice_to, '
+                                     'value),'
+                                     '\n or in a form of disorder onsite energy:'
+                                     '\n ([rel. unit cell], sublattice_name, '
+                                     'onsite energy)')
 
-    def add_local_bond_disorder(self, relative_index, from_sub, to_sub, hoppings):
+        self._num_bond_disorder_per_type.append(num_bond_disorder_per_type)
+        self._num_onsite_disorder_per_type.append(num_onsite_disorder_per_type)
+        sorted_node_orb = sorted(self._nodes_map, key=lambda x: self._nodes_map[x])
+        sorted_nodes = [self._nodes_map[x] for x in sorted_node_orb]
+
+        sorted_dict = dict(zip(sorted_node_orb, sorted_nodes))
+        self._nodes_map = sorted_dict
+        self._node_orbital = sorted_node_orb
+
+    def map_the_orbital(self, orb, nodes_map):
+        idx_node = len(nodes_map)
+        if not (orb in nodes_map):
+            nodes_map[orb] = idx_node
+            idx_node += 1
+        self._nodes_map = nodes_map
+
+        return idx_node
+
+    def add_local_bond_disorder(self, relative_index_from, from_sub, relative_index_to, to_sub, hoppings):
 
         orbital_from = []
         orbital_to = []
@@ -64,33 +114,65 @@ class BondDisorder:
         lattice_sub_to = sublattices[indx_to]
 
         from_sub_id = lattice_sub_from.alias_id
-        # size_orb_from = self._num_orbitals[from_sub_id]
         to_sub_id = lattice_sub_to.alias_id
-        # size_orb_to = self._num_orbitals[to_sub_id]
+
+        nodes_map = self._nodes_map
+
+        nodes_from = []
+        nodes_to = []
 
         h = np.nditer(hoppings, flags=['multi_index'])
         while not h.finished:
-            relative_move = np.dot(np.asarray(relative_index) + 1,
-                                   3 ** np.linspace(0, space_size - 1, space_size, dtype=np.int32))
+            relative_move_from = np.dot(np.asarray(relative_index_from) + 1,
+                                        3 ** np.linspace(0, space_size - 1, space_size, dtype=np.int32))
+            relative_move_to = np.dot(np.asarray(relative_index_to) + 1,
+                                      3 ** np.linspace(0, space_size - 1, space_size, dtype=np.int32))
 
             if isinstance(hoppings, np.ndarray):
-                orbital_from.append(self._num_orbitals_before[from_sub_id] + h.multi_index[0])
-                orbital_to.append(relative_move +
-                                  (self._num_orbitals_before[to_sub_id] + h.multi_index[1]) * 3 ** space_size)
+                orb_from = int(relative_move_from +
+                               (self._num_orbitals_before[from_sub_id] + h.multi_index[0]) * 3 ** space_size)
+                orb_to = int(relative_move_to +
+                             (self._num_orbitals_before[to_sub_id] + h.multi_index[1]) * 3 ** space_size)
+
+                self.map_the_orbital(orb_from, nodes_map)
+                self.map_the_orbital(orb_to, nodes_map)
+
+                orbital_from.append(orb_from)
+                orbital_to.append(orb_to)
+
+                nodes_from.append(nodes_map[orb_from])
+                nodes_to.append(nodes_map[orb_to])
+
                 # conjugate
-                orbital_from.append(self._num_orbitals_before[to_sub_id] + h.multi_index[0])
-                orbital_to.append(relative_move +
-                                  (self._num_orbitals_before[from_sub_id] + h.multi_index[1]) * 3 ** space_size)
+                orbital_from.append(orb_to)
+                orbital_to.append(orb_from)
+
+                nodes_from.append(nodes_map[orb_to])
+                nodes_to.append(nodes_map[orb_from])
+
                 orbital_hop.append(h[0])
                 orbital_hop.append(np.conj(h[0]))
+
             else:
-                orbital_from.append(self._num_orbitals_before[from_sub_id])
-                orbital_to.append(
-                    relative_move + (self._num_orbitals_before[to_sub_id]) * 3 ** space_size)
+                orb_from = int(relative_move_from + self._num_orbitals_before[from_sub_id] * 3 ** space_size)
+                orb_to = int(relative_move_to + self._num_orbitals_before[to_sub_id] * 3 ** space_size)
+
+                self.map_the_orbital(orb_from, nodes_map)
+                self.map_the_orbital(orb_to, nodes_map)
+
+                orbital_from.append(orb_from)
+                orbital_to.append(orb_to)
+
+                nodes_from.append(nodes_map[orb_from])
+                nodes_to.append(nodes_map[orb_to])
+
                 # conjugate
-                orbital_from.append(self._num_orbitals_before[to_sub_id])
-                orbital_to.append(
-                    relative_move + (self._num_orbitals_before[from_sub_id]) * 3 ** space_size)
+                orbital_from.append(orb_to)
+                orbital_to.append(orb_from)
+
+                nodes_from.append(nodes_map[orb_to])
+                nodes_to.append(nodes_map[orb_from])
+
                 orbital_hop.append(h[0])
                 orbital_hop.append((h[0].conjugate()))
 
@@ -98,7 +180,68 @@ class BondDisorder:
 
         self._orbital_from.append(orbital_from)
         self._orbital_to.append(orbital_to)
+
         self._disorder_hopping.append(orbital_hop)
+
+        self._nodes_from.append(nodes_from)
+        self._nodes_to.append(nodes_to)
+
+        if len(nodes_map) > self._num_nodes:
+            self._num_nodes = len(nodes_map)
+
+    def add_local_onsite_disorder(self, relative_index, sub, value):
+        orbital_onsite = []
+        orbital_onsite_en = []
+
+        nodes_map = self._nodes_map
+
+        vectors = np.asarray(self._lattice.vectors)
+        space_size = vectors.shape[0]
+
+        names, sublattices = zip(*self._lattice.sublattices.items())
+
+        if sub not in names:
+            raise SystemExit('Desired initial sublattice doesnt exist in the chosen lattice! ')
+
+        indx_sub = names.index(sub)
+        lattice_sub = sublattices[indx_sub]
+
+        sub_id = lattice_sub.alias_id
+
+        nodes_onsite = []
+
+        h = np.nditer(value, flags=['multi_index'])
+        while not h.finished:
+            relative_move = np.dot(np.asarray(relative_index) + 1,
+                                   3 ** np.linspace(0, space_size - 1, space_size, dtype=np.int32))
+
+            if isinstance(value, np.ndarray):
+                orb = int(relative_move + (self._num_orbitals_before[sub_id] + h.multi_index[0]) * 3 ** space_size)
+
+                self.map_the_orbital(orb, nodes_map)
+
+                orbital_onsite_en.append(h[0])
+
+                nodes_onsite.append(nodes_map[orb])
+                orbital_onsite.append(orb)
+            else:
+                orb = int(relative_move + self._num_orbitals_before[sub_id] * 3 ** space_size)
+
+                self.map_the_orbital(orb, nodes_map)
+
+                orbital_onsite_en.append(h[0])
+                nodes_onsite.append(nodes_map[orb])
+                orbital_onsite.append(orb)
+            h.iternext()
+
+        self._orbital_onsite.append(orbital_onsite)
+
+        self._disorder_onsite.append(orbital_onsite_en)
+
+        self._nodes_onsite.append(nodes_onsite)
+
+        if len(nodes_map) > self._num_nodes:
+            self._num_nodes = len(nodes_map)
 
 
 # Class that introduces Disorder into the initially built lattice.
@@ -130,15 +273,15 @@ class Disorder:
         self._lattice = lattice
 
     # class method that introduces the disorder to the lattice
-    def add_disorder(self, sublattice, type, mean_value, standard_deviation):
-        if isinstance(type, list):
+    def add_disorder(self, sublattice, dis_type, mean_value, standard_deviation):
+        if isinstance(dis_type, list):
             for indx, name in enumerate(sublattice):
-                self.add_local_disorder(name, type[indx], mean_value[indx], standard_deviation[indx])
+                self.add_local_disorder(name, dis_type[indx], mean_value[indx], standard_deviation[indx])
         else:
             for name in sublattice:
-                self.add_local_disorder(name, [type], [mean_value], [standard_deviation])
+                self.add_local_disorder(name, [dis_type], [mean_value], [standard_deviation])
 
-    def add_local_disorder(self, sublattice_name, type, mean_value, standard_deviation):
+    def add_local_disorder(self, sublattice_name, dis_type, mean_value, standard_deviation):
 
         vectors = np.asarray(self._lattice.vectors)
         space_size = vectors.shape[0]
@@ -176,10 +319,10 @@ class Disorder:
                 orbital_to.append(relative_move + hopping['to_id'] * 3 ** space_size)
             orbital_dis_mean.append(it)
             orbital_dis_stdv.append(standard_deviation[index])
-            orbital_dis_type.append(type[index])
-            if type[index] in dis_number:
-                orbital_dis_type_id.append(dis_number[type[index]])
-                if type[index] == 'Deterministic' or type[index] == 'deterministic':
+            orbital_dis_type.append(dis_type[index])
+            if dis_type[index] in dis_number:
+                orbital_dis_type_id.append(dis_number[dis_type[index]])
+                if dis_type[index] == 'Deterministic' or dis_type[index] == 'deterministic':
                     if standard_deviation[index] != 0:
                         raise SystemExit(
                             'Standard deviation of deterministic disorder must be 0.')
@@ -187,8 +330,8 @@ class Disorder:
                 raise SystemExit(
                     'Disorder not present! Try between Gaussian, Deterministic, and Uniform case insensitive ')
 
-        if not (all(np.asarray(i).shape == size_orb for i in [type, mean_value, standard_deviation])):
-            print('Shape of disorder', len(type), len(mean_value), len(standard_deviation),
+        if not (all(np.asarray(i).shape == size_orb for i in [dis_type, mean_value, standard_deviation])):
+            print('Shape of disorder', len(dis_type), len(mean_value), len(standard_deviation),
                   'is different than the number of orbitals at sublattice ', sublattice_name, 'which is', size_orb,
                   '\n')
             raise SystemExit('All parameters should have the same length! ')
@@ -340,7 +483,7 @@ class Configuration:
 def export_lattice(lattice, config, calculation, modification, filename, **kwargs):
     # get the lattice vectors and set the size of space (1D, 2D or 3D) as the total number of vectors.
     disorder = kwargs.get('disorder', 0)
-    disorder_bonds = kwargs.get('disorder_bonds', 0)
+    disorded_structural = kwargs.get('disorded_structural', 0)
 
     vectors = np.asarray(lattice.vectors)
     space_size = vectors.shape[0]
@@ -498,20 +641,52 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
         grp_dis.create_dataset('OnsiteDisorderMeanValue', data=disorder._mean, dtype=np.float64)
         grp_dis.create_dataset('OnsiteDisorderMeanStdv', data=disorder._stdv, dtype=np.float64)
 
-    if disorder_bonds != 0:
-        grp_dis = grp.create_group('BondDisorder')
-        grp_dis.create_dataset('Concentration', data=np.asarray(disorder_bonds._concentration), dtype=np.float64)
-        grp_dis.create_dataset('NumDisorder', data=disorder_bonds._num_disorder, dtype=np.int32)
-        grp_dis.create_dataset('OrbitalFrom', data=np.asarray(disorder_bonds._orbital_from), dtype=np.int32)
-        grp_dis.create_dataset('OrbitalTo', data=np.asarray(disorder_bonds._orbital_to), dtype=np.int32)
-
-        disorder_hopping = disorder_bonds._disorder_hopping
-        if complx:
-            # hoppings
-            grp_dis.create_dataset('DisorderHopping', data=np.asarray(disorder_hopping).astype(config.type))
+    if disorded_structural != 0:
+        grp_dis = grp.create_group('StructuralDisorder')
+        if isinstance(disorded_structural, list):
+            num_dis = len(disorded_structural)
         else:
-            # hoppings
-            grp_dis.create_dataset('DisorderHopping', data=np.asarray(disorder_hopping).real.astype(config.type))
+            num_dis = 1
+        # Number of different disorder realisations
+        grp_dis.create_dataset('NumDisTypes', data=num_dis)
+
+        for idx in range(num_dis):
+            disorded_struct = disorded_structural[idx]
+            # Type idx
+            grp_dis_type = grp_dis.create_group('Type{val}'.format(val=idx))
+            # Concentration of this type
+            grp_dis_type.create_dataset('Concentration', data=np.asarray(disorded_struct._concentration),
+                                        dtype=np.float64)
+            # Number of bond disorder
+            grp_dis_type.create_dataset('NumBondDisorder', data=disorded_struct._num_bond_disorder_per_type,
+                                        dtype=np.int32)
+            # Number of onsite disorder
+            grp_dis_type.create_dataset('NumOnsiteDisorder', data=disorded_struct._num_onsite_disorder_per_type,
+                                        dtype=np.int32)
+
+            # Node of the bond disorder from
+            grp_dis_type.create_dataset('NodeFrom', data=np.asarray(disorded_struct._nodes_from), dtype=np.int32)
+            # Node of the bond disorder to
+            grp_dis_type.create_dataset('NodeTo', data=np.asarray(disorded_struct._nodes_to), dtype=np.int32)
+            # Node of the onsite disorder
+            grp_dis_type.create_dataset('NodeOnsite', data=disorded_struct._nodes_onsite, dtype=np.int32)
+
+            # Num nodes
+            grp_dis_type.create_dataset('NumNodes', data=disorded_struct._num_nodes, dtype=np.int32)
+            # Orbital mapped for this node
+            grp_dis_type.create_dataset('NodePosition', data=np.asarray(disorded_struct._node_orbital), dtype=np.int32)
+
+            # Onsite disorder energy
+            grp_dis_type.create_dataset('U0',
+                                        data=np.asarray(disorded_struct._disorder_onsite).real.astype(config.type))
+            # Bond disorder hopping
+            disorder_hopping = disorded_struct._disorder_hopping
+            if complx:
+                # hoppings
+                grp_dis_type.create_dataset('RH0', data=np.asarray(disorder_hopping).astype(config.type))
+            else:
+                # hoppings
+                grp_dis_type.create_dataset('RH0', data=np.asarray(disorder_hopping).real.astype(config.type))
 
     # Calculation function defined with num_moments, num_random vectors, and num_disorder realisations
     grpc = f.create_group('Calculation')

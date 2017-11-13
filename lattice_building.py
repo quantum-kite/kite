@@ -45,20 +45,35 @@ def graphene_initial(onsite=(0, 0)):
     disorder.add_disorder('A', 'Deterministic', 0.0, 0)
     disorder.add_disorder('B', 'Deterministic', 0.0, 0)
 
-    # Add bond disorder
-    # Same procedure as adding the hopping + concentration
-    disorder_bonds = ex.BondDisorder(lat, concentration=0.05)
-    disorder_bonds.add_bond_disorder(
-        ([0, 0], 'A', 'B', 2),
-        ([-1, 0], 'A', 'B', 4),
-        ([-1, 1], 'B', 'A', 5),
+    # Add bond disorder as an object of a class StructuralDisorder. In this manner we can add onsite and bond defects
+    # with a specific concentration, which will be added to the simulated system. The procedure for adding is same
+    # as adding the hopping, with the difference that the bond disorded is not bounded to one site in the [0, 0]
+    # unit cell.
+    struc_disorder_one = ex.StructuralDisorder(lat, concentration=0.05)
+    struc_disorder_one.add_structural_disorder(
+        # add bond disorder in the form [from unit cell], 'sublattice_from', [to_unit_cell], 'sublattice_to', value:
+        ([+0, +0], 'A', [+1, +1], 'B', 2),
+        ([-1, +0], 'A', [+1, +1], 'B', 4),
+        ([-1, +1], 'B', [+1, +2], 'A', 5),
+        # in this way we can add onsite disorder in the form [unit cell], 'sublattice', value
+        ([+0, +0], 'B', 3)
+    )
+    # It is possible to add multiple different disorder type which should be forwarded to the export_lattice function
+    # as a list.
+    struc_disorder_two = ex.StructuralDisorder(lat, concentration=0.2)
+    struc_disorder_two.add_structural_disorder(
+        ([+0, +0], 'A', [+2, +1], 'B', 21),
+        ([-1, +0], 'A', [+1, +1], 'B', 8),
+        ([-1, +1], 'B', [-2, +2], 'A', -5),
+
+        ([+0, +0], 'B', 2)
     )
 
     # if there is disorder it should be returned separately from the lattice
-    return lat, disorder, disorder_bonds
+    return lat, disorder, [struc_disorder_one, struc_disorder_two]
 
 
-lattice, disorder, disorder_bonds = graphene_initial()
+lattice, disorder, disorded_structural = graphene_initial()
 # number of decomposition parts in each direction of matrix.
 
 nx = ny = 4
@@ -94,7 +109,7 @@ modification = ex.Modification(magnetic_field=True)
 # export the lattice from the lattice object, config and calculation object and the name of the file
 # the disorder is optional. If there is disorder in the lattice for now it should be given separately
 ex.export_lattice(lattice, configuration, calculation, modification, 'test_f.h5',
-                  disorder=disorder, disorder_bonds=disorder_bonds)
+                  disorder=disorder, disorded_structural=disorded_structural)
 
 # plotting the lattice
 lattice.plot()
