@@ -24,7 +24,12 @@ Lattice building script is used for making and exporting the lattice.
 The pybinding format is successfully convert to the format of the C++ code.
 
 ### ~~Add disorder:~~
- - Disorder is added to the plain lattice. (Previously this point was called onsite potential, it's the same.)
+ - Disorder is added to the plain lattice, defined with respect to the structure.
+ (Previously this point was called onsite potential, it's the same.)
+
+### ~~Add structural disorder:~~
+ - Structural disorder is added to the plain lattice, affects only a certain area of the structure and can be defined as
+ bond disorder or onsite disorder.
 
 ### ~~Magnetic field On/Off:~~
  - Add magnetic field support. For now only on and off due to PBC.
