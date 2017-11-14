@@ -49,12 +49,22 @@ def graphene_initial(onsite=(0, 0)):
     # with a specific concentration, which will be added to the simulated system. The procedure for adding is same
     # as adding the hopping, with the difference that the bond disorded is not bounded to one site in the [0, 0]
     # unit cell.
+    node0 = [[+0, +0], 'A']
+    node1 = [[+0, +0], 'B']
+    node2 = [[+1, +0], 'A']
+    node3 = [[+0, +1], 'B']
+    node4 = [[+0, +1], 'A']
+    node5 = [[-1, +1], 'B']
+
     struc_disorder_one = ex.StructuralDisorder(lat, concentration=0.05)
     struc_disorder_one.add_structural_disorder(
         # add bond disorder in the form [from unit cell], 'sublattice_from', [to_unit_cell], 'sublattice_to', value:
-        ([+0, +0], 'A', [+1, +1], 'B', 2),
-        ([-1, +0], 'A', [+1, +1], 'B', 4),
-        ([-1, +1], 'B', [+1, +2], 'A', 5),
+        (*node0, *node1, 1),
+        (*node1, *node2, 1),
+        (*node2, *node3, 1),
+        (*node3, *node4, 1),
+        (*node4, *node5, 1),
+        (*node5, *node0, 1),
         # in this way we can add onsite disorder in the form [unit cell], 'sublattice', value
         ([+0, +0], 'B', 3)
     )

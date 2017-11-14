@@ -14,7 +14,7 @@ from scipy.sparse import coo_matrix
 # - NodePosition: orbital associated with the node,
 # - NodeFrom, and NodeTo: bond from and to with 2 columns and NumBondDisorder rows, where the second column is complex
 # conjugated hopping,
-# - RH0: values of the new hopping, with 2 columns and NumBondDisorder rows where the hoppings in different
+# - Hopping: values of the new hopping, with 2 columns and NumBondDisorder rows where the hoppings in different
 # columns are conjugated values,
 # - NodeOnsite: array of nodes that have onsite disorder,
 # - U0: value of the onsite disorder.
@@ -23,10 +23,9 @@ class StructuralDisorder:
     def __init__(self, lattice, concentration):
 
         self._concentration = concentration
-        # number of atoms in the disordered structure
         self._num_bond_disorder_per_type = []
         self._num_onsite_disorder_per_type = []
-        # affected orbitals
+
         self._orbital_from = []
         self._orbital_to = []
         self._orbital_onsite = []
@@ -498,7 +497,7 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
     # get number of orbitals at each atom.
     num_orbitals = np.zeros(lattice.nsub, dtype=np.int64)
     # get all atom positions to the position array.
-    position_atoms = np.zeros([lattice.nsub, space_size], dtype=np.int64)
+    position_atoms = np.zeros([lattice.nsub, space_size], dtype=np.float64)
     for name, sub in lattice.sublattices.items():
         # num of orbitals at each sublattice is equal to size of onsite energy
         num_energies = np.asarray(sub.energy).shape[0]
@@ -647,8 +646,6 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
             num_dis = len(disorded_structural)
         else:
             num_dis = 1
-        # Number of different disorder realisations
-        grp_dis.create_dataset('NumDisTypes', data=num_dis)
 
         for idx in range(num_dis):
             disorded_struct = disorded_structural[idx]
@@ -658,23 +655,24 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
             grp_dis_type.create_dataset('Concentration', data=np.asarray(disorded_struct._concentration),
                                         dtype=np.float64)
             # Number of bond disorder
-            grp_dis_type.create_dataset('NumBondDisorder', data=disorded_struct._num_bond_disorder_per_type,
-                                        dtype=np.int32)
+            grp_dis_type.create_dataset('NumBondDisorder',
+                                        data=2*np.asarray(disorded_struct._num_bond_disorder_per_type), dtype=np.int32)
             # Number of onsite disorder
-            grp_dis_type.create_dataset('NumOnsiteDisorder', data=disorded_struct._num_onsite_disorder_per_type,
-                                        dtype=np.int32)
+            grp_dis_type.create_dataset('NumOnsiteDisorder',
+                                        data=np.asarray(disorded_struct._num_onsite_disorder_per_type), dtype=np.int32)
 
             # Node of the bond disorder from
-            grp_dis_type.create_dataset('NodeFrom', data=np.asarray(disorded_struct._nodes_from), dtype=np.int32)
+            grp_dis_type.create_dataset('NodeFrom', data=np.asarray(disorded_struct._nodes_from).flatten(),
+                                        dtype=np.int32)
             # Node of the bond disorder to
-            grp_dis_type.create_dataset('NodeTo', data=np.asarray(disorded_struct._nodes_to), dtype=np.int32)
+            grp_dis_type.create_dataset('NodeTo', data=np.asarray(disorded_struct._nodes_to).flatten(), dtype=np.int32)
             # Node of the onsite disorder
-            grp_dis_type.create_dataset('NodeOnsite', data=disorded_struct._nodes_onsite, dtype=np.int32)
+            grp_dis_type.create_dataset('NodeOnsite', data=np.asarray(disorded_struct._nodes_onsite), dtype=np.int32)
 
             # Num nodes
             grp_dis_type.create_dataset('NumNodes', data=disorded_struct._num_nodes, dtype=np.int32)
             # Orbital mapped for this node
-            grp_dis_type.create_dataset('NodePosition', data=np.asarray(disorded_struct._node_orbital), dtype=np.int32)
+            grp_dis_type.create_dataset('NodePosition', data=np.asarray(disorded_struct._node_orbital), dtype=np.uint32)
 
             # Onsite disorder energy
             grp_dis_type.create_dataset('U0',
@@ -683,10 +681,11 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
             disorder_hopping = disorded_struct._disorder_hopping
             if complx:
                 # hoppings
-                grp_dis_type.create_dataset('RH0', data=np.asarray(disorder_hopping).astype(config.type))
+                grp_dis_type.create_dataset('Hopping', data=np.asarray(disorder_hopping).astype(config.type).flatten())
             else:
                 # hoppings
-                grp_dis_type.create_dataset('RH0', data=np.asarray(disorder_hopping).real.astype(config.type))
+                grp_dis_type.create_dataset('Hopping',
+                                            data=np.asarray(disorder_hopping).real.astype(config.type).flatten())
 
     # Calculation function defined with num_moments, num_random vectors, and num_disorder realisations
     grpc = f.create_group('Calculation')
