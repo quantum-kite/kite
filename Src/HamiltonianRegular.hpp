@@ -41,8 +41,10 @@ struct Periodic_Operator {
     std::fill_n(l, D, 3);
     l[D]  = r.Orb;
     
+    // rLat is organized per columns each column is a lattice vector
+    
     Coordinates<std::ptrdiff_t, D + 1> b3(l), Ld(r.Ld);    
-    Eigen::Map<Eigen::Matrix<std::ptrdiff_t,D, 1>> v(b3.coord);
+    Eigen::Map<Eigen::Matrix<std::ptrdiff_t,D, 1>> v(b3.coord); // Column vector
     
     for(unsigned io = 0; io < r.Orb; io++)
       for(unsigned  i = 0; i < NHoppings(io); i++)
@@ -53,7 +55,7 @@ struct Periodic_Operator {
           
           distance(i,io) = Ld.set_index(b3.coord).index;             // Convert in distances in this lattice
           
-          dr = r.rOrb.col(io) - r.rOrb.col(b3.coord[D] + io) ;       // The D components of the vector difference in orbital positions      
+          dr = r.rOrb.col(b3.coord[D] + io) - r.rOrb.col(io)  ;       // The D components of the vector difference in orbital positions      
           dr += r.rLat * v.template cast<double>();
           
           for(unsigned dim = 0; dim < D; dim++)

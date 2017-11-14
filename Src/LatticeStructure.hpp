@@ -92,8 +92,7 @@ public:
   std::size_t Sizet; // Size of full Hilbert Space
 
   Eigen::Matrix<double, D, D> rLat;  // The vectors are organized by columns 
-  Eigen::MatrixXd rOrb;
-  
+  Eigen::MatrixXd rOrb;              // The vectors of each orbital are organized by columns
   unsigned nd[D + 1]; // Number of domains in each dimension (the last dimension corresponding with Orbitals are not decomposed)
   unsigned n_threads; // Number of threads
   
@@ -269,7 +268,12 @@ public:
     std::cout << r2.transpose() << std::endl << std::endl;
   }
 
-  bool test_ghosts(  Coordinates<std::size_t, D + 1> & Latt) {
+  bool test_ghosts(  Coordinates<std::size_t, D + 1> & Latt)
+  {
+    // This function tests if the coordinates are in the ghosts
+    // 0 is in the ghosts
+    // 1 isn't in the ghosts
+    
     bool teste = 1;
   
     for(int j = 0; j < int(D); j++)
@@ -284,6 +288,7 @@ public:
   }
     
 
+  
   
 };
 

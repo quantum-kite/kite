@@ -80,7 +80,8 @@ public:
     T * phiM1 = v.col((memory + index - 1) % memory ).data();
     T * phiM2 = v.col((memory + index - 2) % memory ).data();
     
-    for(auto istr = h.hd.cross_mozaic_indexes.begin(); istr != h.hd.cross_mozaic_indexes.end() ; istr++)
+    // Initialize tiles that have deffects connecting elements of a previous tile
+    for(auto istr = h.cross_mozaic_indexes.begin(); istr != h.cross_mozaic_indexes.end() ; istr++)
       {
 	i0 = ((*istr) % (r.lStr[0]) ) * STRIDE + NGHOSTS;
 	i1 = ((*istr) / r.lStr[0] ) * STRIDE + NGHOSTS;
@@ -94,10 +95,8 @@ public:
 	    for(std::size_t j = j0; j < j1; j += std )
 	      for(std::size_t i = j; i < j + STRIDE ; i++)
 		phi0[i] = - value_type(MULT) * phiM2[i];
-	    
 	  }
       }
-    
     
     for( i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1 += STRIDE  )
       for( i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0 += STRIDE )
@@ -114,10 +113,12 @@ public:
 	      const std::size_t j1 = j0 + STRIDE * std;
 
 	      // Initialize phi0
-	      if(h.hd.cross_mozaic.at(istr))
-		for(std::size_t j = j0; j < j1; j += std )
-		  for(std::size_t i = j; i < j + STRIDE ; i++)
-		    phi0[i] = - value_type(MULT) * phiM2[i];
+	      for(unsigned id = 0; id < h.hd.size(); id++)
+		if(h.cross_mozaic.at(istr))
+		  for(std::size_t j = j0; j < j1; j += std )
+		    for(std::size_t i = j; i < j + STRIDE ; i++)
+		      phi0[i] = - value_type(MULT) * phiM2[i];
+	      
 
 	      // Anderson disorder
 	      if( h.Anderson_orb_address[io] >= 0)
@@ -146,76 +147,131 @@ public:
 	  
 	  // Structural disorder contribution
 	  
-	  
-	  for(std::size_t i = 0; i <  h.hd.position.at(istr).size(); i++)
-	    {
-	      std::size_t ip = h.hd.position.at(istr)[i];
-	      for(unsigned k = 0; k < h.hd.hopping.size(); k++)
-		{
-		  std::size_t k1 = ip + h.hd.node_position[h.hd.element1[k]];
-		  std::size_t k2 = ip + h.hd.node_position[h.hd.element2[k]];
-		  phi0[k1] += value_type(MULT + 1) * h.hd.hopping[k] * phiM1[k2];
-		}
-	      
-	      for(std::size_t k = 0; k < h.hd.U.size(); k++)
-		{
-		  std::size_t k1 = ip + h.hd.node_position[h.hd.element[k]];
-		  phi0[k1] += value_type(MULT + 1) * h.hd.U[k] * phiM1[k1];
-		}
-	    }
+	  for(auto id = h.hd.begin(); id != h.hd.end(); id++)
+	    for(std::size_t i = 0; i <  id->position.at(istr).size(); i++)
+	      {
+		std::size_t ip = id->position.at(istr)[i];
+		for(unsigned k = 0; k < id->hopping.size(); k++)
+		  {
+		    std::size_t k1 = ip + id->node_position[id->element1[k]];
+		    std::size_t k2 = ip + id->node_position[id->element2[k]];
+		    phi0[k1] += value_type(MULT + 1) * id->hopping[k] * phiM1[k2];
+		  }
+		
+		for(std::size_t k = 0; k < id->U.size(); k++)
+		  {
+		    std::size_t k1 = ip + id->node_position[id->element[k]];
+		    phi0[k1] += value_type(MULT + 1) * id->U[k] * phiM1[k1];
+		  }
+	      }
 	}
     
     //  Broken impurities
+    for(auto id = h.hd.begin(); id != h.hd.end(); id++)
+      for(std::size_t i = 0; i < id->border_element1.size(); i++)
+	{
+	  std::size_t i1 = id->border_element1[i];
+	  std::size_t i2 = id->border_element2[i];
+	  phi0[i1] += value_type(MULT + 1) * id->border_hopping[i] * phiM1[i2];
+	}
     
-    for(std::size_t i = 0; i < h.hd.border_element1.size(); i++)
-      {
-	std::size_t i1 = h.hd.border_element1[i];
-	std::size_t i2 = h.hd.border_element2[i];
-	phi0[i1] += value_type(MULT + 1) * h.hd.border_hopping[i] * phiM1[i2];
-      }
-    
-    
-    for(std::size_t i = 0; i < h.hd.border_element.size(); i++)
-      {
-	std::size_t i1 = h.hd.border_element[i];
-	phi0[i1] += value_type(MULT + 1) * h.hd.border_U[i] * phiM1[i1];
-      }
+    for(auto id = h.hd.begin(); id != h.hd.end(); id++)
+      for(std::size_t i = 0; i < id->border_element.size(); i++)
+	{
+	  std::size_t i1 = id->border_element[i];
+	  phi0[i1] += value_type(MULT + 1) * id->border_U[i] * phiM1[i1];
+	}
     
     Exchange_Boundaries();
   };
   
-  
-  void Velocity( T * phi0, T * phiM1, int axis)
-  {
-    Coordinates<unsigned,3> x(r.Ld);
-    const std::size_t STRIDE0 = 4;    
-    const std::size_t STRIDE1 = 4;
+  void Velocity( T * phi0, T * phiM1, int axis) {
+    /*
+      Mosaic Multiplication using a TILE of STRIDE x STRIDE 
+      Right Now We expect that both ld[0] and ld[1]  are multiple of STRIDE
+      MULT = 0 : For the case of the Velocity/Hamiltonian
+      MULT = 1 : For the case of the KPM_iteration
+    */
+    T zero = assign_value<T>(double(0), double(0));
+    Coordinates<std::size_t,3> x(r.Ld);
+    std::size_t i0, i1;
     
-    for(std::size_t io = 0; io < r.Orb; io++)
+    // Initialize tiles that have deffects connecting elements of a previous tile
+    for(auto istr = h.cross_mozaic_indexes.begin(); istr != h.cross_mozaic_indexes.end() ; istr++)
       {
-	const std::size_t ip = io * x.basis[2];
-	for(std::size_t i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1 += STRIDE1  )
-	  for(std::size_t i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0 += STRIDE0 )
+	i0 = ((*istr) % (r.lStr[0]) ) * STRIDE + NGHOSTS;
+	i1 = ((*istr) / r.lStr[0] ) * STRIDE + NGHOSTS;
+	for(std::size_t io = 0; io < r.Orb; io++)
+	  {
+	    const std::size_t ip = io * x.basis[2] ;
+	    const std::size_t std = x.basis[1];
+	    const std::size_t j0 = ip + i0 + i1 * std;
+	    const std::size_t j1 = j0 + STRIDE * std;
+	    
+	    for(std::size_t j = j0; j < j1; j += std )
+	      for(std::size_t i = j; i < j + STRIDE ; i++)
+		phi0[i] = zero;
+	  }
+      }
+    
+    for( i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1 += STRIDE  )
+      for( i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0 += STRIDE )
+	{
+	  // Periodic component of the Hamiltonian + Anderson disorder
+	  std::size_t istr = (i1 - NGHOSTS) /STRIDE * r.lStr[0] + (i0 - NGHOSTS)/ STRIDE;
+	  
+	  for(std::size_t io = 0; io < r.Orb; io++)
 	    {
+	      const std::size_t ip = io * x.basis[2] ;
+	      const std::size_t dd = (h.Anderson_orb_address[io] - io)*r.Nd;
 	      const std::size_t std = x.basis[1];
 	      const std::size_t j0 = ip + i0 + i1 * std;
-	      const std::size_t j1 = j0 + STRIDE1 * std;
+	      const std::size_t j1 = j0 + STRIDE * std;
+
+	      // Initialize phi0
+	      for(unsigned id = 0; id < h.hd.size(); id++)
+		if(h.cross_mozaic.at(istr))
+		  for(std::size_t j = j0; j < j1; j += std )
+		    for(std::size_t i = j; i < j + STRIDE ; i++)
+		      phi0[i] = zero;
 	      
-	      for(std::size_t j = j0; j < j1; j += std )
-		for(std::size_t i = j; i < j + STRIDE0 ; i++)
-		  phi0[i] = 0;
-	      
-	      for(std::size_t ib = 0; ib < h.hr.NHoppings(io); ib++)
+	      // Hoppings
+	      for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
 		{
-		  const std::ptrdiff_t d1 = h.hr.distance(ib, io);
-		  const T    t1 = h.hr.V[axis](ib, io);
+		  const std::ptrdiff_t  d1 = h.hr.distance(ib, io);
+		  const T t1 =   h.hr.V[axis](ib, io);
 		  
 		  for(std::size_t j = j0; j < j1; j += std )
-		    for(std::size_t i = j; i < j + STRIDE0 ; i++)
+		    for(std::size_t i = j; i < j + STRIDE ; i++)
 		      phi0[i] += t1 * phiM1[i + d1];
 		}
 	    }
-      }
+	  
+	  // Structural disorder contribution
+	  
+	  for(auto id = h.hd.begin(); id != h.hd.end(); id++)
+	    for(std::size_t i = 0; i <  id->position.at(istr).size(); i++)
+	      {
+		std::size_t ip = id->position.at(istr)[i];
+		for(unsigned k = 0; k < id->hopping.size(); k++)
+		  {
+		    std::size_t k1 = ip + id->node_position[id->element1[k]];
+		    std::size_t k2 = ip + id->node_position[id->element2[k]];
+		    phi0[k1] +=  (id->V[axis])[k] * phiM1[k2];
+		  }
+	      }
+	}
+    
+    //  Broken impurities
+    for(auto id = h.hd.begin(); id != h.hd.end(); id++)
+      for(std::size_t i = 0; i < id->border_element1.size(); i++)
+	{
+	  std::size_t i1 = id->border_element1[i];
+	  std::size_t i2 = id->border_element2[i];
+	  phi0[i1] +=  (id->border_V[axis])[i] * phiM1[i2];
+	}
+        
+    Exchange_Boundaries();
   };
   
   T VelocityInternalProduct( T * bra, T * ket, int axis)
@@ -236,7 +292,6 @@ public:
 	      const std::size_t std = x.basis[1];
 	      const std::size_t j0 = ip + i0 + i1 * std;
 	      const std::size_t j1 = j0 + STRIDE1 * std;
-	      
 	      
 	      for(std::size_t ib = 0; ib < h.hr.NHoppings(io); ib++)
 		{

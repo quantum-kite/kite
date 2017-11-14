@@ -4,6 +4,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Eigenvalues>
 #include "H5Cpp.h"
+#include <H5Group.h>
 #include <complex>
 #include <random>
 #include <vector>

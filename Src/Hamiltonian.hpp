@@ -3,6 +3,7 @@
 
 #include "HamiltonianDefects.hpp"
 #include "HamiltonianRegular.hpp"
+extern "C" herr_t getDefects(hid_t loc_id, const char *name, void *opdata);
 
 template <typename T, unsigned D>
 class Hamiltonian {
@@ -11,7 +12,7 @@ private:
 public:
   typedef typename extract_value_type<T>::value_type value_type;
   Simulation<T,D> & simul;  
-  Periodic_Operator<T,D> hr;
+  Periodic_Operator<T,D>  hr;
 
   /* Anderson disorder */
   std::vector <int> orb_num;
@@ -24,20 +25,47 @@ public:
   std::vector<int> Anderson_orb_address;
   
   /*   Structural disorder    */
-  Defect_Operator<T,D> hd;
+  std::vector <bool>  cross_mozaic;
+  std::vector <std::size_t>  cross_mozaic_indexes;
+  std::vector < Defect_Operator<T,D> > hd;
   
-  Hamiltonian (Simulation<T,D> & sim) : r(sim.r), simul(sim) , hr(sim), hd(sim)
+  Hamiltonian (Simulation<T,D> & sim) : r(sim.r), simul(sim) , hr(sim), cross_mozaic(sim.r.NStr)
   {  
     /* Anderson disorder */
     build_Anderson_disorder();
-    distribute_AndersonDisorder();
+    build_structural_disorder();
   };
 
   void generate_disorder()
   {
     distribute_AndersonDisorder();
-    hd.generate_disorder();
+    for(std::size_t istr = 0; istr < r.NStr; istr++)
+      cross_mozaic[istr] = true;
+    cross_mozaic_indexes.clear();
+    for(auto id = hd.begin(); id != hd.end(); id++)
+      id->generate_disorder();
   };
+  
+  void build_structural_disorder() {
+#pragma omp critical
+    {
+      H5::H5File *file = new H5::H5File(simul.name, H5F_ACC_RDONLY);
+      // Test if there is a strutural disorder to build
+      H5::Group  grp;
+      std::vector<std::string> defects;
+      try {
+	H5::Exception::dontPrint();
+	grp = file->openGroup("/Hamiltonian/StructuralDisorder");
+	grp.iterateElems(grp.getObjName(), NULL, getDefects, static_cast<void*>(&defects) );
+	for(auto id = defects.begin(); id != defects.end(); id++)
+	  hd.push_back(Defect_Operator<T,D> ( simul, *id, file) );
+      }
+      catch(H5::Exception& e) {
+	// Don't do nothing 
+      }
+      delete file;
+    }
+  }
   
   void build_Anderson_disorder() {
     /*
@@ -118,6 +146,24 @@ public:
 };
 
 
+herr_t getDefects(hid_t loc_id, const char *name, void *opdata)
+{
+  H5::Group  grp(loc_id);
+  std::string Disorder = grp.getObjName();
+  std::string  sep = "/";
+  std::string Defect = name;
+  std::string group = Disorder+sep+name; 
+  std::vector<std::string> * v = static_cast<std::vector<std::string> *> (opdata);
 
+  try {
+    H5::Exception::dontPrint();
+    grp.openGroup(group);
+    v->push_back(group);
+  }
+  catch(H5::Exception& e) {
+    // Don't do nothing 
+  }
+  return 0;
+}
 
 #endif

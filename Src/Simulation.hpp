@@ -105,7 +105,6 @@ public:
 	    
 	    phi.template Multiply<0>();
 	    mu.matrix().block(0,0,1,2) +=  (phi0.v.adjoint() * phi.v - mu.matrix().block(0,0,1,2))/value_type(average + 1);
-	    
 	    for(int m = 2; m < mu.cols(); m += 2)
 	      {	    
 		phi.template Multiply<1>();
