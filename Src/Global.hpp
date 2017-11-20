@@ -9,8 +9,9 @@ struct GLOBAL_VARIABLES {
 
   // Averages
   Eigen::Array <T, Eigen::Dynamic, Eigen::Dynamic> mu;
-  Eigen::Array <T, Eigen::Dynamic, Eigen::Dynamic> gammaxx;
-  Eigen::Array <T, Eigen::Dynamic, Eigen::Dynamic> gammaxy;
+  Eigen::Array <T, Eigen::Dynamic, Eigen::Dynamic> gamma;
+  Eigen::Array <T, Eigen::Dynamic, Eigen::Dynamic> lambda;
+  Eigen::Array <T, Eigen::Dynamic, Eigen::Dynamic> singleshot_cond;
   GLOBAL_VARIABLES() { };
   void addbond( std::size_t  ele1, std::ptrdiff_t ele2, T hop ) {
     element1.push_back(ele1);

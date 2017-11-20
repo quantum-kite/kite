@@ -5,7 +5,8 @@ struct Periodic_Operator {
   Eigen::Array<unsigned,    Eigen::Dynamic, 1 >            NHoppings;         // Number of elements different from Zero from each orbital
   Eigen::Array<std::ptrdiff_t, Eigen::Dynamic, Eigen::Dynamic> distance;          // Distance in the basis 
   Eigen::Array<   T, Eigen::Dynamic, Eigen::Dynamic> hopping;           // Hopping
-  Eigen::Array<   T, Eigen::Dynamic, Eigen::Dynamic> V[D];              // Velocity
+  Eigen::Array<   T, Eigen::Dynamic, Eigen::Dynamic> V[D];              // Velocity [r,h]
+  Eigen::Array<   T, Eigen::Dynamic, Eigen::Dynamic> V2[D][D];              // Velocity [r,[r,h]]
   
   Periodic_Operator(Simulation<T,D> & sim) : simul(sim) {
     
@@ -22,6 +23,11 @@ struct Periodic_Operator {
       
       for(unsigned i = 0; i < D; i++)
         V[i]    = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>(max, sim.r.Orb);
+       
+      
+      for(unsigned i = 0; i < D; i++)
+				for(unsigned j = 0; j < D; j++)
+					V2[i][j] = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>(max, sim.r.Orb);
 
       get_hdf5<T>(hopping.data(), file, (char *) "/Hamiltonian/Hoppings");          // Read Hoppings
       get_hdf5<int>(dist.data(), file, (char *) "/Hamiltonian/d");                  // Read the distances
@@ -60,6 +66,12 @@ struct Periodic_Operator {
           
           for(unsigned dim = 0; dim < D; dim++)
             V[dim](i,io) = hopping(i,io) * T( dr(dim) );
+          
+            
+          for(unsigned dim1 = 0; dim1 < D; dim1++)
+            for(unsigned dim2 = 0; dim2 < D; dim2++)
+              V2[dim1][dim2](i,io) = hopping(i,io) * T( dr(dim1) )* T( dr(dim2) );
+						
 	  
         }
   };

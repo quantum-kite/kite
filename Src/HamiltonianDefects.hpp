@@ -7,6 +7,7 @@ struct Defect_Operator  {
   std::vector <unsigned>             element;                        // nodes with local energies
   std::vector <T>                    hopping;                        // vector of the non-zero values of the operator
   std::vector <T>                       V[D];
+  std::vector <T>                   V2[D][D];
   std::vector <unsigned>            element1;                        // vector with the nodes 
   std::vector <unsigned>            element2;                        // vector with the nodes
   std::vector <std::ptrdiff_t> node_position;                        // Relative distances of the nodes to the defect position
@@ -16,6 +17,7 @@ struct Defect_Operator  {
   std::vector <std::size_t>  border_element2;                        // Position of broken deffects in hopping terms                     
   std::vector <T>             border_hopping;
   std::vector <T>                border_V[D];                                           
+  std::vector <T>            border_V2[D][D];   
   std::vector <T>                   border_U;                                                 
   std::vector <std::size_t>   border_element;                        // Position of broken deffects site energy                                   
   LatticeStructure <D>                   & r;
@@ -116,6 +118,10 @@ struct Defect_Operator  {
 	
 	for(unsigned dim = 0; dim < D; dim++)
 	  V[dim].push_back( hopping.at(ih) * T(dr(dim)) );
+
+	for(unsigned dim1 = 0; dim1 < D; dim1++)
+	  for(unsigned dim2 = 0; dim2 < D; dim2++)
+	    V2[dim1][dim2].push_back( hopping.at(ih) * T(dr(dim1)) * T(dr(dim2)));
       }
     
 
@@ -217,6 +223,10 @@ struct Defect_Operator  {
 	    
 	    for(unsigned dim = 0; dim < D; dim++)
 	      border_V[dim].push_back(simul.Global.hopping[i] * T(dr(dim)));
+
+	    for(unsigned dim1 = 0; dim1 < D; dim1++)
+	      for(unsigned dim2 = 0; dim2 < D; dim2++)
+	        border_V2[dim1][dim2].push_back(simul.Global.hopping[i] * T(dr(dim1))* T(dr(dim2)));
 	  }
       
       for(unsigned i = 0; i < simul.Global.element.size(); i++ )

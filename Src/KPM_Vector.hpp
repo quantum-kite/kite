@@ -55,8 +55,10 @@ public:
   void Exchange_Boundaries() {};
   inline void  HaIteration() { Multiply<0>(); };
   inline void  ChIteration() { Multiply<1>(); };
-  void Velocity( T *, T *, int );
-  T VelocityInternalProduct( T *  , T * , int);  
+  void Velocity( T *, T *, int ){};
+  void Velocity2( T *, T *, int, int){};
+  T VelocityInternalProduct( T *  , T * , int);
+  void empty_ghosts(int){}; 
 };
 
 

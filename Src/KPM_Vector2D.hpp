@@ -223,7 +223,6 @@ public:
 	  for(std::size_t io = 0; io < r.Orb; io++)
 	    {
 	      const std::size_t ip = io * x.basis[2] ;
-	      const std::size_t dd = (h.Anderson_orb_address[io] - io)*r.Nd;
 	      const std::size_t std = x.basis[1];
 	      const std::size_t j0 = ip + i0 + i1 * std;
 	      const std::size_t j1 = j0 + STRIDE * std;
@@ -273,6 +272,97 @@ public:
         
     Exchange_Boundaries();
   };
+
+
+
+  void Velocity2( T * phi0, T * phiM1, int axis1, int axis2) {
+    /*
+      Mosaic Multiplication using a TILE of STRIDE x STRIDE 
+      Right Now We expect that both ld[0] and ld[1]  are multiple of STRIDE
+      MULT = 0 : For the case of the Velocity/Hamiltonian
+      MULT = 1 : For the case of the KPM_iteration
+    */
+    T zero = assign_value<T>(double(0), double(0));
+    Coordinates<std::size_t,3> x(r.Ld);
+    std::size_t i0, i1;
+    
+    // Initialize tiles that have deffects connecting elements of a previous tile
+    for(auto istr = h.cross_mozaic_indexes.begin(); istr != h.cross_mozaic_indexes.end() ; istr++)
+      {
+	i0 = ((*istr) % (r.lStr[0]) ) * STRIDE + NGHOSTS;
+	i1 = ((*istr) / r.lStr[0] ) * STRIDE + NGHOSTS;
+	for(std::size_t io = 0; io < r.Orb; io++)
+	  {
+	    const std::size_t ip = io * x.basis[2] ;
+	    const std::size_t std = x.basis[1];
+	    const std::size_t j0 = ip + i0 + i1 * std;
+	    const std::size_t j1 = j0 + STRIDE * std;
+	    
+	    for(std::size_t j = j0; j < j1; j += std )
+	      for(std::size_t i = j; i < j + STRIDE ; i++)
+		phi0[i] = zero;
+	  }
+      }
+    
+    for( i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1 += STRIDE  )
+      for( i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0 += STRIDE )
+	{
+	  // Periodic component of the Hamiltonian + Anderson disorder
+	  std::size_t istr = (i1 - NGHOSTS) /STRIDE * r.lStr[0] + (i0 - NGHOSTS)/ STRIDE;
+	  
+	  for(std::size_t io = 0; io < r.Orb; io++)
+	    {
+	      const std::size_t ip = io * x.basis[2] ;
+	      const std::size_t std = x.basis[1];
+	      const std::size_t j0 = ip + i0 + i1 * std;
+	      const std::size_t j1 = j0 + STRIDE * std;
+
+	      // Initialize phi0
+	      for(unsigned id = 0; id < h.hd.size(); id++)
+		if(h.cross_mozaic.at(istr))
+		  for(std::size_t j = j0; j < j1; j += std )
+		    for(std::size_t i = j; i < j + STRIDE ; i++)
+		      phi0[i] = zero;
+	      
+	      // Hoppings
+	      for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
+		{
+		  const std::ptrdiff_t  d1 = h.hr.distance(ib, io);
+		  const T t1 =   h.hr.V2[axis1][axis2](ib, io);
+		  
+		  for(std::size_t j = j0; j < j1; j += std )
+		    for(std::size_t i = j; i < j + STRIDE ; i++)
+		      phi0[i] += t1 * phiM1[i + d1];
+		}
+	    }
+	  
+	  // Structural disorder contribution
+	  
+	  for(auto id = h.hd.begin(); id != h.hd.end(); id++)
+	    for(std::size_t i = 0; i <  id->position.at(istr).size(); i++)
+	      {
+		std::size_t ip = id->position.at(istr)[i];
+		for(unsigned k = 0; k < id->hopping.size(); k++)
+		  {
+		    std::size_t k1 = ip + id->node_position[id->element1[k]];
+		    std::size_t k2 = ip + id->node_position[id->element2[k]];
+		    phi0[k1] +=  (id->V2[axis1][axis2])[k]* phiM1[k2];
+		  }
+	      }
+	}
+    
+    //  Broken impurities
+    for(auto id = h.hd.begin(); id != h.hd.end(); id++)
+      for(std::size_t i = 0; i < id->border_element1.size(); i++)
+	{
+	  std::size_t i1 = id->border_element1[i];
+	  std::size_t i2 = id->border_element2[i];
+	  phi0[i1] +=  (id->border_V2[axis1][axis2])[i] * phiM1[i2];
+	}
+        
+    Exchange_Boundaries();
+  };
+
   
   T VelocityInternalProduct( T * bra, T * ket, int axis)
   {
@@ -485,11 +575,44 @@ public:
 		    
 		  }
 	      };
-	    std::cout.flush();
 	  }
-      std::cout << "out of the test " << r.thread_id << std::endl;
-      std::cout.flush();
     }
 
   };
+
+  void empty_ghosts(int mem_index) {
+    /* This function takes the kpm vector that's being used, 'v' and sets to zero the part corresponding
+     * to the ghosts, that is, the part of the vector that actually belongs to a different thread.
+     * This is done so that when we take the dot product 'v' with another vector only terms pertraining 
+     * to the current thread are considered.
+     * */
+  
+    Coordinates<long, 3> x(r.Ld);
+    
+    
+    // There are four sides, so set the ghosts in each side to zero individually.
+    // Remember that the size of the ghost boundaries depends on NGHOSTS.
+    
+    for(long  io = 0; io < (long) r.Ld[2]; io++)
+      for(long i0 = 0; i0 < (long) r.Ld[0]; i0++)
+	for(int d = 0; d < NGHOSTS; d++)
+	  v(x.set({i0,(long) d,io}).index, mem_index) *= 0;
+
+    for(long  io = 0; io < (long) r.Ld[2]; io++)
+      for(long i0 = 0; i0 < (long) r.Ld[0]; i0++)
+	for(int d = 0; d < NGHOSTS; d++)
+	  v(x.set({i0, (long) (r.Ld[1] - 1 - d),io}).index, mem_index) *= 0;
+  
+      for(long  io = 0; io < (long) r.Ld[2]; io++)
+	for(long i1 = 0; i1 < (long) r.Ld[1]; i1++)
+	  for(int d = 0; d < NGHOSTS; d++)
+	    v(x.set({(long) d,i1,io}).index, mem_index) *= 0;
+
+      for(long  io = 0; io < (long) r.Ld[2]; io++)
+	for(long i1 = 0; i1 < (long) r.Ld[1]; i1++)
+	  for(int d = 0; d < NGHOSTS; d++)
+	    v(x.set({(long) (r.Ld[0] - 1 - d),i1,io}).index, mem_index) *= 0;
+
+    };
+  
 };

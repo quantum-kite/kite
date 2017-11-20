@@ -72,9 +72,9 @@ def graphene_initial(onsite=(0, 0)):
     # as a list.
     struc_disorder_two = ex.StructuralDisorder(lat, concentration=0.2)
     struc_disorder_two.add_structural_disorder(
-        ([+0, +0], 'A', [+2, +1], 'B', 21),
+        ([+0, +0], 'A', [+1, +1], 'B', 21),
         ([-1, +0], 'A', [+1, +1], 'B', 8),
-        ([-1, +1], 'B', [-2, +2], 'A', -5),
+        ([-1, +1], 'B', [-1, +1], 'A', -5),
 
         ([+0, +0], 'B', 2)
     )
@@ -86,10 +86,10 @@ def graphene_initial(onsite=(0, 0)):
 lattice, disorder, disorded_structural = graphene_initial()
 # number of decomposition parts in each direction of matrix.
 
-nx = ny = 4
+nx = ny = 1
 # number of unit cells in each direction.
-lx = 4096
-ly = 2048
+lx = 256
+ly = 256
 
 # make config object which caries info about
 # - the number of decomposition parts [nx, ny],
