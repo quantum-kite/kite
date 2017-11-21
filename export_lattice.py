@@ -99,6 +99,12 @@ class StructuralDisorder:
         vectors = np.asarray(self._lattice.vectors)
         space_size = vectors.shape[0]
 
+        distance_relative = np.asarray(relative_index_from) - np.asarray(relative_index_to)
+
+        if np.linalg.norm(distance_relative) > space_size:
+            raise SystemExit('Currently only the next nearest distances are suported, make the bond of the bond '
+                             'disorder shorter! ')
+
         names, sublattices = zip(*self._lattice.sublattices.items())
 
         if from_sub not in names:
