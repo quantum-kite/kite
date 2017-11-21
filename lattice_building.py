@@ -84,7 +84,6 @@ def graphene_initial(onsite=(0, 0)):
     struc_disorder_three.add_vacancy('A')
 
     # if there is disorder it should be returned separately from the lattice
-    return lat, disorder, [struc_disorder_one, struc_disorder_two]
     return lat, disorder, [struc_disorder_one, struc_disorder_two, struc_disorder_three]
 
 
