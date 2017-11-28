@@ -4,8 +4,12 @@ import numpy as np
 import pybinding as pb
 
 
-# define lattice of monolayer graphene with 1[nm] interatomic distance and t=1/3[eV] hopping
+# define lattice of monolayer graphene with 1[nm] interatomic distance and t=1/3[eV] hopping,
+# EnergyScale is the scaling factor of the hopping parameters, important for the rescaling of the spectral quantity.
 #  INFO: other examples are defined in define_lattice.py script
+energy_scale = 3.06
+
+
 def graphene_initial(onsite=(0, 0)):
     """Return the basic lattice specification for monolayer graphene with nearest neighbor"""
 
@@ -29,10 +33,10 @@ def graphene_initial(onsite=(0, 0)):
     # Add hoppings
     lat.add_hoppings(
         # inside the main cell, between which atoms, and the value
-        ([0, 0], 'A', 'B', - 1 / 3.06),
+        ([0, 0], 'A', 'B', - 1 / energy_scale),
         # between neighboring cells, between which atoms, and the value
-        ([-1, 0], 'A', 'B', - 1),
-        ([-1, 1], 'A', 'B', - 1 / 3.06)
+        ([-1, 0], 'A', 'B', - 1 / energy_scale),
+        ([-1, 1], 'A', 'B', - 1 / energy_scale)
     )
 
     # Add disorder
@@ -55,7 +59,7 @@ def graphene_initial(onsite=(0, 0)):
     node3 = [[+0, +1], 'B']
     node4 = [[+0, +1], 'A']
     node5 = [[-1, +1], 'B']
-
+    node6 = [[-2, +2], 'B']
     struc_disorder_one = ex.StructuralDisorder(lat, concentration=0.05)
     struc_disorder_one.add_structural_disorder(
         # add bond disorder in the form [from unit cell], 'sublattice_from', [to_unit_cell], 'sublattice_to', value:
@@ -66,17 +70,16 @@ def graphene_initial(onsite=(0, 0)):
         (*node4, *node5, 1),
         (*node5, *node0, 1),
         # in this way we can add onsite disorder in the form [unit cell], 'sublattice', value
-        ([+0, +0], 'B', 3)
+        ([+0, +0], 'B', 0.1)
     )
     # It is possible to add multiple different disorder type which should be forwarded to the export_lattice function
     # as a list.
     struc_disorder_two = ex.StructuralDisorder(lat, concentration=0.2)
     struc_disorder_two.add_structural_disorder(
-        ([+0, +0], 'A', [+1, +1], 'B', 21),
-        ([-1, +0], 'A', [+1, +1], 'B', 8),
-        ([-1, +1], 'B', [-1, +1], 'A', -5),
-
-        ([+0, +0], 'B', 2)
+        (*node0, *node1, 0.5),
+        (*node4, *node5, 0.4),
+        (*node5, *node0, 1.0),
+        ([+0, +0], 'B', 0.1)
     )
     struc_disorder_two.add_vacancy('B')
 
@@ -102,7 +105,7 @@ ly = 256
 # - info if the exported hopping and onsite data should be complex,
 # - info of the precision of the exported hopping and onsite data, 0 - float, 1 - double, and 2 - long double.
 configuration = ex.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
-                                 is_complex=False, precision=1)
+                                 is_complex=False, precision=1, energy_scale=energy_scale)
 
 # make calculation object which caries info about
 # - the name of the function
@@ -111,10 +114,15 @@ configuration = ex.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries
 #   CondXY - conductivity in xy direction == 3,
 #   OptCond - optical conductivity == 4
 #   SpinCond - spin conductivity == 5
+#   SingleCondXX - single energy XX conductivity == 6
+#   SingleCondXY - single energy XY conductivity == 7
 # - number of moments for the calculation,
 # - number of different random vector realisations,
 # - number of disorder realisations.
-calculation = ex.Calculation(fname=['DOS', 'CondXX'], num_moments=[16384, 24], num_random=[1, 1], num_disorder=[1, 1])
+# - energy and gamma for single energy calculations.
+calculation = ex.Calculation(fname=['DOS', 'CondXX', 'SingleCondXX', 'SingleCondXY'],
+                             num_moments=[16384, 24, 1024, 1024], num_random=[1, 1, 1, 1],
+                             num_disorder=[1, 1, 1, 1], energy=[0, 0], gamma=[1e-2, 1e-2])
 
 # make modification object which caries info about (TODO: Other modifications can be added here)
 # - magnetic field can be set to True. Default case is False. In exported file it's converted to 1 and 0.

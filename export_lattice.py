@@ -400,12 +400,37 @@ class Modification:
 
 
 class Calculation:
-    def __init__(self, fname='DOS', num_moments=1, num_random=1, num_disorder=1):
+    def __init__(self, fname='DOS', num_moments=1, num_random=1, num_disorder=1, energy=0, gamma=0):
+
+        fname_norm = []
+        fname_spec = []
+
+        available_functions = ['DOS', 'CondXX', 'CondXY', 'OptCond', 'SpinCond']
+        fun_number = {'DOS': 1, 'CondXX': 2, 'CondXY': 3, 'OptCond': 4, 'SpinCond': 5}
+
+        special_functions = ['SingleCondXX', 'SingleCondXY']
+        special_fun_number = {'SingleCondXX': 6, 'SingleCondXY': 7}
+
+        fun_number_total = {'DOS': 1, 'CondXX': 2, 'CondXY': 3, 'OptCond': 4, 'SpinCond': 5,
+                            'SingleCondXX': 6, 'SingleCondXY': 7}
+
+        for f in fname:
+            if f in available_functions:
+                fname_norm.append(f)
+            else:
+                if f in special_functions:
+                    fname_spec.append(f)
 
         num_f = len(fname) if fname else None
         if not (all(len(i) == num_f for i in [num_moments, num_random, num_disorder])):
-            print('Number of different functions is different than the entered parameters, num_moments, num_randoms, '
-                  'or num_disorder \n')
+            print('Number of different functions is different than the entered number of parameters, num_moments, '
+                  'num_randoms, or num_disorder. \n')
+            raise SystemExit('All parameters should have the same length! ')
+
+        num_f_spec = len(fname_spec) if fname_spec else None
+        if not (all(len(i) == num_f_spec for i in [energy, gamma])):
+            print('Number of different special functions is different than the entered number of parameters, '
+                  'num_moments, num_randoms, num_disorder, energy or gamma. \n')
             raise SystemExit('All parameters should have the same length! ')
 
         self._number = []
@@ -414,32 +439,54 @@ class Calculation:
         self._num_random = []
         self._num_disorder = []
 
-        available_functions = {'DOS', 'CondXX', 'CondXY', 'OptCond', 'SpinCond'}
-        fun_number = {'DOS': 1, 'CondXX': 2, 'CondXY': 3, 'OptCond': 4, 'SpinCond': 5}
+        self._number_spec = []
+        self._num_moments_spec = []
+        self._fname_spec = []
+        self._num_random_spec = []
+        self._num_disorder_spec = []
+        self._energy_spec = []
+        self._gamma_spec = []
 
+        idx_spec = 0
         for f in fname:
-            if f not in available_functions:
-                print('Available functions are \n', list(available_functions))
+            if f not in available_functions + special_functions:
+                print('Available functions are \n', list(available_functions + special_functions))
                 raise SystemExit('Function not available for the calculation! ')
 
             if len(fname) > 1:
-                self._number.append(fun_number[f])
-                idx = fname.index(f)
-                self._fname.append(f)
-                self._num_moments.append(num_moments[idx])
-                self._num_random.append(num_random[idx])
-                self._num_disorder.append(num_disorder[idx])
-            else:
-                self._number.append(fun_number[f])
-                self._fname.append(f)
-                self._num_moments.append(num_moments)
-                self._num_random.append(num_random)
-                self._num_disorder.append(num_disorder)
+                if f in special_functions:
+                    self._energy_spec.append(energy[idx_spec])
+                    self._gamma_spec.append(gamma[idx_spec])
+                    idx_spec += 1
+                    self._number_spec.append(fun_number_total[f])
+                    idx = fname.index(f)
+                    self._fname_spec.append(f)
+                    self._num_moments_spec.append(num_moments[idx])
+                    self._num_random_spec.append(num_random[idx])
+                    self._num_disorder_spec.append(num_disorder[idx])
+                else:
+                    self._number.append(fun_number_total[f])
+                    idx = fname.index(f)
+                    self._fname.append(f)
+                    self._num_moments.append(num_moments[idx])
+                    self._num_random.append(num_random[idx])
+                    self._num_disorder.append(num_disorder[idx])
 
-    @property
-    def fname(self):  # function name:
-        """Returns the desired function name."""
-        return self._fname
+            else:
+                if f in special_functions:
+                    self._energy_spec.append(energy)
+                    self._gamma_spec.append(gamma)
+                    self._number_spec.append(fun_number[f])
+                    self._fname_spec.append(f)
+                    self._num_moments_spec.append(num_moments)
+                    self._num_random_spec.append(num_random)
+                    self._num_disorder_spec.append(num_disorder)
+                else:
+                    self._number.append(fun_number[f])
+                    self._fname.append(f)
+                    self._num_moments.append(num_moments)
+                    self._num_random.append(num_random)
+                    self._num_disorder.append(num_disorder)
 
     @property
     def number(self):  # -> function number:
@@ -466,9 +513,47 @@ class Calculation:
         """Returns the number of disorder realisations given for the calc."""
         return self._num_disorder
 
+    @property
+    def energy_spec(self):  # -> function name:
+        """Returns the energy of for the single energy calc."""
+        return self._energy_spec
+
+    @property
+    def gamma_spec(self):  # -> function name:
+        """Returns the gamma of for the single energy calc."""
+        return self._gamma_spec
+
+    @property
+    def number_spec(self):  # -> function number:
+        """Returns the predefined number of desired single energy function."""
+        return self._number_spec
+
+    @property
+    def name_spec(self):  # -> function name:
+        """Returns the desired function name."""
+        return self._fname_spec
+
+    @property
+    def moments_spec(self):  # -> function name:
+        """Returns the number of moments given for the single energy calc."""
+        return self._num_moments_spec
+
+    @property
+    def randoms_spec(self):  # -> function name:
+        """Returns the number of random vectors given for the single energy calc."""
+        return self._num_random_spec
+
+    @property
+    def disorder_spec(self):  # -> function name:
+        """Returns the number of disorder realisations given for single energy the calc."""
+        return self._num_disorder_spec
+
 
 class Configuration:
-    def __init__(self, divisions=(1, 1), length=None, boundaries=(False, False), is_complex=False, precision=1):
+    def __init__(self, divisions=(1, 1), length=None, boundaries=(False, False), is_complex=False, precision=1,
+                 energy_scale=1):
+
+        self._energy_scale = energy_scale
         self._is_complex = int(is_complex)
         self._precision = precision
         self._divisions = divisions
@@ -493,6 +578,11 @@ class Configuration:
                 self._htype = np.complex128
             elif self._precision == 2:
                 self._htype = np.complex256
+
+    @property
+    def energy_scale(self):
+        """Returns the energy scale of the hopping parameters."""
+        return self._energy_scale
 
     @property
     def comp(self):  # -> is_complex:
@@ -661,6 +751,8 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
     f.create_dataset('OrbPositions', data=position, dtype=np.float64)
     # total number of orbitals
     f.create_dataset('NOrbitals', data=np.sum(num_orbitals), dtype='u4')
+    # scaling factor for the hopping parameters
+    f.create_dataset('EnergyScale', data=config.energy_scale, dtype=np.float64)
     # Hamiltonian group
     grp = f.create_group('Hamiltonian')
     # Hamiltonian group
@@ -753,8 +845,18 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
 
     # Calculation function defined with num_moments, num_random vectors, and num_disorder realisations
     grpc = f.create_group('Calculation')
-    grpc.create_dataset('FunctionNum', data=np.asarray(calculation.number), dtype=np.int32)
-    grpc.create_dataset('NumMoments', data=np.asarray(calculation.moments), dtype=np.int32)
-    grpc.create_dataset('NumRandoms', data=np.asarray(calculation.randoms), dtype=np.int32)
-    grpc.create_dataset('NumDisorder', data=np.asarray(calculation.disorder), dtype=np.int32)
+    if calculation.number_spec:
+        grpc_spec = grpc.create_group('Calculation_spec')
+        grpc_spec.create_dataset('FunctionNum', data=np.asarray(calculation.number_spec), dtype=np.int32)
+        grpc_spec.create_dataset('NumMoments', data=np.asarray(calculation.moments_spec), dtype=np.int32)
+        grpc_spec.create_dataset('NumRandoms', data=np.asarray(calculation.randoms_spec), dtype=np.int32)
+        grpc_spec.create_dataset('NumDisorder', data=np.asarray(calculation.disorder_spec), dtype=np.int32)
+        grpc_spec.create_dataset('Energy', data=np.asarray(calculation.energy_spec), dtype=np.float64)
+        grpc_spec.create_dataset('Gamma', data=np.asarray(calculation.gamma_spec), dtype=np.float64)
+    if calculation.number:
+        grpc.create_dataset('FunctionNum', data=np.asarray(calculation.number), dtype=np.int32)
+        grpc.create_dataset('NumMoments', data=np.asarray(calculation.moments), dtype=np.int32)
+        grpc.create_dataset('NumRandoms', data=np.asarray(calculation.randoms), dtype=np.int32)
+        grpc.create_dataset('NumDisorder', data=np.asarray(calculation.disorder), dtype=np.int32)
+
     f.close()
