@@ -420,18 +420,18 @@ class Calculation:
             else:
                 if f in special_functions:
                     fname_spec.append(f)
-
-        num_f = len(fname) if fname else None
-        if not (all(len(i) == num_f for i in [num_moments, num_random, num_disorder])):
-            print('Number of different functions is different than the entered number of parameters, num_moments, '
-                  'num_randoms, or num_disorder. \n')
-            raise SystemExit('All parameters should have the same length! ')
-
-        num_f_spec = len(fname_spec) if fname_spec else None
-        if not (all(len(i) == num_f_spec for i in [energy, gamma])):
-            print('Number of different special functions is different than the entered number of parameters, '
-                  'num_moments, num_randoms, num_disorder, energy or gamma. \n')
-            raise SystemExit('All parameters should have the same length! ')
+        if fname_norm:
+            num_f = len(fname) if fname else None
+            if not (all(len(i) == num_f for i in [num_moments, num_random, num_disorder])):
+                print('Number of different functions is different than the entered number of parameters, num_moments, '
+                      'num_randoms, or num_disorder. \n')
+                raise SystemExit('All parameters should have the same length! ')
+        if fname_spec:
+            num_f_spec = len(fname_spec) if fname_spec else None
+            if not (all(len(i) == num_f_spec for i in [energy, gamma])):
+                print('Number of different special functions is different than the entered number of parameters, '
+                      'num_moments, num_randoms, num_disorder, energy or gamma. \n')
+                raise SystemExit('All parameters should have the same length! ')
 
         self._number = []
         self._num_moments = []
