@@ -113,11 +113,13 @@ public:
 	      const std::size_t j1 = j0 + STRIDE * std;
 
 	      // Initialize phi0
-	      for(unsigned id = 0; id < h.hd.size(); id++)
-		if(h.cross_mozaic.at(istr))
-		  for(std::size_t j = j0; j < j1; j += std )
-		    for(std::size_t i = j; i < j + STRIDE ; i++)
-		      phi0[i] = - value_type(MULT) * phiM2[i];
+		
+	      if(h.cross_mozaic.at(istr)){
+		for(std::size_t j = j0; j < j1; j += std )
+		  for(std::size_t i = j; i < j + STRIDE ; i++){
+		    phi0[i] = - value_type(MULT) * phiM2[i];
+		  }
+		}
 	      
 
 	      // Anderson disorder
@@ -228,11 +230,11 @@ public:
 	      const std::size_t j1 = j0 + STRIDE * std;
 
 	      // Initialize phi0
-	      for(unsigned id = 0; id < h.hd.size(); id++)
-		if(h.cross_mozaic.at(istr))
-		  for(std::size_t j = j0; j < j1; j += std )
-		    for(std::size_t i = j; i < j + STRIDE ; i++)
-		      phi0[i] = zero;
+	      
+	      if(h.cross_mozaic.at(istr))
+		for(std::size_t j = j0; j < j1; j += std )
+		  for(std::size_t i = j; i < j + STRIDE ; i++)
+		    phi0[i] = zero;
 	      
 	      // Hoppings
 	      for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
@@ -318,11 +320,10 @@ public:
 	      const std::size_t j1 = j0 + STRIDE * std;
 
 	      // Initialize phi0
-	      for(unsigned id = 0; id < h.hd.size(); id++)
-		if(h.cross_mozaic.at(istr))
-		  for(std::size_t j = j0; j < j1; j += std )
-		    for(std::size_t i = j; i < j + STRIDE ; i++)
-		      phi0[i] = zero;
+	      if(h.cross_mozaic.at(istr))
+		for(std::size_t j = j0; j < j1; j += std )
+		  for(std::size_t i = j; i < j + STRIDE ; i++)
+		    phi0[i] = zero;
 	      
 	      // Hoppings
 	      for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
@@ -570,7 +571,7 @@ public:
 		if( aux_test(v(x.index , 0), val ) )
 		  {
 		    // std::cout << "Problems---->" << v(x.index , 0) << " " << val << std::endl;
-		    std::cout << "\t wrong " << std::real(v(x.index , 0)) << " " << z.index << " " << x.index << "\t\t";
+		    //std::cout << "\t wrong " << std::real(v(x.index , 0)) << " " << z.index << " " << x.index << "\t\t";
 		    x.print();
 		    
 		  }

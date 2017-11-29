@@ -1,6 +1,8 @@
 #ifndef _SIMULATION_HPP
 #define _SIMULATION_HPP
 
+#define DEBUG 0
+
 int custom_find(int *arr, int arr_size, int value_to_search){
 	/* This function searches array 'arr' for any occurence of number 'value to search'.
 	 * If it exists, it exits and returns the index where it occurs.
@@ -27,7 +29,15 @@ class GlobalSimulation {
 private:
   GLOBAL_VARIABLES <T> Global;
   LatticeStructure <D> rglobal;
+  
+  // Regular quantities to calculate, such as DOS and CondXX
   std::vector <int> Quantities, NMoments, NRandomV, NDisorder; 
+  
+  // Other quantities that require special care, such as SingleShotXX
+  std::vector <int> Quantities_special, NMoments_special, NRandomV_special, NDisorder_special, EnergyScale; 
+  std::vector <double> gamma_special;
+  Eigen::Array<double, -1, -1> singleshot_energies;
+  
 public:
   GlobalSimulation( char *name ) : rglobal(name) {
     Global.ghosts.resize( rglobal.get_BorderSize() );
@@ -47,79 +57,145 @@ public:
      * /Calculation/NumDisorder  : number of disorder realisations.
      */
     
+    // Regular quantities to calculate, such as DOS and CondXX
     H5::H5File * file         = new H5::H5File(name, H5F_ACC_RDONLY);
     H5::DataSet * dataset     = new H5::DataSet(file->openDataSet("/Calculation/FunctionNum"));
     H5::DataSpace * dataspace = new H5::DataSpace(dataset->getSpace());
     size_t NQuantities        = dataspace->getSimpleExtentNpoints();
+    
     Quantities.resize (NQuantities);
     NMoments.resize   (NQuantities);
     NRandomV.resize   (NQuantities);
     NDisorder.resize  (NQuantities);
+    EnergyScale.resize  (1);
 
     get_hdf5<int>(Quantities.data(), file, (char *)   "/Calculation/FunctionNum");
     get_hdf5<int>(NRandomV.data(),   file, (char *)   "/Calculation/NumRandoms");
     get_hdf5<int>(NMoments.data(),   file, (char *)   "/Calculation/NumMoments");
     get_hdf5<int>(NDisorder.data(),  file, (char *)   "/Calculation/NumDisorder");
-    for(unsigned i = 0; i < NMoments.size(); i++)
-      NMoments.at(i) = 2*(NMoments.at(i)/2);
-
+    get_hdf5<int>(EnergyScale.data(),  file, (char *)   "/EnergyScale");
+    
     delete dataspace;
     delete dataset;
     delete file;
-
     
-		// What quantities do we need to calculate? Let's find out
+    // What quantities from this list do we need to calculate? Let's find out
     int DOS 	 = custom_find(Quantities.data(), NQuantities, 1);
     int CondXX = custom_find(Quantities.data(), NQuantities, 2);
     int CondXY = custom_find(Quantities.data(), NQuantities, 3);
-    int SingleShot = 4;
+
+   
+      
     
+		// Other quantities that require special care, such as SingleShotXX
+		int SingleShotXX = -1;
+		int SingleShotXY = -1;
+		H5::H5File * file_special	= new H5::H5File(name, H5F_ACC_RDONLY);
+		
+		try{
+			if(DEBUG)std::cout << "start try\n";fflush(stdout);
+			H5::Exception::dontPrint();
+			
+			// This is here just to determine the number of quantities we need to calculate
+			H5::DataSet * dataset_special     	= new H5::DataSet(file_special->openDataSet("/Calculation/Calculation_spec/FunctionNum"));
+			H5::DataSpace * dataspace_special 	= new H5::DataSpace(dataset_special->getSpace());
+			size_t NQuantities_special  				= dataspace_special->getSimpleExtentNpoints();
+			delete dataspace_special;
+			delete dataset_special;
+			
+			Quantities_special.resize (NQuantities_special);
+			NMoments_special.resize   (NQuantities_special);
+			NRandomV_special.resize   (NQuantities_special);
+			NDisorder_special.resize  (NQuantities_special);
+			gamma_special.resize 			(NQuantities_special);
+			
+			
+			
+			
+			// We also need to determine the number of energies that we need to calculate
+			H5::DataSet * dataset_energy     	= new H5::DataSet(file_special->openDataSet("/Calculation/Calculation_spec/Energy"));
+			H5::DataSpace * dataspace_energy 	= new H5::DataSpace(dataset_energy->getSpace());
+			hsize_t dims_out[2];		
+			dataspace_energy->getSimpleExtentDims(dims_out, NULL);	
+			singleshot_energies = Eigen::Array<double, -1, -1>::Zero(dims_out[0], dims_out[1]);	
+			delete dataspace_energy;
+			delete dataset_energy;
+			
+			
+			
+			// Now let's fetch those quantities
+			get_hdf5<int>(Quantities_special.data(),	file, (char *)   "/Calculation/Calculation_spec/FunctionNum");
+			get_hdf5<int>(NRandomV_special.data(),  	file, (char *)   "/Calculation/Calculation_spec/NumRandoms");
+			get_hdf5<int>(NMoments_special.data(),  	file, (char *)   "/Calculation/Calculation_spec/NumMoments");
+			get_hdf5<int>(NDisorder_special.data(), 	file, (char *)   "/Calculation/Calculation_spec/NumDisorder");
+			get_hdf5<double>(gamma_special.data(),  	file, (char *)   "/Calculation/Calculation_spec/Gamma");
+			get_hdf5<double>(singleshot_energies.data(),  	file, (char *)   "/Calculation/Calculation_spec/Energy");
+			
+			// Make sure the moments are a power of 2
+			for(unsigned i = 0; i < NMoments_special.size(); i++)
+				NMoments_special.at(i) = 2*(NMoments_special.at(i)/2);
+
+			
+			
+			SingleShotXX = custom_find(Quantities_special.data(), NQuantities_special, 6);
+			SingleShotXY = custom_find(Quantities_special.data(), NQuantities_special, 7);
+			if(DEBUG)std::cout << "ended try\n";fflush(stdout);
+    }
+    catch(H5::Exception& e) {
+			if(DEBUG)std::cout << "exception \n";fflush(stdout);
+    }
+    
+		delete file_special;
+			
     omp_set_num_threads(rglobal.n_threads);
 #pragma omp parallel default(shared)
     {
-      std::cout << " sdfs\n";fflush(stdout);
-      Simulation<T,D> simul(name, Global);	  
       
-      std::cout << "entered after simulation\n";fflush(stdout); 
-       
-      if(SingleShot != -1){
-				std::cout << "I need to calculate SingleShot\n";fflush(stdout);
-				int momentss = 128;
-				int disroder = 1;
-				int randomss = 1;
-				double finite_gamma = 0.01;
-				Eigen::Array<double, -1, -1> energy_array;
-				energy_array = Eigen::Array<double, -1, 1>::LinSpaced(100, -1, 1);
+      Simulation<T,D> simul(name, Global);	  
+            
+      if(SingleShotXX != -1){
+				if(DEBUG)std::cout << "calculating of singleshotxx\n";fflush(stdout);
+				Global.singleshot_cond = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic > :: Zero(1, singleshot_energies.cols());
+				simul.Single_Shot(EnergyScale.at(0), NRandomV_special.at(SingleShotXX), NDisorder_special.at(SingleShotXX), NMoments_special.at(SingleShotXX), singleshot_energies.row(SingleShotXX), gamma_special.at(SingleShotXX), "x,x", "SingleShotXX");
 				
+				if(DEBUG)std::cout << "ended singleshotxx\n";fflush(stdout);
 				
-				Global.singleshot_cond = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic > :: Zero(1, energy_array.rows());
-				simul.Single_Shot(randomss, disroder, momentss, energy_array, finite_gamma, "x,x", "SingleShotXX");
-				
-				//Global.singleshot_= Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic > :: Zero(NMoments.at(SingleShot), NMoments.at(SingleShot));
-				//simul.Single_Shot(NRandomV.at(SingleShot), NDisorder.at(SingleShot), NMoments.at(SingleShot), energy_array, finite_gamma, "x,x", "SingleShotXX");
-				//Single_Shot(int & NRandomV, int & NDisorder, int N_cheb_moments, Eigen::Array<<double>, -1, -1> energy_array, double finite_gamma, std::string indices, std::string name_dataset)
 			}
        
+      if(SingleShotXY != -1){
+				if(DEBUG)std::cout << "calculating of singleshotxy\n";fflush(stdout);
+				Global.singleshot_cond = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic > :: Zero(1, singleshot_energies.cols());
+				simul.Single_Shot(EnergyScale.at(0), NRandomV_special.at(SingleShotXY), NDisorder_special.at(SingleShotXY), NMoments_special.at(SingleShotXY), singleshot_energies.row(SingleShotXY), gamma_special.at(SingleShotXY), "x,y", "SingleShotXY");
+				if(DEBUG)std::cout << "ended singleshotxx\n";fflush(stdout);
+				
+			}
       if(DOS != -1){
-				std::cout << "I need to calculate the density of states\n";fflush(stdout);
+				if(DEBUG)std::cout << "calculating of DOS\n";fflush(stdout);
+				if(DEBUG)std::cout << "NRandomV: " << NRandomV.at(DOS) << "\n";
+				if(DEBUG)std::cout << "NDisorder: " << NDisorder.at(DOS) << "\n";
+				if(DEBUG)std::cout << "NMoments: " << NMoments.at(DOS) << "\n";
+				
 				Global.mu = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic > :: Zero(1, NMoments.at(DOS));
 				simul.Measure_Dos(NRandomV.at(DOS), NDisorder.at(DOS) );
+				if(DEBUG)std::cout << "ended DOS\n";fflush(stdout);
 			}
 			
 			if(CondXX != -1){
-				std::cout << "I need to calculate CondXX\n";fflush(stdout);
+				if(DEBUG)std::cout << "calculating of condxx\n";fflush(stdout);
 				Global.gamma = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic > :: Zero(NMoments.at(CondXX), NMoments.at(CondXX));
 				Global.lambda = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic > :: Zero(1, NMoments.at(CondXX));
 				simul.Measure_Cond(NRandomV.at(CondXX), NDisorder.at(CondXX), "x,x", "GammaXX");
 				simul.Measure_Lambda(NRandomV.at(CondXX), NDisorder.at(CondXX), "xx", "LambdaXX");
+				if(DEBUG)std::cout << "ended condxx\n";fflush(stdout);
 			}
 			
 			if(CondXY != -1){
-				std::cout << "I need to calculate CondXY\n";fflush(stdout);
+				if(DEBUG)std::cout << "calculating of condxy\n";fflush(stdout);
 				Global.gamma = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic > :: Zero(NMoments.at(CondXY), NMoments.at(CondXY));
 				Global.lambda = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic > :: Zero(1, NMoments.at(CondXY));
 				simul.Measure_Cond(NRandomV.at(CondXY), NDisorder.at(CondXY), "x,y", "GammaXY");
 				simul.Measure_Lambda(NRandomV.at(CondXY), NDisorder.at(CondXY), "xy", "LambdaXY");
+				if(DEBUG)std::cout << "ended condxy\n";fflush(stdout);
 			}
 			
 			
@@ -181,6 +257,8 @@ public:
 	      }
 	    average++;
 	  }
+	  
+	  if(DEBUG)std::cout << "Finished chb iteration in DOS.\n";fflush(stdout);
 
 #pragma omp critical
 	Global.mu += mu;
@@ -189,14 +267,19 @@ public:
 	
 #pragma omp master
 	{
-	  H5::H5File * file = new H5::H5File(name, H5F_ACC_RDWR);
-	  write_hdf5(Global.mu, file, "MU");
-	  delete file;
+		if(DEBUG)std::cout << "before creating file with name: " << name << "\n";fflush(stdout);
+	  H5::H5File * file1 = new H5::H5File(name, H5F_ACC_RDWR);
+	  if(DEBUG)std::cout << "before write to file\n";fflush(stdout);
+	  write_hdf5(Global.mu, file1, "MU");
+	  if(DEBUG)std::cout << "before delete file\n";fflush(stdout);
+	  delete file1;
 	  Global.mu.setZero();
 	}
 #pragma omp barrier	
       }
 #pragma omp barrier	
+
+	if(DEBUG)std::cout << "Left calculation of DOS\n";fflush(stdout);
   }
   
   
@@ -208,7 +291,7 @@ public:
 		 */
 		 
 		// Process the indices
-		std::cout << "entered cond\n";
+		if(DEBUG)std::cout << "Calculating cond\n";
 		std::vector<int> first_indices, second_indices;
 		
 		int comma_location = indices.find_first_of(',');
@@ -219,7 +302,7 @@ public:
 		first_indices.resize(first_string.size()); 
 		second_indices.resize(second_string.size());
 		
-		std::cout << "strings: " << first_string << " "<< second_string << "\n";
+		if(DEBUG)std::cout << "strings: " << first_string << " "<< second_string << "\n";
 		
 		for(unsigned int i = 0; i < first_string.size(); i++){
 			if(first_string[i]=='y')
@@ -234,13 +317,13 @@ public:
 			else
 				second_indices.at(i) = 0;
 		}
-			
+			/*
 		for(unsigned  int i = 0; i < first_string.size(); i++)
 			std::cout << "first_indices: " << first_indices.at(i) << "\n";
 			
 		for(unsigned  int i = 0; i < second_string.size(); i++)
 			std::cout << "second_indices: " << second_indices.at(i) << "\n";
-		
+		*/
 		
 		
 		//Done processing the indices
@@ -354,7 +437,7 @@ public:
 		
 #pragma omp critical
 
-		std::cout << "IMPORTANT ! ! !:\n V is not hermitian. Make sure you take this into account\n";
+		//std::cout << "IMPORTANT ! ! !:\n V is not hermitian. Make sure you take this into account\n";
 		// in this case there's no problem. both V are anti-hermitic, so the minus signs cancel
 		if(first_indices.size()==1 && second_indices.size()==1)
 			Global.gamma.matrix() += (gamma.matrix() + gamma.matrix().adjoint())/2.0;
@@ -389,12 +472,12 @@ public:
 		 * with phi. Velocity2 = v^ab
 		 * */
 		 
-		std::cout << "entered LAMBDA\n";fflush(stdout);
+		if(DEBUG)std::cout << "entered LAMBDA\n";fflush(stdout);
 		
 		// Process the indices
 		std::vector<int> first_indices;
 		first_indices.resize(indices.size()); 
-		std::cout << "strings: " << indices << "\n";fflush(stdout);
+		if(DEBUG)std::cout << "strings: " << indices << "\n";fflush(stdout);
 		
 		for(unsigned int i = 0; i < indices.size(); i++){
 			if(indices[i]=='y')
@@ -403,7 +486,7 @@ public:
 				first_indices.at(i) = 0;
 		}
 		for(unsigned  int i = 0; i < indices.size(); i++)
-			std::cout << "first_indices: " << first_indices.at(i) << "\n";fflush(stdout);
+			if(DEBUG)std::cout << "first_indices: " << first_indices.at(i) << "\n";fflush(stdout);
 		
 		
 		
@@ -478,7 +561,7 @@ public:
 #pragma omp barrier
   }
 
-  void Single_Shot(int & NRandomV, int & NDisorder, int N_cheb_moments, Eigen::Array<double, -1, 1> energy_array, double finite_gamma, std::string indices, std::string name_dataset) {
+  void Single_Shot(double EScale, int & NRandomV, int & NDisorder, int N_cheb_moments, Eigen::Array<double, -1, 1> energy_array, double finite_gamma, std::string indices, std::string name_dataset) {
 		/*
 		 * Calculate the longitudinal conductivity for a single value of the energy
 		 */
@@ -486,7 +569,7 @@ public:
 		//std::cout << "energies: " << energy_array << "\n";
 		 
 		// Process the indices
-		std::cout << "entered cond\n";
+		if(DEBUG)std::cout << "entered singleshot\n";
 		std::vector<int> first_indices, second_indices;
 		
 		int comma_location = indices.find_first_of(',');
@@ -497,7 +580,7 @@ public:
 		first_indices.resize(first_string.size()); 
 		second_indices.resize(second_string.size());
 		
-		std::cout << "strings: " << first_string << " "<< second_string << "\n";
+		if(DEBUG)std::cout << "strings: " << first_string << " "<< second_string << "\n";
 		
 		for(unsigned int i = 0; i < first_string.size(); i++){
 			if(first_string[i]=='y')
@@ -512,14 +595,14 @@ public:
 			else
 				second_indices.at(i) = 0;
 		}
-			
+			/*
 		for(unsigned  int i = 0; i < first_string.size(); i++)
 			std::cout << "first_indices: " << first_indices.at(i) << "\n";
 			
 		for(unsigned  int i = 0; i < second_string.size(); i++)
 			std::cout << "second_indices: " << second_indices.at(i) << "\n";
 		
-		
+		*/
 		
 		//Done processing the indices
 		
@@ -544,19 +627,19 @@ public:
     //~ std::cout << "before cond array\n";fflush(stdout);
     cond_array = Eigen::Array<T, -1, -1>::Zero(1, Global.singleshot_cond.cols());
     
-    std::cout << "gonna start calculating\n";fflush(stdout);
+    if(DEBUG)std::cout << "gonna start calculating\n";fflush(stdout);
     
     for(int ener = 0; ener < N_energies; ener++){
 			std::complex<double> energy(energy_array(ener), finite_gamma);
-			std::cout << "finished setting complex energy\n";fflush(stdout);
+			if(DEBUG)std::cout << "finished setting complex energy\n";fflush(stdout);
 			long average = 0;
 			for(int disorder = 0; disorder < NDisorder; disorder++){
-				std::cout << "before disorder\n";fflush(stdout);
+				if(DEBUG)std::cout << "before disorder\n";fflush(stdout);
 					h.generate_disorder();
-					std::cout << "after disorder\n";fflush(stdout);
+					if(DEBUG)std::cout << "after disorder\n";fflush(stdout);
 					for(int randV = 0; randV < NRandomV; randV++){
 						
-						std::cout << "started calculating the first vector\n";fflush(stdout);
+						if(DEBUG)std::cout << "started calculating the first vector\n";fflush(stdout);
 																		
 						phi0.initiate_vector();					
 						phi0.Exchange_Boundaries(); 	
@@ -567,7 +650,7 @@ public:
 						
 						// |phi> = v |phi_0>
 						phi.Velocity(phi.v.col(0).data(), phi0.v.col(0).data(), first_indices.at(0));	
-						std::cout << "multiplied by velocity\n";fflush(stdout);
+						if(DEBUG)std::cout << "multiplied by velocity\n";fflush(stdout);
 						phi.Exchange_Boundaries();	
 						//~ phi1.v.col(0) = phi.v.col(phi.get_index())*(a==0);
 						phi1.v.col(0) = phi.v.col(phi.get_index())*green(0, 1, energy).imag()/2.0;
@@ -576,7 +659,7 @@ public:
 						//~ phi1.v.col(0) += phi.v.col(1)*(a==1);
 						phi1.v.col(0) += phi.v.col(1)*green(1, 1, energy).imag();
 						
-						std::cout << "finished first cheb\n";fflush(stdout);
+						if(DEBUG)std::cout << "finished first cheb\n";fflush(stdout);
 						
 						for(int n = 2; n < N_cheb_moments; n++){		
 							phi.template Multiply<1>();
@@ -590,7 +673,7 @@ public:
 						phi.Velocity(phi1.v.col(0).data(), phi.v.col(0).data(), second_indices.at(0));
 						phi1.empty_ghosts(0);
 						
-						std::cout << "Finished calculating the first vector\n";fflush(stdout);
+						if(DEBUG)std::cout << "Finished calculating the first vector\n";fflush(stdout);
 						
 						// calculate the right vector
 						phi.set_index(0);			
@@ -612,7 +695,7 @@ public:
 						cond_array(ener) += (T(phi1.v.col(0).adjoint()*phi2.v.col(0)) - cond_array(ener))/value_type(average+1);						
 						average++;
 						
-						std::cout << "Finished calculating the second vector\n";fflush(stdout);
+						if(DEBUG)std::cout << "Finished calculating the second vector\n";fflush(stdout);
 				}
 			}
 		}
@@ -625,7 +708,7 @@ public:
 		
 #pragma omp critical
 
-		std::cout << "IMPORTANT ! ! !:\n V is not hermitian. Make sure you take this into account\n";
+		//std::cout << "IMPORTANT ! ! !:\n V is not hermitian. Make sure you take this into account\n";
 		// in this case there's no problem. both V are anti-hermitic, so the minus signs cancel
 		Global.singleshot_cond += cond_array;
 		
@@ -635,25 +718,35 @@ public:
     
 #pragma omp master
     {
+			
+			// Fixing the factor
+			double unit_cell_area = fabs(r.rLat.determinant());
+      unsigned int number_of_orbitals = r.Orb; 	// This is necessary because the normalization factor inside the random 
+																								// vectors is not the number of lattice sites N but the number of states, 
+																								// which is N*number_of_orbitals
+      unsigned int spin_degeneracy = 1;
+      
+      double factor = -4.0*spin_degeneracy*number_of_orbitals/M_PI/unit_cell_area;	// This is in units of sigma_0, hence the 4
+      Global.singleshot_cond *= factor;
+      
+      // Create array to store the data
+      Eigen::Array<double, -1, -1> store_data;
+      store_data = Eigen::Array<double, -1, -1>::Zero(2, Global.singleshot_cond.cols());
+      
+      for(int ener = 0; ener < N_energies; ener++){
+				store_data(0, ener) = energy_array.real()(ener)*EScale;
+				store_data(1, ener) = Global.singleshot_cond.real()(ener);
+			}
+			
+
+			
       H5::H5File * file = new H5::H5File(name, H5F_ACC_RDWR);
-			write_hdf5(Global.singleshot_cond, file, name_dataset);
+			write_hdf5(store_data, file, name_dataset);
       delete file;
       
-      std::cout << "finished writting to thing\n";fflush(stdout);
-      std::ofstream mmfile;
-      mmfile.open("output_thingy.dat");
-      
-      //std::cout << Global.singleshot_cond.real()  << "\n";
-      
-      for(int i=0; i < Global.singleshot_cond.cols()*Global.singleshot_cond.rows(); i++){
-				mmfile << energy_array(i) << " " << Global.singleshot_cond.real()(i) <<  "\n";
-				std::cout << energy_array(i) << " " << Global.singleshot_cond(i) <<  "\n";
-			}
-      
-      mmfile.close();
       // make sure the global matrix is zeroed
       Global.singleshot_cond.setZero();
-      std::cout << "left singleshot\n";fflush(stdout);
+      if(DEBUG)std::cout << "left singleshot\n";fflush(stdout);
     }
 #pragma omp barrier
   }

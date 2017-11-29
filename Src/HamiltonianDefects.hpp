@@ -111,8 +111,10 @@ struct Defect_Operator  {
 
     for(unsigned ih = 0; ih < hopping.size(); ih++)
       {
-	Lda.set_coord(static_cast<std::ptrdiff_t>(element1.at(ih)));
-	Ldb.set_coord(static_cast<std::ptrdiff_t>(element2.at(ih)));
+	
+	Lda.set_coord(static_cast<std::ptrdiff_t>(r.Nd/2 + node_position[element1.at(ih)]));
+	Ldb.set_coord(static_cast<std::ptrdiff_t>(r.Nd/2 + node_position[element2.at(ih)]));
+
 	dr = r.rOrb.col(Ldb.coord[D]) - r.rOrb.col(Lda.coord[D]);
 	dr += r.rLat * (vb - va).template cast<double>();
 	

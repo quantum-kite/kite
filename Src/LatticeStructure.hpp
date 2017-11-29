@@ -114,7 +114,7 @@ public:
       H5::H5File *file = new H5::H5File(name, H5F_ACC_RDONLY);
       get_hdf5<unsigned>(&Orb, file, (char *) "/NOrbitals");
       get_hdf5<double>(rLat.data(), file, (char *) "/LattVectors");    
-      rOrb = Eigen::MatrixXd::Zero(Orb,D);
+      rOrb = Eigen::MatrixXd::Zero(D, Orb);
       get_hdf5<double>(rOrb.data(), file, (char *) "/OrbPositions");
       
       get_hdf5<unsigned>(Lt, file, (char *) "/L");
@@ -264,8 +264,8 @@ public:
     
     r1 = rOrb.col(Latt1.coord[D]) + rLat * v1.template cast<double>();
     r2 = rOrb.col(Latt2.coord[D]) + rLat * v2.template cast<double>();
-    std::cout << r1.transpose() << std::endl;
-    std::cout << r2.transpose() << std::endl << std::endl;
+    //std::cout << r1.transpose() << std::endl;
+    //std::cout << r2.transpose() << std::endl << std::endl;
   }
 
   bool test_ghosts(  Coordinates<std::size_t, D + 1> & Latt)
@@ -281,8 +281,8 @@ public:
 	teste = 0;                                        // node is in the ghosts!
       else  if(Latt.coord[j] < 0 || Latt.coord[j] > std::ptrdiff_t(Ld[j] - 1))
 	{
-	  std::cout << "Big Mistake" << std::endl;
-	  std::cout.flush();
+	  //std::cout << "Big Mistake" << std::endl;
+	  //std::cout.flush();
 	}
     return teste;
   }
