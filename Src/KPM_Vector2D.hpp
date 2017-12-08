@@ -598,22 +598,22 @@ public:
       for(long i0 = 0; i0 < (long) r.Ld[0]; i0++)
 	for(int d = 0; d < NGHOSTS; d++)
 	  v(x.set({i0,(long) d,io}).index, mem_index) *= 0;
-
+    
     for(long  io = 0; io < (long) r.Ld[2]; io++)
       for(long i0 = 0; i0 < (long) r.Ld[0]; i0++)
 	for(int d = 0; d < NGHOSTS; d++)
 	  v(x.set({i0, (long) (r.Ld[1] - 1 - d),io}).index, mem_index) *= 0;
-  
-      for(long  io = 0; io < (long) r.Ld[2]; io++)
-	for(long i1 = 0; i1 < (long) r.Ld[1]; i1++)
-	  for(int d = 0; d < NGHOSTS; d++)
-	    v(x.set({(long) d,i1,io}).index, mem_index) *= 0;
-
-      for(long  io = 0; io < (long) r.Ld[2]; io++)
-	for(long i1 = 0; i1 < (long) r.Ld[1]; i1++)
-	  for(int d = 0; d < NGHOSTS; d++)
-	    v(x.set({(long) (r.Ld[0] - 1 - d),i1,io}).index, mem_index) *= 0;
-
-    };
+    
+    for(long  io = 0; io < (long) r.Ld[2]; io++)
+      for(long i1 = 0; i1 < (long) r.Ld[1]; i1++)
+	for(int d = 0; d < NGHOSTS; d++)
+	  v(x.set({(long) d,i1,io}).index, mem_index) *= 0;
+    
+    for(long  io = 0; io < (long) r.Ld[2]; io++)
+      for(long i1 = 0; i1 < (long) r.Ld[1]; i1++)
+	for(int d = 0; d < NGHOSTS; d++)
+	  v(x.set({(long) (r.Ld[0] - 1 - d),i1,io}).index, mem_index) *= 0;
+    
+  };
   
 };
