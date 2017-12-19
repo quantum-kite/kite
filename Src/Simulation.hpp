@@ -1,7 +1,6 @@
 #ifndef _SIMULATION_HPP
 #define _SIMULATION_HPP
 
-#define DEBUG 0
 
 int custom_find(int *arr, int arr_size, int value_to_search){
 	/* This function searches array 'arr' for any occurence of number 'value to search'.
@@ -101,7 +100,7 @@ public:
       // This is here just to determine the number of quantities we need to calculate
       H5::DataSet * dataset_special     	= new H5::DataSet(file_special->openDataSet("/Calculation/Calculation_spec/FunctionNum"));
       H5::DataSpace * dataspace_special 	= new H5::DataSpace(dataset_special->getSpace());
-      size_t NQuantities_special  				= dataspace_special->getSimpleExtentNpoints();
+      size_t NQuantities_special  			= dataspace_special->getSimpleExtentNpoints();
       delete dataspace_special;
       delete dataset_special;
 			
@@ -109,7 +108,7 @@ public:
       NMoments_special.resize   (NQuantities_special);
       NRandomV_special.resize   (NQuantities_special);
       NDisorder_special.resize  (NQuantities_special);
-      gamma_special.resize 			(NQuantities_special);
+      gamma_special.resize 		(NQuantities_special);
 			
 			
 			
@@ -118,7 +117,13 @@ public:
       H5::DataSet * dataset_energy     	= new H5::DataSet(file_special->openDataSet("/Calculation/Calculation_spec/Energy"));
       H5::DataSpace * dataspace_energy 	= new H5::DataSpace(dataset_energy->getSpace());
       hsize_t dims_out[2];		
-      dataspace_energy->getSimpleExtentDims(dims_out, NULL);	
+      int dimension;
+      dimension = dataspace_energy->getSimpleExtentDims(dims_out, NULL);	
+      if(dimension == 1)
+		dims_out[1] = 1;
+#ifdef DEBUG      
+      std::cout << "energy dims\n" << dims_out[0] << " " << dims_out[1] << "\n" << std::flush;
+#endif
       singleshot_energies = Eigen::Array<double, -1, -1>::Zero(dims_out[0], dims_out[1]);	
       delete dataspace_energy;
       delete dataset_energy;
@@ -201,21 +206,29 @@ public:
       }
 			
       if(CondXX != -1){
+#ifdef DEBUG      		  
 	if(DEBUG)std::cout << "calculating of condxx\n"<<std::flush;
+#endif
 	Global.gamma = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic > :: Zero(NMoments.at(CondXX), NMoments.at(CondXX));
 	Global.lambda = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic > :: Zero(1, NMoments.at(CondXX));
 	simul.Measure_Cond(NRandomV.at(CondXX), NDisorder.at(CondXX), "x,x", "GammaXX");
 	simul.Measure_Lambda(NRandomV.at(CondXX), NDisorder.at(CondXX), "xx", "LambdaXX");
+#ifdef DEBUG      
 	if(DEBUG)std::cout << "ended condxx\n"<<std::flush;
+#endif
       }
 			
       if(CondXY != -1){
+#ifdef DEBUG      
 	if(DEBUG)std::cout << "calculating of condxy\n"<<std::flush;
+#endif
 	Global.gamma = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic > :: Zero(NMoments.at(CondXY), NMoments.at(CondXY));
 	Global.lambda = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic > :: Zero(1, NMoments.at(CondXY));
 	simul.Measure_Cond(NRandomV.at(CondXY), NDisorder.at(CondXY), "x,y", "GammaXY");
 	simul.Measure_Lambda(NRandomV.at(CondXY), NDisorder.at(CondXY), "xy", "LambdaXY");
+#ifdef DEBUG      
 	if(DEBUG)std::cout << "ended condxy\n"<<std::flush;
+#endif
       }
 			
 			
@@ -277,8 +290,9 @@ public:
 	      }
 	    average++;
 	  }
-	  
+#ifdef DEBUG      
 	if(DEBUG)std::cout << "Finished chb iteration in DOS.\n"<<std::flush;
+#endif
 
 #pragma omp critical
 	Global.mu += mu;
@@ -287,11 +301,8 @@ public:
 	
 #pragma omp master
 	{
-	  if(DEBUG)std::cout << "before creating file with name: " << name << "\n"<<std::flush;
 	  H5::H5File * file1 = new H5::H5File(name, H5F_ACC_RDWR);
-	  if(DEBUG)std::cout << "before write to file\n"<<std::flush;
 	  write_hdf5(Global.mu, file1, "MU");
-	  if(DEBUG)std::cout << "before delete file\n"<<std::flush;
 	  delete file1;
 	  Global.mu.setZero();
 	}
@@ -299,7 +310,9 @@ public:
       }
 #pragma omp barrier	
 
+#ifdef DEBUG      
     if(DEBUG)std::cout << "Left calculation of DOS\n"<<std::flush;
+#endif
   }
   
   
@@ -311,7 +324,10 @@ public:
      */
 		 
     // Process the indices
-    if(DEBUG)std::cout << "Calculating cond\n";
+    
+#ifdef DEBUG      
+	if(DEBUG)std::cout << "Calculating cond\n";
+#endif
     std::vector<int> first_indices, second_indices;
 		
     int comma_location = indices.find_first_of(',');
@@ -322,7 +338,9 @@ public:
     first_indices.resize(first_string.size()); 
     second_indices.resize(second_string.size());
 		
+#ifdef DEBUG      
     if(DEBUG)std::cout << "strings: " << first_string << " "<< second_string << "\n";
+#endif
 		
     for(unsigned int i = 0; i < first_string.size(); i++){
       if(first_string[i]=='y')

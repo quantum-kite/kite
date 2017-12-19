@@ -85,7 +85,7 @@ configuration = ex.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries
 # - energy and gamma for single energy calculations.
 calculation = ex.Calculation(fname=['DOS', 'CondXX', 'SingleCondXX', 'SingleCondXY'],
                              num_moments=[256, 32, 128, 128], num_random=[1, 1, 1, 1],
-                             num_disorder=[1, 1, 1, 1], energy=[[0.01 + 0.01*n for n in range(99)], [0.01 + 0.01*n for n in range(99)]], gamma=[1e-2, 1e-2])
+                             num_disorder=[1, 1, 1, 1], energy=[0.03, 0.04], gamma=[1e-2, 1e-2])
 
 # make modification object which caries info about (TODO: Other modifications can be added here)
 # - magnetic field can be set to True. Default case is False. In exported file it's converted to 1 and 0.
