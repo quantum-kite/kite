@@ -61,7 +61,7 @@ def graphene_initial(onsite=(0, 0)):
 lattice, disorder, disorded_structural = graphene_initial()
 # number of decomposition parts in each direction of matrix.
 
-nx = ny = 1
+nx = ny = 2
 # number of unit cells in each direction.
 lx = 256
 ly = 256
@@ -89,7 +89,7 @@ configuration = ex.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries
 # - number of disorder realisations.
 # - energy and gamma for single energy calculations.
 calculation = ex.Calculation(fname=['DOS', 'CondXX', 'SingleCondXX', 'SingleCondXY'],
-                             num_moments=[256, 32, 256, 256], num_random=[1, 1, 1, 1],
+                             num_moments=[256, 256, 256, 256], num_random=[1, 1, 1, 1],
                              num_disorder=[1, 1, 1, 1], energy=[0, 0], gamma=[1e-2, 1e-2])
 
 # make modification object which caries info about (TODO: Other modifications can be added here)
