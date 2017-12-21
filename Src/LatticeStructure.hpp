@@ -108,6 +108,8 @@ public:
   unsigned Orb; // Number of orbitals
   unsigned thread_id; // thread identification
   
+  Eigen::Matrix<double, D, D> vect_pot; // vector potential
+  
   LatticeStructure(char *name ) {
 #pragma omp critical
     {
@@ -122,6 +124,14 @@ public:
       get_hdf5<unsigned>(nd, file, (char *) "/Divisions");
       file->close();
     }
+    
+    // Set the vector potential
+    vect_pot.setZero();
+    std::cout << "l0: " << Lt[0] << "\n";
+    vect_pot(0,1) = 1.0/Lt[0]*2.0*M_PI;
+    std::cout << "vect_pot:" << vect_pot << "\n";
+    //vect_pot.setZero();
+    
     Nd = 1;
     N = 1;
     Nt = 1;

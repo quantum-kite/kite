@@ -6,6 +6,7 @@ struct Defect_Operator  {
   std::vector <T>                          U;                        // local energies
   std::vector <unsigned>             element;                        // nodes with local energies
   std::vector <T>                    hopping;                        // vector of the non-zero values of the operator
+  std::vector <T>           hopping_magnetic;                        
   std::vector <T>                       V[D];
   std::vector <T>                   V2[D][D];
   std::vector <unsigned>            element1;                        // vector with the nodes 
@@ -16,6 +17,7 @@ struct Defect_Operator  {
   std::vector <std::size_t>  border_element1;                        // Position of broken deffects in hopping terms                     
   std::vector <std::size_t>  border_element2;                        // Position of broken deffects in hopping terms                     
   std::vector <T>             border_hopping;
+  std::vector <T>    border_hopping_magnetic;
   std::vector <T>                border_V[D];                                           
   std::vector <T>            border_V2[D][D];   
   std::vector <T>                   border_U;                                                 
@@ -107,7 +109,12 @@ struct Defect_Operator  {
 
     Coordinates<std::ptrdiff_t, D + 1> Lda(r.Ld), Ldb(r.Ld);
     Eigen::Map<Eigen::Matrix<std::ptrdiff_t,D, 1>> va(Lda.coord), vb(Ldb.coord); // Column vector
-    Eigen::Matrix<double, D, 1> dr;
+    Eigen::Matrix<double, D, 1> dr_R;
+    Eigen::Matrix<double, D, 1> dr_a;
+    Eigen::Matrix<double, D, 1> orbital_difference_R;
+    Eigen::Matrix<double, D, 1> lattice_difference_R;
+    Eigen::Matrix<double, D, 1> orbital_difference_a;
+    Eigen::Matrix<double, D, 1> lattice_difference_a;
 
     for(unsigned ih = 0; ih < hopping.size(); ih++)
       {
@@ -115,15 +122,30 @@ struct Defect_Operator  {
 	Lda.set_coord(static_cast<std::ptrdiff_t>(r.Nd/2 + node_position[element1.at(ih)]));
 	Ldb.set_coord(static_cast<std::ptrdiff_t>(r.Nd/2 + node_position[element2.at(ih)]));
 
-	dr = r.rOrb.col(Ldb.coord[D]) - r.rOrb.col(Lda.coord[D]);
-	dr += r.rLat * (vb - va).template cast<double>();
+	// difference vectors in real-space coordinates
+	orbital_difference_R = r.rOrb.col(Ldb.coord[D]) - r.rOrb.col(Lda.coord[D]);
+	lattice_difference_R = r.rLat * (vb - va).template cast<double>();
+	dr_R = orbital_difference_R + lattice_difference_R;
+	
+	// difference vectors in lattice coordinates
+	orbital_difference_a = r.rLat.inverse() * orbital_difference_R;
+	lattice_difference_a = r.rLat.inverse() * lattice_difference_R;
+	dr_a = orbital_difference_a + lattice_difference_a;
+	
+	
+	
+	// periodic part of the Peierls phase. 
+        // If the kpm vector is not complex, peierls1(phase) will return 1.0, so it is effectively harmless.
+        double phase = ((0.5*dr_a.transpose() + (r.rLat.inverse()*r.rOrb.col(Lda.coord[D])).transpose())*r.vect_pot*dr_a - lattice_difference_a.transpose()*r.vect_pot*r.rLat.inverse()*r.rOrb.col(Ldb.coord[D]))(0,0);
+        hopping_magnetic.at(ih) = hopping.at(ih) * peierls1(phase);
+        hopping.at(ih) = hopping_magnetic.at(ih);
 	
 	for(unsigned dim = 0; dim < D; dim++)
-	  V[dim].push_back( hopping.at(ih) * T(dr(dim)) );
+	  V[dim].push_back( hopping.at(ih) * T(dr_R(dim)) );
 
 	for(unsigned dim1 = 0; dim1 < D; dim1++)
 	  for(unsigned dim2 = 0; dim2 < D; dim2++)
-	    V2[dim1][dim2].push_back( hopping.at(ih) * T(dr(dim1)) * T(dr(dim2)));
+	    V2[dim1][dim2].push_back( hopping.at(ih) * T(dr_R(dim1)) * T(dr_R(dim2)));
       }
     
 
@@ -279,7 +301,16 @@ struct Defect_Operator  {
   
 
 
-
+    template <typename U = T>
+  typename std::enable_if<is_tt<std::complex, U>::value, U>::type peierls1(double phase) {
+	std::complex<double> im(0,1.0);
+    return U(exp(im*phase));
+  };
+  
+  template <typename U = T>
+  typename std::enable_if<!is_tt<std::complex, U>::value, U>::type peierls1(double phase) {
+    return 1.0;
+  };
 
   
 };

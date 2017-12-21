@@ -1,3 +1,4 @@
+#include <iomanip>
 template <typename T>
 class KPM_Vector <T, 2> : public KPM_VectorBasis <T,2> {
 private:
@@ -66,6 +67,8 @@ public:
   
   template < unsigned MULT> 
   void Multiply() {
+	 
+	  
     /*
       Mosaic Multiplication using a TILE of STRIDE x STRIDE 
       Right Now We expect that both ld[0] and ld[1]  are multiple of STRIDE
@@ -74,6 +77,24 @@ public:
     */
 
     Coordinates<std::size_t,3> x(r.Ld);
+    
+    // Relative to magnetic field
+    Coordinates<std::ptrdiff_t, 3> global_coords(r.Lt), local_coords(r.Ld); 
+    Coordinates<std::ptrdiff_t, 3> m1(r.Lt), m2(r.Lt); 
+    Eigen::Map<Eigen::Matrix<std::ptrdiff_t,2,1>> v_global_coords(global_coords.coord);
+    Eigen::Map<Eigen::Matrix<std::ptrdiff_t,2,1>> v_local_coords(local_coords.coord);
+    Eigen::Map<Eigen::Matrix<std::ptrdiff_t,2,1>> v_m(m1.coord);
+    
+    std::complex<double> im(0,1.0);
+    double phase;
+    Eigen::Matrix<double, 1, 2> temp_vect;
+    
+    Eigen::Array<double, 1, 4> hopping_phase; // Hopping
+    hopping_phase(0) = 0;
+    hopping_phase(1) = 2.0*M_PI/r.Lt[0];
+    hopping_phase(2) = -2.0*M_PI/r.Lt[0];
+    hopping_phase(3) = 0;
+    
     std::size_t i0, i1;
     inc_index();
     T * phi0 = v.col(index).data();
@@ -106,11 +127,11 @@ public:
 	  
 	  for(std::size_t io = 0; io < r.Orb; io++)
 	    {
-	      const std::size_t ip = io * x.basis[2] ;
+	      const std::size_t ip = io * x.basis[2];
 	      const std::size_t dd = (h.Anderson_orb_address[io] - io)*r.Nd;
-	      const std::size_t std = x.basis[1];
+	      const std::size_t std = x.basis[1]; // this already takes the orbital into account
 	      const std::size_t j0 = ip + i0 + i1 * std;
-	      const std::size_t j1 = j0 + STRIDE * std;
+	      const std::size_t j1 = j0 + STRIDE * std; //j0 and j1 define the limits of the for cycle
 
 	      // Initialize phi0
 		
@@ -135,15 +156,45 @@ public:
 		    for(std::size_t i = j; i < j + STRIDE ; i++)
 		      phi0[i] += value_type(MULT + 1) * phiM1[i] * h.U_Orbital.at(io);
 		}
+	     
+	      
+	      
+	      
 	      // Hoppings
 	      for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
 		{
-		  const std::ptrdiff_t  d1 = h.hr.distance(ib, io);
+		  const std::ptrdiff_t d1 = h.hr.distance(ib, io);
 		  const T t1 =  value_type(MULT + 1) * h.hr.hopping(ib, io);
 		  
-		  for(std::size_t j = j0; j < j1; j += std )
-		    for(std::size_t i = j; i < j + STRIDE ; i++)
-		      phi0[i] += t1 * phiM1[i + d1];
+		  // These two lines pertrain only to the magnetic field
+		  
+		  //temp_vect = v3.transpose().template cast<double>()*r.vect_pot;
+		  
+		  for(std::size_t j = j0; j < j1; j += std ){
+		    for(std::size_t i = j; i < j + STRIDE ; i++){
+		      
+		      // These two lines pertrain only to the magnetic field
+		      //global_coords.set_coord(i);
+		      r.convertCoordinates(m1, local_coords.set_coord(i));
+		      //phase = -temp_vect*v_global_coords.template cast<double>();
+		      //if((i%r.Ld[0] == 10 and d1 == 1) or (i%r.Ld[0] == 11 and d1 == -1)){
+			  /*std::cout << "i: " << i << " " << " d1: " << d1 << " v3: " << v3 << " v_global_coords: " << v_global_coords << "\n" << std::flush;
+			  std::cout << "phase: " << phase << " " << peierls2(phase) << "\n" << std::flush;*/
+		      /*
+		      r.convertCoordinates(m1, local_coords.set_coord(i));
+		      r.convertCoordinates(m2, local_coords.set_coord(i+d1));
+			  
+		      std::cout << std::setfill('0') << std::setw(5) << std::min(m1.index, m2.index);
+		      std::cout <<  " ";
+		      std::cout << std::setfill('0') << std::setw(5) << std::max(m1.index, m2.index);
+		      std::cout <<  " ";
+		      std::cout << t1*peierls2(hopping_phase(ib)*v_global_coords(1));
+		      m1.print();*/
+		      
+		      phi0[i] += t1 * phiM1[i + d1] * peierls2(hopping_phase(ib)*v_m(1));
+		      
+		    }
+		  }
 		}
 	    }
 	  
@@ -152,12 +203,23 @@ public:
 	  for(auto id = h.hd.begin(); id != h.hd.end(); id++)
 	    for(std::size_t i = 0; i <  id->position.at(istr).size(); i++)
 	      {
+		std::cout << "Shouldn't be here\n";
+		exit(0);
+		
 		std::size_t ip = id->position.at(istr)[i];
 		for(unsigned k = 0; k < id->hopping.size(); k++)
 		  {
 		    std::size_t k1 = ip + id->node_position[id->element1[k]];
 		    std::size_t k2 = ip + id->node_position[id->element2[k]];
-		    phi0[k1] += value_type(MULT + 1) * id->hopping[k] * phiM1[k2];
+		    
+		    // These four lines pertrain only to the magnetic field
+		    local_coords.set_coord(k);
+		    temp_vect = v_local_coords.transpose().template cast<double>()*r.vect_pot;
+		    global_coords.set_coord(k1);
+		    phase = temp_vect*v_global_coords.template cast<double>();
+		    
+		    phi0[k1] += value_type(MULT + 1) * id->hopping[k] * phiM1[k2] * peierls2(0.0);
+		    
 		  }
 		
 		for(std::size_t k = 0; k < id->U.size(); k++)
@@ -172,9 +234,18 @@ public:
     for(auto id = h.hd.begin(); id != h.hd.end(); id++)
       for(std::size_t i = 0; i < id->border_element1.size(); i++)
 	{
+	    std::cout << "Shouldn't be here\n";
+	  exit(0);
 	  std::size_t i1 = id->border_element1[i];
 	  std::size_t i2 = id->border_element2[i];
-	  phi0[i1] += value_type(MULT + 1) * id->border_hopping[i] * phiM1[i2];
+	  
+	  // These four lines pertrain only to the magnetic field
+	  local_coords.set_coord(i);
+	  temp_vect = v_local_coords.transpose().template cast<double>()*r.vect_pot;
+	  global_coords.set_coord(i1);
+	  phase = temp_vect*v_global_coords.template cast<double>();
+	  
+	  phi0[i1] += value_type(MULT + 1) * id->border_hopping[i] * phiM1[i2] * peierls2(0.0);
 	}
     
     for(auto id = h.hd.begin(); id != h.hd.end(); id++)
@@ -185,6 +256,7 @@ public:
 	}
     
     Exchange_Boundaries();
+    
   };
   
   void Velocity( T * phi0, T * phiM1, int axis) {
@@ -197,7 +269,7 @@ public:
     T zero = assign_value<T>(double(0), double(0));
     Coordinates<std::size_t,3> x(r.Ld);
     std::size_t i0, i1;
-    
+
     // Initialize tiles that have deffects connecting elements of a previous tile
     for(auto istr = h.cross_mozaic_indexes.begin(); istr != h.cross_mozaic_indexes.end() ; istr++)
       {
@@ -244,7 +316,7 @@ public:
 		  
 		  for(std::size_t j = j0; j < j1; j += std )
 		    for(std::size_t i = j; i < j + STRIDE ; i++)
-		      phi0[i] += t1 * phiM1[i + d1];
+		      phi0[i] += t1 * phiM1[i + d1];// * Peierls_Phase(i, i + d1);
 		}
 	    }
 	  
@@ -258,7 +330,7 @@ public:
 		  {
 		    std::size_t k1 = ip + id->node_position[id->element1[k]];
 		    std::size_t k2 = ip + id->node_position[id->element2[k]];
-		    phi0[k1] +=  (id->V[axis])[k] * phiM1[k2];
+		    phi0[k1] +=  (id->V[axis])[k] * phiM1[k2];// * Peierls_Phase(k1, k2);
 		  }
 	      }
 	}
@@ -269,7 +341,7 @@ public:
 	{
 	  std::size_t i1 = id->border_element1[i];
 	  std::size_t i2 = id->border_element2[i];
-	  phi0[i1] +=  (id->border_V[axis])[i] * phiM1[i2];
+	  phi0[i1] +=  (id->border_V[axis])[i] * phiM1[i2];// * Peierls_Phase(i1, i2);
 	}
         
     Exchange_Boundaries();
@@ -333,7 +405,7 @@ public:
 		  
 		  for(std::size_t j = j0; j < j1; j += std )
 		    for(std::size_t i = j; i < j + STRIDE ; i++)
-		      phi0[i] += t1 * phiM1[i + d1];
+		      phi0[i] += t1 * phiM1[i + d1];// * Peierls_Phase(i, i + d1);
 		}
 	    }
 	  
@@ -347,7 +419,7 @@ public:
 		  {
 		    std::size_t k1 = ip + id->node_position[id->element1[k]];
 		    std::size_t k2 = ip + id->node_position[id->element2[k]];
-		    phi0[k1] +=  (id->V2[axis1][axis2])[k]* phiM1[k2];
+		    phi0[k1] +=  (id->V2[axis1][axis2])[k]* phiM1[k2];// * Peierls_Phase(k1, k2);
 		  }
 	      }
 	}
@@ -358,7 +430,7 @@ public:
 	{
 	  std::size_t i1 = id->border_element1[i];
 	  std::size_t i2 = id->border_element2[i];
-	  phi0[i1] +=  (id->border_V2[axis1][axis2])[i] * phiM1[i2];
+	  phi0[i1] +=  (id->border_V2[axis1][axis2])[i] * phiM1[i2];// * Peierls_Phase(i1, i2);
 	}
         
     Exchange_Boundaries();
@@ -598,22 +670,35 @@ public:
       for(long i0 = 0; i0 < (long) r.Ld[0]; i0++)
 	for(int d = 0; d < NGHOSTS; d++)
 	  v(x.set({i0,(long) d,io}).index, mem_index) *= 0;
-    
+
     for(long  io = 0; io < (long) r.Ld[2]; io++)
       for(long i0 = 0; i0 < (long) r.Ld[0]; i0++)
 	for(int d = 0; d < NGHOSTS; d++)
 	  v(x.set({i0, (long) (r.Ld[1] - 1 - d),io}).index, mem_index) *= 0;
+  
+      for(long  io = 0; io < (long) r.Ld[2]; io++)
+	for(long i1 = 0; i1 < (long) r.Ld[1]; i1++)
+	  for(int d = 0; d < NGHOSTS; d++)
+	    v(x.set({(long) d,i1,io}).index, mem_index) *= 0;
+
+      for(long  io = 0; io < (long) r.Ld[2]; io++)
+	for(long i1 = 0; i1 < (long) r.Ld[1]; i1++)
+	  for(int d = 0; d < NGHOSTS; d++)
+	    v(x.set({(long) (r.Ld[0] - 1 - d),i1,io}).index, mem_index) *= 0;
+
+    };
     
-    for(long  io = 0; io < (long) r.Ld[2]; io++)
-      for(long i1 = 0; i1 < (long) r.Ld[1]; i1++)
-	for(int d = 0; d < NGHOSTS; d++)
-	  v(x.set({(long) d,i1,io}).index, mem_index) *= 0;
-    
-    for(long  io = 0; io < (long) r.Ld[2]; io++)
-      for(long i1 = 0; i1 < (long) r.Ld[1]; i1++)
-	for(int d = 0; d < NGHOSTS; d++)
-	  v(x.set({(long) (r.Ld[0] - 1 - d),i1,io}).index, mem_index) *= 0;
-    
+  template <typename U = T>
+  typename std::enable_if<is_tt<std::complex, U>::value, U>::type peierls2(double phase) {
+    std::complex<double> im(0,1.0);
+    return U(exp(im*phase));
+  };
+  
+  template <typename U = T>
+  typename std::enable_if<!is_tt<std::complex, U>::value, U>::type peierls2(double phase) {
+    std::cout << "Shouldn't be here..\n";
+    return 1.0;
   };
   
 };
+      

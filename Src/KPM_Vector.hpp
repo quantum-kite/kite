@@ -43,6 +43,7 @@ public:
 template <typename T, unsigned D>
 class KPM_Vector : public KPM_VectorBasis <T,D> {
 public:
+  typedef typename extract_value_type<T>::value_type value_type;
   KPM_Vector(int mem, Simulation<T,D> & sim) :
     KPM_VectorBasis<T,D>(mem,sim){};
   
@@ -59,6 +60,11 @@ public:
   void Velocity2( T *, T *, int, int){};
   T VelocityInternalProduct( T *  , T * , int);
   void empty_ghosts(int){}; 
+  
+  template <typename U = T>
+  typename std::enable_if<is_tt<std::complex, U>::value, U>::type peierls2(double phase){return 1;};
+  template <typename U = T>
+  typename std::enable_if<!is_tt<std::complex, U>::value, U>::type peierls2(double phase){return 1;};
 };
 
 
