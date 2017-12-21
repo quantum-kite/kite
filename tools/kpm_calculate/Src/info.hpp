@@ -5,6 +5,9 @@ using namespace H5;
 using std::endl;
 
 
+#define debug 1
+
+
 int custom_find(int *arr, int arr_size, int value_to_search){
 	/* This function searches array 'arr' for any occurence of number 'value to search'.
 	 * If it exists, it exits and returns the index where it occurs.
@@ -62,11 +65,13 @@ class info{
 template <typename T, unsigned DIM>
 info<T, DIM>::info(std::string name){
 	file = H5::H5File(name, H5F_ACC_RDONLY);
+	
 }
 	
 
 template <typename T, unsigned DIM>
 void info<T, DIM>::read(){
+	if(debug)std::cout << "Entered info.\n" << std::flush;
 	/* This function reads all the data from the hdf5 file that's needed to 
 	 * calculate the quantities we want.*/
 	 
@@ -76,10 +81,12 @@ void info<T, DIM>::read(){
 	size = Eigen::Array<int,1,-1>::Zero(1,dim);		// size of the sample
 	get_hdf5(size.data(), &file, (char*)"L");
 	
+	if(debug)std::cout << "Reading LattVectors.\n" << std::flush;
 	vectors = Eigen::Array<double,-1,-1>::Zero(dim,dim);	// Basis of primitive vectors that generate the lattice
 	get_hdf5(vectors.data(), &file, (char*)"LattVectors");
 	unit_cell_area = fabs(vectors.matrix().determinant());	// Use the basis vectors to determine the area of the unit cell
 	
+	if(debug)std::cout << "Reading EnergyScale.\n" << std::flush;
 	get_hdf5(&energy_scale, &file, (char*)"EnergyScale");								// energy scale
 	get_hdf5(&num_orbitals, &file, (char*)"NOrbitals");									// number of orbitals in each unit cell	
 	orbital_positions = Eigen::Array<double,-1,-1>::Zero(num_orbitals, num_orbitals);	// position of each of those orbitals
@@ -88,6 +95,7 @@ void info<T, DIM>::read(){
 	spin_degeneracy = 2; // put by hand?
 	
 	// Information about the data types
+	if(debug)std::cout << "Reading information about data types.\n" << std::flush;
 	int precision = 1, dim, complex;
 	get_hdf5(&complex, &file, (char *) "/IS_COMPLEX");
 	get_hdf5(&precision,  &file, (char *) "/PRECISION");
@@ -122,12 +130,12 @@ void info<T, DIM>::read(){
 	LambdaXX_needed 	= CondXX >= 0;
 	LambdaXY_needed 	= CondXY >= 0;
 	
-	/*
-	std::cout << "MU_needed? " << MU_needed << "\n";
-	std::cout << "GammaXX_needed? " << GammaXX_needed << "\n";
-	std::cout << "GammaXY_needed? " << GammaXY_needed << "\n";
-	std::cout << "LambdaXX_needed? " << LambdaXX_needed << "\n";
-	std::cout << "LambdaXY_needed? " << LambdaXY_needed << "\n";*/
+	
+	std::cout << "MU_needed? " << MU_needed << "\n" << std::flush;
+	std::cout << "GammaXX_needed? " << GammaXX_needed << "\n" << std::flush;
+	std::cout << "GammaXY_needed? " << GammaXY_needed << "\n" << std::flush;
+	std::cout << "LambdaXX_needed? " << LambdaXX_needed << "\n" << std::flush;
+	std::cout << "LambdaXY_needed? " << LambdaXY_needed << "\n" << std::flush;
 	
 	// Fill the MU matrix if the density of states needs to be calculated. 
 	// For simplicity, let it always be complex
@@ -207,5 +215,7 @@ void info<T, DIM>::read(){
 			LambdaXY = LambdaXYReal.template cast<std::complex<T>>();
 		}				
 	}
+	
+	file.close();
 }
 

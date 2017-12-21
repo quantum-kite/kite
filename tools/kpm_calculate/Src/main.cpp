@@ -40,6 +40,8 @@ void choose_simulation_type(char *name){
 	get_hdf5(&precision,  &file, (char *) "/PRECISION");
 	get_hdf5(&dim,        &file, (char *) "/DIM");
 	
+	file.close();
+	
 	 if(dim < 1 || dim > 3)
 		exit(0);
   
@@ -51,6 +53,7 @@ void choose_simulation_type(char *name){
 
 	int index = dim - 1 + 3 * precision;
 	switch (index ) {
+#ifdef debug1
 		case 0:
 		{
 			if(debug)std::cout << "The program is using data type: float.\nDimension: 1.\n" << std::flush;
@@ -75,6 +78,7 @@ void choose_simulation_type(char *name){
 			calculate<double, 1u>(name);
 			break;
 		}
+#endif
 		case 4:
 		{
 			if(debug)std::cout << "The program is using data type: double.\nDimension: 2.\n" << std::flush;
@@ -87,6 +91,7 @@ void choose_simulation_type(char *name){
 			calculate<double, 3u>(name);
 			break;
 		}
+#ifdef debug1
 		case 6:
 		{
 			if(debug)std::cout << "The program is using data type: long double.\nDimension: 1.\n" << std::flush;
@@ -105,6 +110,7 @@ void choose_simulation_type(char *name){
 			calculate<long double, 3u>(name);
 			break;
 		}
+#endif
 		default:
 		{
 			if(debug)std::cout << "Please enter a valid data type: float, double or long double and a valid dimension: 1, 2, \n" << std::flush;
