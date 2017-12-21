@@ -83,5 +83,12 @@ fabric.properties
 # all hdf5 files
 *.h5
 
+# add .dat files
+*.dat
+
+# compiled programs
+pp
+tools/kpm_transport/calc_cond
+
 # Python cache files
 __pycache__
