@@ -138,7 +138,7 @@ struct Defect_Operator  {
         // If the kpm vector is not complex, peierls1(phase) will return 1.0, so it is effectively harmless.
         double phase = ((0.5*dr_a.transpose() + (r.rLat.inverse()*r.rOrb.col(Lda.coord[D])).transpose())*r.vect_pot*dr_a - lattice_difference_a.transpose()*r.vect_pot*r.rLat.inverse()*r.rOrb.col(Ldb.coord[D]))(0,0);
         hopping_magnetic.at(ih) = hopping.at(ih) * peierls1(phase);
-        hopping.at(ih) = hopping_magnetic.at(ih);
+        //hopping.at(ih) = hopping_magnetic.at(ih);
 	
 	for(unsigned dim = 0; dim < D; dim++)
 	  V[dim].push_back( hopping.at(ih) * T(dr_R(dim)) );

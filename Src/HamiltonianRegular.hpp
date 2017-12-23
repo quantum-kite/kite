@@ -87,13 +87,13 @@ struct Periodic_Operator {
           if(DEBUG) std::cout << "Started calculating the vectors\n" << std::flush;
           
           // difference vectors in real-space coordinates
-          orbital_difference_R = r.rOrb.col(b3.coord[D] + io) - r.rOrb.col(io)  ;       // The D components of the vector difference in orbital positions      
+          orbital_difference_R = r.rOrb.col(b3.coord[D] + io) - r.rOrb.col(io)  ;       // The D components of the vector difference in orbital positions in real space
           lattice_difference_R = r.rLat * v.template cast<double>();
           dr = orbital_difference_R + lattice_difference_R;
 		  if(DEBUG) std::cout << "dr: " << dr << "\n";
 		  
           // difference vectors in lattice coordinates
-          orbital_difference_a = r.rLat.inverse() * orbital_difference_R;       // The D components of the vector difference in orbital positions      
+          orbital_difference_a = r.rLat.inverse() * orbital_difference_R;       // vector difference in orbital positions, expressed in terms of the lattice vectors      
           lattice_difference_a = r.rLat.inverse() * lattice_difference_R;
           dr_a = orbital_difference_a + lattice_difference_a;
           if(DEBUG) std::cout << "dr_a: " << dr_a << "\n";

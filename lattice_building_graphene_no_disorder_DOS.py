@@ -61,10 +61,10 @@ def graphene_initial(onsite=(0, 0)):
 lattice, disorder, disorded_structural = graphene_initial()
 # number of decomposition parts in each direction of matrix.
 
-nx = ny = 2
+nx = ny = 1
 # number of unit cells in each direction.
-lx = 256
-ly = 256
+lx = 32
+ly = 32
 
 # make config object which caries info about
 # - the number of decomposition parts [nx, ny],
@@ -88,9 +88,9 @@ configuration = ex.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries
 # - number of different random vector realisations,
 # - number of disorder realisations.
 # - energy and gamma for single energy calculations.
-calculation = ex.Calculation(fname=['DOS', 'CondXX', 'SingleCondXX', 'SingleCondXY'],
-                             num_moments=[256, 256, 256, 256], num_random=[1, 1, 1, 1],
-                             num_disorder=[1, 1, 1, 1], energy=[0, 0], gamma=[1e-2, 1e-2])
+calculation = ex.Calculation(fname=['DOS'],
+                             num_moments=[1024], num_random=[1],
+                             num_disorder=[1])
 
 # make modification object which caries info about (TODO: Other modifications can be added here)
 # - magnetic field can be set to True. Default case is False. In exported file it's converted to 1 and 0.

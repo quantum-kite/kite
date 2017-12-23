@@ -58,8 +58,8 @@ lattice, disorder, disorded_structural = graphene_initial()
 
 nx = ny = 1
 # number of unit cells in each direction.
-lx = 512
-ly = 512
+lx = 32
+ly = 32
 
 # make config object which caries info about
 # - the number of decomposition parts [nx, ny],

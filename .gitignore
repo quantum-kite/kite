@@ -86,9 +86,18 @@ fabric.properties
 # add .dat files
 *.dat
 
+# add .txt and .pdf files
+*.txt
+*.pdf
+
+# test script
+test_script
+# ignore mathematica notebooks
+*.nb
+
 # compiled programs
 pp
-tools/kpm_transport/calc_cond
+tools/kpm_calculate/calc_cond
 
 # Python cache files
 __pycache__
