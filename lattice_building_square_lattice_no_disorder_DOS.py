@@ -98,4 +98,4 @@ ex.export_lattice(lattice, configuration, calculation, modification, 'test_f.h5'
 
 # plotting the lattice
 lattice.plot()
-plt.show()
+#plt.show()

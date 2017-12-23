@@ -79,11 +79,14 @@ public:
     Coordinates<std::size_t,3> x(r.Ld);
     
     // Relative to magnetic field
-    Coordinates<std::ptrdiff_t, 3> global_coords(r.Lt), local_coords(r.Ld); 
-    Coordinates<std::ptrdiff_t, 3> m1(r.Lt), m2(r.Lt); 
-    Eigen::Map<Eigen::Matrix<std::ptrdiff_t,2,1>> v_global_coords(global_coords.coord);
-    Eigen::Map<Eigen::Matrix<std::ptrdiff_t,2,1>> v_local_coords(local_coords.coord);
-    Eigen::Map<Eigen::Matrix<std::ptrdiff_t,2,1>> v_m(m1.coord);
+    
+    Coordinates<std::ptrdiff_t, 3> global1(r.Lt), global2(r.Lt), local1(r.Ld), local2(r.Ld); 
+    Eigen::Map<Eigen::Matrix<std::ptrdiff_t,2,1>> v_global1(global1.coord), v_global2(global2.coord), v_local1(local1.coord), v_local2(local2.coord);
+    
+    Eigen::Matrix<double, 2, 2> vect_pot;
+    vect_pot.setZero();
+    vect_pot(0,1) = 2.0*M_PI/r.Lt[0];
+    
     
     std::complex<double> im(0,1.0);
     double phase;
@@ -166,32 +169,16 @@ public:
 		  const std::ptrdiff_t d1 = h.hr.distance(ib, io);
 		  const T t1 =  value_type(MULT + 1) * h.hr.hopping(ib, io);
 		  
-		  // These two lines pertrain only to the magnetic field
-		  
-		  //temp_vect = v3.transpose().template cast<double>()*r.vect_pot;
-		  
 		  for(std::size_t j = j0; j < j1; j += std ){
 		    for(std::size_t i = j; i < j + STRIDE ; i++){
 		      
-		      // These two lines pertrain only to the magnetic field
-		      //global_coords.set_coord(i);
-		      r.convertCoordinates(m1, local_coords.set_coord(i));
-		      //phase = -temp_vect*v_global_coords.template cast<double>();
-		      //if((i%r.Ld[0] == 10 and d1 == 1) or (i%r.Ld[0] == 11 and d1 == -1)){
-			  /*std::cout << "i: " << i << " " << " d1: " << d1 << " v3: " << v3 << " v_global_coords: " << v_global_coords << "\n" << std::flush;
-			  std::cout << "phase: " << phase << " " << peierls2(phase) << "\n" << std::flush;*/
-		      /*
-		      r.convertCoordinates(m1, local_coords.set_coord(i));
-		      r.convertCoordinates(m2, local_coords.set_coord(i+d1));
-			  
-		      std::cout << std::setfill('0') << std::setw(5) << std::min(m1.index, m2.index);
-		      std::cout <<  " ";
-		      std::cout << std::setfill('0') << std::setw(5) << std::max(m1.index, m2.index);
-		      std::cout <<  " ";
-		      std::cout << t1*peierls2(hopping_phase(ib)*v_global_coords(1));
-		      m1.print();*/
+		      // These four lines pertrain only to the magnetic field
+		      r.convertCoordinates(global1, local1.set_coord(i));
+		      r.convertCoordinates(global2, local1.set_coord(i + d1));
+		      temp_vect = (v_global2 - v_global1).template cast<double>().matrix().transpose();
+		      phase = temp_vect*vect_pot*v_global1.template cast<double>().matrix();
 		      
-		      phi0[i] += t1 * phiM1[i + d1] * peierls2(hopping_phase(ib)*v_m(1));
+		      phi0[i] += t1 * phiM1[i + d1] * peierls2(phase);
 		      
 		    }
 		  }
@@ -213,10 +200,10 @@ public:
 		    std::size_t k2 = ip + id->node_position[id->element2[k]];
 		    
 		    // These four lines pertrain only to the magnetic field
-		    local_coords.set_coord(k);
+		    /*local_coords.set_coord(k);
 		    temp_vect = v_local_coords.transpose().template cast<double>()*r.vect_pot;
 		    global_coords.set_coord(k1);
-		    phase = temp_vect*v_global_coords.template cast<double>();
+		    phase = temp_vect*v_global_coords.template cast<double>();*/
 		    
 		    phi0[k1] += value_type(MULT + 1) * id->hopping[k] * phiM1[k2] * peierls2(0.0);
 		    
@@ -240,10 +227,10 @@ public:
 	  std::size_t i2 = id->border_element2[i];
 	  
 	  // These four lines pertrain only to the magnetic field
-	  local_coords.set_coord(i);
+	  /*local_coords.set_coord(i);
 	  temp_vect = v_local_coords.transpose().template cast<double>()*r.vect_pot;
 	  global_coords.set_coord(i1);
-	  phase = temp_vect*v_global_coords.template cast<double>();
+	  phase = temp_vect*v_global_coords.template cast<double>();*/
 	  
 	  phi0[i1] += value_type(MULT + 1) * id->border_hopping[i] * phiM1[i2] * peierls2(0.0);
 	}
