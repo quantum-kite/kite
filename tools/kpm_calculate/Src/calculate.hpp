@@ -206,7 +206,7 @@ void single_shot(info<T,DIM> *config, Eigen::Array<T, -1, 1> energies){
 template <typename U, unsigned DIM>
 void calculate(char *name){
 	
-	info<U,DIM> config("test_f.h5");
+	info<U,DIM> config(name);
 	config.read();
 	
 	if(config.DOS >= 0){
