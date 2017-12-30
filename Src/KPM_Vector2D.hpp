@@ -83,20 +83,11 @@ public:
     Coordinates<std::ptrdiff_t, 3> global1(r.Lt), global2(r.Lt), local1(r.Ld), local2(r.Ld); 
     Eigen::Map<Eigen::Matrix<std::ptrdiff_t,2,1>> v_global1(global1.coord), v_global2(global2.coord), v_local1(local1.coord), v_local2(local2.coord);
     
-    Eigen::Matrix<double, 2, 2> vect_pot;
-    vect_pot.setZero();
-    vect_pot(0,1) = 2.0*M_PI/r.Lt[0];
-    
     
     std::complex<double> im(0,1.0);
     double phase;
     Eigen::Matrix<double, 1, 2> temp_vect;
     
-    Eigen::Array<double, 1, 4> hopping_phase; // Hopping
-    hopping_phase(0) = 0;
-    hopping_phase(1) = 2.0*M_PI/r.Lt[0];
-    hopping_phase(2) = -2.0*M_PI/r.Lt[0];
-    hopping_phase(3) = 0;
     
     std::size_t i0, i1;
     inc_index();
@@ -176,22 +167,19 @@ public:
 		      r.convertCoordinates(global1, local1.set_coord(i));
 		      r.convertCoordinates(global2, local1.set_coord(i + d1));
 		      temp_vect = (v_global2 - v_global1).template cast<double>().matrix().transpose();
-		      phase = temp_vect*vect_pot*v_global1.template cast<double>().matrix();
-		      
+		      phase = temp_vect*r.vect_pot*v_global1.template cast<double>().matrix();
+		      //std::cout << "hopping: " << phase << "\n";
 		      phi0[i] += t1 * phiM1[i + d1] * peierls2(phase);
 		      
 		    }
 		  }
 		}
-	    }
+	  }
 	  
 	  // Structural disorder contribution
-	  
-	  for(auto id = h.hd.begin(); id != h.hd.end(); id++)
+	  for(auto id = h.hd.begin(); id != h.hd.end(); id++){
 	    for(std::size_t i = 0; i <  id->position.at(istr).size(); i++)
 	      {
-		std::cout << "Shouldn't be here\n";
-		exit(0);
 		
 		std::size_t ip = id->position.at(istr)[i];
 		for(unsigned k = 0; k < id->hopping.size(); k++)
@@ -200,12 +188,12 @@ public:
 		    std::size_t k2 = ip + id->node_position[id->element2[k]];
 		    
 		    // These four lines pertrain only to the magnetic field
-		    /*local_coords.set_coord(k);
-		    temp_vect = v_local_coords.transpose().template cast<double>()*r.vect_pot;
-		    global_coords.set_coord(k1);
-		    phase = temp_vect*v_global_coords.template cast<double>();*/
+		    r.convertCoordinates(global1, local1.set_coord(k1));
+		    r.convertCoordinates(global2, local1.set_coord(k2));
+		    temp_vect = (v_global2 - v_global1).template cast<double>().matrix().transpose();
+		    phase = temp_vect*r.vect_pot*v_global1.template cast<double>().matrix();
 		    
-		    phi0[k1] += value_type(MULT + 1) * id->hopping[k] * phiM1[k2] * peierls2(0.0);
+		    phi0[k1] += value_type(MULT + 1) * id->hopping[k] * phiM1[k2] * peierls2(phase);
 		    
 		  }
 		
@@ -215,25 +203,28 @@ public:
 		    phi0[k1] += value_type(MULT + 1) * id->U[k] * phiM1[k1];
 		  }
 	      }
+	  }
 	}
     
     //  Broken impurities
     for(auto id = h.hd.begin(); id != h.hd.end(); id++)
       for(std::size_t i = 0; i < id->border_element1.size(); i++)
 	{
-	    std::cout << "Shouldn't be here\n";
-	  exit(0);
+	    
 	  std::size_t i1 = id->border_element1[i];
 	  std::size_t i2 = id->border_element2[i];
 	  
 	  // These four lines pertrain only to the magnetic field
-	  /*local_coords.set_coord(i);
-	  temp_vect = v_local_coords.transpose().template cast<double>()*r.vect_pot;
-	  global_coords.set_coord(i1);
-	  phase = temp_vect*v_global_coords.template cast<double>();*/
-	  
-	  phi0[i1] += value_type(MULT + 1) * id->border_hopping[i] * phiM1[i2] * peierls2(0.0);
+	  r.convertCoordinates(global1, local1.set_coord(i1));
+	  r.convertCoordinates(global2, local1.set_coord(i2));
+	  temp_vect  = (v_global2 - v_global1).template cast<double>().matrix().transpose();
+	  phase = temp_vect*r.vect_pot*v_global1.template cast<double>().matrix();
+	  //std::cout << "broken: " << phase << "\n";
+	  phi0[i1] += value_type(MULT + 1) * id->border_hopping[i] * phiM1[i2] * peierls2(phase);
 	}
+	
+	
+	
     
     for(auto id = h.hd.begin(); id != h.hd.end(); id++)
       for(std::size_t i = 0; i < id->border_element.size(); i++)
@@ -683,7 +674,7 @@ public:
   
   template <typename U = T>
   typename std::enable_if<!is_tt<std::complex, U>::value, U>::type peierls2(double phase) {
-    std::cout << "Shouldn't be here..\n";
+    //std::cout << "Shouldn't be here..\n";
     return 1.0;
   };
   

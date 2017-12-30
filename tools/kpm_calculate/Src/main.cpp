@@ -6,14 +6,13 @@
 #include "info.hpp"
 #include "calculate.hpp"
 
-#define debug 1
 
-//void calc_dos(double, int);
-//void calc_optical_cond(int, int, int, double, double);
-//void single_shot(Eigen::Array<double, -1, 1> energies);
-//void single_shot_matrix(Eigen::Array<double, -1, 1> energies);
-
-//#################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################
+//#####################################################################################
+//#####################################################################################
+//#####################################################################################
+//#####################################################################################
+//#####################################################################################
+//#####################################################################################
 
 //TO DO:
 // Clarify what each quantity to be calculated means. Cond, SingleCond, OptCond????
@@ -23,6 +22,7 @@
 
 
 void choose_simulation_type(char *name){
+	debug_message("Entered choose_simulation.\n");
 	/* The type of data used for the simulation is not known beforehand. It may be 
 	 * float, double or long double. Each of those may or may not be complex. To simplify
 	 * we assume everything is complex. If they are not, they are cast into their complex form.
@@ -56,72 +56,74 @@ void choose_simulation_type(char *name){
 #ifdef debug1
 		case 0:
 		{
-			if(debug)std::cout << "The program is using data type: float.\nDimension: 1.\n" << std::flush;
+			verbose_message("The program is using data type: float.\nDimension: 1.\n");
 			calculate<float, 1u>(name);
 			break;
 		}
 		case 1:
 		{
-			if(debug)std::cout << "The program is using data type: float.\nDimension: 2.\n" << std::flush;
+			verbose_message("The program is using data type: float.\nDimension: 2.\n");
 			calculate<float, 2u>(name);
 			break;
 		}
 		case 2:
 		{
-			if(debug)std::cout << "The program is using data type: float.\nDimension: 3.\n" << std::flush;
+			verbose_message("The program is using data type: float.\nDimension: 3.\n");
 			calculate<float, 3u>(name);
 			break;			
 		}
 		case 3:
 		{
-			if(debug)std::cout << "The program is using data type: double.\nDimension: 1.\n" << std::flush;
+			verbose_message("The program is using data type: double.\nDimension: 1.\n");
 			calculate<double, 1u>(name);
 			break;
 		}
 #endif
 		case 4:
 		{
-			if(debug)std::cout << "The program is using data type: double.\nDimension: 2.\n" << std::flush;
+			verbose_message("The program is using data type: double.\nDimension: 2.\n");
 			calculate<double, 2u>(name);
 			break;
 		}
 		case 5:
 		{
-			if(debug)std::cout << "The program is using data type: double.\nDimension: 3.\n" << std::flush;
+			verbose_message("The program is using data type: double.\nDimension: 3.\n");
 			calculate<double, 3u>(name);
 			break;
 		}
 #ifdef debug1
 		case 6:
 		{
-			if(debug)std::cout << "The program is using data type: long double.\nDimension: 1.\n" << std::flush;
+			verbose_message("The program is using data type: long double.\nDimension: 1.\n");
 			calculate<long double, 1u>(name);
 			break;
 		}
 		case 7:
 		{
-			if(debug)std::cout << "The program is using data type: long double.\nDimension: 2.\n" << std::flush;
+			verbose_message("The program is using data type: long double.\nDimension: 2.\n");
 			calculate<long double, 2u>(name);
 			break;
 		}
 		case 8:
 		{
-			if(debug)std::cout << "The program is using data type: long double.\nDimension: 3.\n" << std::flush;
+			verbose_message("The program is using data type: long double.\nDimension: 3.\n");
 			calculate<long double, 3u>(name);
 			break;
 		}
 #endif
 		default:
 		{
-			if(debug)std::cout << "Please enter a valid data type: float, double or long double and a valid dimension: 1, 2, \n" << std::flush;
-			exit(0);
+			std::cout << "Please enter a valid data type: float, double or long double and a valid dimension: 2. Exiting.\n" << std::flush;
+			exit(1);
 			break;
 		}
 	} 
+	debug_message("Left choose_simulation.\n");
 }
 
 
 int main(int argc, char *argv[]){
+	
 	choose_simulation_type(argv[1]);
 	return 0;
 }

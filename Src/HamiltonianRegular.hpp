@@ -1,5 +1,5 @@
 #ifndef DEBUG
-#define DEBUG 1
+#define DEBUG 0
 #endif
 
 template <typename T, unsigned D>
@@ -27,7 +27,6 @@ struct Periodic_Operator {
       hopping  			= Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>(max, sim.r.Orb);
       hopping_magnetic  = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>(max, sim.r.Orb);
       
-      std::cout << "max: " << max << " sim.r.Orb: " << sim.r.Orb << "\n";
       
       for(unsigned i = 0; i < D; i++)
         V[i]    = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>(max, sim.r.Orb);
@@ -39,7 +38,6 @@ struct Periodic_Operator {
 
       get_hdf5<T>(hopping.data(), file, (char *) "/Hamiltonian/Hoppings");          // Read Hoppings
       get_hdf5<int>(dist.data(), file, (char *) "/Hamiltonian/d");                  // Read the distances
-      if(DEBUG) std::cout << "hopping initial : " << hopping << "\n";
       
       for(std::size_t i = 0; i < max; i++ )
 	for(std::size_t j = 0; j <  sim.r.Orb; j++ )      
@@ -51,7 +49,6 @@ struct Periodic_Operator {
 
   void Convert_Build (  LatticeStructure <D> & r )
   {
-	if(DEBUG) std::cout << "entered convert_build\n" << std::flush;
     Eigen::Matrix<double, D, 1> dr; 
     Eigen::Matrix<double, D, 1> dr_a; //difference vector in coordinates of the lattice
     
@@ -61,7 +58,6 @@ struct Periodic_Operator {
     Eigen::Matrix<double, D, 1> orbital_difference_a; //vectors in coordinates of the lattice
     Eigen::Matrix<double, D, 1> lattice_difference_a;
     
-    if(DEBUG) std::cout << "Defined the vectors \n" << std::flush;
     
     // l = (3,3,Number_of_orbitals)
     unsigned l[D + 1];
@@ -76,39 +72,31 @@ struct Periodic_Operator {
     for(unsigned io = 0; io < r.Orb; io++)
       for(unsigned  i = 0; i < NHoppings(io); i++)
         {
-		  std::cout << "io: " << io << " i: " << i << "\n";
           b3.set_coord(distance(i,io));                              // Get Coordinates in Basis 3,  The last is the Final Orbital.
           b3.coord[D] -= io;                                         // Obtain the difference in orbital coordinates
           v.array() -= 1;                                            // Subtract to the first D elements of v to get v(i) in (-1, 0 , 1)
-          std::cout << "distance before: " << distance(i,io) << "\n";
           distance(i,io) = Ld.set_index(b3.coord).index;             // Convert in distances in this lattice
-          std::cout << "distance after: " << distance(i,io) << "\n";
           
-          if(DEBUG) std::cout << "Started calculating the vectors\n" << std::flush;
           
           // difference vectors in real-space coordinates
           orbital_difference_R = r.rOrb.col(b3.coord[D] + io) - r.rOrb.col(io)  ;       // The D components of the vector difference in orbital positions in real space
           lattice_difference_R = r.rLat * v.template cast<double>();
           dr = orbital_difference_R + lattice_difference_R;
-		  if(DEBUG) std::cout << "dr: " << dr << "\n";
 		  
           // difference vectors in lattice coordinates
           orbital_difference_a = r.rLat.inverse() * orbital_difference_R;       // vector difference in orbital positions, expressed in terms of the lattice vectors      
           lattice_difference_a = r.rLat.inverse() * lattice_difference_R;
           dr_a = orbital_difference_a + lattice_difference_a;
-          if(DEBUG) std::cout << "dr_a: " << dr_a << "\n";
           
-          if(DEBUG) std::cout << "Finished calculating the vectors.\n" << std::flush;
           
           // periodic part of the Peierls phase. 
           // If the kpm vector is not complex, peierls1(phase) will return 1.0, so it is effectively harmless.
-          double phase = ((0.5*dr_a.transpose() + (r.rLat.inverse()*r.rOrb.col(io)).transpose())*r.vect_pot*dr_a - lattice_difference_a.transpose()*r.vect_pot*r.rLat.inverse()*r.rOrb.col(b3.coord[D] + io))(0,0);
+          //double phase = ((0.5*dr_a.transpose() + (r.rLat.inverse()*r.rOrb.col(io)).transpose())*r.vect_pot*dr_a - lattice_difference_a.transpose()*r.vect_pot*r.rLat.inverse()*r.rOrb.col(b3.coord[D] + io))(0,0);
+          double phase = ((-0.5*dr_a.transpose() + (r.rLat.inverse()*r.rOrb.col(b3.coord[D] + io)).transpose())*r.vect_pot*(-dr_a) + lattice_difference_a.transpose()*r.vect_pot*r.rLat.inverse()*r.rOrb.col(io))(0,0);
           
-          if(DEBUG) std::cout << "phase : " << phase << "\n";
-          if(DEBUG) std::cout << "hopping before : " << hopping(i, io) << "\n";
+          
           hopping_magnetic(i,io) = hopping(i,io) * peierls1(phase);
-          //hopping(i,io) = hopping_magnetic(i,io);
-          if(DEBUG) std::cout << "hopping after: " << hopping(i, io) << "\n";
+          hopping(i,io) = hopping_magnetic(i,io);
           
           //if(DEBUG) std::cout << "Finished calculating the phase.\n" << std::flush;
           
@@ -125,14 +113,11 @@ struct Periodic_Operator {
 	  
         }
         
-     if(DEBUG) std::cout << "left convert_build\n";
   };
 	
   template <typename U = T>
   typename std::enable_if<is_tt<std::complex, U>::value, U>::type peierls1(double phase) {
 	std::complex<double> im(0,1.0);
-	std::cout << "phase " << phase << "\n";
-	std::cout << "peierls " << U(exp(im*phase)) << "\n";
     return U(exp(im*phase));
   };
   

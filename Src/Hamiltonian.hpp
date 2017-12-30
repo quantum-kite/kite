@@ -55,13 +55,14 @@ public:
       std::vector<std::string> defects;
       try {
 	H5::Exception::dontPrint();
-	H5::Group group = file->openGroup("/Hamiltonian/StructuralDisorder");
+	grp = file->openGroup("/Hamiltonian/StructuralDisorder");
 	grp.iterateElems(grp.getObjName(), NULL, getDefects, static_cast<void*>(&defects) );
-	for(auto id = defects.begin(); id != defects.end(); id++)
-	  hd.push_back(Defect_Operator<T,D> ( simul, *id, file) );
-      }
+	for(auto id = defects.begin(); id != defects.end(); id++){
+		hd.push_back(Defect_Operator<T,D> ( simul, *id, file) );
+		}
+    }
       catch(H5::Exception& e) {
-	// Don't do nothing 
+		// Do nothing
       }
       delete file;
     }

@@ -55,7 +55,25 @@ int main(int argc, char *argv[])
   get_hdf5(&precision,  file, (char *) "/PRECISION");
   get_hdf5(&dim,        file, (char *) "/DIM");
   
+  std::vector <int> MagneticField;      
+  MagneticField.resize  (1);
+  MagneticField.at(0) = 0;
+  try {
+		H5::Exception::dontPrint();
+		get_hdf5<int>(MagneticField.data(),  file, (char *)   "/Hamiltonian/MagneticField");
+	}
+	catch (H5::Exception& e){}
+  
+  // Magnetic field requires complex-valued functions. Make sure the user knows about this
+	if(MagneticField.at(0) == 1 and !is_complex){
+		std::cout << "If you want to include a magnetic field, please use complex-valued functions. ";
+		std::cout << "This may be done by setting the 'complex' flag to True in the lattice_building python script.\n";
+		exit(1);		
+  }
+	
+  
   file->close();
+  
   if(dim < 1 || dim > 3)
     exit(0);
   

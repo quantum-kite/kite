@@ -7,15 +7,14 @@ import pybinding as pb
 # define lattice of monolayer graphene with 1[nm] interatomic distance and t=1/3[eV] hopping,
 # EnergyScale is the scaling factor of the hopping parameters, important for the rescaling of the spectral quantity.
 #  INFO: other examples are defined in define_lattice.py script
-energy_scale = 3.06
+energy_scale = 4*1.01
 
 
 def graphene_initial(onsite=(0, 0)):
     """Return the basic lattice specification for monolayer graphene with nearest neighbor"""
 
-    theta = np.pi / 3
-    a1 = np.array([1 + np.cos(theta), np.sin(theta)])
-    a2 = np.array([0, 2 * np.sin(theta)])
+    a1 = np.array([1,0])
+    a2 = np.array([0, 1])
 
     # create a lattice with 2 primitive vectors
     lat = pb.Lattice(
@@ -26,17 +25,15 @@ def graphene_initial(onsite=(0, 0)):
     # Add sublattices
     lat.add_sublattices(
         # name, position, and onsite potential
-        ('A', [0, 0], onsite[0]),
-        ('B', [1, 0], onsite[1])
+        ('A', [0, 0], onsite[0])
     )
 
     # Add hoppings
     lat.add_hoppings(
         # inside the main cell, between which atoms, and the value
-
+        ([1, 0], 'A', 'A', - 1 / energy_scale),
         # between neighboring cells, between which atoms, and the value
-        ([-1, 0], 'A', 'B', - 1 / energy_scale),
-        ([-1, 1], 'A', 'B', - 1 / energy_scale)
+        ([0, 1], 'A', 'A', - 1 / energy_scale)
     )
 
     # Add disorder
@@ -47,28 +44,19 @@ def graphene_initial(onsite=(0, 0)):
 
     disorder = ex.Disorder(lat)
     disorder.add_disorder('A', 'Deterministic', 0.0, 0)
-    disorder.add_disorder('B', 'Deterministic', 0.0, 0)
 
     # Add bond disorder as an object of a class StructuralDisorder. In this manner we can add onsite and bond defects
     # with a specific concentration, which will be added to the simulated system. The procedure for adding is same
     # as adding the hopping, with the difference that the bond disorded is not bounded to one site in the [0, 0]
     # unit cell.
-    node0 = [[+0, +0], 'A']
-    node1 = [[+0, +0], 'B']
-    struc_disorder_one = ex.StructuralDisorder(lat, concentration=1.00)
-    struc_disorder_one.add_structural_disorder(
-        # add bond disorder in the form [from unit cell], 'sublattice_from', [to_unit_cell], 'sublattice_to', value:
-        (*node0, *node1, -1 / energy_scale)
-    )
 
     # if there is disorder it should be returned separately from the lattice
-    return lat, disorder, [struc_disorder_one]
-
+    return lat, disorder, []
 
 lattice, disorder, disorded_structural = graphene_initial()
 # number of decomposition parts in each direction of matrix.
 
-nx = ny = 2
+nx = ny = 1
 # number of unit cells in each direction.
 lx = 256
 ly = 256
@@ -95,13 +83,13 @@ configuration = ex.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries
 # - number of different random vector realisations,
 # - number of disorder realisations.
 # - energy and gamma for single energy calculations.
-calculation = ex.Calculation(fname=['DOS', 'CondXX', 'SingleCondXX', 'SingleCondXY'],
-                             num_moments=[128, 16, 16, 16], num_random=[1, 1, 1, 1],
-                             num_disorder=[1, 1, 1, 1], energy=[0, 0], gamma=[1e-2, 1e-2])
+calculation = ex.Calculation(fname=['DOS'],
+                             num_moments=[256], num_random=[1],
+                             num_disorder=[1])
 
 # make modification object which caries info about (TODO: Other modifications can be added here)
 # - magnetic field can be set to True. Default case is False. In exported file it's converted to 1 and 0.
-modification = ex.Modification(magnetic_field=True)
+modification = ex.Modification(magnetic_field=False)
 
 # export the lattice from the lattice object, config and calculation object and the name of the file
 # the disorder is optional. If there is disorder in the lattice for now it should be given separately

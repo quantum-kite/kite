@@ -31,7 +31,6 @@ struct Defect_Operator  {
     std::string field = defect + std::string("/Concentration");
     get_hdf5<double> ( &p, file, field );
 
-
     /* Read Number of nodes and their relative  positions */
     field = defect + std::string("/NumNodes");
     get_hdf5<unsigned> ( &NumberNodes, file, field );
@@ -54,6 +53,7 @@ struct Defect_Operator  {
       
       tmp.resize(n);
       hopping.resize(n);
+      hopping_magnetic.resize(n);
       element1.resize(n);
       element2.resize(n);
       
@@ -116,6 +116,7 @@ struct Defect_Operator  {
     Eigen::Matrix<double, D, 1> orbital_difference_a;
     Eigen::Matrix<double, D, 1> lattice_difference_a;
 
+
     for(unsigned ih = 0; ih < hopping.size(); ih++)
       {
 	
@@ -133,12 +134,13 @@ struct Defect_Operator  {
 	dr_a = orbital_difference_a + lattice_difference_a;
 	
 	
-	
 	// periodic part of the Peierls phase. 
-        // If the kpm vector is not complex, peierls1(phase) will return 1.0, so it is effectively harmless.
-        double phase = ((0.5*dr_a.transpose() + (r.rLat.inverse()*r.rOrb.col(Lda.coord[D])).transpose())*r.vect_pot*dr_a - lattice_difference_a.transpose()*r.vect_pot*r.rLat.inverse()*r.rOrb.col(Ldb.coord[D]))(0,0);
-        hopping_magnetic.at(ih) = hopping.at(ih) * peierls1(phase);
-        //hopping.at(ih) = hopping_magnetic.at(ih);
+	// If the kpm vector is not complex, peierls1(phase) will return 1.0, so it is effectively harmless.
+	//double phase = ((0.5*dr_a.transpose() + (r.rLat.inverse()*r.rOrb.col(Lda.coord[D])).transpose())*r.vect_pot*dr_a - lattice_difference_a.transpose()*r.vect_pot*r.rLat.inverse()*r.rOrb.col(Ldb.coord[D]))(0,0);
+	double phase = (-(-0.5*dr_a.transpose() + (r.rLat.inverse()*r.rOrb.col(Ldb.coord[D])).transpose())*r.vect_pot*dr_a + lattice_difference_a.transpose()*r.vect_pot*r.rLat.inverse()*r.rOrb.col(Lda.coord[D]))(0,0);
+	hopping_magnetic.at(ih) = hopping.at(ih) * peierls1(phase);
+	hopping.at(ih) = hopping_magnetic.at(ih);
+	
 	
 	for(unsigned dim = 0; dim < D; dim++)
 	  V[dim].push_back( hopping.at(ih) * T(dr_R(dim)) );
@@ -147,9 +149,6 @@ struct Defect_Operator  {
 	  for(unsigned dim2 = 0; dim2 < D; dim2++)
 	    V2[dim1][dim2].push_back( hopping.at(ih) * T(dr_R(dim1)) * T(dr_R(dim2)));
       }
-    
-
-    
   };
 
 
@@ -228,9 +227,17 @@ struct Defect_Operator  {
 
 #pragma omp critical
     {
-      Eigen::Matrix<double, D, 1> dr;
       Coordinates<std::ptrdiff_t, D + 1> latt(r.ld), LATT(r.Lt), Latt(r.Ld), Ldb(r.Ld);
       Eigen::Map<Eigen::Matrix<std::ptrdiff_t,D, 1>> va(Latt.coord), vb(Ldb.coord); // Column vector
+      
+      
+		  
+	  Eigen::Matrix<double, D, 1> dr_R;
+	  Eigen::Matrix<double, D, 1> dr_a;
+	  Eigen::Matrix<double, D, 1> orbital_difference_R;
+	  Eigen::Matrix<double, D, 1> lattice_difference_R;
+	  Eigen::Matrix<double, D, 1> orbital_difference_a;
+	  Eigen::Matrix<double, D, 1> lattice_difference_a;
       
       for(unsigned i = 0; i < simul.Global.element1.size(); i++ )
 	if(r.domain_number( long(simul.Global.element1[i]) ) == std::ptrdiff_t(r.thread_id))
@@ -240,17 +247,21 @@ struct Defect_Operator  {
 	    border_element1.push_back( Latt.index );	    
 	    border_element2.push_back(Latt.index + simul.Global.element2_diff[i]);
 	    border_hopping.push_back(simul.Global.hopping[i]);
-	    
 	    Ldb.set_coord(static_cast<std::ptrdiff_t>(Latt.index + simul.Global.element2_diff[i] ));
-	    dr = r.rOrb.col(Ldb.coord[D]) - r.rOrb.col(Latt.coord[D]);
-	    dr += r.rLat * (vb - va).template cast<double>();
+		
+		// difference vectors in real-space coordinates
+		orbital_difference_R = r.rOrb.col(Ldb.coord[D]) - r.rOrb.col(Latt.coord[D]);
+		lattice_difference_R = r.rLat * (vb - va).template cast<double>();
+		dr_R = orbital_difference_R + lattice_difference_R;
+		
+        
 	    
 	    for(unsigned dim = 0; dim < D; dim++)
-	      border_V[dim].push_back(simul.Global.hopping[i] * T(dr(dim)));
+	      border_V[dim].push_back(simul.Global.hopping[i] * T(dr_R(dim)));
 
 	    for(unsigned dim1 = 0; dim1 < D; dim1++)
 	      for(unsigned dim2 = 0; dim2 < D; dim2++)
-	        border_V2[dim1][dim2].push_back(simul.Global.hopping[i] * T(dr(dim1))* T(dr(dim2)));
+	        border_V2[dim1][dim2].push_back(simul.Global.hopping[i] * T(dr_R(dim1))* T(dr_R(dim2)));
 	  }
       
       for(unsigned i = 0; i < simul.Global.element.size(); i++ )

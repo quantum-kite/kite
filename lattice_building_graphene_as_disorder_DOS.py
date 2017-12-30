@@ -33,7 +33,7 @@ def graphene_initial(onsite=(0, 0)):
     # Add hoppings
     lat.add_hoppings(
         # inside the main cell, between which atoms, and the value
-        ([0, 0], 'A', 'B', - 1 / energy_scale),
+
         # between neighboring cells, between which atoms, and the value
         ([-1, 0], 'A', 'B', - 1 / energy_scale),
         ([-1, 1], 'A', 'B', - 1 / energy_scale)
@@ -53,9 +53,16 @@ def graphene_initial(onsite=(0, 0)):
     # with a specific concentration, which will be added to the simulated system. The procedure for adding is same
     # as adding the hopping, with the difference that the bond disorded is not bounded to one site in the [0, 0]
     # unit cell.
-    
+    node0 = [[+0, +0], 'A']
+    node1 = [[+0, +0], 'B']
+    struc_disorder_one = ex.StructuralDisorder(lat, concentration=1.00)
+    struc_disorder_one.add_structural_disorder(
+        # add bond disorder in the form [from unit cell], 'sublattice_from', [to_unit_cell], 'sublattice_to', value:
+        (*node0, *node1, -1 / energy_scale)
+    )
+
     # if there is disorder it should be returned separately from the lattice
-    return lat, disorder, []
+    return lat, disorder, [struc_disorder_one]
 
 
 lattice, disorder, disorded_structural = graphene_initial()
@@ -73,7 +80,7 @@ ly = 32
 # - info if the exported hopping and onsite data should be complex,
 # - info of the precision of the exported hopping and onsite data, 0 - float, 1 - double, and 2 - long double.
 configuration = ex.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
-                                 is_complex=False, precision=1, energy_scale=energy_scale)
+                                 is_complex=True, precision=1, energy_scale=energy_scale)
 
 # make calculation object which caries info about
 # - the name of the function
@@ -89,7 +96,7 @@ configuration = ex.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries
 # - number of disorder realisations.
 # - energy and gamma for single energy calculations.
 calculation = ex.Calculation(fname=['DOS'],
-                             num_moments=[1024], num_random=[1],
+                             num_moments=[4096], num_random=[1],
                              num_disorder=[1])
 
 # make modification object which caries info about (TODO: Other modifications can be added here)
@@ -103,4 +110,4 @@ ex.export_lattice(lattice, configuration, calculation, modification, 'test_f.h5'
 
 # plotting the lattice
 lattice.plot()
-#plt.show()
+# plt.show()

@@ -83,15 +83,13 @@ fabric.properties
 # all hdf5 files
 *.h5
 
-# add .dat files
-*.dat
+tools/tests/output
 
 # add .txt and .pdf files
 *.txt
 *.pdf
 
 # test script
-test_script
 # ignore mathematica notebooks
 *.nb
 

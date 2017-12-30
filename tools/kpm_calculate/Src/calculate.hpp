@@ -15,7 +15,7 @@ template <typename T>
 std::complex<T> integrate(Eigen::Array<T, -1, -1> energies, Eigen::Array<std::complex<T>, -1, -1> integrand){
 	if(energies.rows() != integrand.rows() or energies.cols() != integrand.cols()){
 		std::cout << "x and y arrays in the integrator must have the same number of elements. Exiting.\n";
-		exit(0);
+		exit(1);
 	}
 	
 	int N = energies.cols()*energies.rows();
@@ -30,6 +30,7 @@ std::complex<T> integrate(Eigen::Array<T, -1, -1> energies, Eigen::Array<std::co
 
 template <typename T, unsigned DIM>
 void calc_dos(info<T,DIM> *config, double lim, int N_energies){
+	debug_message("Entered calc_dos.\n");
 	/* Calculates the density of states for N_energies energies in the range ]-lim, lim[. 
 	 * These energies are in the KPM scale. 
 	 */
@@ -57,10 +58,12 @@ void calc_dos(info<T,DIM> *config, double lim, int N_energies){
 	}
 	
 	myfile.close();
+	debug_message("Left calc_dos.\n");
 }
 
 template <typename U, unsigned DIM>
 void calc_optical_cond(info<U,DIM> *config, int sigma, int R, int T, U beta, U e_fermi, std::string cond_axis){
+	debug_message("Entered calc_optical_cond.\n");
 	/* Calculates the optical conductivity for a set of frequencies in the range [-sigma, sigma].
 	 * These frequencies are in the KPM scale, that is, the scale where the energy is in the range ]-1,1[.
 	 * T is the number of frequency intervals in the range [0,sigma].
@@ -162,10 +165,12 @@ void calc_optical_cond(info<U,DIM> *config, int sigma, int R, int T, U beta, U e
 		myfile  << freqs_array(i)*config->energy_scale << " " << cond.real()(i) << " " << cond.imag()(i) << "\n";
 	
 	myfile.close();
+	debug_message("Left calc_optical_cond.\n");
 }
 
 template <typename T, unsigned DIM>
 void single_shot(info<T,DIM> *config, Eigen::Array<T, -1, 1> energies){
+	debug_message("Entered single_shot.\n");
 	/* Calculates the DC XX conductivity at zero temperature.
 	 * Evaluated at the values in the energies array.
 	 */
@@ -199,44 +204,45 @@ void single_shot(info<T,DIM> *config, Eigen::Array<T, -1, 1> energies){
 	
 	myfile.close();
 	
-	std::cout << "Left single_shot\n";fflush(stdout);
+	debug_message("Left single_shot.\n");
 }
 
 
 template <typename U, unsigned DIM>
 void calculate(char *name){
-	
+	debug_message("Entered calculate.\n");
+
 	info<U,DIM> config(name);
 	config.read();
 	
 	if(config.DOS >= 0){
-		std::cout << "Calculating the density of states... " << std::flush;
 		double lim;
-		int N_energies;
-		calc_dos<U,DIM>(&config, lim = 1.0, N_energies = 1001);
-		std::cout << "Done.\n" << std::flush;
+		int N_energies = 1001;
+		verbose_message("Calculating the density of states with "); verbose_message(N_energies); verbose_message(" energies... ");
+		calc_dos<U,DIM>(&config, lim = 1.0, N_energies);
+		verbose_message("Done.\n");
 	}
 	
 	if(config.CondXX >= 0){
-		std::cout << "Calculating the XX optical conductivity... " << std::flush;
+		verbose_message("Calculating the XX optical conductivity... ");
 		int max_freq;
 		int R;
 		int T;
 		U beta;
 		U e_fermi;
 		calc_optical_cond<U, DIM>(&config, max_freq = 2, R = 2, T=100, beta=200.0, e_fermi = 0.5, "xx");
-		std::cout << "Done.\n" << std::flush;
+		verbose_message("Done.\n");
 	}
 	
 	if(config.CondXY >= 0){
-		std::cout << "Calculating the XY optical conductivity... " << std::flush;
+		verbose_message("Calculating the XY optical conductivity... ");
 		int max_freq;
 		int R;
 		int T;
 		U beta;
 		U e_fermi;
 		calc_optical_cond<U, DIM>(&config, max_freq = 2, R = 2, T=100, beta=200.0, e_fermi = 0.5, "xy");
-		std::cout << "Done.\n" << std::flush;
+		verbose_message("Done.\n");
 	}
 	
 	
@@ -249,5 +255,7 @@ void calculate(char *name){
 		energies(i) = -1 + 2.0*i/N_energies2;
 	single_shot<U,DIM>(&config, energies);
 	*/
+	
+	debug_message("Left calculate.\n");
 }
 

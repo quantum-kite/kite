@@ -34,7 +34,7 @@ private:
   std::vector <int> Quantities, NMoments, NRandomV, NDisorder; 
   
   // Other quantities that require special care, such as SingleShotXX
-  std::vector <int> Quantities_special, NMoments_special, NRandomV_special, NDisorder_special, EnergyScale; 
+  std::vector <int> Quantities_special, NMoments_special, NRandomV_special, NDisorder_special, EnergyScale, MagneticField; 
   std::vector <double> gamma_special;
   Eigen::Array<double, -1, -1> singleshot_energies;
   
@@ -68,12 +68,19 @@ public:
     NRandomV.resize   (NQuantities);
     NDisorder.resize  (NQuantities);
     EnergyScale.resize  (1);
+    MagneticField.resize  (1);
 
     get_hdf5<int>(Quantities.data(), file, (char *)   "/Calculation/FunctionNum");
     get_hdf5<int>(NRandomV.data(),   file, (char *)   "/Calculation/NumRandoms");
     get_hdf5<int>(NMoments.data(),   file, (char *)   "/Calculation/NumMoments");
     get_hdf5<int>(NDisorder.data(),  file, (char *)   "/Calculation/NumDisorder");
     get_hdf5<int>(EnergyScale.data(),  file, (char *)   "/EnergyScale");
+    MagneticField.at(0) = 0;
+		try {
+			H5::Exception::dontPrint();
+			get_hdf5<int>(MagneticField.data(),  file, (char *)   "/Hamiltonian/MagneticField");
+		}
+		catch (H5::Exception& e){}
     
     delete dataspace;
     delete dataset;
@@ -107,7 +114,7 @@ public:
 		NMoments_special.resize   (NQuantities_special);
 		NRandomV_special.resize   (NQuantities_special);
 		NDisorder_special.resize  (NQuantities_special);
-		gamma_special.resize 			(NQuantities_special);
+		gamma_special.resize 	  (NQuantities_special);
 		
 		
 		

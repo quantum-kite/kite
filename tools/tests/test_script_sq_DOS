@@ -1,0 +1,98 @@
+#!/bin/bash
+
+echo This script is part of a test suite to verify that the program is running well and producing the correct results. In this particular script, we test the density of states of a 2D square lattice, building it solely from the periodic part of the Hamiltonian.
+
+color='\033[0;33m'
+reset='\033[0m'
+name='sq_DOS'
+script_name='lattice_building'
+dir_name=output/$name
+mkdir $dir_name
+
+echo "import matplotlib.pyplot as plt
+import export_lattice as ex
+import numpy as np
+import pybinding as pb
+
+energy_scale = 4.02
+def graphene_initial(onsite=(0, 0)):
+    a1 = np.array([1,0])
+    a2 = np.array([0, 1])
+
+    lat = pb.Lattice(
+        a1=a1,
+        a2=a2
+    )
+
+    lat.add_sublattices(
+        # name, position, and onsite potential
+        ('A', [0, 0], onsite[0])
+    )
+
+    lat.add_hoppings(
+        ([1, 0], 'A', 'A', - 1 / energy_scale),
+        ([0, 1], 'A', 'A', - 1 / energy_scale)
+    )
+
+    disorder = ex.Disorder(lat)
+    disorder.add_disorder('A', 'Deterministic', 0.0, 0)
+    return lat, disorder, []
+
+lattice, disorder, disorded_structural = graphene_initial()
+
+nx = ny = 1
+lx = 256
+ly = 256
+
+configuration = ex.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
+                                 is_complex=False, precision=1, energy_scale=energy_scale)
+
+calculation = ex.Calculation(fname=['DOS'],
+                             num_moments=[128], num_random=[1],
+                             num_disorder=[1])
+
+modification = ex.Modification(magnetic_field=False)
+ex.export_lattice(lattice, configuration, calculation, modification, '"$name".h5',
+                  disorder=disorder, disorded_structural=disorded_structural)
+" > $script_name.py
+
+echo -ne "${color}Running Python script to generate the lattice... ${reset}"
+python3.5 $script_name.py > /dev/null
+echo -e "${color}Done.${reset}"
+mv $script_name.py $dir_name
+mv $name.h5 $dir_name
+cd $dir_name
+
+
+echo -ne "${color}Running the main program, kpm_transport... ${reset}"
+../../../../pp $name.h5
+echo -e "${color}Done.${reset}"
+echo -ne "${color}Running the post processing, kpm_calculate... ${reset}"
+../../../kpm_calculate/calc_cond $name.h5
+echo -e "${color}Done.${reset}"
+
+
+cd ../..
+mv $dir_name/DOS.dat .
+echo -ne "${color}Processing with xmgrace... ${reset}"
+echo 'READ BLOCK "DOS.dat"
+BLOCK xy "1:2"
+s0 line color 1
+s0 legend "kpm"
+title "Density of states"
+xaxis label "energy"
+yaxis label "DOS"
+PRINT TO "'$name'.eps"
+DEVICE "EPS" OP "level2"
+PRINT' > temp_grace_script
+echo -e "${color}Done.${reset}"
+
+xmgrace -batch temp_grace_script -nosafe -hardcopy
+mv DOS.dat $dir_name
+mv $name.eps $dir_name
+cd $dir_name
+
+epspdf $name.eps
+mv ../../temp_grace_script .
+evince $name.pdf 
+
