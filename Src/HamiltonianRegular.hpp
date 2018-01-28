@@ -9,6 +9,7 @@ struct Periodic_Operator {
   Eigen::Array<unsigned,    Eigen::Dynamic, 1 >            NHoppings;         // Number of elements different from Zero from each orbital
   Eigen::Array<std::ptrdiff_t, Eigen::Dynamic, Eigen::Dynamic> distance;          // Distance in the basis 
   Eigen::Array<   T, Eigen::Dynamic, Eigen::Dynamic> hopping;           // Hopping
+  Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> dist;
   Eigen::Array<   T, Eigen::Dynamic, Eigen::Dynamic> hopping_magnetic; 	// Hoppings with magnetic field, periodic part
   Eigen::Array<   T, Eigen::Dynamic, Eigen::Dynamic> V[D];              // Velocity [r,h]
   Eigen::Array<   T, Eigen::Dynamic, Eigen::Dynamic> V2[D][D];              // Velocity [r,[r,h]]
@@ -23,7 +24,7 @@ struct Periodic_Operator {
 
       std::size_t max  	= NHoppings.maxCoeff();
       distance 			= Eigen::Matrix< std::ptrdiff_t, Eigen::Dynamic, Eigen::Dynamic>  (max, sim.r.Orb);
-      Eigen::Matrix< int, Eigen::Dynamic, Eigen::Dynamic> dist = Eigen::Matrix< int, Eigen::Dynamic, Eigen::Dynamic>  (max, sim.r.Orb);
+      dist 				= Eigen::Matrix< int, Eigen::Dynamic, Eigen::Dynamic>  (max, sim.r.Orb);
       hopping  			= Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>(max, sim.r.Orb);
       hopping_magnetic  = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>(max, sim.r.Orb);
       

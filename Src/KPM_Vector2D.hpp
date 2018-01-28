@@ -80,8 +80,14 @@ public:
     
     // Relative to magnetic field
     
-    Coordinates<std::ptrdiff_t, 3> global1(r.Lt), global2(r.Lt), local1(r.Ld), local2(r.Ld); 
+    Coordinates<std::ptrdiff_t, 3> global(r.Lt), global1(r.Lt), global2(r.Lt), local1(r.Ld), local2(r.Ld); 
     Eigen::Map<Eigen::Matrix<std::ptrdiff_t,2,1>> v_global1(global1.coord), v_global2(global2.coord), v_local1(local1.coord), v_local2(local2.coord);
+    
+    unsigned l[2 + 1];
+	std::fill_n(l, 2, 3);
+	l[2]  = r.Orb;
+	Coordinates<std::ptrdiff_t, 2 + 1> b3(l);    
+	Eigen::Map<Eigen::Matrix<std::ptrdiff_t,2, 1>> vee(b3.coord); // Column vector
     
     
     std::complex<double> im(0,1.0);
@@ -96,142 +102,139 @@ public:
     T * phiM2 = v.col((memory + index - 2) % memory ).data();
     
     // Initialize tiles that have deffects connecting elements of a previous tile
-    for(auto istr = h.cross_mozaic_indexes.begin(); istr != h.cross_mozaic_indexes.end() ; istr++)
-      {
-	i0 = ((*istr) % (r.lStr[0]) ) * STRIDE + NGHOSTS;
-	i1 = ((*istr) / r.lStr[0] ) * STRIDE + NGHOSTS;
-	for(std::size_t io = 0; io < r.Orb; io++)
-	  {
-	    const std::size_t ip = io * x.basis[2] ;
-	    const std::size_t std = x.basis[1];
-	    const std::size_t j0 = ip + i0 + i1 * std;
-	    const std::size_t j1 = j0 + STRIDE * std;
-	    
-	    for(std::size_t j = j0; j < j1; j += std )
-	      for(std::size_t i = j; i < j + STRIDE ; i++)
-		phi0[i] = - value_type(MULT) * phiM2[i];
-	  }
-      }
-    
-    for( i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1 += STRIDE  )
-      for( i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0 += STRIDE )
+	for(auto istr = h.cross_mozaic_indexes.begin(); istr != h.cross_mozaic_indexes.end() ; istr++)
 	{
-	  // Periodic component of the Hamiltonian + Anderson disorder
-	  std::size_t istr = (i1 - NGHOSTS) /STRIDE * r.lStr[0] + (i0 - NGHOSTS)/ STRIDE;
-	  
-	  for(std::size_t io = 0; io < r.Orb; io++)
-	    {
-	      const std::size_t ip = io * x.basis[2];
-	      const std::size_t dd = (h.Anderson_orb_address[io] - io)*r.Nd;
-	      const std::size_t std = x.basis[1]; // this already takes the orbital into account
-	      const std::size_t j0 = ip + i0 + i1 * std;
-	      const std::size_t j1 = j0 + STRIDE * std; //j0 and j1 define the limits of the for cycle
+		i0 = ((*istr) % (r.lStr[0]) ) * STRIDE + NGHOSTS;
+		i1 = ((*istr) / r.lStr[0] ) * STRIDE + NGHOSTS;
+		for(std::size_t io = 0; io < r.Orb; io++)
+		{
+			const std::size_t ip = io * x.basis[2] ;
+			const std::size_t std = x.basis[1];
+			const std::size_t j0 = ip + i0 + i1 * std;
+			const std::size_t j1 = j0 + STRIDE * std;
 
-	      // Initialize phi0
-		
-	      if(h.cross_mozaic.at(istr)){
-		for(std::size_t j = j0; j < j1; j += std )
-		  for(std::size_t i = j; i < j + STRIDE ; i++){
-		    phi0[i] = - value_type(MULT) * phiM2[i];
-		  }
+			for(std::size_t j = j0; j < j1; j += std )
+			  for(std::size_t i = j; i < j + STRIDE ; i++)
+				phi0[i] = - value_type(MULT) * phiM2[i];
 		}
-	      
-
-	      // Anderson disorder
-	      if( h.Anderson_orb_address[io] >= 0)
-		{
-		  for(std::size_t j = j0; j < j1; j += std )
-		    for(std::size_t i = j; i < j + STRIDE ; i++)
-		      phi0[i] += value_type(MULT + 1) * phiM1[i] * h.U_Anderson.at(i - dd);
-		}
-	      else if (h.Anderson_orb_address[io] == - 1)
-		{
-		  for(std::size_t j = j0; j < j1; j += std )
-		    for(std::size_t i = j; i < j + STRIDE ; i++)
-		      phi0[i] += value_type(MULT + 1) * phiM1[i] * h.U_Orbital.at(io);
-		}
-	     
-	      
-	      
-	      
-	      // Hoppings
-	      for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
-		{
-		  const std::ptrdiff_t d1 = h.hr.distance(ib, io);
-		  const T t1 =  value_type(MULT + 1) * h.hr.hopping(ib, io);
-		  
-		  for(std::size_t j = j0; j < j1; j += std ){
-		    for(std::size_t i = j; i < j + STRIDE ; i++){
-		      
-		      // These four lines pertrain only to the magnetic field
-		      r.convertCoordinates(global1, local1.set_coord(i));
-		      r.convertCoordinates(global2, local1.set_coord(i + d1));
-		      temp_vect = (v_global2 - v_global1).template cast<double>().matrix().transpose();
-		      phase = temp_vect*r.vect_pot*v_global1.template cast<double>().matrix();
-		      //std::cout << "hopping: " << phase << "\n";
-		      phi0[i] += t1 * phiM1[i + d1] * peierls2(phase);
-		      
-		    }
-		  }
-		}
-	  }
-	  
-	  // Structural disorder contribution
-	  for(auto id = h.hd.begin(); id != h.hd.end(); id++){
-	    for(std::size_t i = 0; i <  id->position.at(istr).size(); i++)
-	      {
-		
-		std::size_t ip = id->position.at(istr)[i];
-		for(unsigned k = 0; k < id->hopping.size(); k++)
-		  {
-		    std::size_t k1 = ip + id->node_position[id->element1[k]];
-		    std::size_t k2 = ip + id->node_position[id->element2[k]];
-		    
-		    // These four lines pertrain only to the magnetic field
-		    r.convertCoordinates(global1, local1.set_coord(k1));
-		    r.convertCoordinates(global2, local1.set_coord(k2));
-		    temp_vect = (v_global2 - v_global1).template cast<double>().matrix().transpose();
-		    phase = temp_vect*r.vect_pot*v_global1.template cast<double>().matrix();
-		    
-		    phi0[k1] += value_type(MULT + 1) * id->hopping[k] * phiM1[k2] * peierls2(phase);
-		    
-		  }
-		
-		for(std::size_t k = 0; k < id->U.size(); k++)
-		  {
-		    std::size_t k1 = ip + id->node_position[id->element[k]];
-		    phi0[k1] += value_type(MULT + 1) * id->U[k] * phiM1[k1];
-		  }
-	      }
-	  }
 	}
+
+	for( i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1 += STRIDE  )
+		for( i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0 += STRIDE )
+		{
+			// Periodic component of the Hamiltonian + Anderson disorder
+			std::size_t istr = (i1 - NGHOSTS) /STRIDE * r.lStr[0] + (i0 - NGHOSTS)/ STRIDE;
+			
+			for(std::size_t io = 0; io < r.Orb; io++)
+			{
+				const std::size_t ip = io * x.basis[2];
+				const std::size_t dd = (h.Anderson_orb_address[io] - io)*r.Nd;
+				const std::size_t std = x.basis[1]; // this already takes the orbital into account
+				const std::size_t j0 = ip + i0 + i1 * std;
+				const std::size_t j1 = j0 + STRIDE * std; //j0 and j1 define the limits of the for cycle
+
+				// Initialize phi0
+
+				if(h.cross_mozaic.at(istr)){
+					for(std::size_t j = j0; j < j1; j += std )
+						for(std::size_t i = j; i < j + STRIDE ; i++){
+							phi0[i] = - value_type(MULT) * phiM2[i];
+						}
+					}
+				
+
+				// Anderson disorder
+				if( h.Anderson_orb_address[io] >= 0)
+				{
+					for(std::size_t j = j0; j < j1; j += std )
+						for(std::size_t i = j; i < j + STRIDE ; i++)
+							phi0[i] += value_type(MULT + 1) * phiM1[i] * h.U_Anderson.at(i - dd);
+				}
+				else if (h.Anderson_orb_address[io] == - 1)
+				{
+					for(std::size_t j = j0; j < j1; j += std )
+						for(std::size_t i = j; i < j + STRIDE ; i++)
+							phi0[i] += value_type(MULT + 1) * phiM1[i] * h.U_Orbital.at(io);
+				}
+			 
+				
+				
+				
+				// Hoppings
+				for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
+				{
+					const std::ptrdiff_t d1 = h.hr.distance(ib, io);
+					const T t1 =  value_type(MULT + 1) * h.hr.hopping(ib, io);
+					b3.set_coord(h.hr.dist(ib,io));        
+					vee.array() -= 1; 
+					
+					for(std::size_t j = j0; j < j1; j += std ){
+						r.convertCoordinates(global, local1.set_coord(j));
+						phase = vee(0)*global.coord[1]*r.vect_pot(0,1);
+						
+						for(std::size_t i = j; i < j + STRIDE ; i++){								
+							phi0[i] += t1 * phiM1[i + d1] * peierls2(phase);								
+						}
+					}
+				}
+			}
+			
+			
+			
+			// Structural disorder contribution			
+			for(auto id = h.hd.begin(); id != h.hd.end(); id++){				// iterate over each kind of disorder
+				for(std::size_t i = 0; i <  id->position.at(istr).size(); i++){
+
+					std::size_t ip = id->position.at(istr)[i];
+					for(unsigned k = 0; k < id->hopping.size(); k++)
+					{
+						std::size_t k1 = ip + id->node_position[id->element1[k]];
+						std::size_t k2 = ip + id->node_position[id->element2[k]];
+						
+						// These four lines pertrain only to the magnetic field
+						r.convertCoordinates(global1, local1.set_coord(k1));
+						r.convertCoordinates(global2, local1.set_coord(k2));
+						temp_vect = (v_global2 - v_global1).template cast<double>().matrix().transpose();
+						phase = temp_vect*r.vect_pot*v_global1.template cast<double>().matrix();
+						
+						phi0[k1] += value_type(MULT + 1) * id->hopping[k] * phiM1[k2] * peierls2(phase);
+						
+					}
+					
+					for(std::size_t k = 0; k < id->U.size(); k++)
+					{
+						std::size_t k1 = ip + id->node_position[id->element[k]];
+						phi0[k1] += value_type(MULT + 1) * id->U[k] * phiM1[k1];
+					}
+				}
+			}
+		}
     
     //  Broken impurities
     for(auto id = h.hd.begin(); id != h.hd.end(); id++)
-      for(std::size_t i = 0; i < id->border_element1.size(); i++)
-	{
-	    
-	  std::size_t i1 = id->border_element1[i];
-	  std::size_t i2 = id->border_element2[i];
-	  
-	  // These four lines pertrain only to the magnetic field
-	  r.convertCoordinates(global1, local1.set_coord(i1));
-	  r.convertCoordinates(global2, local1.set_coord(i2));
-	  temp_vect  = (v_global2 - v_global1).template cast<double>().matrix().transpose();
-	  phase = temp_vect*r.vect_pot*v_global1.template cast<double>().matrix();
-	  //std::cout << "broken: " << phase << "\n";
-	  phi0[i1] += value_type(MULT + 1) * id->border_hopping[i] * phiM1[i2] * peierls2(phase);
-	}
+		for(std::size_t i = 0; i < id->border_element1.size(); i++)
+		{
+			std::size_t i1 = id->border_element1[i];
+			std::size_t i2 = id->border_element2[i];
+
+			// These four lines pertrain only to the magnetic field
+			r.convertCoordinates(global1, local1.set_coord(i1));
+			r.convertCoordinates(global2, local1.set_coord(i2));
+			temp_vect  = (v_global2 - v_global1).template cast<double>().matrix().transpose();
+			phase = temp_vect*r.vect_pot*v_global1.template cast<double>().matrix();
+			
+			phi0[i1] += value_type(MULT + 1) * id->border_hopping[i] * phiM1[i2] * peierls2(phase);
+		}
 	
 	
 	
     
-    for(auto id = h.hd.begin(); id != h.hd.end(); id++)
-      for(std::size_t i = 0; i < id->border_element.size(); i++)
-	{
-	  std::size_t i1 = id->border_element[i];
-	  phi0[i1] += value_type(MULT + 1) * id->border_U[i] * phiM1[i1];
-	}
+	for(auto id = h.hd.begin(); id != h.hd.end(); id++)
+		for(std::size_t i = 0; i < id->border_element.size(); i++)
+		{
+			std::size_t i1 = id->border_element[i];
+			phi0[i1] += value_type(MULT + 1) * id->border_U[i] * phiM1[i1];
+		}
     
     Exchange_Boundaries();
     

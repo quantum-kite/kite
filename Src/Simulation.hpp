@@ -30,6 +30,7 @@ private:
   GLOBAL_VARIABLES <T> Global;
   LatticeStructure <D> rglobal;
   
+  
   // Regular quantities to calculate, such as DOS and CondXX
   std::vector <int> Quantities, NMoments, NRandomV, NDisorder; 
   
@@ -153,13 +154,49 @@ public:
     }
     
 		delete file_special;
-			
+		
+		int CondXXX = 0;
+		int hBN = 1;
+		
+		bool GammaXiX 	= CondXX != -1;
+		bool GammaXX	= CondXX != -1;
+		bool GammaXiY	= CondXY != -1;
+		bool GammaXY	= CondXY != -1;
+		bool Gamma		= DOS != -1;
+		bool GammaXXiX	= CondXXX != -1 or hBN != -1;
+		bool GammaXiXX	= CondXXX != -1 or hBN != -1;
+		
+		std::cout << GammaXY << " " << GammaXiY << " ";
+		
+		int NDisorderhBN = NDisorder.at(CondXX);
+		int NRandomhBN = NRandomV.at(CondXX);
+		int NMomentshBN = NMoments.at(CondXX);
+		
+		
     omp_set_num_threads(rglobal.n_threads);
 #pragma omp parallel default(shared)
     {
+		
+		
       
-      Simulation<T,D> simul(name, Global);	  
-            
+		Simulation<T,D> simul(name, Global);
+		
+		#pragma omp master
+		{
+		Global.kpm_iteration_time = simul.time_kpm(100);
+		std::cout << "kpm iteration time: " << Global.kpm_iteration_time << "\n" << std::flush;
+		
+		
+		
+		
+		}
+		#pragma omp barrier
+	
+		//double calc_time = size_gamma*Global.kpm_iteration_time*NRandomV*NDisorder;
+		//std::cout << "This function will take around " << calc_time << " seconds.\n" << std::flush;
+		
+		
+		
       if(SingleShotXX != -1){
 				if(DEBUG)std::cout << "calculating of singleshotxx\n";fflush(stdout);
 				Global.singleshot_cond = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic > :: Zero(1, singleshot_energies.cols());
@@ -176,36 +213,17 @@ public:
 				if(DEBUG)std::cout << "ended singleshotxx\n";fflush(stdout);
 				
 			}
-      if(DOS != -1){
-				if(DEBUG)std::cout << "calculating of DOS\n";fflush(stdout);
-				if(DEBUG)std::cout << "NRandomV: " << NRandomV.at(DOS) << "\n";
-				if(DEBUG)std::cout << "NDisorder: " << NDisorder.at(DOS) << "\n";
-				if(DEBUG)std::cout << "NMoments: " << NMoments.at(DOS) << "\n";
-				
-				Global.mu = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic > :: Zero(1, NMoments.at(DOS));
-				simul.Measure_Dos(NRandomV.at(DOS), NDisorder.at(DOS) );
-				if(DEBUG)std::cout << "ended DOS\n";fflush(stdout);
-			}
 			
-			if(CondXX != -1){
-				if(DEBUG)std::cout << "calculating of condxx\n";fflush(stdout);
-				Global.gamma = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic > :: Zero(NMoments.at(CondXX), NMoments.at(CondXX));
-				Global.lambda = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic > :: Zero(1, NMoments.at(CondXX));
-				simul.Measure_Cond(NRandomV.at(CondXX), NDisorder.at(CondXX), "x,x", "GammaXX");
-				simul.Measure_Lambda(NRandomV.at(CondXX), NDisorder.at(CondXX), "xx", "LambdaXX");
-				if(DEBUG)std::cout << "ended condxx\n";fflush(stdout);
-			}
-			
-			if(CondXY != -1){
-				if(DEBUG)std::cout << "calculating of condxy\n";fflush(stdout);
-				Global.gamma = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic > :: Zero(NMoments.at(CondXY), NMoments.at(CondXY));
-				Global.lambda = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic > :: Zero(1, NMoments.at(CondXY));
-				simul.Measure_Cond(NRandomV.at(CondXY), NDisorder.at(CondXY), "x,y", "GammaXY");
-				simul.Measure_Lambda(NRandomV.at(CondXY), NDisorder.at(CondXY), "xy", "LambdaXY");
-				if(DEBUG)std::cout << "ended condxy\n";fflush(stdout);
-			}
-			
-			
+		/*if(Gamma) 	  simul.Measure_Gamma(NRandomV.at(DOS), NDisorder.at(DOS), {NMoments.at(DOS)}, "", "MU");			
+		
+		if(GammaXX)   simul.Measure_Gamma(NRandomV.at(CondXX), NDisorder.at(CondXX), {NMoments.at(CondXX)}, "xx", "LambdaXX");
+		if(GammaXiX)  simul.Measure_Gamma(NRandomV.at(CondXX), NDisorder.at(CondXX), {NMoments.at(CondXX), NMoments.at(CondXX)}, "x,x", "GammaXX");*/
+		
+		if(GammaXXiX) simul.Measure_Gamma(NRandomhBN, NDisorderhBN, {NMomentshBN, NMomentshBN}, "xx,x", "GammaXXiX");
+		if(GammaXiXX) simul.Measure_Gamma(NRandomhBN, NDisorderhBN, {NMomentshBN, NMomentshBN}, "x,xx", "GammaXiXX");
+		if(GammaXY)   simul.Measure_Gamma(NRandomV.at(CondXY), NDisorder.at(CondXY), {NMoments.at(CondXY)}, "xy", "LambdaXY");
+		if(GammaXiY)  simul.Measure_Gamma(NRandomV.at(CondXY), NDisorder.at(CondXY), {NMoments.at(CondXY), NMoments.at(CondXY)}, "x,y", "GammaXY");
+		
 			
 			
     }
@@ -266,6 +284,11 @@ public:
 	  }
 	  
 	  if(DEBUG)std::cout << "Finished chb iteration in DOS.\n";fflush(stdout);
+	  
+	  
+	  
+	  
+	  
 
 #pragma omp critical
 	Global.mu += mu;
@@ -436,7 +459,6 @@ public:
 			}
 		}
 		
-		//std::cout << "gamma_00\n" << gamma.matrix().block(0,0,3,1) << "\n";fflush(stdout);
 		
 		// the gamma matrix has been calculated. Now we're going to use the 
 		// property that gamma is hermitian: gamma_nm=gamma_mn*
@@ -468,7 +490,429 @@ public:
 #pragma omp barrier
   }
 
+	void Measure_Gamma(int NRandomV, int NDisorder, std::vector<int> N_moments, std::string indices_string, std::string name_dataset) {
+		if(DEBUG) std::cout << "Entered Measure_Gamma.\n" << std::flush;
+		/* Calculates the Gamma matrix of parameters given by 'indices_string'. These matrices
+		are used to calculate various properties of the quantum system, such as the density
+		of states and the optical conductivity. The Gamma matrix is a multi-dimensional matrix 
+		defined by:
+		
+			Gamma{i1, i2, ... , iN}(n1, n2, ..., nN) = < v^i1  T_n1(H)  v^i2  T_n2(H) ... v^iN  T_nN(H) >
+			
+		The first argument is the parameters and the second argument is the matrix indices. Here's 
+		a quick rundown of what each of these objects means:
+		 
+			T_n(H) is the n-th order Chebyshev polynomial of the Hamiltonian matrix H
+			
+		Note that each i in the parameters actually stands for a set of letters, such as x, or xx, or xyyxxy.
+		Unwinding those, v^{ij...mn} represents the  nested commutator of the position operator:
+		
+			v^{x} = [x,H],  v^{xy} = [x,[y,H]],  v^{yyy} = [y,[y,[y,H]]],  etc...
+			
+		Note that these velocity operators do not have the imaginary number in their definition, so they are not
+		hermitian. When the parameter of v is empty, it is treated as the identity operator: v^{} = 1.		
+		Some valid parameters for the Gamma matrix are: 
+		
+			""  		->  		   G^{}(n) = < Tn(H) > 
+			"x"			->			  G^{x}(n) = < v^x  Tn(H) >
+			"xyyyxyx"	->		G^{xyyyxyx}(n) = < v^xyyyxyx  Tn(H) >
+			"xy,y"		->		 G^{xy,y}(n,m) = < v^x  Tn(H)  v^y  Tm(H) >
+			","			->			G^{,}(n,m) = < Tn(H)  Tm(H) >
+			"y,,y,"		->	G^{y,,y,}(n,m,p,q) = < v^y  Tn(H)  Tm(H)  v^y  Tp(H)  Tq(H) >
+			etc...		->	etc...
+		
+		These parameters should NOT contain anything else other than the characters ',', 'x' and 'y',
+		not even whitespace characters. The dimension of the Gamma matrix is the number of commas + 1 */
+		
+		
+		
+		
+		// First of all, we need to process the indices_string into something the program can use
+		// Each element of this vector is a list of the indices of a generalized velocity operator
+		std::vector<std::vector<int>> indices = process_string(indices_string);
+		int dim = indices.size();
+		
+		if(DEBUG){
+			std::cout << "\nIndices:\n";
+			for(unsigned i = 0; i < indices.size(); i++){
+				for(unsigned j = 0; j < indices.at(i).size(); j++){
+					std::cout << indices.at(i).at(j) << "\t";
+				}
+				std::cout << "\n";
+			}
+			std::cout << "Gamma matrix dimension: " << dim << "\n";
+			
+			
+			std::cout << "Number of moments: \n";
+			for(unsigned i = 0; i < N_moments.size(); i++){
+				std::cout << N_moments.at(i) << "\n";
+			}
+			std::cout << "N_moments size: " << N_moments.size() << "\n";
+		}
+		
+		// Check if the dimensions match
+		if(dim != int(N_moments.size())){
+			std::cout << "Dimension of the Gamma matrix does not match the number of chebyshev moments. Aborting.\n";
+			exit(0);
+		}
+			
+		// Determine the size of the gamma matrix we want to calculate
+		int size_gamma = 1;
+		for(int i = 0; i < dim; i++){
+			if(N_moments.at(i) % 2 != 0){
+				std::cout << "The number of moments must be an even number, due to limitations of the program. Aborting\n";
+				exit(0);
+			}
+			size_gamma *= N_moments.at(i);
+		}
+		
+		// Estimate of the time it'll take to run this function
+		
+		
+		
+		
+		
+		// Initialize the KPM vectors that will be needed to run the program 
+		std::vector<KPM_Vector<T,D>> kpm_vector;
+		kpm_vector.push_back(KPM_Vector<T,D> (1, *this));
+		for(int i = 0; i < dim; i++)
+			kpm_vector.push_back(KPM_Vector<T,D> (2, *this));
+		
+		
+		
+		// Define some pointers to make the code easier to read
+		KPM_Vector<T,D> *kpm0 = &kpm_vector.at(0);
+		KPM_Vector<T,D> *kpm1 = &kpm_vector.at(1);
+		T * kpm0data = kpm0->v.col(0).data();
+		T * kpm1data = kpm1->v.col(kpm1->get_index()).data();
+		int axis0, axis1;
+			
+			
+			
+		// Make sure the local gamma matrix is zeroed
+		Eigen::Array<T, -1, -1> gamma = Eigen::Array<T, -1, -1 >::Zero(1, size_gamma);
+		
+		long average = 0;
+		for(int disorder = 0; disorder < NDisorder; disorder++){
+			h.generate_disorder();
+			for(int randV = 0; randV < NRandomV; randV++){
+				
+				kpm0->initiate_vector();			// original random vector
+				kpm1->set_index(0);
+				kpm1->v.col(0) = kpm0->v.col(0);
+				kpm1->Exchange_Boundaries();
+				
+				// Check which generalized velocity operator needs to be calculated. 
+				// This replaces the original random vector |0> by v|0> 
+				if(DEBUG)std::cout << "First multiplication by the Velocity.\n";
+				switch(indices.at(0).size()){
+					case 0:
+						if(DEBUG)std::cout << "case 0\n";
+						break;
+					case 1:
+						
+						if(DEBUG)std::cout << "case 1\n";
+						axis0 = indices.at(0).at(0);
+						kpm0->Velocity(kpm0data, kpm1data, axis0);  
+						kpm0->empty_ghosts(0);
+						kpm0->v.col(0) = -kpm0->v.col(0); // This minus sign is due to the fact that this Velocity operator is not self-adjoint
+						
+						
+						break;
+					
+					case 2:
+						if(DEBUG)std::cout << "case 2\n";
+						axis0 = indices.at(0).at(0);
+						axis1 = indices.at(0).at(1);
+						
+						kpm0->Velocity2(kpm0data, kpm1data, axis0, axis1);  
+						kpm0->empty_ghosts(0);
+						break;
+						
+					case 3:
+						std::cout << "The matrix you're trying to calculate requires an operator that is not yet implemented: Velocity3.\n";
+						exit(0);
+						
+					default:
+						std::cout << "The matrix you're trying to calculate requires an operator that is not yet implemented.\n";
+						exit(0);
+				
+				}
+					
+				long index_gamma = 0;
+				recursive_KPM(1, dim, N_moments, &average, &index_gamma, indices, &kpm_vector, &gamma);
+				
+				
+				average++;
+			}
+		} 
+		
+		
+		store_gamma(&gamma, N_moments, indices, name_dataset);
+		
+		
+		if(DEBUG)std::cout << "Left Measure_Gamma.\n" << std::flush;
+  }
+	
+	void recursive_KPM(int depth, int max_depth, std::vector<int> N_moments, long *average, long *index_gamma, std::vector<std::vector<int>> indices, std::vector<KPM_Vector<T,D>> *kpm_vector, Eigen::Array<T, -1, -1> *gamma){
+		typedef typename extract_value_type<T>::value_type value_type;
+		
+		
+		if(depth != max_depth){
+			KPM_Vector<T,D> *kpm1 = &kpm_vector->at(depth);
+			KPM_Vector<T,D> *kpm2 = &kpm_vector->at(depth + 1);
+			
+			T * kpm1data;
+			T * kpm2data;
+			int axis1, axis2;
+			
+			//std::cout << "first branch. Depth: " << depth << "\n" << std::flush;
+			
+			
+			for(int p = 0; p < N_moments.at(depth - 1); p++){
+				kpm2->set_index(0);
+				switch(indices.at(depth).size()){
+					case 0:
+						//std::cout << "case0\n";
+						break;
+					case 1:
+						//std::cout << "case1\n";
+						axis1 = indices.at(depth).at(0);
+						kpm1data = kpm1->v.col(kpm1->get_index()).data();
+						kpm2data = kpm2->v.col(kpm2->get_index()).data();
+						
+						//std::cout << "indices.at(" << depth << "): " << axis1 << "\n";
+						kpm2->Velocity(kpm2data, kpm1data, axis1); 
+						
+						break;
+						
+					case 2:
+						//std::cout << "case2\n";
+						axis1 = indices.at(depth).at(0);
+						axis2 = indices.at(depth).at(1);
+						kpm1data = kpm1->v.col(kpm1->get_index()).data();
+						kpm2data = kpm2->v.col(kpm2->get_index()).data();
+						
+						kpm2->Velocity2(kpm2data, kpm1data, axis1, axis2); 
+						
+						break;
+						
+					default:
+						//std::cout << "The matrix you're trying to calculate requires an operator that is not yet implemented.\n";
+						exit(0);
+						
+				}
+				
+				
+				recursive_KPM(depth + 1, max_depth, N_moments, average, index_gamma, indices, kpm_vector, gamma);
+				//std::cout << "left second branch\n";
+				if(p == 0){
+					//std::cout << "p=0\n";
+					kpm1->template Multiply<0>(); 
+				}
+				else if(p < N_moments.at(depth-1) - 1){
+					//std::cout << "p!=0\n";
+					kpm1->template Multiply<1>(); 
+				}
+			
+			}
+			
+		} else {
+			KPM_Vector<T,D> *kpm0 = &kpm_vector->at(0);
+			KPM_Vector<T,D> *kpm1 = &kpm_vector->at(depth);
+			
+			//std::cout << "second branch. Depth: " << depth << "\n" << std::flush;
+			kpm1->template Multiply<0>();			
+			gamma->matrix().block(0,*index_gamma,1,2) += (kpm0->v.adjoint() * kpm1->v - gamma->matrix().block(0,*index_gamma,1,2))/value_type(*average + 1);			
+			*index_gamma += 2;
+			
+			for(int m = 2; m < N_moments.at(depth - 1); m += 2)
+			{
+				kpm1->template Multiply<1>();
+				kpm1->template Multiply<1>();
+				gamma->matrix().block(0, *index_gamma,1,2) += (kpm0->v.adjoint() * kpm1->v - gamma->matrix().block(0,*index_gamma,1,2))/value_type(*average + 1);
+				//std::cout << "product: " << kpm0->v.adjoint() * kpm1->v << "\n";
+				
+				*index_gamma += 2;
+			}
+			
+		}
+	}
+	
+	
+	std::vector<std::vector<int>> process_string(std::string indices_string){
+		// First of all, split the indices string by commas ','
+		std::vector<std::string> strings;
+		int end_pos = 0;
+		while(end_pos != -1){
+			end_pos = indices_string.find(',');
+			strings.push_back(indices_string.substr(0, end_pos));
+			indices_string = indices_string.substr(end_pos + 1, indices_string.size() - end_pos - 1);
+		}
+		
+		int dim = strings.size();
+		/*
+		for(int i = 0; i < dim; i++)
+			std::cout << strings.at(i) << "\n";*/
+		
+		
+		
+		
+		
+		std::vector<std::vector<int>> indices;
+		
+		for(int i = 0; i < dim; i++){
+			
+			int len_str = strings.at(i).size();
+			int single_digit;
+			std::vector<int> temp;
+			
+			for(int j = 0; j < len_str; j++){
+				char single_char = strings.at(i)[j];
+				
+				if(single_char == 'x'){
+					single_digit = 0;
+				} else {
+					if(single_char == 'y'){
+						single_digit = 1;
+					} else {
+						// This block should never run
+						std::cout << "Please enter a valid expression.\n";
+						exit(0);
+					}
+				} 
+				temp.push_back(single_digit);
+				}
+				
+			indices.push_back(temp);
+			   
+			}
+			
+			
+		return indices;
+		}
 
+	void store_gamma(Eigen::Array<T, -1, -1> *gamma, std::vector<int> N_moments, std::vector<std::vector<int>> indices, std::string name_dataset){
+		if(DEBUG)std::cout << "Entered store_gamma.\n" << std::flush;
+		/* Depending on the type of Gamma matrix we're calculating, there may be some symmetries
+		 * among the matrix entries that could be taken into account.
+		 * 
+		 * */
+		H5::H5File * file = new H5::H5File(name, H5F_ACC_RDWR);
+		long int size_gamma = gamma->cols();
+		int dim = indices.size();
+		
+		
+		// Number of commutators inside the Gamma matrix. 
+		// V^{x}  = [x,H]		-> one commutator
+		// V^{xy} = [x,[y,H]]	-> two commutators
+		// This is important because the commutator is anti-hermitian. So, an odd number of commutators
+		// means that the conjugate of the Gamma matrix has an overall minus sign
+		int num_velocities = 0;
+		for(int i = 0; i < int(indices.size()); i++)
+			num_velocities += indices.at(i).size();
+		//std::cout << "num_velocities: " << num_velocities << "\n";
+		
+		int factor = 1 - (num_velocities % 2)*2;
+		
+		//std::cout << "gamma: " << *gamma << "\n";
+		
+		switch(dim){
+			case 2:
+			{
+				//std::cout << "gamma_matrix dimension: " << dim << "\n";
+				// Put the data of the Gamma matrix in a 2D matrix 
+				Eigen::Array<T,-1,-1> general_gamma = Eigen::Map<Eigen::Array<T,-1,-1>>(gamma->data(), N_moments.at(0), N_moments.at(1));
+				#pragma omp master
+				{
+					Global.general_gamma = Eigen::Array<T, -1, -1 > :: Zero(N_moments.at(0), N_moments.at(1));
+				}
+				#pragma omp barrier
+				
+				
+				
+				// Gather the data from all the threads, one by one.
+				// There are some additional symmetry operations that we can take advantage of.
+				// In the case of two indices: Gamma{x,y}(n,m) = Gamma{x,y}(n,m)*, that is, it's self-adjoint.
+				// The factor is -1 when the matrix is anti-hermitian and 1 when hermitian
+				#pragma omp critical
+				Global.general_gamma.matrix() += (general_gamma.matrix() + factor*general_gamma.matrix().adjoint())/2.0;
+				#pragma omp barrier
+				
+				break;
+			}
+				
+			case 1:
+			{
+				//std::cout << "gamma_matrix dimension: " << dim << "\n" << std::flush;
+				Eigen::Array<T,-1,-1> general_gamma = Eigen::Map<Eigen::Array<T,-1,-1>>(gamma->data(), 1, size_gamma);
+				#pragma omp master
+				{
+					Global.general_gamma = Eigen::Array<T, -1, -1 > :: Zero(1, size_gamma);
+				}
+				#pragma omp barrier
+				
+				
+				//std::cout << "here1\n" << std::flush;
+				// Gather the data from all the threads, one by one.
+				
+				#pragma omp critical
+				Global.general_gamma += general_gamma;
+				#pragma omp barrier
+				
+				//std::cout << "here2\n" << std::flush;
+			
+				break;
+			}
+			/*
+			case 3:
+			
+				break;
+				*/
+			default:
+				std::cout << "You're trying to store a matrix that is not expected by the program. Exiting.\n";
+				exit(0);
+		
+		}
+		
+		
+		//std::cout << "global_general_gamma: " << Global.general_gamma << "\n";
+		
+		#pragma omp master
+		{
+			write_hdf5(Global.general_gamma, file, name_dataset);
+		}
+		
+		delete file;
+		
+		//std::cout << "here3\n" << std::flush;
+		std::cout << "Left store_gamma.\n" << std::flush;
+	}
+
+	double time_kpm(int N_average){
+		/* This function serves to provide an estimate of the time it takes for each kpm iteration
+		 * 
+		*/
+		
+		KPM_Vector<T,D> kpm0(1, *this);
+		KPM_Vector<T,D> kpm1(2, *this);
+		
+		
+		kpm0.initiate_vector();
+		kpm1.set_index(0);
+		kpm1.v.col(0) = kpm0.v.col(0);
+		kpm1.template Multiply<0>(); 
+		
+		auto t0 =  std::chrono::high_resolution_clock::now();
+		for(int i = 0; i < N_average; i++)
+			kpm1.template Multiply<1>(); 
+		auto t1 =  std::chrono::high_resolution_clock::now();
+		
+		std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t1 - t0);
+		return time_span.count()/N_average;
+		
+		
+	}
 
   void Measure_Lambda(int & NRandomV, int & NDisorder, std::string indices, std::string filename_dataset) {
 		

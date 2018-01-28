@@ -25,10 +25,10 @@ struct Coordinates {
     T p = 1;
     
     for(unsigned i = 0; i < D; i++)
-      {
-	basis[i] = p;
-	p *= T(L[i]);
-      }
+	{
+		basis[i] = p;
+		p *= T(L[i]);
+	}
   }
   void print() {
     for(unsigned i = 0; i < D ; i++)
@@ -48,10 +48,10 @@ struct Coordinates {
   Coordinates & set_index(T1 (&c)[D] ) {
     index = 0;
     for(int i = D - 1; i >= 0; i--)
-      {
-	coord[i] = T(c[i]);
-	index += T(c[i]) * basis[i];
-      }
+	{
+		coord[i] = T(c[i]);
+		index += T(c[i]) * basis[i];
+	}
     return *this;
   }
   
