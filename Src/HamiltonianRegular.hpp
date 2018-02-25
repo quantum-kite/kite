@@ -15,6 +15,7 @@ struct Periodic_Operator {
   Eigen::Array<   T, Eigen::Dynamic, Eigen::Dynamic> V2[D][D];              // Velocity [r,[r,h]]
   
   Periodic_Operator(Simulation<T,D> & sim) : simul(sim) {
+    debug_message("Entered Periodic_Operator constructor.\n");
     
     NHoppings =  Eigen::Array<unsigned, Eigen::Dynamic, 1 > (sim.r.Orb);
 #pragma omp critical
@@ -46,10 +47,19 @@ struct Periodic_Operator {
       delete file;
       Convert_Build(sim.r);
     }
+    debug_message("Left Periodic_Operator constructor.\n");
   }
+
+
+
+
+
+
 
   void Convert_Build (  LatticeStructure <D> & r )
   {
+	debug_message("Entered Convert_Build\n");
+	  
     Eigen::Matrix<double, D, 1> dr; 
     Eigen::Matrix<double, D, 1> dr_a; //difference vector in coordinates of the lattice
     
@@ -113,7 +123,7 @@ struct Periodic_Operator {
 						
 	  
         }
-        
+    debug_message("Left Convert_Build.\n");
   };
 	
   template <typename U = T>

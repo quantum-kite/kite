@@ -29,6 +29,36 @@
 #endif
 
 
+#define outcol "\033[1;31m"
+#define outres "\033[0m"
+
+#define DEBUG 0
+#define VERBOSE 0
+
+#ifdef VERBOSE
+	#if VERBOSE==1
+		#define verbose_message(VAR) std::cout<<VAR<<std::flush
+	#else
+		#define verbose_message(VAR) 
+	#endif
+#else
+	#define verbose_message(VAR) 
+#endif
+
+#ifdef DEBUG
+	#if DEBUG==1
+		#define debug_message(VAR) std::cout << outcol << VAR << outres << std::flush
+	#else
+		#define debug_message(VAR) 
+	#endif
+#else
+	#define debug_message(VAR) 
+#endif
+
+
+
+
+
 template<typename T, unsigned D>
 class Simulation;
 #include "Global.hpp"
@@ -47,6 +77,7 @@ typedef int indextype;
 
 int main(int argc, char *argv[])
 {  
+	debug_message("Starting program. The messages in red are debug messages. They may be turned off by setting DEBUG 0 in main.cpp\n");
   /* Define General characteristics of the data */ 
   int precision = 1, dim, is_complex;
 
@@ -186,6 +217,7 @@ int main(int argc, char *argv[])
     exit(0);
   } 
   
+  debug_message("Program ended with success!\n");
   return 1;
 }
 

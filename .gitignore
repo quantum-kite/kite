@@ -85,8 +85,7 @@ fabric.properties
 
 tools/tests/output
 
-# add .txt and .pdf files
-*.txt
+# add .pdf files
 *.pdf
 
 # test script

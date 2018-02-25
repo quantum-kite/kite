@@ -27,6 +27,7 @@ struct Defect_Operator  {
   std::vector <std::vector<std::size_t>> position;                   // vector of vectors with positions in the lattice of the Orbital 0 of the defects for each stride block
   
   Defect_Operator(Simulation <T,D> & sim, std::string & defect, H5::H5File *file) : r(sim.r), simul(sim), position(sim.r.NStr) {
+	debug_message("Entered Defect_Operator\n");
 
     std::string field = defect + std::string("/Concentration");
     get_hdf5<double> ( &p, file, field );
@@ -149,12 +150,15 @@ struct Defect_Operator  {
 	  for(unsigned dim2 = 0; dim2 < D; dim2++)
 	    V2[dim1][dim2].push_back( hopping.at(ih) * T(dr_R(dim1)) * T(dr_R(dim2)));
       }
+      
+    debug_message("Left Defect_Operator constructor.\n");
   };
 
 
 
   
   void generate_disorder()  {
+	  debug_message("Entered generate_disorder\n");
     /* Structural disorder*/
 
     /*
@@ -308,6 +312,8 @@ struct Defect_Operator  {
     for(std::size_t istr = 0; istr < r.NStr; istr++)
       std::sort(position[istr].begin(), position[istr].end() );
     
+    
+   debug_message("Left generate_disorder\n");
   }
   
 
