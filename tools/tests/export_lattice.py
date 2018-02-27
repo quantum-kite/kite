@@ -779,6 +779,11 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
         grp_dis.create_dataset('OrbitalNum', data=disorder._orbital, dtype=np.int32)
         grp_dis.create_dataset('OnsiteDisorderMeanValue', data=disorder._mean, dtype=np.float64)
         grp_dis.create_dataset('OnsiteDisorderMeanStdv', data=disorder._stdv, dtype=np.float64)
+    else:
+        grp_dis.create_dataset('OnsiteDisorderModelType', (1,0))
+        grp_dis.create_dataset('OrbitalNum', (1,0))
+        grp_dis.create_dataset('OnsiteDisorderMeanValue', (1,0))
+        grp_dis.create_dataset('OnsiteDisorderMeanStdv', (1,0))
 
     grp_dis_vac = grp.create_group('Vacancy')
     idx_vacancy = 0
