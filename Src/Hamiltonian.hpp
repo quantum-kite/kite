@@ -3,7 +3,8 @@
 
 #include "HamiltonianDefects.hpp"
 #include "HamiltonianRegular.hpp"
-extern "C" herr_t getDefects(hid_t loc_id, const char *name, void *opdata);
+#include "HamiltonianVacancies.hpp"
+extern "C" herr_t getMembers(hid_t loc_id, const char *name, void *opdata);
 
 template <typename T, unsigned D>
 class Hamiltonian {
@@ -25,28 +26,36 @@ public:
   std::vector<int> Anderson_orb_address;
   
   /*   Structural disorder    */
-  std::vector <bool>  cross_mozaic;
-  std::vector <std::size_t>  cross_mozaic_indexes;
-  std::vector < Defect_Operator<T,D> > hd;
+  std::vector <bool>                   cross_mozaic;
+  std::vector <std::size_t>            cross_mozaic_indexes;
+  std::vector < Defect_Operator<T,D>>  hd;
+  Vacancy_Operator<T,D>                hV;
   
-  Hamiltonian (Simulation<T,D> & sim) : r(sim.r), simul(sim) , hr(sim), cross_mozaic(sim.r.NStr)
+  Hamiltonian (Simulation<T,D> & sim) : r(sim.r), simul(sim) , hr(sim), cross_mozaic(sim.r.NStr), hV(sim)
   {  
     /* Anderson disorder */
     build_Anderson_disorder();
+    build_vacancies_disorder();    
     build_structural_disorder();
   };
-
+  
   void generate_disorder()
   {
     distribute_AndersonDisorder();
     for(std::size_t istr = 0; istr < r.NStr; istr++)
       cross_mozaic[istr] = true;
     cross_mozaic_indexes.clear();
+
+    hV.generate_disorder();
     for(auto id = hd.begin(); id != hd.end(); id++)
       id->generate_disorder();
+    
+
   };
   
-  void build_structural_disorder() {
+  void build_structural_disorder()
+  {
+    
 #pragma omp critical
     {
       H5::H5File *file = new H5::H5File(simul.name, H5F_ACC_RDONLY);
@@ -56,17 +65,56 @@ public:
       try {
 	H5::Exception::dontPrint();
 	grp = file->openGroup("/Hamiltonian/StructuralDisorder");
-	grp.iterateElems(grp.getObjName(), NULL, getDefects, static_cast<void*>(&defects) );
-	for(auto id = defects.begin(); id != defects.end(); id++){
-		hd.push_back(Defect_Operator<T,D> ( simul, *id, file) );
-		}
-    }
+	grp.iterateElems(grp.getObjName(), NULL, getMembers, static_cast<void*>(&defects) );
+	
+	for(auto id = defects.begin(); id != defects.end(); id++)
+	  hd.push_back(Defect_Operator<T,D> ( simul, *id, file) );
+      }
       catch(H5::Exception& e) {
-		// Do nothing
+	// Do nothing
       }
       delete file;
     }
   }
+
+  void build_vacancies_disorder()
+  {
+#pragma omp critical
+    {
+      H5::H5File *file = new H5::H5File(simul.name, H5F_ACC_RDONLY);
+      // Test if there is vacancies to build
+      H5::Group  grp;
+      double p;
+      std::vector<int> orbit;
+      std::vector<std::string> vacancies;
+      int n;
+      
+      try {
+	H5::Exception::dontPrint();
+	grp = file->openGroup("/Hamiltonian/Vacancy");
+	// Get the names of the Vacancies Types
+	grp.iterateElems(grp.getObjName(), NULL, getMembers, static_cast<void*>(&vacancies)); 
+	for(auto id = vacancies.begin(); id != vacancies.end(); id++)
+	  {
+	    std::string field = *id + std::string("/Concentration");
+	    get_hdf5<double> ( &p, file, field );
+	    field = *id + std::string("/NumOrbitals");
+	    get_hdf5<int> ( &n, file, field );
+	    orbit.resize(n);
+	    field = *id + std::string("/Orbitals");
+	    get_hdf5<int> ( orbit.data(), file, field );
+	    hV.add_model(p, orbit);
+	  }
+	
+      }
+      catch(H5::Exception& e) {
+	// Do nothing
+      }
+      delete file;
+    }
+    
+  }
+  
   
   void build_Anderson_disorder() {
     /*
@@ -80,7 +128,7 @@ public:
       H5::DataSet   dataset    = H5::DataSet(file->openDataSet("/Hamiltonian/Disorder/OrbitalNum"));
       H5::DataSpace dataspace  = dataset.getSpace();
       size_t        m          = dataspace.getSimpleExtentNpoints();
-
+      
       orb_num.resize(m);
       model.resize(m);
       mu.resize(m);
@@ -147,7 +195,7 @@ public:
 };
 
 
-herr_t getDefects(hid_t loc_id, const char *name, void *opdata)
+herr_t getMembers(hid_t loc_id, const char *name, void *opdata)
 {
   H5::Group  grp(loc_id);
   std::string Disorder = grp.getObjName();

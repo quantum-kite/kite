@@ -5,14 +5,14 @@
 template <typename T, unsigned D>
 struct Periodic_Operator {
   Simulation<T,D> & simul;
-  // Non-diagonal component of the operator
+                                                                              // Non-diagonal component of the operator
   Eigen::Array<unsigned,    Eigen::Dynamic, 1 >            NHoppings;         // Number of elements different from Zero from each orbital
-  Eigen::Array<std::ptrdiff_t, Eigen::Dynamic, Eigen::Dynamic> distance;          // Distance in the basis 
-  Eigen::Array<   T, Eigen::Dynamic, Eigen::Dynamic> hopping;           // Hopping
+  Eigen::Array<std::ptrdiff_t, Eigen::Dynamic, Eigen::Dynamic> distance;      // Distance in the basis 
+  Eigen::Array<   T, Eigen::Dynamic, Eigen::Dynamic> hopping;                 // Hopping
   Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> dist;
-  Eigen::Array<   T, Eigen::Dynamic, Eigen::Dynamic> hopping_magnetic; 	// Hoppings with magnetic field, periodic part
-  Eigen::Array<   T, Eigen::Dynamic, Eigen::Dynamic> V[D];              // Velocity [r,h]
-  Eigen::Array<   T, Eigen::Dynamic, Eigen::Dynamic> V2[D][D];              // Velocity [r,[r,h]]
+  Eigen::Array<   T, Eigen::Dynamic, Eigen::Dynamic> hopping_magnetic; 	      // Hoppings with magnetic field, periodic part
+  Eigen::Array<   T, Eigen::Dynamic, Eigen::Dynamic> V[D];                    // Velocity [r,h]
+  Eigen::Array<   T, Eigen::Dynamic, Eigen::Dynamic> V2[D][D];                // Velocity [r,[r,h]]
   
   Periodic_Operator(Simulation<T,D> & sim) : simul(sim) {
     debug_message("Entered Periodic_Operator constructor.\n");

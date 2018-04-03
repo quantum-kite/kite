@@ -5,8 +5,8 @@ struct Defect_Operator  {
   unsigned                       NumberNodes;                        // Number of nodes in the deffect
   std::vector <T>                          U;                        // local energies
   std::vector <unsigned>             element;                        // nodes with local energies
-  std::vector <T>                    hopping;                        // vector of the non-zero values of the operator
-  std::vector <T>           hopping_magnetic;                        
+  std::vector <T>                    hopping;                        // vector of the non-zero values of the hopping operator operator
+  std::vector <T>           hopping_magnetic;                        // 
   std::vector <T>                       V[D];
   std::vector <T>                   V2[D][D];
   std::vector <unsigned>            element1;                        // vector with the nodes 
@@ -26,70 +26,67 @@ struct Defect_Operator  {
   Simulation <T,D>                   & simul;
   std::vector <std::vector<std::size_t>> position;                   // vector of vectors with positions in the lattice of the Orbital 0 of the defects for each stride block
   
-  Defect_Operator(Simulation <T,D> & sim, std::string & defect, H5::H5File *file) : r(sim.r), simul(sim), position(sim.r.NStr) {
-	debug_message("Entered Defect_Operator\n");
-
+  Defect_Operator(Simulation <T,D> & sim, std::string & defect, H5::H5File *file) : r(sim.r), simul(sim), position(sim.r.NStr)
+  {
+    debug_message("Entered Defect_Operator\n");
+    
     std::string field = defect + std::string("/Concentration");
     get_hdf5<double> ( &p, file, field );
-
+    std::vector<unsigned> tmpU;
+    std::vector<int> tmpI;
+    int n;
+    
     /* Read Number of nodes and their relative  positions */
     field = defect + std::string("/NumNodes");
     get_hdf5<unsigned> ( &NumberNodes, file, field );
-    {
-      std::vector<unsigned> tmp(NumberNodes);
-      field = defect + std::string("/NodePosition");
-      get_hdf5<unsigned> ( tmp.data(), file, field );
-      node_position.resize(NumberNodes);
-      for(unsigned i = 0; i < NumberNodes; i++)
-	node_position.at(i) = tmp.at(i);
-    }
+    tmpU.resize(NumberNodes);
+    field = defect + std::string("/NodePosition");
+    get_hdf5<unsigned> ( tmpU.data(), file, field );
+    node_position.resize(NumberNodes);
+    for(unsigned i = 0; i < NumberNodes; i++)
+      node_position.at(i) = tmpU.at(i);
+    
     
     /* Read Hoppings */
-
-    {
-      int n;
-      std::vector<int> tmp;
-      field = defect + std::string("/NumBondDisorder");
-      get_hdf5<int> ( &n, file, field );
-      
-      tmp.resize(n);
-      hopping.resize(n);
-      hopping_magnetic.resize(n);
-      element1.resize(n);
-      element2.resize(n);
-      
-      field = defect + std::string("/NodeTo");
-      get_hdf5<int> (tmp.data(), file, field );
-      for(int i = 0; i < n; i++)
-	element1.at(i) = tmp.at(i);
-      
-      field = defect + std::string("/NodeFrom");
-      get_hdf5<int> (tmp.data(), file, field );
-      for(int i = 0; i < n; i++)
-	element2.at(i) = tmp.at(i);
-      
-      field = defect + std::string("/Hopping");
-      get_hdf5<T> (hopping.data(), file, field );
-    }
+    
+    field = defect + std::string("/NumBondDisorder");
+    get_hdf5<int> ( &n, file, field );
+    
+    tmpI.resize(n);
+    hopping.resize(n);
+    hopping_magnetic.resize(n);
+    element1.resize(n);
+    element2.resize(n);
+    
+    field = defect + std::string("/NodeTo");
+    get_hdf5<int> (tmpI.data(), file, field );
+    for(int i = 0; i < n; i++)
+      element1.at(i) = tmpI.at(i);
+    
+    field = defect + std::string("/NodeFrom");
+    get_hdf5<int> (tmpI.data(), file, field );
+    for(int i = 0; i < n; i++)
+      element2.at(i) = tmpI.at(i);
+    
+    field = defect + std::string("/Hopping");
+    get_hdf5<T> (hopping.data(), file, field );
+    
     
     /* Read local Disorder */
-    {
-      int n;
-      std::vector<int> tmp;
-      field = defect + std::string("/NumOnsiteDisorder");
-      get_hdf5<int> ( &n, file, field );
-      tmp.resize(n);     
-      U.resize(n);
-      element.resize(n);
-      
-      field = defect + std::string("/NodeOnsite");
-      get_hdf5<int> (tmp.data(), file, field );
-      for(int i = 0; i < n; i++)
-	element.at(i) = tmp.at(i);
-      
-      field = defect + std::string("/U0");
-      get_hdf5<T> (U.data(), file, field );
-    }
+    
+    field = defect + std::string("/NumOnsiteDisorder");
+    get_hdf5<int> ( &n, file, field );
+    tmpI.resize(n);     
+    U.resize(n);
+    element.resize(n);
+    
+    field = defect + std::string("/NodeOnsite");
+    get_hdf5<int> (tmpI.data(), file, field );
+    for(int i = 0; i < n; i++)
+      element.at(i) = tmpI.at(i);
+    
+    field = defect + std::string("/U0");
+    get_hdf5<T> (U.data(), file, field );
     
     /* Translate Positions */
     unsigned l[D + 1];
@@ -107,7 +104,7 @@ struct Defect_Operator  {
       }
     
     /* Build Velocity */ 
-
+    
     Coordinates<std::ptrdiff_t, D + 1> Lda(r.Ld), Ldb(r.Ld);
     Eigen::Map<Eigen::Matrix<std::ptrdiff_t,D, 1>> va(Lda.coord), vb(Ldb.coord); // Column vector
     Eigen::Matrix<double, D, 1> dr_R;
@@ -116,8 +113,8 @@ struct Defect_Operator  {
     Eigen::Matrix<double, D, 1> lattice_difference_R;
     Eigen::Matrix<double, D, 1> orbital_difference_a;
     Eigen::Matrix<double, D, 1> lattice_difference_a;
-
-
+    
+    
     for(unsigned ih = 0; ih < hopping.size(); ih++)
       {
 	
@@ -150,15 +147,15 @@ struct Defect_Operator  {
 	  for(unsigned dim2 = 0; dim2 < D; dim2++)
 	    V2[dim1][dim2].push_back( hopping.at(ih) * T(dr_R(dim1)) * T(dr_R(dim2)));
       }
-      
+    
     debug_message("Left Defect_Operator constructor.\n");
   };
-
+  
 
 
   
   void generate_disorder()  {
-	  debug_message("Entered generate_disorder\n");
+    debug_message("Entered generate_disorder\n");
     /* Structural disorder*/
 
     /*
@@ -184,24 +181,25 @@ struct Defect_Operator  {
     }
 #pragma omp barrier
 
-    Coordinates<std::size_t,D + 1> latt(r.ld), LATT(r.Lt), Latt(r.Ld), latStr(r.lStr);
+    Coordinates<std::size_t,D + 1> latt(r.ld), LATT(r.Lt), Latt(r.Ld), Latt2(r.Ld), latStr(r.lStr);
     // Distribute the local disorder
 
     std::size_t ndefects= p * r.N , count = 0;
-
-    while(count < ndefects)
+    
+    while(count < ndefects) 
       {
-	std::size_t pos = r.N * simul.rnd.get();
+	std::size_t  pos = r.N * simul.rnd.get();
+	auto & st = position.at(latStr.index);
 	latt.set_coord(pos);
 	r.convertCoordinates(Latt,latt);
 	r.convertCoordinates(latStr,latt);
-	
-	if( !any_of(position.at(latStr.index).begin(), position.at(latStr.index).end(), std::bind2nd(std::equal_to<std::size_t>(), Latt.index)))
+	if( !any_of(st.begin(), st.end(), std::bind2nd(std::equal_to<std::size_t>(), Latt.index)))
 	  {	    
-	    position.at(latStr.index).push_back(Latt.index);
+	    st.push_back(Latt.index);
 	    count++;
 	  }
-      }    
+      }
+    
     // Test if any of the defect cross the borders
     for(std::size_t istr = 0; istr < r.NStr; istr++)
       for(auto it = position.at(istr).begin(); it != position.at(istr).end(); it++)
@@ -209,15 +207,52 @@ struct Defect_Operator  {
 	  {
 	    auto node_pos =  *it + node_position.at(node);
 	    Latt.set_coord(node_pos);                             // coordinates of the node in Ld Lattice
-	    
-	    if(r.test_ghosts(Latt) == 0)
+
+	    if(r.test_ghosts(Latt) == 1)                               // test if it is in the ghosts
 	      {
+		/*
+		  For the nodes of the defects inside the sample
+		  I need to test if they will add amplitudes for 
+		  nodes of already visited and emptied tiles
+		 */
+
+		r.convertCoordinates(latStr, Latt);
+		if(latStr.index < istr)                           
+		  simul.h.hV.add_conflict_with_defect(std::size_t(node_pos), latStr.index);
+	      }
+	    else
+	      {
+		// node is in the ghosts
 		r.convertCoordinates(LATT, Latt);
 #pragma omp critical
 		{
+		  /*
+		    For the nodes of the defects outside the sample
+		    I need to add the local terms and bonds of the Hamiltonian 
+		    do the global memory to be passed to the neighbour domain
+
+		    In the case of bonds, I will test if the pair corresponds to 
+		    a vacancy in this domain. In this case, the bond will not be added.
+		    
+		  */
+		  
 		  for(unsigned i = 0; i < element1.size(); i++)
 		    if(node == element1[i])
-		      simul.Global.addbond(LATT.index,  node_position.at(element2[i]) - node_position.at(element1[i]), hopping[i]);
+		      {
+			std::ptrdiff_t  dd =  node_position.at(element2[i]) - node_position.at(element1[i]);
+			auto node2_pos =  *it + node_position.at(element2[i]);
+			Latt2.set_coord(node2_pos);
+			
+			if(r.test_ghosts(Latt2) == 1)
+			  {
+			    // Not in the ghosts
+			    if( simul.h.hV.test_vacancy(Latt2) == 0)  // Not a Vacancy
+			      simul.Global.addbond(LATT.index,  dd, hopping[i]);
+			  }
+			else
+			  simul.Global.addbond(LATT.index,  dd, hopping[i]); // If both nodes are the ghosts I add it
+		      }
+		  
 		  
 		  for(unsigned i = 0; i < element.size(); i++)
 		    if(node == element[i])
@@ -226,46 +261,55 @@ struct Defect_Operator  {
 	      }
 	  }
 #pragma omp barrier
-    /* Look for the extra bonds in this domain */
-
-
+    /* 
+       Look for the extra bonds in this domain 
+       That come from broken defects in the boundaries 
+    */
+    
+    
 #pragma omp critical
     {
-      Coordinates<std::ptrdiff_t, D + 1> latt(r.ld), LATT(r.Lt), Latt(r.Ld), Ldb(r.Ld);
+      Coordinates<std::ptrdiff_t, D + 1> latt(r.ld), LATT(r.Lt), Latt(r.Ld), Ldb(r.Ld), latStr(r.lStr);
       Eigen::Map<Eigen::Matrix<std::ptrdiff_t,D, 1>> va(Latt.coord), vb(Ldb.coord); // Column vector
       
       
 		  
-	  Eigen::Matrix<double, D, 1> dr_R;
-	  Eigen::Matrix<double, D, 1> dr_a;
-	  Eigen::Matrix<double, D, 1> orbital_difference_R;
-	  Eigen::Matrix<double, D, 1> lattice_difference_R;
-	  Eigen::Matrix<double, D, 1> orbital_difference_a;
-	  Eigen::Matrix<double, D, 1> lattice_difference_a;
+      Eigen::Matrix<double, D, 1> dr_R;
+      Eigen::Matrix<double, D, 1> dr_a;
+      Eigen::Matrix<double, D, 1> orbital_difference_R;
+      Eigen::Matrix<double, D, 1> lattice_difference_R;
+      Eigen::Matrix<double, D, 1> orbital_difference_a;
+      Eigen::Matrix<double, D, 1> lattice_difference_a;
       
       for(unsigned i = 0; i < simul.Global.element1.size(); i++ )
 	if(r.domain_number( long(simul.Global.element1[i]) ) == std::ptrdiff_t(r.thread_id))
 	  {
 	    LATT.set_coord(simul.Global.element1[i]);
 	    r.convertCoordinates(Latt, LATT);
-	    border_element1.push_back( Latt.index );	    
-	    border_element2.push_back(Latt.index + simul.Global.element2_diff[i]);
-	    border_hopping.push_back(simul.Global.hopping[i]);
-	    Ldb.set_coord(static_cast<std::ptrdiff_t>(Latt.index + simul.Global.element2_diff[i] ));
+	    r.convertCoordinates(latStr, Latt);
+	    
+	    auto & st = simul.h.hV.position.at(latStr.index); 
+	    if( !any_of(st.begin(), st.end(), std::bind2nd(std::equal_to<std::size_t>(), Latt.index)))
+	      {     
+		border_element1.push_back( Latt.index );	    
+		border_element2.push_back(Latt.index + simul.Global.element2_diff[i]);
+		border_hopping.push_back(simul.Global.hopping[i]);
+		Ldb.set_coord(static_cast<std::ptrdiff_t>(Latt.index + simul.Global.element2_diff[i] ));
 		
 		// difference vectors in real-space coordinates
 		orbital_difference_R = r.rOrb.col(Ldb.coord[D]) - r.rOrb.col(Latt.coord[D]);
 		lattice_difference_R = r.rLat * (vb - va).template cast<double>();
 		dr_R = orbital_difference_R + lattice_difference_R;
 		
-        
-	    
-	    for(unsigned dim = 0; dim < D; dim++)
-	      border_V[dim].push_back(simul.Global.hopping[i] * T(dr_R(dim)));
-
-	    for(unsigned dim1 = 0; dim1 < D; dim1++)
-	      for(unsigned dim2 = 0; dim2 < D; dim2++)
-	        border_V2[dim1][dim2].push_back(simul.Global.hopping[i] * T(dr_R(dim1))* T(dr_R(dim2)));
+		
+		
+		for(unsigned dim = 0; dim < D; dim++)
+		  border_V[dim].push_back(simul.Global.hopping[i] * T(dr_R(dim)));
+		
+		for(unsigned dim1 = 0; dim1 < D; dim1++)
+		  for(unsigned dim2 = 0; dim2 < D; dim2++)
+		    border_V2[dim1][dim2].push_back(simul.Global.hopping[i] * T(dr_R(dim1))* T(dr_R(dim2)));
+	      }
 	  }
       
       for(unsigned i = 0; i < simul.Global.element.size(); i++ )
@@ -273,8 +317,13 @@ struct Defect_Operator  {
 	  {
 	    LATT.set_coord(simul.Global.element[i] );
 	    r.convertCoordinates(Latt, LATT );
-	    border_element.push_back(Latt.index );	    
-	    border_U.push_back(simul.Global.U[i] );
+	    r.convertCoordinates(latStr, Latt);
+	    auto & st = simul.h.hV.position.at(latStr.index); 
+	    if( !any_of(st.begin(), st.end(), std::bind2nd(std::equal_to<std::size_t>(), Latt.index)))
+	      {
+		border_element.push_back(Latt.index );	    
+		border_U.push_back(simul.Global.U[i] );
+	      }
 	  }
     }
 #pragma omp barrier
@@ -312,15 +361,14 @@ struct Defect_Operator  {
     for(std::size_t istr = 0; istr < r.NStr; istr++)
       std::sort(position[istr].begin(), position[istr].end() );
     
-    
-   debug_message("Left generate_disorder\n");
+    debug_message("Left generate_disorder\n");
   }
   
 
 
-    template <typename U = T>
+  template <typename U = T>
   typename std::enable_if<is_tt<std::complex, U>::value, U>::type peierls1(double phase) {
-	std::complex<double> im(0,1.0);
+    std::complex<double> im(0,1.0);
     return U(exp(im*phase));
   };
   

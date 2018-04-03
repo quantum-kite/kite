@@ -476,7 +476,7 @@ class Calculation:
                 if f in special_functions:
                     self._energy_spec.append(energy)
                     self._gamma_spec.append(gamma)
-                    self._number_spec.append(fun_number[f])
+                    self._number_spec.append(fun_number_total[f])
                     self._fname_spec.append(f)
                     self._num_moments_spec.append(num_moments)
                     self._num_random_spec.append(num_random)

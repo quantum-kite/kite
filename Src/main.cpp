@@ -32,32 +32,28 @@
 #define outcol "\033[1;31m"
 #define outres "\033[0m"
 
-#define DEBUG 0
+#define DEBUG 1
 #define VERBOSE 0
 
 #ifdef VERBOSE
-	#if VERBOSE==1
-		#define verbose_message(VAR) std::cout<<VAR<<std::flush
-	#else
-		#define verbose_message(VAR) 
-	#endif
+#if VERBOSE==1
+#define verbose_message(VAR) std::cout<<VAR<<std::flush
 #else
-	#define verbose_message(VAR) 
+#define verbose_message(VAR) 
+#endif
+#else
+#define verbose_message(VAR) 
 #endif
 
 #ifdef DEBUG
-	#if DEBUG==1
-		#define debug_message(VAR) std::cout << outcol << VAR << outres << std::flush
-	#else
-		#define debug_message(VAR) 
-	#endif
+#if DEBUG==1
+#define debug_message(VAR) std::cout << outcol << VAR << outres << std::flush
 #else
-	#define debug_message(VAR) 
+#define debug_message(VAR) 
 #endif
-
-
-
-
+#else
+#define debug_message(VAR) 
+#endif
 
 template<typename T, unsigned D>
 class Simulation;
