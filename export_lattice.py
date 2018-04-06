@@ -458,7 +458,7 @@ class Calculation:
                     self._energy_spec.append(energy[idx_spec])
                     self._gamma_spec.append(gamma[idx_spec])
                     idx_spec += 1
-                    self._number_spec.append(fun_number_total[f])
+                    self._number_spec.append(special_fun_number[f])
                     idx = fname.index(f)
                     self._fname_spec.append(f)
                     self._num_moments_spec.append(num_moments[idx])
@@ -558,6 +558,10 @@ class Configuration:
         self._precision = precision
         self._divisions = divisions
         self._boundaries = np.asarray(boundaries).astype(int)
+        for l in length:
+            if l < 128:
+                raise SystemExit('Due to parallelization requirements, minimal system size is 128! '
+                                 'Change the length of your system.')
         self._length = length
         self.set_type()
 
@@ -795,6 +799,7 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
             num_dis = len(disorded_structural)
         else:
             num_dis = 1
+            disorded_structural = [disorded_structural]
 
         for idx in range(num_dis):
 
