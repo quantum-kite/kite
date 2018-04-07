@@ -189,10 +189,11 @@ struct Defect_Operator  {
     while(count < ndefects) 
       {
 	std::size_t  pos = r.N * simul.rnd.get();
-	auto & st = position.at(latStr.index);
 	latt.set_coord(pos);
 	r.convertCoordinates(Latt,latt);
 	r.convertCoordinates(latStr,latt);
+	auto & st = position.at(latStr.index);
+
 	if( !any_of(st.begin(), st.end(), std::bind2nd(std::equal_to<std::size_t>(), Latt.index)))
 	  {	    
 	    st.push_back(Latt.index);

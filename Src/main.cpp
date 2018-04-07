@@ -73,8 +73,9 @@ typedef int indextype;
 
 int main(int argc, char *argv[])
 {  
-	debug_message("Starting program. The messages in red are debug messages. They may be turned off by setting DEBUG 0 in main.cpp\n");
-  /* Define General characteristics of the data */ 
+  debug_message("Starting program. The messages in red are debug messages. They may be turned off by setting DEBUG 0 in main.cpp\n");
+  std::cout << "The Stride is set to " << STRIDE << std::endl ;
+  /* Define General characteristics of the data */  
   int precision = 1, dim, is_complex;
 
   H5::H5File *file = new H5::H5File(argv[1], H5F_ACC_RDONLY);

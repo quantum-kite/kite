@@ -1,3 +1,8 @@
+"""
+This Example shows how to add Vacancies to a graphene lattice 
+and to ask the measurement of the DOS with 2048 moments and 
+the SingleShot xx conductivity for a set of Fermi Energies and a defined gamma 
+"""
 import matplotlib.pyplot as plt
 import export_lattice as ex
 import numpy as np
@@ -45,9 +50,9 @@ ly = 256
 configuration = ex.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
                                  is_complex=False, precision=1, energy_scale=energy_scale)
 
-NPontos = 100
-M = 2048
-g1 = 0.030
+NPontos = 10
+M = 512
+g1 = 0.1
 calculation = ex.Calculation(fname=['DOS','SingleCondXX'],
                              num_moments=[M,M], num_random=[1,1], 
                              num_disorder=[1,1], 
