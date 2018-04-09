@@ -26,6 +26,7 @@ def graphene_initial(onsite=(0, 0)):
     )
 
     lat.add_hoppings(
+        ([ 0, 0], 'A', 'B', - 1 / energy_scale),
         ([-1, 0], 'A', 'B', - 1 / energy_scale),
         ([-1, 1], 'A', 'B', - 1 / energy_scale)
     )
