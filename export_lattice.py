@@ -323,8 +323,7 @@ class Disorder:
             for indx, name in enumerate(sublattice):
                 self.add_local_disorder(name, dis_type[indx], mean_value[indx], standard_deviation[indx])
         else:
-            for name in sublattice:
-                self.add_local_disorder(name, [dis_type], [mean_value], [standard_deviation])
+            self.add_local_disorder(sublattice, [dis_type], [mean_value], [standard_deviation])
 
     def add_local_disorder(self, sublattice_name, dis_type, mean_value, standard_deviation):
 
