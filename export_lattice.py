@@ -320,8 +320,12 @@ class Disorder:
     # class method that introduces the disorder to the lattice
     def add_disorder(self, sublattice, dis_type, mean_value, standard_deviation):
         if isinstance(dis_type, list):
-            for indx, name in enumerate(sublattice):
-                self.add_local_disorder(name, dis_type[indx], mean_value[indx], standard_deviation[indx])
+            if isinstance(sublattice, list):
+                for indx, name in enumerate(sublattice):
+                    self.add_local_disorder(name, dis_type[indx], mean_value[indx], standard_deviation[indx])
+            else:
+                self.add_local_disorder(sublattice, dis_type, mean_value, standard_deviation)
+
         else:
             self.add_local_disorder(sublattice, [dis_type], [mean_value], [standard_deviation])
 
