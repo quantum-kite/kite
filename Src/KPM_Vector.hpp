@@ -46,6 +46,7 @@ public:
   typedef typename extract_value_type<T>::value_type value_type;
   KPM_Vector(int mem, Simulation<T,D> & sim) :
     KPM_VectorBasis<T,D>(mem,sim){};
+    
   
   void initiate_vector() {};
   template <unsigned MULT>

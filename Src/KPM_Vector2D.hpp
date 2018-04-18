@@ -3,8 +3,8 @@ template <typename T>
 class KPM_Vector <T, 2> : public KPM_VectorBasis <T,2> {
 private:
   std::size_t             max[2];
-  std::size_t MemIndBeg[2][2][2];
-  std::size_t MemIndEnd[2][2][2];
+  std::size_t 	*MemIndBeg[2][2];
+  std::size_t 	*MemIndEnd[2][2];
   std::size_t        block[2][2];
   std::size_t          stride[2];
   std::size_t   stride_ghosts[2];
@@ -25,6 +25,15 @@ public:
     Coordinates <std::size_t, 3>     z(r.Ld);
     Coordinates <int, 3> x(r.nd), dist(r.nd);
 
+
+    for(unsigned d = 0; d < 2; d++)
+	for(unsigned b = 0; b < 2; b++)
+	{
+	    MemIndBeg[d][b] = new std::size_t[r.Orb];
+	    MemIndEnd[d][b] = new std::size_t[r.Orb];
+	    
+	}
+    
     for(std::size_t io = 0; io < r.Orb; io++)
       {
 	d = 0;
@@ -56,6 +65,8 @@ public:
     initiate_vector();
   };
   
+  
+  
   void initiate_vector() {
     std::size_t count = 0;
     for(unsigned i = 0; i < r.NStr; i++)
@@ -79,6 +90,7 @@ public:
   
   template < unsigned MULT> 
   void Multiply() {
+	  vverbose_message("Entered Multiply");
 
     /*
       Mosaic Multiplication using a TILE of STRIDE x STRIDE 
@@ -112,6 +124,7 @@ public:
     T * phiM1 = v.col((memory + index - 1) % memory ).data();
     T * phiM2 = v.col((memory + index - 2) % memory ).data();
     
+    vverbose_message("Before initializing tiles that have deffects connecting elements of a previous tile.");
     // Initialize tiles that have deffects connecting elements of a previous tile
     for(auto istr = h.cross_mozaic_indexes.begin(); istr != h.cross_mozaic_indexes.end() ; istr++)
       {
@@ -129,10 +142,12 @@ public:
 		phi0[i] = - value_type(MULT) * phiM2[i];
 	  }
       }
-
+    
+    vverbose_message("Before periodic component");
     for( i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1 += STRIDE  )
       for( i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0 += STRIDE )
 	{
+	  //vverbose_message("Before periodic component + Anderson disorder");
 	  // Periodic component of the Hamiltonian + Anderson disorder
 	  std::size_t istr = (i1 - NGHOSTS) /STRIDE * r.lStr[0] + (i0 - NGHOSTS)/ STRIDE;
 			
@@ -153,7 +168,7 @@ public:
 		  }
 	      }
 				
-	      
+	      //vverbose_message("Before Anderson disorder");
 	      // Anderson disorder
 	      if( h.Anderson_orb_address[io] >= 0)
 		{
@@ -168,6 +183,7 @@ public:
 		      phi0[i] += value_type(MULT + 1) * phiM1[i] * h.U_Orbital.at(io);
 		}
 	      
+	      //vverbose_message("Before hoppings");
 	      // Hoppings
 	      for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
 		{
@@ -188,7 +204,7 @@ public:
 	    }
 			
 			
-			
+	  //vverbose_message("Before structural disorder");	
 	  // Structural disorder contribution - iterate over the disorder models			
 	  for(auto id = h.hd.begin(); id != h.hd.end(); id++)		   
 	    for(std::size_t i = 0; i <  id->position.at(istr).size(); i++)
@@ -232,7 +248,7 @@ public:
        located on the neighbour domains.
        We already subtract the vacancies from these contributions 
     */
-    
+    //vverbose_message("Before broken impurities");	
     for(auto id = h.hd.begin(); id != h.hd.end(); id++)
       for(std::size_t i = 0; i < id->border_element1.size(); i++)
 	{
@@ -257,8 +273,9 @@ public:
 
 
     //    h.hV.test_field(phi0); 
+    vverbose_message("Exchange boundaries");	
     Exchange_Boundaries();
-    
+    verbose_message("Left Multiply");	
   };
   
   void Velocity( T * phi0, T * phiM1, int axis) {
@@ -557,25 +574,29 @@ public:
 	std::copy(neigh_right,         neigh_right + BSize , ghosts_right );     // From the left to the right
 	std::copy(neigh_left + BSize,  neigh_left + 2*BSize, ghosts_left  )  ;   // From the right to the left
 
+	
 #pragma omp barrier	
 	for(std::size_t io = 0; io < r.Orb; io++)
 	  {
 	    std::size_t il = MemIndEnd[d][0][io];
 	    std::size_t ir = MemIndEnd[d][1][io];
 	    
+	    
 	    for(std::size_t i = 0; i < max[d]; i++)
 	      {
 		for(int ig = 0; ig < NGHOSTS; ig++)
 		  {
+		    
+		    
 		    phi[il + ig*stride_ghosts[d]] = ghosts_left [i + (ig + NGHOSTS*io) * max[d]];
 		    phi[ir + ig*stride_ghosts[d]] = ghosts_right[i + (ig + NGHOSTS*io) * max[d]];
 		  }
-		
 		il += stride[d];
 		ir += stride[d];
 	      }
 	  }
       }
+      
   }
   
 

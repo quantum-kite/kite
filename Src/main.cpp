@@ -34,6 +34,7 @@
 
 #define DEBUG 1
 #define VERBOSE 0
+#define VVERBOSE 0
 
 #ifdef VERBOSE
 #if VERBOSE==1
@@ -43,6 +44,16 @@
 #endif
 #else
 #define verbose_message(VAR) 
+#endif
+
+#ifdef VVERBOSE
+#if VVERBOSE==1
+#define vverbose_message(VAR) std::cout<<VAR<<std::flush
+#else
+#define vverbose_message(VAR) 
+#endif
+#else
+#define vverbose_message(VAR) 
 #endif
 
 #ifdef DEBUG

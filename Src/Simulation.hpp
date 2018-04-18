@@ -360,13 +360,11 @@ public:
 		
 		
 		
-		
     // Initialize the KPM vectors that will be needed to run the program 
     std::vector<KPM_Vector<T,D>> kpm_vector;
     kpm_vector.push_back(KPM_Vector<T,D> (1, *this));
     for(int i = 0; i < dim; i++)
       kpm_vector.push_back(KPM_Vector<T,D> (2, *this));
-		
 		
 		
     // Define some pointers to make the code easier to read
@@ -377,20 +375,19 @@ public:
     int axis0, axis1;
 			
 			
-			
     // Make sure the local gamma matrix is zeroed
     Eigen::Array<T, -1, -1> gamma = Eigen::Array<T, -1, -1 >::Zero(1, size_gamma);
-		
+
     long average = 0;
     for(int disorder = 0; disorder < NDisorder; disorder++){
       h.generate_disorder();
       for(int randV = 0; randV < NRandomV; randV++){
-				
+	
+	
 	kpm0->initiate_vector();			// original random vector
 	kpm1->set_index(0);
 	kpm1->v.col(0) = kpm0->v.col(0);
 	kpm1->Exchange_Boundaries();
-				
 	// Check which generalized velocity operator needs to be calculated. 
 	// This replaces the original random vector |0> by v|0> 
 				
@@ -463,21 +460,21 @@ public:
 	kpm2->set_index(0);
 	switch(indices.at(depth).size()){
 	case 0:
-	  //std::cout << "case0\n";
+	  //std::cout << "case0\n"<< std::flush;
 	  break;
 	case 1:
-	  //std::cout << "case1\n";
+	  //std::cout << "case1\n"<< std::flush;
 	  axis1 = indices.at(depth).at(0);
 	  kpm1data = kpm1->v.col(kpm1->get_index()).data();
 	  kpm2data = kpm2->v.col(kpm2->get_index()).data();
 						
-	  //std::cout << "indices.at(" << depth << "): " << axis1 << "\n";
+	  //std::cout << "indices.at(" << depth << "): " << axis1 << "\n"<< std::flush;
 	  kpm2->Velocity(kpm2data, kpm1data, axis1); 
 						
 	  break;
 						
 	case 2:
-	  //std::cout << "case2\n";
+	  //std::cout << "case2\n"<< std::flush;
 	  axis1 = indices.at(depth).at(0);
 	  axis2 = indices.at(depth).at(1);
 	  kpm1data = kpm1->v.col(kpm1->get_index()).data();
@@ -495,13 +492,13 @@ public:
 				
 				
 	recursive_KPM(depth + 1, max_depth, N_moments, average, index_gamma, indices, kpm_vector, gamma);
-	//std::cout << "left second branch\n";
+	//std::cout << "left second branch\n" << std::flush;
 	if(p == 0){
-	  //std::cout << "p=0\n";
+	  //std::cout << "p=0\n" << std::flush;
 	  kpm1->template Multiply<0>(); 
 	}
 	else if(p < N_moments.at(depth-1) - 1){
-	  //std::cout << "p!=0\n";
+	  //std::cout << "p!=0\n" << std::flush;
 	  kpm1->template Multiply<1>(); 
 	}
 			
@@ -511,11 +508,12 @@ public:
       KPM_Vector<T,D> *kpm0 = &kpm_vector->at(0);
       KPM_Vector<T,D> *kpm1 = &kpm_vector->at(depth);
 			
-      //std::cout << "second branch. Depth: " << depth << "\n" << std::flush;
-      kpm1->template Multiply<0>();			
+      //std::cout << "second branch. Depth: " << depth << "\n" << std::flush<< std::flush;
+      kpm1->template Multiply<0>();		
+      //std::cout << "You failed at multiplication\n" << std::flush<< std::flush;	
       gamma->matrix().block(0,*index_gamma,1,2) += (kpm0->v.adjoint() * kpm1->v - gamma->matrix().block(0,*index_gamma,1,2))/value_type(*average + 1);			
       *index_gamma += 2;
-			
+	
       for(int m = 2; m < N_moments.at(depth - 1); m += 2)
 	{
 	  kpm1->template Multiply<1>();
