@@ -128,7 +128,7 @@ lat.plot_brillouin_zone()
 plt.show()
 ```
 
-Relative unit cell index ```[n, m]``` is a parameter that the index of the unit cell
+Relative unit cell index ```[n, m]``` is a parameter of the unit cell
 (in the notation ```n * a1 , m * a2```) to which the hopping occurs. The index
 ```[0, 0]``` is a reference hopping inside the unit cell, while other indexes mark
 the periodic hopping.
@@ -139,16 +139,16 @@ allowed to add them twice. Also, it's not allowed to add hopping
 ```(i, i)``` inside the cell ```[0,0]``` because these terms are actually
 onsite energies that can be added when adding a lattice site (sublattice).
 
-Now let's try to make just a slighly advanced example, a graphene lattice:
+Now let's try to make just a slightly advanced example, a graphene lattice:
 
-_add_gist_ 
+_add_gist_
 https://gist.github.com/MAndelkovic/a5f085ce48b5d28de68b03b08008b57f
 
 ## Exporting the model
 
 After making the Lattice object, we can output both the model
 and information about the quantities that we want to calculate.
-For this, we need an additional functionaliteis that can be imported:
+For this, we need an additional functionalities that can be imported:
 
 ```
 import export_lattice as ex
@@ -158,8 +158,4 @@ The following script displays how we can export the lattice:
 
 https://gist.github.com/MAndelkovic/633949a568f5c7842381be265b49c02a
 
-## TODO: Tutorial about the disorded more on exporting the lattice...
-
-# Visualize the data
-
-https://gist.github.com/MAndelkovic/a5b5f47509430458d193ba169f212177
+## TODO: Tutorial about the types of disorder and more on exporting the lattice...
