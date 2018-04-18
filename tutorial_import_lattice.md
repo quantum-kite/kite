@@ -158,4 +158,18 @@ The following script displays how we can export the lattice:
 
 https://gist.github.com/MAndelkovic/633949a568f5c7842381be265b49c02a
 
+# Visualizing the data
+
+After calculating the quantity of interest and post processing the data,
+we can plot the resulting data using pybinding classes/functions with
+the following script (change the name of input data):
+
+https://gist.github.com/MAndelkovic/a5b5f47509430458d193ba169f212177
+
+![Graphene DOS test](figures/dos_test.png)
+
+TODO: There are different classes from PB that should be documented,
+sweep plots, scatter etc. Can be very useful.
+
+
 ## TODO: Tutorial about the types of disorder and more on exporting the lattice...
