@@ -166,7 +166,13 @@ the following script (change the name of input data):
 
 https://gist.github.com/MAndelkovic/a5b5f47509430458d193ba169f212177
 
-![Graphene DOS test](figures/dos_test.png)
+![Graphene DOS test local](figures/dos_test.png)
+
+Image from a local repo.
+
+![Graphene DOS test repo](https://raw.githubusercontent.com/MAndelkovic/scratch/master/dos_test.png)
+
+Image from a GitHub repo.
 
 TODO: There are different classes from PB that should be documented,
 sweep plots, scatter etc. Can be very useful.
