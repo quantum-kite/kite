@@ -316,26 +316,6 @@ public:
 		
 		
 		
-    /*
-      if(DEBUG){
-      std::cout << "\nIndices:\n";
-      for(unsigned i = 0; i < indices.size(); i++){
-      for(unsigned j = 0; j < indices.at(i).size(); j++){
-      std::cout << indices.at(i).at(j) << "\t";
-      }
-      std::cout << "\n";
-      }
-      std::cout << "Gamma matrix dimension: " << dim << "\n";
-			
-			
-      std::cout << "Number of moments: \n";
-      for(unsigned i = 0; i < N_moments.size(); i++){
-      std::cout << N_moments.at(i) << "\n";
-      }
-      std::cout << "N_moments size: " << N_moments.size() << "\n";
-      }
-    */
-		
     // Check if the dimensions match
     if(dim != int(N_moments.size())){
       std::cout << "Dimension of the Gamma matrix does not match the number of chebyshev moments. Aborting.\n";
@@ -361,15 +341,17 @@ public:
 		
 		
     // Initialize the KPM vectors that will be needed to run the program 
-    std::vector<KPM_Vector<T,D>> kpm_vector;
-    kpm_vector.push_back(KPM_Vector<T,D> (1, *this));
+    std::vector<KPM_Vector<T,D>*> kpm_vector(dim+1);
+    kpm_vector.at(0) = new KPM_Vector<T,D> (1, *this);
     for(int i = 0; i < dim; i++)
-      kpm_vector.push_back(KPM_Vector<T,D> (2, *this));
+		kpm_vector.at(i+1) = new KPM_Vector<T,D> (2, *this);
+		
+		//kpm_vector.push_back(KPM_Vector<T,D> (2, *this));
 		
 		
     // Define some pointers to make the code easier to read
-    KPM_Vector<T,D> *kpm0 = &kpm_vector.at(0);
-    KPM_Vector<T,D> *kpm1 = &kpm_vector.at(1);
+    KPM_Vector<T,D> *kpm0 = kpm_vector.at(0);
+    KPM_Vector<T,D> *kpm1 = kpm_vector.at(1);
     T * kpm0data = kpm0->v.col(0).data();
     T * kpm1data = kpm1->v.col(kpm1->get_index()).data();
     int axis0, axis1;
@@ -436,18 +418,23 @@ public:
 		
     store_gamma(&gamma, N_moments, indices, name_dataset);
 		
+	// delete the kpm_vector
+	delete kpm_vector.at(0);
+    for(int i = 0; i < dim; i++)
+		delete kpm_vector.at(i+1);
+		
 		
     debug_message("Left Measure_Gamma\n");
   }
 	
-  void recursive_KPM(int depth, int max_depth, std::vector<int> N_moments, long *average, long *index_gamma, std::vector<std::vector<int>> indices, std::vector<KPM_Vector<T,D>> *kpm_vector, Eigen::Array<T, -1, -1> *gamma){
+  void recursive_KPM(int depth, int max_depth, std::vector<int> N_moments, long *average, long *index_gamma, std::vector<std::vector<int>> indices, std::vector<KPM_Vector<T,D>*> *kpm_vector, Eigen::Array<T, -1, -1> *gamma){
     verbose_message("Entered recursive_KPM\n");
     typedef typename extract_value_type<T>::value_type value_type;
 		
 		
     if(depth != max_depth){
-      KPM_Vector<T,D> *kpm1 = &kpm_vector->at(depth);
-      KPM_Vector<T,D> *kpm2 = &kpm_vector->at(depth + 1);
+      KPM_Vector<T,D> *kpm1 = kpm_vector->at(depth);
+      KPM_Vector<T,D> *kpm2 = kpm_vector->at(depth + 1);
 			
       T * kpm1data;
       T * kpm2data;
@@ -505,8 +492,8 @@ public:
       }
 			
     } else {
-      KPM_Vector<T,D> *kpm0 = &kpm_vector->at(0);
-      KPM_Vector<T,D> *kpm1 = &kpm_vector->at(depth);
+      KPM_Vector<T,D> *kpm0 = kpm_vector->at(0);
+      KPM_Vector<T,D> *kpm1 = kpm_vector->at(depth);
 			
       //std::cout << "second branch. Depth: " << depth << "\n" << std::flush<< std::flush;
       kpm1->template Multiply<0>();		
@@ -663,11 +650,11 @@ public:
     
     debug_message("Left store_gamma\n");
   }
-  
+  /*
   double time_kpm(int N_average){
-    /* This function serves to provide an estimate of the time it takes for each kpm iteration
+     This function serves to provide an estimate of the time it takes for each kpm iteration
      * 
-     */
+     
 		
     KPM_Vector<T,D> kpm0(1, *this);
     KPM_Vector<T,D> kpm1(2, *this);
@@ -687,7 +674,7 @@ public:
     return time_span.count()/N_average;
 		
 		
-  }
+  }*/
 
   void Single_Shot(double EScale, int & NRandomV, int & NDisorder, int N_cheb_moments, Eigen::Array<double, -1, 1> energy_array, double finite_gamma, std::string indices, std::string name_dataset) {
     /*

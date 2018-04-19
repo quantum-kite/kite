@@ -66,6 +66,15 @@ public:
   };
   
   
+  ~KPM_Vector(void){
+    for(unsigned d = 0; d < 2; d++)
+	for(unsigned b = 0; b < 2; b++)
+	{
+	    delete MemIndBeg[d][b];
+	    delete MemIndEnd[d][b];
+	    
+	}
+  }
   
   void initiate_vector() {
     std::size_t count = 0;
