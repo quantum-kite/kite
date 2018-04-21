@@ -156,7 +156,7 @@ public:
     for( i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1 += STRIDE  )
       for( i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0 += STRIDE )
 	{
-	  //vverbose_message("Before periodic component + Anderson disorder");
+	  vverbose_message("Before periodic component + Anderson disorder");
 	  // Periodic component of the Hamiltonian + Anderson disorder
 	  std::size_t istr = (i1 - NGHOSTS) /STRIDE * r.lStr[0] + (i0 - NGHOSTS)/ STRIDE;
 			
@@ -168,31 +168,37 @@ public:
 	      const std::size_t j0 = ip + i0 + i1 * std;
 	      const std::size_t j1 = j0 + STRIDE * std; //j0 and j1 define the limits of the for cycle
 
+
+	    vverbose_message("Before initialize phi0");
 	      // Initialize phi0
 
 	      if(h.cross_mozaic.at(istr)){
+		  vverbose_message("mosaic\n");
 		for(std::size_t j = j0; j < j1; j += std )
 		  for(std::size_t i = j; i < j + STRIDE ; i++){
+		      vverbose_message("zeroing\n");
 		    phi0[i] = - value_type(MULT) * phiM2[i];
 		  }
 	      }
 				
-	      //vverbose_message("Before Anderson disorder");
+	      vverbose_message("Before Anderson disorder");
 	      // Anderson disorder
 	      if( h.Anderson_orb_address[io] >= 0)
 		{
+		vverbose_message("inside if\n");
 		  for(std::size_t j = j0; j < j1; j += std )
 		    for(std::size_t i = j; i < j + STRIDE ; i++)
 		      phi0[i] += value_type(MULT + 1) * phiM1[i] * h.U_Anderson.at(i - dd);
 		}
 	      else if (h.Anderson_orb_address[io] == - 1)
 		{
+		vverbose_message("inside elif\n");
 		  for(std::size_t j = j0; j < j1; j += std )
 		    for(std::size_t i = j; i < j + STRIDE ; i++)
 		      phi0[i] += value_type(MULT + 1) * phiM1[i] * h.U_Orbital.at(io);
 		}
 	      
-	      //vverbose_message("Before hoppings");
+	      vverbose_message("Before hoppings");
 	      // Hoppings
 	      for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
 		{
@@ -213,7 +219,7 @@ public:
 	    }
 			
 			
-	  //vverbose_message("Before structural disorder");	
+	  vverbose_message("Before structural disorder");	
 	  // Structural disorder contribution - iterate over the disorder models			
 	  for(auto id = h.hd.begin(); id != h.hd.end(); id++)		   
 	    for(std::size_t i = 0; i <  id->position.at(istr).size(); i++)
@@ -257,7 +263,7 @@ public:
        located on the neighbour domains.
        We already subtract the vacancies from these contributions 
     */
-    //vverbose_message("Before broken impurities");	
+    vverbose_message("Before broken impurities");	
     for(auto id = h.hd.begin(); id != h.hd.end(); id++)
       for(std::size_t i = 0; i < id->border_element1.size(); i++)
 	{
