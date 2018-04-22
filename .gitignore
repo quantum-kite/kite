@@ -91,7 +91,7 @@ tools/tests/output
 # test script
 # ignore mathematica notebooks
 *.nb
-
+*.fuse*
 # compiled programs
 pp
 tools/kpm_calculate/calc_cond
