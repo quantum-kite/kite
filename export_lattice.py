@@ -507,6 +507,7 @@ class Calculation:
         self._num_random = []
         self._num_disorder = []
         self._num_points = []
+        self._special = []
 
         self._temperature = []
 
@@ -549,6 +550,11 @@ class Calculation:
                 self._num_random.append(num_random[idx])
                 self._num_disorder.append(num_disorder[idx])
                 self._num_points.append(num_points[idx])
+
+                if f in nonl_cond:
+                    idx2 = nonl_cond.index(f)
+
+                    self._special.append(special[idx2])
             if f in spec_cond_func:  # all the singleshot conductivity functions
                 if direction[idx_cond + idx_cond_spec] not in avail_dir_spec:
                     print('The desired direction is not available for a singleshot calculation, '
@@ -602,6 +608,11 @@ class Calculation:
     def temperature(self):  # -> function name:
         """Returns the chosen temperature."""
         return self._temperature
+
+    @property
+    def special(self):  # -> function name:
+        """Returns the modifier for nonlinear optical conductivity."""
+        return self._special
 
     @property
     def energy_spec(self):  # -> function name:
@@ -963,5 +974,6 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
         grpc.create_dataset('NumDisorder', data=np.asarray(calculation.disorder), dtype=np.int32)
         grpc.create_dataset('NumPoints', data=np.asarray(calculation.points), dtype=np.int32)
         grpc.create_dataset('Temperature', data=np.asarray(calculation.temperature), dtype=np.int32)
+        grpc.create_dataset('Special', data=np.asarray(calculation.special), dtype=np.int32)
 
     f.close()
