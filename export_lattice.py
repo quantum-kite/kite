@@ -61,10 +61,9 @@ class StructuralDisorder:
             if len(dis) == 1:
                 num_vacancy_disorder += 1
                 self.add_local_vacancy_disorder(*dis)
-
             else:
                 raise SystemExit('Vacancy disorder should be added in a form:'
-                                 '\n sublattice name,' 
+                                 '\n sublattice name,'
                                  '\n or in a form of disorder onsite energy:'
                                  '\n ([rel. unit cell], sublattice_name, '
                                  'onsite energy)')
@@ -402,93 +401,172 @@ class Modification:
 
 
 class Calculation:
-    def __init__(self, fname='DOS', num_moments=1, num_random=1, num_disorder=1, energy=0, gamma=0):
+    def __init__(self, fname='DOS', num_moments=256, num_random=1, num_disorder=1, **kwargs):
+        if not isinstance(fname, list) :
+            fname = [fname]
 
-        fname_norm = []
-        fname_spec = []
+        fname = [f.lower() for f in fname]  # convert all to lowercase
 
-        available_functions = ['DOS', 'CondXX', 'CondXY', 'OptCond', 'SpinCond']
-        fun_number = {'DOS': 1, 'CondXX': 2, 'CondXY': 3, 'OptCond': 4, 'SpinCond': 5}
+        energy = kwargs.get('energy', [])
+        gamma = kwargs.get('gamma', [])
+        special = kwargs.get('special', [])
+        temp = kwargs.get('temperature', [])
+        direction = kwargs.get('direction', [])
 
-        special_functions = ['SingleCondXX', 'SingleCondXY']
-        special_fun_number = {'SingleCondXX': 6, 'SingleCondXY': 7}
+        cond_func = []
+        spec_cond_func = []
+        nonl_cond = []
 
-        fun_number_total = {'DOS': 1, 'CondXX': 2, 'CondXY': 3, 'OptCond': 4, 'SpinCond': 5,
-                            'SingleCondXX': 6, 'SingleCondXY': 7}
+        num_points = kwargs.get('num_points', 1000)
 
+        avail_functions = ['dos', 'conductivity_optical', 'conductivity_dc', 'conductivity_optical_nonlinear',
+                           'singleshot_conductivity_dc']  # all available functions
+        avail_cond_func = ['conductivity_optical', 'conductivity_dc',
+                           'conductivity_optical_nonlinear']  # available conductivity functions
+        avail_spec_cond_func = ['singleshot_conductivity_dc']  # available special conductivity functions
+
+        avail_dir = {'xx': 0, 'xy': 1, 'xz': 2, 'yx': 3, 'yy': 4, 'yz': 5, 'zx': 6, 'zy': 7,
+                     'zz': 8}  # directions for conductivity
+        avail_dir_spec = {'xx': 0, 'yy': 1, 'zz': 2}  # directions for special conductivity
+
+        fun_num = {'dos': 1, 'conductivity_optical': 2, 'conductivity_dc': 11, 'conductivity_optical_nonlinear': 20,
+                   'singleshot_conductivity_dc': 29}
+
+        # number that will distinguish the quantity is fun_number[type] + avail_dir/avail_dir_spec[direction]
         for f in fname:
-            if f in available_functions:
-                fname_norm.append(f)
-            else:
-                if f in special_functions:
-                    fname_spec.append(f)
-        if fname_norm:
-            num_f = len(fname) if fname else None
-            if not (all(len(i) == num_f for i in [num_moments, num_random, num_disorder])):
-                print('Number of different functions is different than the entered number of parameters, num_moments, '
-                      'num_randoms, or num_disorder. \n')
-                raise SystemExit('All parameters should have the same length! ')
-        if fname_spec:
-            num_f_spec = len(fname_spec) if fname_spec else None
-            if not (all(len(i) == num_f_spec for i in [energy, gamma])):
-                print('Number of different special functions is different than the entered number of parameters, '
-                      'num_moments, num_randoms, num_disorder, energy or gamma. \n')
-                raise SystemExit('All parameters should have the same length! ')
+            if f not in avail_functions:
+                print('Selected function is not available! Choose one from a following set: ',
+                      avail_functions)
+                raise SystemExit('Unknown function!')
+            if f == 'conductivity_optical_nonlinear':
+                nonl_cond.append(f)
+
+            if f in avail_cond_func:
+                cond_func.append(f)
+            if f in avail_spec_cond_func:
+                spec_cond_func.append(f)
+
+        num_f = len(fname)
+        num_cond_f = len(cond_func)
+        num_spec_cond_f = len(spec_cond_func)
+
+        if not isinstance(num_points, list):  # if only a single value is added duplicate
+            num_points = [num_points] * (num_f - num_spec_cond_f)
+        if not isinstance(num_moments, list):
+            num_moments = [num_moments] * num_f
+        if not isinstance(num_random, list):
+            num_random = [num_random] * num_f
+        if not isinstance(num_disorder, list):
+            num_disorder = [num_disorder] * num_f
+
+        # for a single entry, repeat the parameter required number of times
+        if not isinstance(temp, list):  # parameters specific for conductivity functions
+            temp = [temp] * num_cond_f if num_cond_f else [temp]
+        if not isinstance(direction, list):
+            direction = [direction] * (num_cond_f + num_spec_cond_f) if num_cond_f + num_spec_cond_f else [direction]
+        if not isinstance(energy, list):
+            energy = [energy] * num_spec_cond_f if num_spec_cond_f else [energy]
+        if not isinstance(gamma, list):
+            gamma = [gamma] * num_spec_cond_f if num_spec_cond_f else [gamma]
+        if not isinstance(special, list):  # only for nonlinear sigma
+            special = [special] * len(nonl_cond) if len(nonl_cond) else [special]
+
+        if not (all(len(i) == num_f for i in [num_moments, num_random, num_disorder])):
+            print('Number of different functions is different than the entered number of parameters, num_moments, '
+                  'num_randoms, num_disorder or num_points. Enter either a single value, or a list with the same '
+                  'length as the number of functions. \n')
+            raise SystemExit('All parameters should have the same length! ')
+
+        if not len(num_points) == (num_f - num_spec_cond_f) and (num_f - num_spec_cond_f):
+            print('Number of different functions is different than the number of num_points entries. '
+                  'Enter either a single value, or a list with the same length as the number of functions that are '
+                  'are evaluated for full spectrum. Bare in mind that singleshot is not full spectrum function, and '
+                  'doesn\'t support this parameter. \n')
+            raise SystemExit('All parameters should have the same length! ')
+
+        if not len(temp) == num_cond_f and num_cond_f:
+            print('Number of different conductivity functions is different than the entered number of temperature '
+                  'entries. Enter either a single value, or a list with the same length as the number of functions '
+                  'that depend on the temperature. \n')
+            raise SystemExit('All parameters should have the same length! ')
+
+        if not len(special) == len(nonl_cond) and nonl_cond:
+            print('Number of different special modifiers is different than the number of function '
+                  'for nonlinear conductivity. \n')
+            raise SystemExit('All parameters should have the same length! ')
+
+        # if not (all(len(i) == num_spec_cond_f for i in [gamma, energy])):
+        if len(gamma) == len(energy) and len(gamma) > 1 and len(energy) > 1 and num_spec_cond_f:
+            print('If both gamma and energies are set, the number of energie entries should be the same as the number '
+                  'of entries for gamma for per singleshot entry. \n')
+            raise SystemExit('All parameters should have the same length! ')
 
         self._number = []
         self._num_moments = []
         self._fname = []
         self._num_random = []
         self._num_disorder = []
+        self._num_points = []
+
+        self._temperature = []
 
         self._number_spec = []
         self._num_moments_spec = []
         self._fname_spec = []
         self._num_random_spec = []
         self._num_disorder_spec = []
+
         self._energy_spec = []
         self._gamma_spec = []
 
-        idx_spec = 0
+        idx_cond_spec = 0
+        idx_cond = 0
+
         for f in fname:
-            if f not in available_functions + special_functions:
-                print('Available functions are \n', list(available_functions + special_functions))
-                raise SystemExit('Function not available for the calculation! ')
+            if f == 'dos':  # doesn't have direction hence specific condition, temperature is 0 [K]
+                self._number.append(fun_num[f])
 
-            if len(fname) > 1:
-                if f in special_functions:
-                    self._energy_spec.append(energy[idx_spec])
-                    self._gamma_spec.append(gamma[idx_spec])
-                    idx_spec += 1
-                    self._number_spec.append(special_fun_number[f])
-                    idx = fname.index(f)
-                    self._fname_spec.append(f)
-                    self._num_moments_spec.append(num_moments[idx])
-                    self._num_random_spec.append(num_random[idx])
-                    self._num_disorder_spec.append(num_disorder[idx])
-                else:
-                    self._number.append(fun_number_total[f])
-                    idx = fname.index(f)
-                    self._fname.append(f)
-                    self._num_moments.append(num_moments[idx])
-                    self._num_random.append(num_random[idx])
-                    self._num_disorder.append(num_disorder[idx])
+                idx = fname.index(f)
+                self._fname.append(f)
+                self._num_moments.append(num_moments[idx])
+                self._num_random.append(num_random[idx])
+                self._num_disorder.append(num_disorder[idx])
+                self._num_points.append(num_points[idx])
 
-            else:
-                if f in special_functions:
-                    self._energy_spec.append(energy)
-                    self._gamma_spec.append(gamma)
-                    self._number_spec.append(fun_number_total[f])
-                    self._fname_spec.append(f)
-                    self._num_moments_spec.append(num_moments)
-                    self._num_random_spec.append(num_random)
-                    self._num_disorder_spec.append(num_disorder)
-                else:
-                    self._number.append(fun_number[f])
-                    self._fname.append(f)
-                    self._num_moments.append(num_moments)
-                    self._num_random.append(num_random)
-                    self._num_disorder.append(num_disorder)
+            if f not in spec_cond_func and f != 'dos':  # all the conductivity functions
+                if direction[idx_cond + idx_cond_spec] not in avail_dir:
+                    print('The desired direction is not available. Choose from a following set: \n',
+                          avail_dir.keys())
+                    raise SystemExit('Invalid direction!')
+
+                self._number.append(fun_num[f] + avail_dir[direction[idx_cond + idx_cond_spec]])
+                self._temperature.append(temp[idx_cond])
+                idx_cond += 1
+
+                idx = fname.index(f)
+                self._fname.append(f)
+                self._num_moments.append(num_moments[idx])
+                self._num_random.append(num_random[idx])
+                self._num_disorder.append(num_disorder[idx])
+                self._num_points.append(num_points[idx])
+            if f in spec_cond_func:  # all the singleshot conductivity functions
+                if direction[idx_cond + idx_cond_spec] not in avail_dir_spec:
+                    print('The desired direction is not available for a singleshot calculation, '
+                          'the algorithm for singleshot calculation is valid only for longitudinal '
+                          'contribution.'
+                          'Choose from a following set: \n', avail_dir_spec.keys())
+                    raise SystemExit('Invalid direction!')
+
+                self._energy_spec.append(np.asarray(energy[idx_cond_spec]))
+                self._gamma_spec.append(gamma[idx_cond_spec])
+                self._number_spec.append(fun_num[f] + avail_dir[direction[idx_cond + idx_cond_spec]])
+                idx_cond_spec += 1
+
+                idx = fname.index(f)
+                self._fname_spec.append(f)
+                self._num_moments_spec.append(num_moments[idx])
+                self._num_random_spec.append(num_random[idx])
+                self._num_disorder_spec.append(num_disorder[idx])
 
     @property
     def number(self):  # -> function number:
@@ -514,6 +592,16 @@ class Calculation:
     def disorder(self):  # -> function name:
         """Returns the number of disorder realisations given for the calc."""
         return self._num_disorder
+
+    @property
+    def points(self):  # -> function name:
+        """Returns the chosen number of points at which you evaluate the function."""
+        return self._num_points
+
+    @property
+    def temperature(self):  # -> function name:
+        """Returns the chosen temperature."""
+        return self._temperature
 
     @property
     def energy_spec(self):  # -> function name:
@@ -873,5 +961,7 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
         grpc.create_dataset('NumMoments', data=np.asarray(calculation.moments), dtype=np.int32)
         grpc.create_dataset('NumRandoms', data=np.asarray(calculation.randoms), dtype=np.int32)
         grpc.create_dataset('NumDisorder', data=np.asarray(calculation.disorder), dtype=np.int32)
+        grpc.create_dataset('NumPoints', data=np.asarray(calculation.points), dtype=np.int32)
+        grpc.create_dataset('Temperature', data=np.asarray(calculation.temperature), dtype=np.int32)
 
     f.close()

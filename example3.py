@@ -36,9 +36,9 @@ ly = 512
 configuration = ex.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
                                  is_complex=False, precision=1, energy_scale=energy_scale)
 
-calculation = ex.Calculation(fname=['DOS'],
-                             num_moments=[256], num_random=[1],
-                             num_disorder=[1])
+calculation = ex.Calculation(fname='dos',
+                             num_moments=256, num_random=1,
+                             num_disorder=1)
 
 modification = ex.Modification(magnetic_field=False)
 ex.export_lattice(lattice, configuration, calculation, modification, 'example3.h5',
