@@ -621,8 +621,8 @@ class Configuration:
 
 def export_lattice(lattice, config, calculation, modification, filename, **kwargs):
     # get the lattice vectors and set the size of space (1D, 2D or 3D) as the total number of vectors.
-    disorder = kwargs.get('disorder', 0)
-    disorded_structural = kwargs.get('disorded_structural', 0)
+    disorder = kwargs.get('disorder', None)
+    disorded_structural = kwargs.get('disorded_structural', None)
 
     vectors = np.asarray(lattice.vectors)
     space_size = vectors.shape[0]
@@ -774,10 +774,9 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
     if modification.magnetic_field:
         grp.create_dataset('MagneticField', data=int(modification.magnetic_field), dtype='u4')
 
-    # TODO: Change this comparison
     grp_dis = grp.create_group('Disorder')
 
-    if disorder != 0:
+    if disorder:
         grp_dis.create_dataset('OnsiteDisorderModelType', data=disorder._type_id, dtype=np.int32)
         grp_dis.create_dataset('OrbitalNum', data=disorder._orbital, dtype=np.int32)
         grp_dis.create_dataset('OnsiteDisorderMeanValue', data=disorder._mean, dtype=np.float64)
@@ -792,7 +791,7 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
     idx_vacancy = 0
     grp_dis = grp.create_group('StructuralDisorder')
 
-    if disorded_structural != 0:
+    if disorded_structural:
 
         if isinstance(disorded_structural, list):
             num_dis = len(disorded_structural)
