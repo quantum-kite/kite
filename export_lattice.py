@@ -825,10 +825,10 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
 
     if complx:
         # hoppings
-        grp.create_dataset('Hoppings', data=t.astype(config.type))
+        grp.create_dataset('Hoppings', data=t.astype(config.type) / config.energy_scale)
     else:
         # hoppings
-        grp.create_dataset('Hoppings', data=t.real.astype(config.type))
+        grp.create_dataset('Hoppings', data=t.real.astype(config.type) / config.energy_scale)
 
     # magnetic field
     if modification.magnetic_field:
@@ -839,8 +839,8 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
     if disorder:
         grp_dis.create_dataset('OnsiteDisorderModelType', data=disorder._type_id, dtype=np.int32)
         grp_dis.create_dataset('OrbitalNum', data=disorder._orbital, dtype=np.int32)
-        grp_dis.create_dataset('OnsiteDisorderMeanValue', data=disorder._mean, dtype=np.float64)
-        grp_dis.create_dataset('OnsiteDisorderMeanStdv', data=disorder._stdv, dtype=np.float64)
+        grp_dis.create_dataset('OnsiteDisorderMeanValue', data=disorder._mean / config.energy_scale, dtype=np.float64)
+        grp_dis.create_dataset('OnsiteDisorderMeanStdv', data=disorder._stdv / config.energy_scale, dtype=np.float64)
     else:
         grp_dis.create_dataset('OnsiteDisorderModelType', (1, 0))
         grp_dis.create_dataset('OrbitalNum', (1, 0))
@@ -906,19 +906,22 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
 
                 # Onsite disorder energy
                 grp_dis_type.create_dataset('U0',
-                                            data=np.asarray(disorded_struct._disorder_onsite).real.astype(config.type))
+                                            data=np.asarray(disorded_struct._disorder_onsite).real.astype(
+                                                config.type)) / config.energy_scale
                 # Bond disorder hopping
                 disorder_hopping = disorded_struct._disorder_hopping
                 if complx:
                     # hoppings
                     grp_dis_type.create_dataset('Hopping',
-                                                data=np.asarray(disorder_hopping).astype(config.type).flatten())
+                                                data=np.asarray(disorder_hopping).astype(
+                                                    config.type).flatten() / config.energy_scale)
                 else:
                     # hoppings
                     grp_dis_type.create_dataset('Hopping',
-                                                data=np.asarray(disorder_hopping).real.astype(config.type).flatten())
+                                                data=np.asarray(disorder_hopping).real.astype(
+                                                    config.type).flatten() / config.energy_scale)
 
-    # Calculation function defined with num_moments, num_random vectors, and num_disorder realisations
+    # Calculation function defined with num_moments, num_random vectors, and num_disorder etc. realisations
     grpc = f.create_group('Calculation')
     if calculation.get_dos:
         grpc_p = grpc.create_group('dos')

@@ -34,10 +34,10 @@ def graphene_initial(onsite=(0, 0)):
     # Add hoppings
     lat.add_hoppings(
         # inside the main cell, between which atoms, and the value
-        ([0, 0], 'A', 'B', - 1 / energy_scale),
+        ([0, 0], 'A', 'B', - 1),
         # between neighboring cells, between which atoms, and the value
-        ([-1, 0], 'A', 'B', - 1 / energy_scale),
-        ([-1, 1], 'A', 'B', - 1 / energy_scale)
+        ([-1, 0], 'A', 'B', - 1),
+        ([-1, 1], 'A', 'B', - 1)
     )
 
     return lat
