@@ -71,7 +71,7 @@ configuration = Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[T
 #   conductivity_optical_nonlinear - optical conductivity nonlinear response,
 #   singleshot_conductivity_dc - zero frequency singleshot conductivity.
 
-
+# direction ID 'xx': 0, 'yy': 1, 'zz': 2, 'xy': 3, 'xz': 4, 'yx': 3, 'yz': 5, 'zx': 4, 'zy': 5
 calculation = Calculation(configuration)
 calculation.dos(num_points=5, num_random=5, num_moments=5)
 calculation.conductivity_optical(num_points=5, num_random=1, num_moments=2, direction='xx')
