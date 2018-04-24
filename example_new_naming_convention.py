@@ -73,14 +73,14 @@ configuration = Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[T
 
 # direction ID 'xx': 0, 'yy': 1, 'zz': 2, 'xy': 3, 'xz': 4, 'yx': 3, 'yz': 5, 'zx': 4, 'zy': 5
 calculation = Calculation(configuration)
-calculation.dos(num_points=5, num_random=5, num_moments=5)
-calculation.conductivity_optical(num_points=5, num_random=1, num_moments=2, direction='xx')
-calculation.conductivity_dc(num_points=6, num_random=2, num_moments=5, direction='xx', temperature=0)
-calculation.conductivity_dc(num_points=62, num_random=1, num_moments=23, direction='xy', temperature=0)
-calculation.singleshot_conductivity_dc(energy=[0, 1, 2, 62], num_random=1, num_moments=23, direction='xx', gamma=0.1)
-calculation.singleshot_conductivity_dc(energy=[125, 25, 3, 63], num_random=1, num_moments=23, direction='yy', gamma=0.1)
-calculation.conductivity_optical_nonlinear(num_points=1, num_random=5, num_moments=2, direction='xx', temperature=5,
-                                           special=1)
+calculation.dos(num_points=1000, num_random=1, num_moments=1024)
+calculation.conductivity_optical(num_points=1000, num_random=1, num_moments=256, direction='xx')
+calculation.conductivity_dc(num_points=1000, num_random=2, num_moments=256, direction='xx', temperature=300)
+calculation.conductivity_dc(num_points=1000, num_random=1, num_moments=256, direction='xy', temperature=300)
+calculation.singleshot_conductivity_dc(energy=[0, 0.1], num_random=1, num_moments=256, direction='xx', gamma=0.1)
+calculation.singleshot_conductivity_dc(energy=[0, 0.1], num_random=1, num_moments=256, direction='yy', gamma=0.1)
+calculation.conductivity_optical_nonlinear(num_points=1000, num_random=1, num_moments=256, direction='xx',
+                                           temperature=0, special=1)
 
 # make modification object which caries info about (TODO: Other modifications can be added here)
 # - magnetic field can be set to True. Default case is False. In exported file it's converted to 1 and 0.
