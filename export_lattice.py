@@ -401,258 +401,198 @@ class Modification:
 
 
 class Calculation:
-    def __init__(self, fname='DOS', num_moments=256, num_random=1, num_disorder=1, **kwargs):
-        if not isinstance(fname, list) :
-            fname = [fname]
-
-        fname = [f.lower() for f in fname]  # convert all to lowercase
-
-        energy = kwargs.get('energy', [])
-        gamma = kwargs.get('gamma', [])
-        special = kwargs.get('special', [])
-        temp = kwargs.get('temperature', [])
-        direction = kwargs.get('direction', [])
-
-        cond_func = []
-        spec_cond_func = []
-        nonl_cond = []
-
-        num_points = kwargs.get('num_points', 1000)
-
-        avail_functions = ['dos', 'conductivity_optical', 'conductivity_dc', 'conductivity_optical_nonlinear',
-                           'singleshot_conductivity_dc']  # all available functions
-        avail_cond_func = ['conductivity_optical', 'conductivity_dc',
-                           'conductivity_optical_nonlinear']  # available conductivity functions
-        avail_spec_cond_func = ['singleshot_conductivity_dc']  # available special conductivity functions
-
-        avail_dir = {'xx': 0, 'xy': 1, 'xz': 2, 'yx': 3, 'yy': 4, 'yz': 5, 'zx': 6, 'zy': 7,
-                     'zz': 8}  # directions for conductivity
-        avail_dir_spec = {'xx': 0, 'yy': 1, 'zz': 2}  # directions for special conductivity
-
-        fun_num = {'dos': 1, 'conductivity_optical': 2, 'conductivity_dc': 11, 'conductivity_optical_nonlinear': 20,
-                   'singleshot_conductivity_dc': 29}
-
-        # number that will distinguish the quantity is fun_number[type] + avail_dir/avail_dir_spec[direction]
-        for f in fname:
-            if f not in avail_functions:
-                print('Selected function is not available! Choose one from a following set: ',
-                      avail_functions)
-                raise SystemExit('Unknown function!')
-            if f == 'conductivity_optical_nonlinear':
-                nonl_cond.append(f)
-
-            if f in avail_cond_func:
-                cond_func.append(f)
-            if f in avail_spec_cond_func:
-                spec_cond_func.append(f)
-
-        num_f = len(fname)
-        num_cond_f = len(cond_func)
-        num_spec_cond_f = len(spec_cond_func)
-
-        if not isinstance(num_points, list):  # if only a single value is added duplicate
-            num_points = [num_points] * (num_f - num_spec_cond_f)
-        if not isinstance(num_moments, list):
-            num_moments = [num_moments] * num_f
-        if not isinstance(num_random, list):
-            num_random = [num_random] * num_f
-        if not isinstance(num_disorder, list):
-            num_disorder = [num_disorder] * num_f
-
-        # for a single entry, repeat the parameter required number of times
-        if not isinstance(temp, list):  # parameters specific for conductivity functions
-            temp = [temp] * num_cond_f if num_cond_f else [temp]
-        if not isinstance(direction, list):
-            direction = [direction] * (num_cond_f + num_spec_cond_f) if num_cond_f + num_spec_cond_f else [direction]
-        if not isinstance(energy, list):
-            energy = [energy] * num_spec_cond_f if num_spec_cond_f else [energy]
-        if not isinstance(gamma, list):
-            gamma = [gamma] * num_spec_cond_f if num_spec_cond_f else [gamma]
-        if not isinstance(special, list):  # only for nonlinear sigma
-            special = [special] * len(nonl_cond) if len(nonl_cond) else [special]
-
-        if not (all(len(i) == num_f for i in [num_moments, num_random, num_disorder])):
-            print('Number of different functions is different than the entered number of parameters, num_moments, '
-                  'num_randoms, num_disorder or num_points. Enter either a single value, or a list with the same '
-                  'length as the number of functions. \n')
-            raise SystemExit('All parameters should have the same length! ')
-
-        if not len(num_points) == (num_f - num_spec_cond_f) and (num_f - num_spec_cond_f):
-            print('Number of different functions is different than the number of num_points entries. '
-                  'Enter either a single value, or a list with the same length as the number of functions that are '
-                  'are evaluated for full spectrum. Bare in mind that singleshot is not full spectrum function, and '
-                  'doesn\'t support this parameter. \n')
-            raise SystemExit('All parameters should have the same length! ')
-
-        if not len(temp) == num_cond_f and num_cond_f:
-            print('Number of different conductivity functions is different than the entered number of temperature '
-                  'entries. Enter either a single value, or a list with the same length as the number of functions '
-                  'that depend on the temperature. \n')
-            raise SystemExit('All parameters should have the same length! ')
-
-        if not len(special) == len(nonl_cond) and nonl_cond:
-            print('Number of different special modifiers is different than the number of function '
-                  'for nonlinear conductivity. \n')
-            raise SystemExit('All parameters should have the same length! ')
-
-        # if not (all(len(i) == num_spec_cond_f for i in [gamma, energy])):
-        if len(gamma) == len(energy) and len(gamma) > 1 and len(energy) > 1 and num_spec_cond_f:
-            print('If both gamma and energies are set, the number of energie entries should be the same as the number '
-                  'of entries for gamma for per singleshot entry. \n')
-            raise SystemExit('All parameters should have the same length! ')
-
-        self._number = []
-        self._num_moments = []
-        self._fname = []
-        self._num_random = []
-        self._num_disorder = []
-        self._num_points = []
-        self._special = []
-
-        self._temperature = []
-
-        self._number_spec = []
-        self._num_moments_spec = []
-        self._fname_spec = []
-        self._num_random_spec = []
-        self._num_disorder_spec = []
-
-        self._energy_spec = []
-        self._gamma_spec = []
-
-        idx_cond_spec = 0
-        idx_cond = 0
-
-        for f in fname:
-            if f == 'dos':  # doesn't have direction hence specific condition, temperature is 0 [K]
-                self._number.append(fun_num[f])
-
-                idx = fname.index(f)
-                self._fname.append(f)
-                self._num_moments.append(num_moments[idx])
-                self._num_random.append(num_random[idx])
-                self._num_disorder.append(num_disorder[idx])
-                self._num_points.append(num_points[idx])
-
-            if f not in spec_cond_func and f != 'dos':  # all the conductivity functions
-                if direction[idx_cond + idx_cond_spec] not in avail_dir:
-                    print('The desired direction is not available. Choose from a following set: \n',
-                          avail_dir.keys())
-                    raise SystemExit('Invalid direction!')
-
-                self._number.append(fun_num[f] + avail_dir[direction[idx_cond + idx_cond_spec]])
-                self._temperature.append(temp[idx_cond])
-                idx_cond += 1
-
-                idx = fname.index(f)
-                self._fname.append(f)
-                self._num_moments.append(num_moments[idx])
-                self._num_random.append(num_random[idx])
-                self._num_disorder.append(num_disorder[idx])
-                self._num_points.append(num_points[idx])
-
-                if f in nonl_cond:
-                    idx2 = nonl_cond.index(f)
-
-                    self._special.append(special[idx2])
-            if f in spec_cond_func:  # all the singleshot conductivity functions
-                if direction[idx_cond + idx_cond_spec] not in avail_dir_spec:
-                    print('The desired direction is not available for a singleshot calculation, '
-                          'the algorithm for singleshot calculation is valid only for longitudinal '
-                          'contribution.'
-                          'Choose from a following set: \n', avail_dir_spec.keys())
-                    raise SystemExit('Invalid direction!')
-
-                self._energy_spec.append(np.asarray(energy[idx_cond_spec]))
-                self._gamma_spec.append(gamma[idx_cond_spec])
-                self._number_spec.append(fun_num[f] + avail_dir[direction[idx_cond + idx_cond_spec]])
-                idx_cond_spec += 1
-
-                idx = fname.index(f)
-                self._fname_spec.append(f)
-                self._num_moments_spec.append(num_moments[idx])
-                self._num_random_spec.append(num_random[idx])
-                self._num_disorder_spec.append(num_disorder[idx])
 
     @property
-    def number(self):  # -> function number:
-        """Returns the predefined number of desired function."""
-        return self._number
+    def get_dos(self):
+        """Returns the requested DOS functions."""
+        return self._dos
 
     @property
-    def name(self):  # -> function name:
-        """Returns the desired function name."""
-        return self._fname
+    def get_conductivity_dc(self):
+        """Returns the requested DC conductivity functions."""
+        return self._conductivity_dc
 
     @property
-    def moments(self):  # -> function name:
-        """Returns the number of moments given for the calc."""
-        return self._num_moments
+    def get_conductivity_optical(self):
+        """Returns the requested optical conductivity functions."""
+        return self._conductivity_optical
 
     @property
-    def randoms(self):  # -> function name:
-        """Returns the number of random vectors given for the calc."""
-        return self._num_random
+    def get_conductivity_optical_nonlinear(self):
+        """Returns the requested nonlinear optical conductivity functions."""
+        return self._conductivity_optical_nonlinear
 
     @property
-    def disorder(self):  # -> function name:
-        """Returns the number of disorder realisations given for the calc."""
-        return self._num_disorder
+    def get_singleshot_conductivity_dc(self):
+        """Returns the requested singleshot DC conductivity functions."""
+        return self._singleshot_conductivity_dc
 
-    @property
-    def points(self):  # -> function name:
-        """Returns the chosen number of points at which you evaluate the function."""
-        return self._num_points
+    def __init__(self, configuration=None):
 
-    @property
-    def temperature(self):  # -> function name:
-        """Returns the chosen temperature."""
-        return self._temperature
+        if configuration is not None and not isinstance(configuration, Configuration):
+            raise TypeError("You're forwaring a wrong type!")
 
-    @property
-    def special(self):  # -> function name:
-        """Returns the modifier for nonlinear optical conductivity."""
-        return self._special
+        self._scaling_factor = configuration.energy_scale
+        self._dos = []
+        self._conductivity_dc = []
+        self._conductivity_optical = []
+        self._conductivity_optical_nonlinear = []
+        self._singleshot_conductivity_dc = []
 
-    @property
-    def energy_spec(self):  # -> function name:
-        """Returns the energy of for the single energy calc."""
-        return self._energy_spec
+        self._avail_dir_full = {'xx': 0, 'yy': 1, 'zz': 2, 'xy': 3, 'xz': 4, 'yx': 3, 'yz': 5, 'zx': 4, 'zy': 5}
+        self._avail_dir_sngl = {'xx': 0, 'yy': 1, 'zz': 2}
 
-    @property
-    def gamma_spec(self):  # -> function name:
-        """Returns the gamma of for the single energy calc."""
-        return self._gamma_spec
+    def dos(self, num_points, num_moments, num_random):
+        """Calculate the density of states as a function of energy
 
-    @property
-    def number_spec(self):  # -> function number:
-        """Returns the predefined number of desired single energy function."""
-        return self._number_spec
+        Parameters
+        ----------
+        num_points : int
+            Number of energy point inside the spectrum at which the DOS will be calculated.
+        num_moments : int
+            Number of polynomials in the Chebyshev expansion.
+        num_random : int
+            Number of random vectors to use for the stochastic evaluation of trace.
+        """
 
-    @property
-    def name_spec(self):  # -> function name:
-        """Returns the desired function name."""
-        return self._fname_spec
+        self._dos.append({'num_points': num_points, 'num_moments': num_moments, 'num_random': num_random})
 
-    @property
-    def moments_spec(self):  # -> function name:
-        """Returns the number of moments given for the single energy calc."""
-        return self._num_moments_spec
+    def conductivity_dc(self, direction, num_points, num_moments, num_random=1, temperature=0):
+        """Calculate the density of states as a function of energy
 
-    @property
-    def randoms_spec(self):  # -> function name:
-        """Returns the number of random vectors given for the single energy calc."""
-        return self._num_random_spec
+        Parameters
+        ----------
+        direction : string
+            direction in xyz coordinates along which the conductivity is calculated.
+            Supports 'xx', 'yy', 'zz', 'xy', 'xz', 'yx', 'yz', 'zx', 'zy'.
+        num_points : int
+            Number of energy point inside the spectrum at which the DOS will be calculated.
+        num_moments : int
+            Number of polynomials in the Chebyshev expansion.
+        num_random : int
+            Number of random vectors to use for the stochastic evaluation of trace.
+        temperature : float
+            Value of the temperature at which we calculate the response.
+        """
+        if direction not in self._avail_dir_full:
+            print('The desired direction is not available. Choose from a following set: \n',
+                  self._avail_dir_full.keys())
+            raise SystemExit('Invalid direction!')
+        else:
+            self._conductivity_dc.append(
+                {'direction': self._avail_dir_full[direction], 'num_points': num_points, 'num_moments': num_moments,
+                 'num_random': num_random, 'temperature': temperature / self._scaling_factor})
 
-    @property
-    def disorder_spec(self):  # -> function name:
-        """Returns the number of disorder realisations given for single energy the calc."""
-        return self._num_disorder_spec
+    def conductivity_optical(self, direction, num_points, num_moments, num_random=1, temperature=0):
+        """Calculate the density of states as a function of energy
+
+        Parameters
+        ----------
+        direction : string
+            direction in xyz coordinates along which the conductivity is calculated.
+            Supports 'xx', 'yy', 'zz', 'xy', 'xz', 'yx', 'yz', 'zx', 'zy'.
+        num_points : int
+            Number of energy point inside the spectrum at which the DOS will be calculated.
+        num_moments : int
+            Number of polynomials in the Chebyshev expansion.
+        num_random : int
+            Number of random vectors to use for the stochastic evaluation of trace.
+        temperature : float
+            Value of the temperature at which we calculate the response.
+        """
+        if direction not in self._avail_dir_full:
+            print('The desired direction is not available. Choose from a following set: \n',
+                  self._avail_dir_full.keys())
+            raise SystemExit('Invalid direction!')
+        else:
+            self._conductivity_optical.append(
+                {'direction': self._avail_dir_full[direction], 'num_points': num_points, 'num_moments': num_moments,
+                 'num_random': num_random, 'temperature': temperature / self._scaling_factor})
+
+    def conductivity_optical_nonlinear(self, direction, num_points, num_moments, num_random=1, temperature=0, **kwargs):
+        """Calculate the density of states as a function of energy
+
+        Parameters
+        ----------
+        direction : string
+            direction in xyz coordinates along which the conductivity is calculated.
+            Supports 'xx', 'yy', 'zz', 'xy', 'xz', 'yx', 'yz', 'zx', 'zy'.
+        num_points : int
+            Number of energy point inside the spectrum at which the DOS will be calculated.
+        num_moments : int
+            Number of polynomials in the Chebyshev expansion.
+        num_random : int
+            Number of random vectors to use for the stochastic evaluation of trace.
+        temperature : float
+            Value of the temperature at which we calculate the response.
+
+            Optional parameters, forward special, a parameter that can simplify the calculation for some materials.
+        """
+
+        if direction not in self._avail_dir_full:
+            print('The desired direction is not available. Choose from a following set: \n',
+                  self._avail_dir_full.keys())
+            raise SystemExit('Invalid direction!')
+        else:
+            special = kwargs.get('special', 0)
+
+            self._conductivity_optical_nonlinear.append(
+                {'direction': self._avail_dir_full[direction], 'num_points': num_points,
+                 'num_moments': num_moments, 'num_random': num_random,
+                 'temperature': temperature / self._scaling_factor, 'special': special})
+
+    def singleshot_conductivity_dc(self, energy, direction, gamma, num_moments, num_random=1):
+        """Calculate the density of states as a function of energy
+
+        Parameters
+        ----------
+        energy : ndarray or float
+            Array or a single value of energies at which singleshot_conductivity_dc will be calculated.
+        direction : string
+            direction in xyz coordinates along which the conductivity is calculated.
+            Supports 'xx', 'yy', 'zz'.
+        gamma : Float
+            Parameter that affects the broadening of the kernel function.
+        num_moments : int
+            Number of polynomials in the Chebyshev expansion.
+        num_random : int
+            Number of random vectors to use for the stochastic evaluation of trace.
+        """
+
+        if direction not in self._avail_dir_sngl:
+            print('The desired direction is not available. Choose from a following set: \n',
+                  self._avail_dir_sngl.keys())
+            raise SystemExit('Invalid direction!')
+        else:
+            self._singleshot_conductivity_dc.append(
+                {'energy': np.array(energy) / self._scaling_factor, 'direction': self._avail_dir_sngl[direction],
+                 'gamma': gamma / self._scaling_factor, 'num_moments': num_moments,
+                 'num_random': num_random})
 
 
 class Configuration:
-    def __init__(self, divisions=(1, 1), length=None, boundaries=(False, False), is_complex=False, precision=1,
+
+    def __init__(self, divisions=(1, 1), length=(1, 1), boundaries=(False, False), is_complex=False, precision=1,
                  energy_scale=1):
+        """Define basic parameters used in the calculation
+
+       Parameters
+       ----------
+       divisions : int, tuple(int, int), tuple(int, int, int)
+           Number of decomposition parts of the system.
+       length : int, tuple(int, int), tuple(int, int, int)
+           Number of unit cells in each direction.
+       boundaries : int, tuple(int, int), tuple(int, int, int)
+           Periodic boundary conditions each direction.
+       is_complex : bool
+           Boolean that reflects whether the type of Hamiltonian is complex or not.
+       precision : int
+            Integer which defines the precision of the number used in the calculation. Float - 0, double - 1,
+            long double - 2.
+        energy_scale : float
+            Energy scale which defines the scaling factor of all the energy related parameters. The scaling is done
+            automatically in the background after this definition.
+       """
 
         self._energy_scale = energy_scale
         self._is_complex = int(is_complex)
@@ -661,6 +601,7 @@ class Configuration:
         self._boundaries = np.asarray(boundaries).astype(int)
 
         self._length = length
+        self._htype = np.float32
         self.set_type()
 
     def set_type(self, ):
@@ -719,6 +660,26 @@ class Configuration:
 
 
 def export_lattice(lattice, config, calculation, modification, filename, **kwargs):
+    """Export the lattice and related parameters to the *.h5 file
+
+    Parameters
+    ----------
+    lattice : pb.Lattice
+        Pybinding lattice object that carries the info about the unit cell vectors, unit cell cites, hopping terms and
+        onsite energies.
+    config : Configuration
+        Configuration object, basic parameters defining size, precision, energy scale and number of decomposition parts
+        in the calculation.
+    calculation : Calculation
+        Calculation object that defines the requested functions for the calculation.
+    modification : Modification
+        Modification object, has the magnetic field operator which can be True or False.
+    filename : string
+        Output filename.
+    **kwargs: Optional arguments like Disorder or Disorder_structural.
+
+    """
+
     # get the lattice vectors and set the size of space (1D, 2D or 3D) as the total number of vectors.
     disorder = kwargs.get('disorder', None)
     disorded_structural = kwargs.get('disorded_structural', None)
@@ -959,21 +920,83 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
 
     # Calculation function defined with num_moments, num_random vectors, and num_disorder realisations
     grpc = f.create_group('Calculation')
-    if calculation.number_spec:
-        grpc_spec = grpc.create_group('Calculation_spec')
-        grpc_spec.create_dataset('FunctionNum', data=np.asarray(calculation.number_spec), dtype=np.int32)
-        grpc_spec.create_dataset('NumMoments', data=np.asarray(calculation.moments_spec), dtype=np.int32)
-        grpc_spec.create_dataset('NumRandoms', data=np.asarray(calculation.randoms_spec), dtype=np.int32)
-        grpc_spec.create_dataset('NumDisorder', data=np.asarray(calculation.disorder_spec), dtype=np.int32)
-        grpc_spec.create_dataset('Energy', data=np.asarray(calculation.energy_spec), dtype=np.float64)
-        grpc_spec.create_dataset('Gamma', data=np.asarray(calculation.gamma_spec), dtype=np.float64)
-    if calculation.number:
-        grpc.create_dataset('FunctionNum', data=np.asarray(calculation.number), dtype=np.int32)
-        grpc.create_dataset('NumMoments', data=np.asarray(calculation.moments), dtype=np.int32)
-        grpc.create_dataset('NumRandoms', data=np.asarray(calculation.randoms), dtype=np.int32)
-        grpc.create_dataset('NumDisorder', data=np.asarray(calculation.disorder), dtype=np.int32)
-        grpc.create_dataset('NumPoints', data=np.asarray(calculation.points), dtype=np.int32)
-        grpc.create_dataset('Temperature', data=np.asarray(calculation.temperature), dtype=np.int32)
-        grpc.create_dataset('Special', data=np.asarray(calculation.special), dtype=np.int32)
+    if calculation.get_dos:
+        grpc_p = grpc.create_group('dos')
+
+        for single_dos in calculation.get_dos:
+            grpc_p.create_dataset('NumMoments', data=single_dos['num_moments'], dtype=np.int32)
+            grpc_p.create_dataset('NumRandoms', data=single_dos['num_random'], dtype=np.int32)
+            grpc_p.create_dataset('NumPoints', data=single_dos['num_points'], dtype=np.int32)
+
+    if calculation.get_conductivity_dc:
+        grpc_p = grpc.create_group('conductivity_dc')
+
+        moments, random, point, temp, direction = [], [], [], [], []
+        for single_cond_dc in calculation.get_conductivity_dc:
+            moments.append(single_cond_dc['num_moments'])
+            random.append(single_cond_dc['num_random'])
+            point.append(single_cond_dc['num_points'])
+            temp.append(single_cond_dc['temperature'])
+            direction.append(single_cond_dc['direction'])
+
+        grpc_p.create_dataset('NumMoments', data=np.asarray(moments), dtype=np.int32)
+        grpc_p.create_dataset('NumRandoms', data=np.asarray(random), dtype=np.int32)
+        grpc_p.create_dataset('NumPoints', data=np.asarray(point), dtype=np.int32)
+        grpc_p.create_dataset('Temperature', data=np.asarray(temp), dtype=np.float64)
+        grpc_p.create_dataset('Direction', data=np.asarray(direction), dtype=np.int32)
+
+    if calculation.get_conductivity_optical:
+        grpc_p = grpc.create_group('conductivity_optical')
+
+        moments, random, point, temp, direction = [], [], [], [], []
+        for single_cond_opt in calculation.get_conductivity_optical:
+            moments.append(single_cond_opt['num_moments'])
+            random.append(single_cond_opt['num_random'])
+            point.append(single_cond_opt['num_points'])
+            temp.append(single_cond_opt['temperature'])
+            direction.append(single_cond_opt['direction'])
+
+        grpc_p.create_dataset('NumMoments', data=np.asarray(moments), dtype=np.int32)
+        grpc_p.create_dataset('NumRandoms', data=np.asarray(random), dtype=np.int32)
+        grpc_p.create_dataset('NumPoints', data=np.asarray(point), dtype=np.int32)
+        grpc_p.create_dataset('Temperature', data=np.asarray(temp), dtype=np.float64)
+        grpc_p.create_dataset('Direction', data=np.asarray(direction), dtype=np.int32)
+
+    if calculation.get_conductivity_optical_nonlinear:
+        grpc_p = grpc.create_group('conductivity_optical_nonlinear')
+
+        moments, random, point, temp, direction, special = [], [], [], [], [], []
+        for single_cond_opt_non in calculation.get_conductivity_optical_nonlinear:
+            moments.append(single_cond_opt_non['num_moments'])
+            random.append(single_cond_opt_non['num_random'])
+            point.append(single_cond_opt_non['num_points'])
+            temp.append(single_cond_opt_non['temperature'])
+            direction.append(single_cond_opt_non['direction'])
+            special.append(single_cond_opt_non['special'])
+
+        grpc_p.create_dataset('NumMoments', data=np.asarray(moments), dtype=np.int32)
+        grpc_p.create_dataset('NumRandoms', data=np.asarray(random), dtype=np.int32)
+        grpc_p.create_dataset('NumPoints', data=np.asarray(point), dtype=np.int32)
+        grpc_p.create_dataset('Temperature', data=np.asarray(temp), dtype=np.float64)
+        grpc_p.create_dataset('Direction', data=np.asarray(direction), dtype=np.int32)
+        grpc_p.create_dataset('Special', data=np.asarray(special), dtype=np.int32)
+
+    if calculation.get_singleshot_conductivity_dc:
+        grpc_p = grpc.create_group('singleshot_conductivity_dc')
+
+        moments, random, energies, gamma, direction = [], [], [], [], []
+
+        for single_singlshot_cond in calculation.get_singleshot_conductivity_dc:
+            moments.append(single_singlshot_cond['num_moments'])
+            random.append(single_singlshot_cond['num_random'])
+            energies.append(single_singlshot_cond['energy'])
+            gamma.append(single_singlshot_cond['gamma'])
+            direction.append(single_singlshot_cond['direction'])
+
+        grpc_p.create_dataset('NumMoments', data=np.asarray(moments), dtype=np.int32)
+        grpc_p.create_dataset('NumRandoms', data=np.asarray(random), dtype=np.int32)
+        grpc_p.create_dataset('Energy', data=np.asarray(energies), dtype=np.float64)
+        grpc_p.create_dataset('Gamma', data=np.asarray(gamma), dtype=np.float64)
+        grpc_p.create_dataset('Direction', data=np.asarray(direction), dtype=np.int32)
 
     f.close()

@@ -3,6 +3,8 @@ import export_lattice as ex
 import numpy as np
 import pybinding as pb
 
+from export_lattice import Configuration, Calculation, Modification, export_lattice
+
 # define lattice of monolayer graphene with 1[nm] interatomic distance and t=1/3[eV] hopping,
 # EnergyScale is the scaling factor of the hopping parameters, important for the rescaling of the spectral quantity.
 #  INFO: other examples are defined in define_lattice.py script
@@ -43,7 +45,8 @@ def graphene_initial(onsite=(0, 0)):
 
 lattice = graphene_initial()
 
-# number of decomposition parts in each direction of matrix. This divides the lattice into various sections, each of which is calculated in parallel
+# number of decomposition parts in each direction of matrix. This divides the lattice into various sections,
+# each of which is calculated in parallel
 nx = ny = 1
 
 # number of unit cells in each direction.
@@ -56,52 +59,36 @@ ly = 256
 # - boundary conditions, setting True as periodic boundary conditions, and False elsewise,
 # - info if the exported hopping and onsite data should be complex,
 # - info of the precision of the exported hopping and onsite data, 0 - float, 1 - double, and 2 - long double.
-configuration = ex.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
-                                 is_complex=False, precision=1, energy_scale=energy_scale)
-
+configuration = Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
+                              is_complex=False, precision=0, energy_scale=energy_scale)
 
 # make calculation object which caries info about
-# - the name of the function, case insensitive choice
+# - the desired function:
 
-#   dos - denstity of states == 1,
-#   conductivity_optical - conductivity in xx direction == 2,
-#   conductivity_dc - conductivity in xy direction == 11,
-#   conductivity_optical_nonlinear - optical conductivity == 20
-#   singleshot_conductivity_dc - singleshot conductivity == 29
+#   dos - denstity of states,
+#   conductivity_optical - optical conductivity in linear response,
+#   conductivity_dc - zero frequency conductivity in linear response,
+#   conductivity_optical_nonlinear - optical conductivity nonlinear response,
+#   singleshot_conductivity_dc - zero frequency singleshot conductivity.
 
-# - number of moments for the calculation,
-# - number of different random vector realisations,
-# - number of disorder realisations,
-# - number of points for evaluating full spectrum calculation,
-# - temperature at which we want to calculate full spectrum conductivity,
-# - energy and gamma for single energy calculations.
 
-# adding a direction number:
-# 'xx': 0,
-# 'xy': 1,
-# 'xz': 2,
-# 'yx': 3,
-# 'yy': 4,
-# 'yz': 5,
-# 'zx': 6
-# 'zy': 7
-# 'zz': 8
-
-# number that will distinguish the quantity is fun_number[type] + avail_dir/avail_dir_spec[direction]
-# for example conductivity_optical_nonlinear in yx direction is 20 + 3 = 23
-
-calculation = ex.Calculation(fname=['DOS', 'conductivity_dc', 'conductivity_optical_nonlinear',
-                                    'singleshot_conductivity_dc'],
-                             num_moments=[1024, 1, 1, 1], num_random=[1, 1, 1, 1], temperature=[100, 0],
-                             num_disorder=[1, 1, 1, 1], direction=['xx', 'xy', 'zz'], energy=[0,0], gamma=[0.1], special=1)
+calculation = Calculation(configuration)
+calculation.dos(num_points=5, num_random=5, num_moments=5)
+calculation.conductivity_optical(num_points=5, num_random=1, num_moments=2, direction='xx')
+calculation.conductivity_dc(num_points=6, num_random=2, num_moments=5, direction='xx', temperature=0)
+calculation.conductivity_dc(num_points=62, num_random=1, num_moments=23, direction='xy', temperature=0)
+calculation.singleshot_conductivity_dc(energy=[0, 1, 2, 62], num_random=1, num_moments=23, direction='xx', gamma=0.1)
+calculation.singleshot_conductivity_dc(energy=[125, 25, 3, 63], num_random=1, num_moments=23, direction='yy', gamma=0.1)
+calculation.conductivity_optical_nonlinear(num_points=1, num_random=5, num_moments=2, direction='xx', temperature=5,
+                                           special=1)
 
 # make modification object which caries info about (TODO: Other modifications can be added here)
 # - magnetic field can be set to True. Default case is False. In exported file it's converted to 1 and 0.
-modification = ex.Modification(magnetic_field=False)
+modification = Modification(magnetic_field=False)
 
 # export the lattice from the lattice object, config and calculation object and the name of the file
 # the disorder is optional. If there is disorder in the lattice for now it should be given separately
-ex.export_lattice(lattice, configuration, calculation, modification, 'example_new_naming_convention.h5')
+export_lattice(lattice, configuration, calculation, modification, 'example_new_naming_convention.h5')
 
 # plotting the lattice
 lattice.plot()
