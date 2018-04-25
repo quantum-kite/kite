@@ -680,6 +680,22 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
 
     """
 
+    # check if there's complex hopping or magnetic field but identifier is_complex is 0
+    imag_part = 0
+    # loop through all hoppings
+    for name, hop in lattice.hoppings.items():
+        imag_part += np.linalg.norm(np.asarray(hop.energy).imag)
+    if imag_part > 0 and config._is_complex == 0:
+        print('Complex hoppings are added but is_complex identifier is 0. Automatically turning is_complex to 1!')
+        config._is_complex = 1
+        config.set_type()
+        
+    # check if magnetic field is On
+    if modification.magnetic_field and config._is_complex == 0:
+        print('Magnetic field is added but is_complex identifier is 0. Automatically turning is_complex to 1!')
+        config._is_complex = 1
+        config.set_type()
+
     # get the lattice vectors and set the size of space (1D, 2D or 3D) as the total number of vectors.
     disorder = kwargs.get('disorder', None)
     disorded_structural = kwargs.get('disorded_structural', None)
