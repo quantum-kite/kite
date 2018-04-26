@@ -11,6 +11,8 @@
 #define outcol "\033[1;31m"
 #define outres "\033[0m"
 
+#define VERBOSE 1
+
 #ifdef VERBOSE
 	#if VERBOSE==1
 		#define verbose_message(VAR) std::cout<<VAR<<std::flush

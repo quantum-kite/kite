@@ -4,8 +4,8 @@
 #include "tensor.hpp"
 #include "myHDF5.hpp"
 #include "info.hpp"
-#include "calculate.hpp"
-
+#include "calculate_simple.hpp"
+#include "parse_input.hpp"
 
 //#####################################################################################
 //#####################################################################################
@@ -15,11 +15,11 @@
 //#####################################################################################
 
 //TO DO:
-// Clarify what each quantity to be calculated means. Cond, SingleCond, OptCond????
+// Clarify what each quantity to be calculate_simpled means. Cond, SingleCond, OptCond????
 
 //https://support.hdfgroup.org/HDF5/doc/cpplus_RM/readdata_8cpp-example.html
 
-
+#define debug 1
 
 void choose_simulation_type(char *name){
 	debug_message("Entered choose_simulation.\n");
@@ -57,57 +57,57 @@ void choose_simulation_type(char *name){
 		case 0:
 		{
 			verbose_message("The program is using data type: float.\nDimension: 1.\n");
-			calculate<float, 1u>(name);
+			calculate_simple<float, 1u>(name);
 			break;
 		}
 		case 1:
 		{
 			verbose_message("The program is using data type: float.\nDimension: 2.\n");
-			calculate<float, 2u>(name);
+			calculate_simple<float, 2u>(name);
 			break;
 		}
 		case 2:
 		{
 			verbose_message("The program is using data type: float.\nDimension: 3.\n");
-			calculate<float, 3u>(name);
+			calculate_simple<float, 3u>(name);
 			break;			
 		}
 		case 3:
 		{
 			verbose_message("The program is using data type: double.\nDimension: 1.\n");
-			calculate<double, 1u>(name);
+			calculate_simple<double, 1u>(name);
 			break;
 		}
 #endif
 		case 4:
 		{
 			verbose_message("The program is using data type: double.\nDimension: 2.\n");
-			calculate<double, 2u>(name);
+			calculate_simple<double, 2u>(name);
 			break;
 		}
 		case 5:
 		{
 			verbose_message("The program is using data type: double.\nDimension: 3.\n");
-			calculate<double, 3u>(name);
+			calculate_simple<double, 3u>(name);
 			break;
 		}
 #ifdef debug1
 		case 6:
 		{
 			verbose_message("The program is using data type: long double.\nDimension: 1.\n");
-			calculate<long double, 1u>(name);
+			calculate_simple<long double, 1u>(name);
 			break;
 		}
 		case 7:
 		{
 			verbose_message("The program is using data type: long double.\nDimension: 2.\n");
-			calculate<long double, 2u>(name);
+			calculate_simple<long double, 2u>(name);
 			break;
 		}
 		case 8:
 		{
 			verbose_message("The program is using data type: long double.\nDimension: 3.\n");
-			calculate<long double, 3u>(name);
+			calculate_simple<long double, 3u>(name);
 			break;
 		}
 #endif
@@ -123,7 +123,7 @@ void choose_simulation_type(char *name){
 
 
 int main(int argc, char *argv[]){
-	
+	//parser(argc, argv);
 	choose_simulation_type(argv[1]);
 	return 0;
 }

@@ -33,14 +33,14 @@ def graphene_initial(onsite=(0, 0)):
 lattice, disorder, disorded_structural = graphene_initial()
 
 nx = ny = 2
-lx = 256
-ly = 256
+lx = 128
+ly = 128
 
 configuration = ex.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
                                  is_complex=False, precision=1, energy_scale=energy_scale)
 
-calculation = ex.Calculation(fname=['CondXX'],
-                             num_moments=[256], num_random=[1],
+calculation = ex.Calculation(fname=['CondXY'],
+                             num_moments=[8], num_random=[1],
                              num_disorder=[1])
 
 modification = ex.Modification(magnetic_field=False)
