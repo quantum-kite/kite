@@ -28,9 +28,9 @@ def graphene_initial(onsite=(0, 0)):
     )
 
     lat.add_hoppings(
-        ([0, 0], 'A', 'B', - 1 / energy_scale),
-        ([-1, 0], 'A', 'B', - 1 / energy_scale),
-        ([-1, 1], 'A', 'B', - 1 / energy_scale)
+        ([ 0, 0], 'A', 'B', - 1),
+        ([-1, 0], 'A', 'B', - 1),
+        ([-1, 1], 'A', 'B', - 1)
     )
 
     disorder = ex.Disorder(lat)
@@ -56,9 +56,11 @@ configuration = ex.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries
 NPontos = 10
 M = 512
 g1 = 0.1
-calculation = ex.Calculation(fname=['DOS', 'singleshot_conductivity_dc'], num_moments=[M, M], num_random=[1, 1],
-                             num_disorder=[1, 1], energy=[[0.3 / NPontos * i / energy_scale for i in range(NPontos)]],
-                             gamma=[[g1 / energy_scale]], direction='xx')
+calculation = ex.Calculation(fname=['DOS','SingleCondXX'],
+                             num_moments=[M,M], num_random=[1,1], 
+                             num_disorder=[1,1], 
+                             energy=[[0.3/NPontos * i  for i in range(NPontos)]],
+                             gamma=[[g1]])
 
 modification = ex.Modification(magnetic_field=False)
 ex.export_lattice(lattice, configuration, calculation, modification, 'example5.h5',

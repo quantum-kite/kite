@@ -25,17 +25,17 @@ def graphene_initial(onsite=(0, 0)):
     # Add sublattices
     lat.add_sublattices(
         # name, position, and onsite potential
-        ('A', [0, 0], onsite[0] / energy_scale),
-        ('B', [1, 0], onsite[1] / energy_scale)
+        ('A', [0, 0], onsite[0]),
+        ('B', [1, 0], onsite[1])
     )
 
     # Add hoppings
     lat.add_hoppings(
         # inside the main cell, between which atoms, and the value
-        ([0, 0], 'A', 'B', - 1 / energy_scale),
+        ([0, 0], 'A', 'B', - 1),
         # between neighboring cells, between which atoms, and the value
-        ([-1, 0], 'A', 'B', - 1 / energy_scale),
-        ([-1, 1], 'A', 'B', - 1 / energy_scale)
+        ([-1, 0], 'A', 'B', - 1),
+        ([-1, 1], 'A', 'B', - 1)
     )
 
     # Add disorder
@@ -45,8 +45,8 @@ def graphene_initial(onsite=(0, 0)):
     # of deterministic disorder should be 0.
 
     disorder = ex.Disorder(lat)
-    disorder.add_disorder('A', 'Gaussian', 0.5 / energy_scale, 0.1)
-    disorder.add_disorder('B', 'Uniform', 0.2 / energy_scale, 0.1)
+    disorder.add_disorder('A', 'Gaussian', 0.5, 0.1)
+    disorder.add_disorder('B', 'Uniform', 0.2, 0.1)
 
     # Add bond disorder as an object of a class StructuralDisorder. In this manner we can add onsite and bond defects
     # with a specific concentration, which will be added to the simulated system. The procedure for adding is same
@@ -62,23 +62,23 @@ def graphene_initial(onsite=(0, 0)):
     struc_disorder_one = ex.StructuralDisorder(lat, concentration=0.05)
     struc_disorder_one.add_structural_disorder(
         # add bond disorder in the form [from unit cell], 'sublattice_from', [to_unit_cell], 'sublattice_to', value:
-        (*node0, *node1, 1 / energy_scale),
-        (*node1, *node2, 1 / energy_scale),
-        (*node2, *node3, 1 / energy_scale),
-        (*node3, *node4, 1 / energy_scale),
-        (*node4, *node5, 1 / energy_scale),
-        (*node5, *node0, 1 / energy_scale),
+        (*node0, *node1, 1),
+        (*node1, *node2, 1),
+        (*node2, *node3, 1),
+        (*node3, *node4, 1),
+        (*node4, *node5, 1),
+        (*node5, *node0, 1),
         # in this way we can add onsite disorder in the form [unit cell], 'sublattice', value
-        ([+0, +0], 'B', 0.1 / energy_scale)
+        ([+0, +0], 'B', 0.1)
     )
     # It is possible to add multiple different disorder type which should be forwarded to the export_lattice function
     # as a list.
     struc_disorder_two = ex.StructuralDisorder(lat, concentration=0.2)
     struc_disorder_two.add_structural_disorder(
-        (*node0, *node1, 0.1 / energy_scale),
-        (*node4, *node5, 0.1 / energy_scale),
-        (*node5, *node0, 0.1 / energy_scale),
-        ([+0, +0], 'B', 0.1 / energy_scale)
+        (*node0, *node1, 0.1),
+        (*node4, *node5, 0.1),
+        (*node5, *node0, 0.1),
+        ([+0, +0], 'B', 0.1)
     )
     struc_disorder_two.add_vacancy('B')
 
