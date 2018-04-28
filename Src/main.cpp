@@ -35,6 +35,7 @@
 #define DEBUG 1
 #define VERBOSE 0
 #define VVERBOSE 0
+#define COMPILE_MAIN 1
 
 #ifdef VERBOSE
 #if VERBOSE==1
@@ -126,17 +127,21 @@ int main(int argc, char *argv[])
   switch (index ) {
     /*
      * Float Real 
-     *//*
+     */
+    
+#if COMPILE_MAIN==1
   case 0:
     {
       class GlobalSimulation <float, 1u> h(argv[1]);
       break;
-    }*/
+    }
+#endif
   case 1:
     {
       class GlobalSimulation <float, 2u> h(argv[1]);
       break;
-    }/*
+    }
+#if COMPILE_MAIN==1
   case 2:
     {
       class GlobalSimulation <float, 3u> h(argv[1]);
@@ -146,12 +151,14 @@ int main(int argc, char *argv[])
     {
       class GlobalSimulation <double, 1u> h(argv[1]);
       break;
-    }*/
+    }
+#endif
   case 4:
     {
       class GlobalSimulation <double, 2u> h(argv[1]);
       break;
-    }/*
+    }
+#if COMPILE_MAIN==1  
   case 5:
     {
       class GlobalSimulation <double, 3u> h(argv[1]);
@@ -188,7 +195,7 @@ int main(int argc, char *argv[])
     {
       class GlobalSimulation <std::complex<float>, 3u> h(argv[1]);
       break;
-    }*//*
+    }
   case 12:
     {
       class GlobalSimulation <std::complex<double>, 1u> h(argv[1]);
@@ -203,7 +210,7 @@ int main(int argc, char *argv[])
     {
       class GlobalSimulation <std::complex<double>, 3u> h(argv[1]);
       break;
-    }*//*
+    }
   case 15:
     {
       class GlobalSimulation <std::complex<long double>, 1u> h(argv[1]);
@@ -218,13 +225,14 @@ int main(int argc, char *argv[])
     {
       class GlobalSimulation <std::complex<long double>, 3u> h(argv[1]);
       break;
-    }*/
+    }
+#endif
 
   default:
     exit(0);
   } 
   
   debug_message("Program ended with success!\n");
-  return 1;
+  return 0;
 }
 
