@@ -1,52 +1,5 @@
 #include "headers.hpp"
-
-/*
-int int_pow(int base, int exp){
-    int result = 1;
-    while (exp)
-    {
-        if (exp & 1)
-           result *= base;
-        exp /= 2;
-        base *= base;
-    }
-    return result;
-}
-
-using namespace std::placeholders;  // for _1, _2, _3...
-
-double kernel_jackson(int n, int M){
-	double f = M_PI/(M+1);
-	return ((M+1-n)*cos(n*f) + sin(n*f)/tan(f))/(M+1);
-}
-
-double lorentz(double lambda, int n, int M){
-	return sinh(lambda*(1.0 - (double)n/M))/sinh(lambda);
-}
-std::function<double(int, int)> kernel_lorentz(double lambda){
-	return std::bind(lorentz, lambda, _1, _2);
-}
-
-double kernel_dirichlet(int n, int M){
-	return (double)(n < M);
-}
-
-template <typename TC>
-TC green(int n, int sigma, TC energy){
-	const TC i(0.0,1.0); 
-	TC sq = sqrt(1.0 - energy*energy);
-	return 2.0*sigma/sq*i*exp(-sigma*n*1.0*acos(energy)*i);
-}
-
-template <typename TR>
-TR delta(int n, TR energy){
-	TR sq = sqrt(1.0 - energy*energy);
-	if(energy < 1 and energy > -1)
-		return 2.0/M_PI/sq*cos(n*acos(energy));
-	else
-		return 0;
-}
-*/
+#include <functional>
 
 
 
@@ -66,7 +19,7 @@ std::complex<T> integrate(Eigen::Matrix<T, -1, 1> energies, Eigen::Matrix<std::c
 	
 	return sum;
 }
-
+/*
 template <typename T>
 std::complex<T> contract(std::complex<T>(*f)(int, std::complex<T>), T omega, int N_moments,
                          const Eigen::Matrix<std::complex<T>, -1, -1>& gammaEN, 
@@ -105,10 +58,10 @@ std::complex<T> contract(std::complex<T>(*f)(int, std::complex<T>), T omega, int
 
   // All the indices have now been contracted. We may proceed to the integration
   return integrate(energies, gammaE);
-}
+}*/
 
 
-
+/*
 template <typename T>
 std::complex<T> contract(std::complex<T>(*f1)(int, std::complex<T>), T omega1, int N_moments1,
                          std::complex<T>(*f2)(int, std::complex<T>), T omega2, int N_moments2,
@@ -116,8 +69,7 @@ std::complex<T> contract(std::complex<T>(*f1)(int, std::complex<T>), T omega1, i
                          const Eigen::Matrix<T, -1, 1>& energies) {
 
   // This function performs the multiplication of the gamma matrix with the functions
-  // specified in the arguments. To increase efficiency, one very important aspect
-  // must be considered. One of the functions multiplying by the original Gamma matrix
+  // specified in the arguments. To increase efficiency, one very important aspect // must be considered. One of the functions multiplying by the original Gamma matrix
   // is always a delta function (it originates from the Fermi function). The important
   // fact is that it does not depend on the frequencies at all. Therefore, we can
   // perform this multiplication beforehand and then provide THAT resulting product 
@@ -166,55 +118,149 @@ std::complex<T> contract(std::complex<T>(*f1)(int, std::complex<T>), T omega1, i
   // All the indices have now been contracted. We may proceed to the integration
   return integrate(energies, gammaE);
 }
+*/
 
 
 template <typename T>
-Eigen::Matrix<std::complex<T>, -1, 1> contract1(
-                  T(*f0)(int, T), 
-    std::complex<T>(*f1)(int, std::complex<T>), int N_moments, 
-    const Eigen::Matrix<std::complex<T>&, -1, -1> Gamma, 
-    const Eigen::Matrix<T, -1, 1>& energies, 
-    const Eigen::Matrix<T, -1, 1>& frequencies, int delta_position){
+Eigen::Matrix<std::complex<T>, -1, 1> contract_nint(
+    std::function<T(int, T)> f0, int N_moments, 
+    const Eigen::Array<std::complex<T>, -1, -1>& Gamma, 
+    const Eigen::Matrix<T, -1, 1>& energies){
 
     // First of all, contact the index that will not depend on the frequency.
     // That is the index of the delta function, that's why we need to know its
     // position.
 
     int N_energies = energies.rows();
+
+    T energy;
+    Eigen::Matrix<std::complex<T>, -1, 1> GammaE;
+    GammaE = Eigen::Matrix<std::complex<T>, -1, 1>::Zero(N_energies, 1);
+    
+    for(int e = 0; e < N_energies; e++){
+      energy = energies(e);
+      for(int m = 0; m < N_moments; m++){
+        GammaE(e) += Gamma(m)*f0(m, energy);
+      }
+    }
+
+    
+        
+
+    return GammaE;
+}
+
+
+template <typename T>
+std::complex<T> contract1(
+    std::function<T(int, T)> f0, int N_moments, 
+    const Eigen::Array<std::complex<T>, -1, -1>& Gamma, 
+    const Eigen::Matrix<T, -1, 1>& energies){
+
+    // First of all, contact the index that will not depend on the frequency.
+    // That is the index of the delta function, that's why we need to know its
+    // position.
+
+    int N_energies = energies.rows();
+
+    T energy;
+    Eigen::Matrix<std::complex<T>, -1, 1> GammaE;
+    GammaE = Eigen::Matrix<std::complex<T>, -1, 1>::Zero(N_energies, 1);
+    
+    for(int e = 0; e < N_energies; e++){
+      energy = energies(e);
+      for(int m = 0; m < N_moments; m++){
+        GammaE(e) += Gamma(m)*f0(m, energy);
+      }
+    }
+
+    
+        
+
+    return integrate(energies, GammaE);
+}
+
+template <typename T>
+Eigen::Matrix<std::complex<T>, -1, 1> contract1(
+    std::function<T(int, T)> f0, int delta_position, 
+    std::function<std::complex<T>(int, T)> f1, int N_moments, 
+    const Eigen::Array<std::complex<T>, -1, -1>& Gamma, 
+    const Eigen::Matrix<T, -1, 1>& energies, 
+    const Eigen::Matrix<T, -1, 1>& frequencies){
+
+    // First of all, contact the index that will not depend on the frequency.
+    // That is the index of the delta function, that's why we need to know its
+    // position.
+    verbose_message("Entered contract 2d.\n");
+
+    int N_energies = energies.rows();
+    int N_freqs = frequencies.rows();
+
     T energy;
     Eigen::Matrix<std::complex<T>, -1, -1> GammaEN;
     GammaEN = Eigen::Matrix<std::complex<T>, -1, -1>::Zero(N_energies, N_moments);
-    
+   
+    verbose_message("First part of the calculation.\n");
+
     if(delta_position == 0){
       for(int e = 0; e < N_energies; e++){
         energy = energies(e);
         for(int n = 0; n < N_moments; n++){
           for(int m = 0; m < N_moments; m++){
-            GammaEN(e, n) += Gamma(n*N_moments + m)*delta(m, energy)*
-              kernel_jackson(m, N_moments)/(1.0 + double(m==0))*f0(energies);
+            GammaEN(e, n) += Gamma(n*N_moments + m)*f0(m, energy);
           }
         }
       }
     }
 
-
+    
     else if(delta_position == 1){
       for(int e = 0; e < N_energies; e++){
         energy = energies(e);
         for(int n = 0; n < N_moments; n++){
           for(int m = 0; m < N_moments; m++){
-            GammaEN(e, n) += Gamma(m*N_moments + n)*delta(m, energy)*
-              kernel_jackson(m, N_moments)/(1.0 + double(m==0))*f0(energies);
+            GammaEN(e, n) += Gamma(m*N_moments + n)*f0(m, energy);
           }
         }
       }
     }
+    else{
+      std::cout << "delta_position must be specified. Exiting.\n";
+      exit(1);
+    }
 
+    
 
-    result = contract(f1, freq, N_moments, GammaEN,  energies) {
-  
+    verbose_message("Second part of the calculation.\n");
+    // Now contract the remaining index. This index does depend on the
+    // frequency argument
+    
+    T freq;
+    Eigen::Matrix<std::complex<T>, -1, 1> GammaE;
+    GammaE = Eigen::Matrix<std::complex<T>, -1, 1>::Zero(N_energies, 1);
+    
+    Eigen::Matrix<std::complex<T>, -1, 1> cond;
+    cond = Eigen::Matrix<std::complex<T>, -1, 1>::Zero(N_freqs, 1);
 
-
+    for(int w1 = 0; w1 < N_freqs; w1++){
+      freq = frequencies(w1);
+      for(int e = 0; e < N_energies; e++){
+        energy = energies(e) + freq;
+        GammaE(e) = 0;
+        for(int n = 0; n < N_moments; n++){
+          //std::cout << freq << " " << complex_energy << " " << n << " " << f1(n, complex_energy) << "\n";
+          GammaE(e) += GammaEN(e, n)*f1(n, energy);
+        }
+      }
+      //verbose_message("Starting integration.\n"); 
+      cond(w1) = integrate(energies, GammaE);
+      //std::cout << "##############\n" << GammaE << "\n";
+    //std::cout << cond(w1);
+    }
+    //std::cout << cond << "\n\n####################\n\n";
+    //exit(2);  
+    verbose_message("Left contract.\n");
+    return cond;
 }
 
 
@@ -261,16 +307,16 @@ void calc_dos_simple(info<T,DIM> *config, double lim, int N_energies){
 	debug_message("Left calc_dos.\n");
 };
 
-
+/*
 template <typename U, unsigned DIM>
 void calc_optical_cond_simple_explicit(info<U,DIM> *config, std::string cond_axis){
 	debug_message("Entered calc_optical_cond.\n");
-	/* Calculates the optical conductivity for a set of frequencies in the range [-sigma, sigma].
-	 * These frequencies are in the KPM scale, that is, the scale where the energy is in the range ]-1,1[.
-	 * T is the number of frequency intervals in the range [0,sigma].
-	 * R is the number of energy intervals inside each frequency interval.
-	 * beta and e_fermi are not in the KPM scale, so they must be converted.
-	 */
+	 //Calculates the optical conductivity for a set of frequencies in the range [-sigma, sigma].
+	 //These frequencies are in the KPM scale, that is, the scale where the energy is in the range ]-1,1[.
+	 //T is the number of frequency intervals in the range [0,sigma].
+	 //R is the number of energy intervals inside each frequency interval.
+	 //beta and e_fermi are not in the KPM scale, so they must be converted.
+	
 	double beta = 200;
   double e_fermi = 0.0;
 
@@ -290,10 +336,10 @@ void calc_optical_cond_simple_explicit(info<U,DIM> *config, std::string cond_axi
   energies  = Eigen::Matrix<U, -1, 1>::LinSpaced(N_energies, -lim, lim);
   
 
-  /*Eigen::Array<std::complex<U>, -1, -1> Gamma;
-  Eigen::Array<std::complex<U>, -1, -1> Lambda;
-  Gamma  = Eigen::Array<std::complex<U>, -1, -1>::Zero(1, N_moments*N_moments);
-  Lambda = Eigen::Array<std::complex<U>, -1, -1>::Zero(1, N_moments);*/
+  //Eigen::Array<std::complex<U>, -1, -1> Gamma;
+  //Eigen::Array<std::complex<U>, -1, -1> Lambda;
+  //Gamma  = Eigen::Array<std::complex<U>, -1, -1>::Zero(1, N_moments*N_moments);
+  //Lambda = Eigen::Array<std::complex<U>, -1, -1>::Zero(1, N_moments);
   
   std::complex<U> *pointer_gamma;
   std::complex<U> *pointer_lambda;
@@ -320,18 +366,6 @@ void calc_optical_cond_simple_explicit(info<U,DIM> *config, std::string cond_axi
   Eigen::Map<Eigen::Matrix<std::complex<U>, 1, -1>> Gamma(pointer_gamma, N_moments*N_moments);
   Eigen::Map<Eigen::Matrix<std::complex<U>, 1, -1>> Lambda(pointer_lambda, N_moments*N_moments);
   
-  /*
-  for(int i = 0; i < N_moments; i++){
-    for(int j = 0; j < N_moments; j++){
-      std::cout << Gamma(i*N_moments + j) << " ";
-    }
-    std::cout << "\n";
-  }*/
-
-  
-
-
-
 
   // Perform the first part of the multiplication. This is the multiplication of
   // one of the indices of the Gamma matrix by the Delta function. This does not
@@ -443,7 +477,7 @@ void calc_optical_cond_simple_explicit(info<U,DIM> *config, std::string cond_axi
   
 
   
-};
+};*/
 
 
 
@@ -464,83 +498,86 @@ void calc_optical_cond_simple(info<U,DIM> *config, std::string cond_axis){
 	e_fermi /= config->energy_scale;
 	
 	// Calculate the number of frequencies and energies needed to perform the calculation.
-	int N_omegas = 500;
-	int N_energies = 1001;
+	int N_omegas = 200;
+	int N_energies = 401;
   double lim = 0.999;
 	std::complex<U> imaginary(0.0, 1.0);
 
   Eigen::Matrix<U, -1, 1> energies;
-  int N_moments;
+  int N_moments = -1;
 
   energies  = Eigen::Matrix<U, -1, 1>::LinSpaced(N_energies, -lim, lim);
   
 
-  
-  std::complex<U> *pointer_gamma;
-  std::complex<U> *pointer_lambda;
+  verbose_message(cond_axis); 
 	if(cond_axis == "xx"){
 		//N_moments.at(0) = config->num_moments(config->CondXX);
 		//N_moments.at(1) = config->num_moments(config->CondXX);
 		N_moments = config->num_moments(config->CondXX);
-    pointer_gamma = &config->GammaXX(0);
-    pointer_lambda = &config->LambdaXX(0);
   }
 	
-	if(cond_axis == "xy"){
+  else	if(cond_axis == "xy"){
 		//N_moments.at(0) = config->num_moments(config->CondXY);
 		//N_moments.at(1) = config->num_moments(config->CondXY);
 		N_moments = config->num_moments(config->CondXY);
-    pointer_gamma = &config->GammaXY(0);
-    pointer_lambda = &config->LambdaXY(0);
   }
   
   else{
     std::cout << "Unknown direction in calc_optical_cond_simple.\n";
+    exit(1);
   }
   
-  Eigen::Map<Eigen::Matrix<std::complex<U>, 1, -1>> Gamma(pointer_gamma, N_moments*N_moments);
-  Eigen::Map<Eigen::Matrix<std::complex<U>, 1, -1>> Lambda(pointer_lambda, N_moments);
-  
-  /*
-  for(int i = 0; i < N_moments; i++){
-    for(int j = 0; j < N_moments; j++){
-      std::cout << Gamma(i*N_moments + j) << " ";
-    }
-    std::cout << "\n";
-  }*/
 
-  Eigen::Matrix<std::complex<U>, -1, -1> GammaEN1;
-  Eigen::Matrix<std::complex<U>, -1, -1> GammaEN2;
-  Eigen::Matrix<std::complex<U>, -1, -1> LambdaE;
-  int N_moments1 = N_moments;
-  int N_moments2 = N_moments;
   
-  GammaEN1 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_moments1);
-  GammaEN2 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_moments2);
-  LambdaE  = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, 1);
+  verbose_message("Setting lambda functions\n");
 
-  for(int e = 0; e < N_energies; e++){
-    for(int n = 0; n < N_moments1; n++){
-      for(int m = 0; m < N_moments2; m++){
-        GammaEN1(e,n) += delta(m, e)*kernel_jackson(m, N_moments2)/(1.0 + double(m==0))*
-                        fermi_function(e, e_fermi, beta)*Gamma(n*N_moments + m);
-      }
-    }
+  // Functions that are going to be used by the contractor
+
+  std::function<U(int, U)> deltaF = [beta, e_fermi, N_moments](int n, U energy)->U{
+    return delta(n, energy)/(1.0 + U(n==0))*fermi_function(energy, e_fermi, beta)*kernel_jackson(n, N_moments);
+  };
+
+
+  Eigen::Matrix<U, -1, 1> frequencies;
+  frequencies = Eigen::Matrix<U, -1, 1>::Zero(N_omegas,1);
+  for(int i = 0; i < N_omegas; i++)
+  {
+    frequencies(i) = i*1.0/N_omegas*3;
   }
-      
 
+  Eigen::Matrix<std::complex<U>, -1, 1> temp1; 
+  Eigen::Matrix<std::complex<U>, -1, 1> temp2; 
+  Eigen::Matrix<std::complex<U>, -1, 1> cond; 
+  std::complex<U> temp3 = 0; 
 
+  temp1 = Eigen::Matrix<std::complex<U>, -1, 1>::Zero(N_omegas, 1);
+  temp2 = Eigen::Matrix<std::complex<U>, -1, 1>::Zero(N_omegas, 1);
+  cond  = Eigen::Matrix<std::complex<U>, -1, 1>::Zero(N_omegas, 1);
 
+  temp1 = contract1(deltaF, 0, greenAscat(0.01), N_moments, config->GammaXX, energies, frequencies);
+  temp2 = contract1(deltaF, 1, greenRscat(0.01), N_moments, config->GammaXX, energies, frequencies);
+  temp3 = contract1(deltaF, N_moments, config->LambdaXX, energies);
 
-
-	// Output to a file
-	std::ofstream myfile;
-	myfile.open ("optical_cond.dat");
-	for(int i=0; i < N_omegas; i++)
-		myfile  << frequencies[i]*config->energy_scale << " " << cond.real()(i) << " " << cond.imag()(i) << "\n";
+  std::complex<U> freq;
+  for(int i = 0; i < N_omegas; i++){
+    freq = std::complex<U>(frequencies(i), 0.01);  
+    std::cout << freq.real() << " ";
+    std::cout << (temp1(i)/freq).real()  << " " << (temp1(i)/freq).imag() << " ";
+    std::cout << (temp2(i)/freq).real()  << " " << (temp2(i)/freq).imag() << " ";
+    std::cout << (temp3/freq).real()     << " " << (temp3/freq).imag()    << "\n";
+    cond(i) += (temp1(i) + temp2(i) + temp3)/freq;
+  }
+  cond *= imaginary*U(4.0*config->num_orbitals*config->spin_degeneracy/config->unit_cell_area);
 	
-	myfile.close();
-	debug_message("Left calc_optical_cond.\n");
+  
+   //Output to a file
+  std::ofstream myfile;
+  myfile.open ("optical_cond.dat");
+  for(int i=0; i < N_omegas; i++)
+    myfile  << frequencies.real()(i)*config->energy_scale << " " << cond.real()(i) << " " << cond.imag()(i) << "\n";
+  
+  myfile.close();
+  debug_message("Left calc_optical_cond.\n");
 
 
 
