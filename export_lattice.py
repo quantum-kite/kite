@@ -679,19 +679,21 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
     **kwargs: Optional arguments like Disorder or Disorder_structural.
 
     """
+    # hamiltonian is complex 1 or real 0
+    complx = int(config.comp)
 
     # check if there's complex hopping or magnetic field but identifier is_complex is 0
     imag_part = 0
     # loop through all hoppings
     for name, hop in lattice.hoppings.items():
         imag_part += np.linalg.norm(np.asarray(hop.energy).imag)
-    if imag_part > 0 and config._is_complex == 0:
+    if imag_part > 0 and complx == 0:
         print('Complex hoppings are added but is_complex identifier is 0. Automatically turning is_complex to 1!')
         config._is_complex = 1
         config.set_type()
-        
+
     # check if magnetic field is On
-    if modification.magnetic_field and config._is_complex == 0:
+    if modification.magnetic_field and complx == 0:
         print('Magnetic field is added but is_complex identifier is 0. Automatically turning is_complex to 1!')
         config._is_complex = 1
         config.set_type()
@@ -703,9 +705,6 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
     vectors = np.asarray(lattice.vectors)
     space_size = vectors.shape[0]
     vectors = vectors[:, 0:space_size]
-
-    # hamiltonian is complex 1 or real 0
-    complx = int(config.comp)
 
     # iterate through all the sublattices and add onsite energies to hoppings list
     # count num of orbitals and read the atom positions.
@@ -855,8 +854,10 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
     if disorder:
         grp_dis.create_dataset('OnsiteDisorderModelType', data=disorder._type_id, dtype=np.int32)
         grp_dis.create_dataset('OrbitalNum', data=disorder._orbital, dtype=np.int32)
-        grp_dis.create_dataset('OnsiteDisorderMeanValue', data=disorder._mean / config.energy_scale, dtype=np.float64)
-        grp_dis.create_dataset('OnsiteDisorderMeanStdv', data=disorder._stdv / config.energy_scale, dtype=np.float64)
+        grp_dis.create_dataset('OnsiteDisorderMeanValue', data=np.array(disorder._mean) / config.energy_scale,
+                               dtype=np.float64)
+        grp_dis.create_dataset('OnsiteDisorderMeanStdv', data=np.array(disorder._stdv) / config.energy_scale,
+                               dtype=np.float64)
     else:
         grp_dis.create_dataset('OnsiteDisorderModelType', (1, 0))
         grp_dis.create_dataset('OrbitalNum', (1, 0))
@@ -866,7 +867,6 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
     grp_dis_vac = grp.create_group('Vacancy')
     idx_vacancy = 0
     grp_dis = grp.create_group('StructuralDisorder')
-
     if disorded_structural:
 
         if isinstance(disorded_structural, list):
@@ -923,7 +923,7 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
                 # Onsite disorder energy
                 grp_dis_type.create_dataset('U0',
                                             data=np.asarray(disorded_struct._disorder_onsite).real.astype(
-                                                config.type)) / config.energy_scale
+                                                config.type) / config.energy_scale)
                 # Bond disorder hopping
                 disorder_hopping = disorded_struct._disorder_hopping
                 if complx:
