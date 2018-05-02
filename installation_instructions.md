@@ -12,7 +12,7 @@ KITE is written in C++ but has an interface in python, based on pybinding, a tig
 
 ##Linux:
 
-### Ubuntu installation
+###Ubuntu installation
 
 These instructions are geared towards Ubuntu LTS realese 16.04 although some of the instructions work for other distributions as well (for other Linux distributions, check the section *Compiling libraries from Source Code*)
 
@@ -66,7 +66,7 @@ make
 cd tools/kpm_calculate
 make
 ~~~
-#### Compiling Libraries From Source Code
+####Compiling Libraries From Source Code
 
 Instead of installing the dependencies with **apt-get** you can install the libraries manually. For KITE, the compiler must be up to date. The required dependencies are:
 
@@ -103,6 +103,8 @@ To install Homebrew, run the following command in a terminal:
 
 The script explains what it will do and then pauses before it does it.
 
+** Homebrew requires command-line tools from xcode. You can either download xcode from Mac App Store (basic users) or just download the command line tools from the developer site of apple (advanced users)
+
 Next, you need to use Homebrew to install g++:
 
 ~~~bash
@@ -127,32 +129,26 @@ Hierarchical Data Format (HDF5) is used to store the outputs of the program in a
 ~~~bash
 brew install hdf5 --cc=gcc-6
 ~~~
-The calculations are configured using a python script which interfaces with Pybinding, so make sure that you have python 3 installed with SciPy and Pybinding. We suggest to proceed with the  [installation suggested by Pybinding](http://docs.pybinding.site/en/stable/install/quick.html), with the use of Miniconda:
-
-
- Download the Miniconda Python 3.x installer: [miniconda3-latest-MacOSX-x86_64.sh](https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh) and run it in the terminal window
+The calculations are configured using a python script which interfaces with Pybinding, so make sure that you have python 3 installed with SciPy and Pybinding. We suggest using Hombrew but you can also proceed with the  [installation suggested by Pybinding](http://docs.pybinding.site/en/stable/install/quick.html), with the use of Miniconda.
 
 ~~~bash
-    bash Miniconda3-latest-MacOSX-x86_64.sh
+brew install cmake
 ~~~
- Follow the installation steps. You can accept most of the default values, but make sure that you type yes to add Miniconda to PATH:
+ 
 ~~~bash
-    Do you wish the installer to prepend the Miniconda3 install location
-    to PATH in your /Users/<user_name>/.bash_profile ? [yes|no]
-    [yes] >>> yes
+brew install python
 ~~~
-Now, close your terminal window and open a new one for the changes to take effect.
-
- Install CMake and the scientific Python packages:
+Now you are ready to install pybiding with pip:
 ~~~bash
-    conda install cmake numpy scipy matplotlib
-~~~
- The next command will download and install pybinding:
-~~~bash
-    pip install pybinding
+pip3 install pybinding
 ~~~
 **After successfully installing these libraries, you are now ready to compile KITE.**
 
+**IMPORTANT: the last version of matlibplot is having issues with pybinding. Until this is resolved, use:
+
+~~~bash
+pip3 install matplotlib==2.1.1 
+~~~
 
 1. Download the source code from () 
 Alternativelly, fetch the source code from the git repository in (…)
@@ -168,4 +164,12 @@ make
 ~~~bash
 cd tools/kpm_calculate
 make
-
+~~~
+To generate the input file, try one of our examples:
+~~~bash
+python3 example1.py
+~~~
+It generates a file names example.h5 that is used as an input for KITE:
+~~~bash
+./pp example1.h5
+~~~
