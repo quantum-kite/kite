@@ -430,7 +430,7 @@ class Calculation:
     def __init__(self, configuration=None):
 
         if configuration is not None and not isinstance(configuration, Configuration):
-            raise TypeError("You're forwaring a wrong type!")
+            raise TypeError("You're forwarding a wrong type!")
 
         self._scaling_factor = configuration.energy_scale
         self._dos = []
@@ -440,9 +440,13 @@ class Calculation:
         self._singleshot_conductivity_dc = []
 
         self._avail_dir_full = {'xx': 0, 'yy': 1, 'zz': 2, 'xy': 3, 'xz': 4, 'yx': 3, 'yz': 5, 'zx': 4, 'zy': 5}
+        self._avail_dir_nonl = {'xxx': 0, 'xxy': 1, 'xxz': 2, 'xyx': 3, 'xyy': 4, 'xyz': 5, 'xzx': 6, 'xzy': 7,
+                                'xzz': 8, 'yxx': 9, 'yxy': 10, 'yxz': 11, 'yyx': 12, 'yyy': 13, 'yyz': 14, 'yzx': 15,
+                                'yzy': 16, 'yzz': 17, 'zxx': 18, 'zxy': 19, 'zxz': 20, 'zyx': 21, 'zyy': 22, 'zyz': 23,
+                                'zzx': 24, 'zzy': 25, 'zzz': 26}
         self._avail_dir_sngl = {'xx': 0, 'yy': 1, 'zz': 2}
 
-    def dos(self, num_points, num_moments, num_random):
+    def dos(self, num_points, num_moments, num_random, num_disorder):
         """Calculate the density of states as a function of energy
 
         Parameters
@@ -453,11 +457,14 @@ class Calculation:
             Number of polynomials in the Chebyshev expansion.
         num_random : int
             Number of random vectors to use for the stochastic evaluation of trace.
+        num_disorder : int
+            Number of different disorder realisations.
         """
 
-        self._dos.append({'num_points': num_points, 'num_moments': num_moments, 'num_random': num_random})
+        self._dos.append({'num_points': num_points, 'num_moments': num_moments, 'num_random': num_random,
+                          'num_disorder': num_disorder})
 
-    def conductivity_dc(self, direction, num_points, num_moments, num_random=1, temperature=0):
+    def conductivity_dc(self, direction, num_points, num_moments, num_random, num_disorder, temperature=0):
         """Calculate the density of states as a function of energy
 
         Parameters
@@ -471,6 +478,8 @@ class Calculation:
             Number of polynomials in the Chebyshev expansion.
         num_random : int
             Number of random vectors to use for the stochastic evaluation of trace.
+        num_disorder : int
+            Number of different disorder realisations.
         temperature : float
             Value of the temperature at which we calculate the response.
         """
@@ -481,9 +490,10 @@ class Calculation:
         else:
             self._conductivity_dc.append(
                 {'direction': self._avail_dir_full[direction], 'num_points': num_points, 'num_moments': num_moments,
-                 'num_random': num_random, 'temperature': temperature / self._scaling_factor})
+                 'num_random': num_random, 'num_disorder': num_disorder,
+                 'temperature': temperature / self._scaling_factor})
 
-    def conductivity_optical(self, direction, num_points, num_moments, num_random=1, temperature=0):
+    def conductivity_optical(self, direction, num_points, num_moments, num_random, num_disorder, temperature=0):
         """Calculate the density of states as a function of energy
 
         Parameters
@@ -497,6 +507,8 @@ class Calculation:
             Number of polynomials in the Chebyshev expansion.
         num_random : int
             Number of random vectors to use for the stochastic evaluation of trace.
+        num_disorder : int
+            Number of different disorder realisations.
         temperature : float
             Value of the temperature at which we calculate the response.
         """
@@ -507,41 +519,45 @@ class Calculation:
         else:
             self._conductivity_optical.append(
                 {'direction': self._avail_dir_full[direction], 'num_points': num_points, 'num_moments': num_moments,
-                 'num_random': num_random, 'temperature': temperature / self._scaling_factor})
+                 'num_random': num_random, 'num_disorder': num_disorder,
+                 'temperature': temperature / self._scaling_factor})
 
-    def conductivity_optical_nonlinear(self, direction, num_points, num_moments, num_random=1, temperature=0, **kwargs):
+    def conductivity_optical_nonlinear(self, direction, num_points, num_moments, num_random, num_disorder,
+                                       temperature=0, **kwargs):
         """Calculate the density of states as a function of energy
 
         Parameters
         ----------
         direction : string
             direction in xyz coordinates along which the conductivity is calculated.
-            Supports 'xx', 'yy', 'zz', 'xy', 'xz', 'yx', 'yz', 'zx', 'zy'.
+            Supports all the combinations of the direction x, y and z with length 3 like 'xxx','zzz', 'xxy', 'xxz' etc.
         num_points : int
             Number of energy point inside the spectrum at which the DOS will be calculated.
         num_moments : int
             Number of polynomials in the Chebyshev expansion.
         num_random : int
             Number of random vectors to use for the stochastic evaluation of trace.
+        num_disorder : int
+            Number of different disorder realisations.
         temperature : float
             Value of the temperature at which we calculate the response.
 
             Optional parameters, forward special, a parameter that can simplify the calculation for some materials.
         """
 
-        if direction not in self._avail_dir_full:
+        if direction not in self._avail_dir_nonl:
             print('The desired direction is not available. Choose from a following set: \n',
-                  self._avail_dir_full.keys())
+                  self._avail_dir_nonl.keys())
             raise SystemExit('Invalid direction!')
         else:
             special = kwargs.get('special', 0)
 
             self._conductivity_optical_nonlinear.append(
-                {'direction': self._avail_dir_full[direction], 'num_points': num_points,
-                 'num_moments': num_moments, 'num_random': num_random,
+                {'direction': self._avail_dir_nonl[direction], 'num_points': num_points,
+                 'num_moments': num_moments, 'num_random': num_random, 'num_disorder': num_disorder,
                  'temperature': temperature / self._scaling_factor, 'special': special})
 
-    def singleshot_conductivity_dc(self, energy, direction, gamma, num_moments, num_random=1):
+    def singleshot_conductivity_dc(self, energy, direction, gamma, num_moments, num_random, num_disorder):
         """Calculate the density of states as a function of energy
 
         Parameters
@@ -557,6 +573,8 @@ class Calculation:
             Number of polynomials in the Chebyshev expansion.
         num_random : int
             Number of random vectors to use for the stochastic evaluation of trace.
+        num_disorder : int
+            Number of different disorder realisations.
         """
 
         if direction not in self._avail_dir_sngl:
@@ -567,7 +585,7 @@ class Calculation:
             self._singleshot_conductivity_dc.append(
                 {'energy': np.array(energy) / self._scaling_factor, 'direction': self._avail_dir_sngl[direction],
                  'gamma': gamma / self._scaling_factor, 'num_moments': num_moments,
-                 'num_random': num_random})
+                 'num_random': num_random, 'num_disorder': num_disorder})
 
 
 class Configuration:
@@ -679,6 +697,24 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
     **kwargs: Optional arguments like Disorder or Disorder_structural.
 
     """
+    # hamiltonian is complex 1 or real 0
+    complx = int(config.comp)
+
+    # check if there's complex hopping or magnetic field but identifier is_complex is 0
+    imag_part = 0
+    # loop through all hoppings
+    for name, hop in lattice.hoppings.items():
+        imag_part += np.linalg.norm(np.asarray(hop.energy).imag)
+    if imag_part > 0 and complx == 0:
+        print('Complex hoppings are added but is_complex identifier is 0. Automatically turning is_complex to 1!')
+        config._is_complex = 1
+        config.set_type()
+
+    # check if magnetic field is On
+    if modification.magnetic_field and complx == 0:
+        print('Magnetic field is added but is_complex identifier is 0. Automatically turning is_complex to 1!')
+        config._is_complex = 1
+        config.set_type()
 
     # get the lattice vectors and set the size of space (1D, 2D or 3D) as the total number of vectors.
     disorder = kwargs.get('disorder', None)
@@ -687,9 +723,6 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
     vectors = np.asarray(lattice.vectors)
     space_size = vectors.shape[0]
     vectors = vectors[:, 0:space_size]
-
-    # hamiltonian is complex 1 or real 0
-    complx = int(config.comp)
 
     # iterate through all the sublattices and add onsite energies to hoppings list
     # count num of orbitals and read the atom positions.
@@ -839,8 +872,10 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
     if disorder:
         grp_dis.create_dataset('OnsiteDisorderModelType', data=disorder._type_id, dtype=np.int32)
         grp_dis.create_dataset('OrbitalNum', data=disorder._orbital, dtype=np.int32)
-        grp_dis.create_dataset('OnsiteDisorderMeanValue', data=disorder._mean / config.energy_scale, dtype=np.float64)
-        grp_dis.create_dataset('OnsiteDisorderMeanStdv', data=disorder._stdv / config.energy_scale, dtype=np.float64)
+        grp_dis.create_dataset('OnsiteDisorderMeanValue', data=np.array(disorder._mean) / config.energy_scale,
+                               dtype=np.float64)
+        grp_dis.create_dataset('OnsiteDisorderMeanStdv', data=np.array(disorder._stdv) / config.energy_scale,
+                               dtype=np.float64)
     else:
         grp_dis.create_dataset('OnsiteDisorderModelType', (1, 0))
         grp_dis.create_dataset('OrbitalNum', (1, 0))
@@ -850,7 +885,6 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
     grp_dis_vac = grp.create_group('Vacancy')
     idx_vacancy = 0
     grp_dis = grp.create_group('StructuralDisorder')
-
     if disorded_structural:
 
         if isinstance(disorded_structural, list):
@@ -907,7 +941,7 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
                 # Onsite disorder energy
                 grp_dis_type.create_dataset('U0',
                                             data=np.asarray(disorded_struct._disorder_onsite).real.astype(
-                                                config.type)) / config.energy_scale
+                                                config.type) / config.energy_scale)
                 # Bond disorder hopping
                 disorder_hopping = disorded_struct._disorder_hopping
                 if complx:
@@ -926,60 +960,85 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
     if calculation.get_dos:
         grpc_p = grpc.create_group('dos')
 
+        moments, random, point, dis, temp, direction = [], [], [], [], [], []
         for single_dos in calculation.get_dos:
-            grpc_p.create_dataset('NumMoments', data=single_dos['num_moments'], dtype=np.int32)
-            grpc_p.create_dataset('NumRandoms', data=single_dos['num_random'], dtype=np.int32)
-            grpc_p.create_dataset('NumPoints', data=single_dos['num_points'], dtype=np.int32)
+            moments.append(single_dos['num_moments'])
+            random.append(single_dos['num_random'])
+            point.append(single_dos['num_points'])
+            dis.append(single_dos['num_disorder'])
+
+        if len(calculation.get_dos) > 1:
+            raise SystemExit('Only a single function request of each type is currently allowed. Please use another '
+                             'configuration file for the same functionality.')
+        grpc_p.create_dataset('NumMoments', data=moments, dtype=np.int32)
+        grpc_p.create_dataset('NumRandoms', data=random, dtype=np.int32)
+        grpc_p.create_dataset('NumPoints', data=point, dtype=np.int32)
+        grpc_p.create_dataset('NumDisorder', data=dis, dtype=np.int32)
 
     if calculation.get_conductivity_dc:
         grpc_p = grpc.create_group('conductivity_dc')
 
-        moments, random, point, temp, direction = [], [], [], [], []
+        moments, random, point, dis, temp, direction = [], [], [], [], [], []
         for single_cond_dc in calculation.get_conductivity_dc:
             moments.append(single_cond_dc['num_moments'])
             random.append(single_cond_dc['num_random'])
             point.append(single_cond_dc['num_points'])
+            dis.append(single_cond_dc['num_disorder'])
             temp.append(single_cond_dc['temperature'])
             direction.append(single_cond_dc['direction'])
 
+        if len(calculation.get_conductivity_dc) > 1:
+            raise SystemExit('Only a single function request of each type is currently allowed. Please use another '
+                             'configuration file for the same functionality.')
         grpc_p.create_dataset('NumMoments', data=np.asarray(moments), dtype=np.int32)
         grpc_p.create_dataset('NumRandoms', data=np.asarray(random), dtype=np.int32)
         grpc_p.create_dataset('NumPoints', data=np.asarray(point), dtype=np.int32)
+        grpc_p.create_dataset('NumDisorder', data=np.asarray(dis), dtype=np.int32)
         grpc_p.create_dataset('Temperature', data=np.asarray(temp), dtype=np.float64)
         grpc_p.create_dataset('Direction', data=np.asarray(direction), dtype=np.int32)
 
     if calculation.get_conductivity_optical:
         grpc_p = grpc.create_group('conductivity_optical')
 
-        moments, random, point, temp, direction = [], [], [], [], []
+        moments, random, point, dis, temp, direction = [], [], [], [], [], []
         for single_cond_opt in calculation.get_conductivity_optical:
             moments.append(single_cond_opt['num_moments'])
             random.append(single_cond_opt['num_random'])
             point.append(single_cond_opt['num_points'])
+            dis.append(single_cond_opt['num_disorder'])
             temp.append(single_cond_opt['temperature'])
             direction.append(single_cond_opt['direction'])
 
+        if len(calculation.get_conductivity_optical) > 1:
+            raise SystemExit('Only a single function request of each type is currently allowed. Please use another '
+                             'configuration file for the same functionality.')
         grpc_p.create_dataset('NumMoments', data=np.asarray(moments), dtype=np.int32)
         grpc_p.create_dataset('NumRandoms', data=np.asarray(random), dtype=np.int32)
         grpc_p.create_dataset('NumPoints', data=np.asarray(point), dtype=np.int32)
+        grpc_p.create_dataset('NumDisorder', data=np.asarray(dis), dtype=np.int32)
         grpc_p.create_dataset('Temperature', data=np.asarray(temp), dtype=np.float64)
         grpc_p.create_dataset('Direction', data=np.asarray(direction), dtype=np.int32)
 
     if calculation.get_conductivity_optical_nonlinear:
         grpc_p = grpc.create_group('conductivity_optical_nonlinear')
 
-        moments, random, point, temp, direction, special = [], [], [], [], [], []
+        moments, random, point, dis, temp, direction, special = [], [], [], [], [], [], []
         for single_cond_opt_non in calculation.get_conductivity_optical_nonlinear:
             moments.append(single_cond_opt_non['num_moments'])
             random.append(single_cond_opt_non['num_random'])
             point.append(single_cond_opt_non['num_points'])
+            dis.append(single_cond_opt_non['num_disorder'])
             temp.append(single_cond_opt_non['temperature'])
             direction.append(single_cond_opt_non['direction'])
             special.append(single_cond_opt_non['special'])
 
+        if len(calculation.get_conductivity_optical_nonlinear) > 1:
+            raise SystemExit('Only a single function request of each type is currently allowed. Please use another '
+                             'configuration file for the same functionality.')
         grpc_p.create_dataset('NumMoments', data=np.asarray(moments), dtype=np.int32)
         grpc_p.create_dataset('NumRandoms', data=np.asarray(random), dtype=np.int32)
         grpc_p.create_dataset('NumPoints', data=np.asarray(point), dtype=np.int32)
+        grpc_p.create_dataset('NumDisorder', data=np.asarray(dis), dtype=np.int32)
         grpc_p.create_dataset('Temperature', data=np.asarray(temp), dtype=np.float64)
         grpc_p.create_dataset('Direction', data=np.asarray(direction), dtype=np.int32)
         grpc_p.create_dataset('Special', data=np.asarray(special), dtype=np.int32)
@@ -987,17 +1046,22 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
     if calculation.get_singleshot_conductivity_dc:
         grpc_p = grpc.create_group('singleshot_conductivity_dc')
 
-        moments, random, energies, gamma, direction = [], [], [], [], []
+        moments, random, dis, energies, gamma, direction = [], [], [], [], [], []
 
         for single_singlshot_cond in calculation.get_singleshot_conductivity_dc:
             moments.append(single_singlshot_cond['num_moments'])
             random.append(single_singlshot_cond['num_random'])
+            dis.append(single_singlshot_cond['num_disorder'])
             energies.append(single_singlshot_cond['energy'])
             gamma.append(single_singlshot_cond['gamma'])
             direction.append(single_singlshot_cond['direction'])
 
+        if len(calculation.get_singleshot_conductivity_dc) > 1:
+            raise SystemExit('Only a single function request of each type is currently allowed. Please use another '
+                             'configuration file for the same functionality.')
         grpc_p.create_dataset('NumMoments', data=np.asarray(moments), dtype=np.int32)
         grpc_p.create_dataset('NumRandoms', data=np.asarray(random), dtype=np.int32)
+        grpc_p.create_dataset('NumDisorder', data=np.asarray(dis), dtype=np.int32)
         grpc_p.create_dataset('Energy', data=np.asarray(energies), dtype=np.float64)
         grpc_p.create_dataset('Gamma', data=np.asarray(gamma), dtype=np.float64)
         grpc_p.create_dataset('Direction', data=np.asarray(direction), dtype=np.int32)
