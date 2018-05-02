@@ -47,7 +47,7 @@ lattice = graphene_initial()
 
 # number of decomposition parts in each direction of matrix. This divides the lattice into various sections,
 # each of which is calculated in parallel
-nx = ny = 1
+nx = ny = 2
 
 # number of unit cells in each direction.
 lx = 256
@@ -74,13 +74,13 @@ configuration = Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[T
 # direction ID 'xx': 0, 'yy': 1, 'zz': 2, 'xy': 3, 'xz': 4, 'yx': 3, 'yz': 5, 'zx': 4, 'zy': 5
 calculation = Calculation(configuration)
 calculation.dos(num_points=1000, num_random=1, num_moments=1024)
-calculation.conductivity_optical(num_points=1000, num_random=1, num_moments=256, direction='xx')
-calculation.conductivity_dc(num_points=1000, num_random=2, num_moments=256, direction='xx', temperature=300)
-calculation.conductivity_dc(num_points=1000, num_random=1, num_moments=256, direction='xy', temperature=300)
-calculation.singleshot_conductivity_dc(energy=[0, 0.1], num_random=1, num_moments=256, direction='xx', gamma=0.1)
-calculation.singleshot_conductivity_dc(energy=[0, 0.1], num_random=1, num_moments=256, direction='yy', gamma=0.1)
-calculation.conductivity_optical_nonlinear(num_points=1000, num_random=1, num_moments=256, direction='xx',
-                                           temperature=0, special=1)
+calculation.conductivity_optical(num_points=1000, num_random=1, num_moments=32, direction='xy')
+calculation.conductivity_dc(num_points=1000, num_random=1, num_moments=32, direction='xx', temperature=300)
+calculation.conductivity_dc(num_points=1000, num_random=1, num_moments=32, direction='xy', temperature=300)
+calculation.singleshot_conductivity_dc(energy=[0, 0.1], num_random=1, num_moments=32, direction='xx', gamma=0.1)
+# calculation.singleshot_conductivity_dc(energy=[0, 0.1], num_random=1, num_moments=256, direction='yy', gamma=0.1)
+# calculation.conductivity_optical_nonlinear(num_points=1000, num_random=1, num_moments=256, direction='xx',
+                                           # temperature=0, special=1)
 
 # make modification object which caries info about (TODO: Other modifications can be added here)
 # - magnetic field can be set to True. Default case is False. In exported file it's converted to 1 and 0.
