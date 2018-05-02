@@ -3,7 +3,7 @@ import export_lattice as ex
 import numpy as np
 import pybinding as pb
 
-
+from export_lattice import Configuration, Calculation, Modification, export_lattice
 # define lattice of monolayer graphene with 1[nm] interatomic distance and t=1/3[eV] hopping,
 # EnergyScale is the scaling factor of the hopping parameters, important for the rescaling of the spectral quantity.
 #  INFO: other examples are defined in define_lattice.py script
@@ -33,10 +33,10 @@ def graphene_initial(onsite=(0, 0)):
     # Add hoppings
     lat.add_hoppings(
         # inside the main cell, between which atoms, and the value
-        ([0, 0], 'A', 'B', - 1 / energy_scale),
+        ([0, 0], 'A', 'B', - 1),
         # between neighboring cells, between which atoms, and the value
-        ([-1, 0], 'A', 'B', - 1 / energy_scale),
-        ([-1, 1], 'A', 'B', - 1 / energy_scale)
+        ([-1, 0], 'A', 'B', - 1),
+        ([-1, 1], 'A', 'B', - 1)
     )
 
     return lat
@@ -58,19 +58,19 @@ ly = 256
 # - boundary conditions, setting True as periodic boundary conditions, and False elsewise,
 # - info if the exported hopping and onsite data should be complex,
 # - info of the precision of the exported hopping and onsite data, 0 - float, 1 - double, and 2 - long double.
-configuration = ex.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
+configuration = Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
                                  is_complex=False, precision=1, energy_scale=energy_scale)
 
-
-calculation = ex.Calculation(fname='dos', num_moments=1024, num_random=1, num_disorder=1)
+calculation = Calculation(configuration)
+calculation.dos(num_points=1000, num_moments=1024, num_random=1, num_disorder=1)
 
 # make modification object which caries info about (TODO: Other modifications can be added here)
 # - magnetic field can be set to True. Default case is False. In exported file it's converted to 1 and 0.
-modification = ex.Modification(magnetic_field=False)
+modification = Modification(magnetic_field=False)
 
 # export the lattice from the lattice object, config and calculation object and the name of the file
 # the disorder is optional. If there is disorder in the lattice for now it should be given separately
-ex.export_lattice(lattice, configuration, calculation, modification, 'example1.h5')
+export_lattice(lattice, configuration, calculation, modification, 'example1.h5')
 
 # plotting the lattice
 lattice.plot()

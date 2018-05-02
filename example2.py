@@ -3,6 +3,8 @@ import export_lattice as ex
 import numpy as np
 import pybinding as pb
 
+from export_lattice import Configuration, Calculation, Modification, export_lattice
+
 energy_scale = 3.06
 def graphene_initial(onsite=(0, 0)):
     theta = np.pi / 3
@@ -18,31 +20,27 @@ def graphene_initial(onsite=(0, 0)):
         ('B', [1, 0], onsite[1])
     )
     lat.add_hoppings(
-        ([0, 0], 'A', 'B', - 1 / energy_scale),
-        ([-1, 0], 'A', 'B', - 1 / energy_scale),
-        ([-1, 1], 'A', 'B', - 1 / energy_scale)
+        ([0, 0], 'A', 'B', - 1),
+        ([-1, 0], 'A', 'B', - 1),
+        ([-1, 1], 'A', 'B', - 1)
     )
 
-    disorder = ex.Disorder(lat)
-    disorder.add_disorder('A', 'Deterministic', 0.0, 0)
-    disorder.add_disorder('B', 'Deterministic', 0.0, 0)
-
-    return lat, disorder, []
+    return lat
 
 
-lattice, disorder, disorded_structural = graphene_initial()
+lattice = graphene_initial()
 
 nx = ny = 2
 lx = 128
 ly = 128
 
-configuration = ex.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
+configuration = Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
                                  is_complex=False, precision=1, energy_scale=energy_scale)
 
-calculation = ex.Calculation(fname=['CondXX'],
-                             num_moments=[128], num_random=[1],
-                             num_disorder=[1])
+calculation = Calculation(configuration)
+calculation.conductivity_optical(num_points=1000, num_disorder=1, num_random=1, num_moments=128, direction='xx')
 
-modification = ex.Modification(magnetic_field=False)
-ex.export_lattice(lattice, configuration, calculation, modification, 'example2.h5',
-                  disorder=disorder, disorded_structural=disorded_structural)
+modification = Modification(magnetic_field=False)
+
+export_lattice(lattice, configuration, calculation, modification, 'example2.h5')
+

@@ -3,6 +3,8 @@ import export_lattice as ex
 import numpy as np
 import pybinding as pb
 
+from export_lattice import Configuration, Calculation, Modification, export_lattice
+
 energy_scale = 4.02
 def graphene_initial(onsite=(0, 0)):
     a1 = np.array([1,0])
@@ -19,29 +21,25 @@ def graphene_initial(onsite=(0, 0)):
     )
 
     lat.add_hoppings(
-        ([1, 0], 'A', 'A', - 1 / energy_scale),
-        ([0, 1], 'A', 'A', - 1 / energy_scale)
+        ([1, 0], 'A', 'A', - 1),
+        ([0, 1], 'A', 'A', - 1)
     )
 
-    disorder = ex.Disorder(lat)
-    disorder.add_disorder('A', 'Deterministic', 0.0, 0)
-    return lat, disorder, []
+    return lat
 
-lattice, disorder, disorded_structural = graphene_initial()
+lattice = graphene_initial()
 
 nx = ny = 2
 lx = 512
 ly = 512
 
-configuration = ex.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
+configuration = Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
                                  is_complex=False, precision=1, energy_scale=energy_scale)
 
-calculation = ex.Calculation(fname='dos',
-                             num_moments=256, num_random=1,
-                             num_disorder=1)
+calculation = Calculation(configuration)
+calculation.dos(num_points=1000, num_moments=256, num_random=1, num_disorder=1)
 
 modification = ex.Modification(magnetic_field=False)
-ex.export_lattice(lattice, configuration, calculation, modification, 'example3.h5',
-                  disorder=disorder, disorded_structural=disorded_structural)
+export_lattice(lattice, configuration, calculation, modification, 'example3.h5')
 
 
