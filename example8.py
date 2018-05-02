@@ -36,8 +36,8 @@ def graphene_initial(onsite=(0, 0)):
         ([0, 0], 'A', 'B', - 1 / energy_scale),
         # between neighboring cells, between which atoms, and the value
         ([-1, 0], 'A', 'B', - 1 / energy_scale),
-        ([-1, 1], 'A', 'B', - 1 / energy_scale),
-	)
+        ([-1, 1], 'A', 'B', - 1 / energy_scale)
+    )
 
     # Add disorder
     # Each sublattice can have different disorder. If there are multiple orbitals at one sublattice, one needs to add
@@ -45,6 +45,9 @@ def graphene_initial(onsite=(0, 0)):
     # Deterministic and Uniform. Each of the needs the have mean value, and standard deviation, where standard deviation
     # of deterministic disorder should be 0.
 
+    disorder = ex.Disorder(lat)
+    disorder.add_disorder('A', 'Deterministic', 0.0, 0)
+    disorder.add_disorder('B', 'Deterministic', 0.0, 0)
 
     # Add bond disorder as an object of a class StructuralDisorder. In this manner we can add onsite and bond defects
     # with a specific concentration, which will be added to the simulated system. The procedure for adding is same
@@ -52,10 +55,10 @@ def graphene_initial(onsite=(0, 0)):
     # unit cell.
     
     # if there is disorder it should be returned separately from the lattice
-    return lat
+    return lat, disorder, []
 
 
-lattice = graphene_initial()
+lattice, disorder, disorded_structural = graphene_initial()
 
 # number of decomposition parts in each direction of matrix. This divides the lattice into various sections, each of which is calculated in parallel
 nx = ny = 1
@@ -71,7 +74,7 @@ ly = 256
 # - info if the exported hopping and onsite data should be complex,
 # - info of the precision of the exported hopping and onsite data, 0 - float, 1 - double, and 2 - long double.
 configuration = ex.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
-                                 is_complex=False, precision=1, energy_scale=energy_scale)
+                                 is_complex=True, precision=1, energy_scale=energy_scale)
 
 # make calculation object which caries info about
 # - the name of the function
@@ -96,7 +99,8 @@ modification = ex.Modification(magnetic_field=False)
 
 # export the lattice from the lattice object, config and calculation object and the name of the file
 # the disorder is optional. If there is disorder in the lattice for now it should be given separately
-ex.export_lattice(lattice, configuration, calculation, modification, 'example7.h5')
+ex.export_lattice(lattice, configuration, calculation, modification, 'example8.h5',
+                  disorder=disorder, disorded_structural=disorded_structural)
 
 # plotting the lattice
 lattice.plot()

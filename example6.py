@@ -130,7 +130,7 @@ modification = ex.Modification(magnetic_field=False)
 
 # export the lattice from the lattice object, config and calculation object and the name of the file
 # the disorder is optional. If there is disorder in the lattice for now it should be given separately
-ex.export_lattice(lattice, configuration, calculation, modification, 'example1.h5',
+ex.export_lattice(lattice, configuration, calculation, modification, 'example6.h5',
                   disorder=disorder, disorded_structural=disorded_structural)
 
 # plotting the lattice
