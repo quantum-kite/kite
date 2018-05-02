@@ -39,28 +39,13 @@ def graphene_initial(onsite=(0, 0)):
         ([-1, 1], 'A', 'B', - 1 / energy_scale)
     )
 
-    # Add disorder
-    # Each sublattice can have different disorder. If there are multiple orbitals at one sublattice, one needs to add
-    # disorder vector of the same size as the number of orbitals. Type of disorder available are Gaussian,
-    # Deterministic and Uniform. Each of the needs the have mean value, and standard deviation, where standard deviation
-    # of deterministic disorder should be 0.
-
-    disorder = ex.Disorder(lat)
-    disorder.add_disorder('A', 'Deterministic', 0.0, 0)
-    disorder.add_disorder('B', 'Deterministic', 0.0, 0)
-
-    # Add bond disorder as an object of a class StructuralDisorder. In this manner we can add onsite and bond defects
-    # with a specific concentration, which will be added to the simulated system. The procedure for adding is same
-    # as adding the hopping, with the difference that the bond disorded is not bounded to one site in the [0, 0]
-    # unit cell.
-    
-    # if there is disorder it should be returned separately from the lattice
-    return lat, disorder, []
+    return lat
 
 
-lattice, disorder, disorded_structural = graphene_initial()
+lattice = graphene_initial()
 
-# number of decomposition parts in each direction of matrix. This divides the lattice into various sections, each of which is calculated in parallel
+# number of decomposition parts in each direction of matrix. This divides the lattice into various sections,
+# each of which is calculated in parallel
 nx = ny = 1
 
 # number of unit cells in each direction.
@@ -76,22 +61,8 @@ ly = 256
 configuration = ex.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
                                  is_complex=False, precision=1, energy_scale=energy_scale)
 
-# make calculation object which caries info about
-# - the name of the function
-#   DOS - denstity of states == 1,
-#   CondXX - conductivity in xx direction == 2,
-#   CondXY - conductivity in xy direction == 3,
-#   OptCond - optical conductivity == 4
-#   SpinCond - spin conductivity == 5
-#   SingleCondXX - single energy XX conductivity == 6
-#   SingleCondXY - single energy XY conductivity == 7
-# - number of moments for the calculation,
-# - number of different random vector realisations,
-# - number of disorder realisations.
-# - energy and gamma for single energy calculations.
-calculation = ex.Calculation(fname=['DOS'],
-                             num_moments=[1024], num_random=[1],
-                             num_disorder=[1])
+
+calculation = ex.Calculation(fname='dos', num_moments=1024, num_random=1, num_disorder=1)
 
 # make modification object which caries info about (TODO: Other modifications can be added here)
 # - magnetic field can be set to True. Default case is False. In exported file it's converted to 1 and 0.
@@ -99,8 +70,7 @@ modification = ex.Modification(magnetic_field=False)
 
 # export the lattice from the lattice object, config and calculation object and the name of the file
 # the disorder is optional. If there is disorder in the lattice for now it should be given separately
-ex.export_lattice(lattice, configuration, calculation, modification, 'example1.h5',
-                  disorder=disorder, disorded_structural=disorded_structural)
+ex.export_lattice(lattice, configuration, calculation, modification, 'example1.h5')
 
 # plotting the lattice
 lattice.plot()

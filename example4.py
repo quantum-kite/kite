@@ -4,6 +4,8 @@ import numpy as np
 import pybinding as pb
 
 energy_scale = 3.06
+
+
 def graphene_initial(onsite=(0, 0)):
     theta = np.pi / 3
     a1 = np.array([1 + np.cos(theta), np.sin(theta)])
@@ -47,11 +49,8 @@ ly = 256
 configuration = ex.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
                                  is_complex=False, precision=1, energy_scale=energy_scale)
 
-calculation = ex.Calculation(fname=['DOS'],
-                             num_moments=[256], num_random=[1],
-                             num_disorder=[1])
+calculation = ex.Calculation(fname='dos', num_moments=256, num_random=1, num_disorder=1)
 
 modification = ex.Modification(magnetic_field=False)
 ex.export_lattice(lattice, configuration, calculation, modification, 'example4.h5',
                   disorder=disorder, disorded_structural=disorded_structural)
-
