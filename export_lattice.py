@@ -960,11 +960,20 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
     if calculation.get_dos:
         grpc_p = grpc.create_group('dos')
 
+        moments, random, point, dis, temp, direction = [], [], [], [], [], []
         for single_dos in calculation.get_dos:
-            grpc_p.create_dataset('NumMoments', data=single_dos['num_moments'], dtype=np.int32)
-            grpc_p.create_dataset('NumRandoms', data=single_dos['num_random'], dtype=np.int32)
-            grpc_p.create_dataset('NumPoints', data=single_dos['num_points'], dtype=np.int32)
-            grpc_p.create_dataset('NumDisorder', data=single_dos['num_disorder'], dtype=np.int32)
+            moments.append(single_dos['num_moments'])
+            random.append(single_dos['num_random'])
+            point.append(single_dos['num_points'])
+            dis.append(single_dos['num_disorder'])
+
+        if len(calculation.get_dos) > 1:
+            raise SystemExit('Only a single function request of each type is currently allowed. Please use another '
+                             'configuration file for the same functionality.')
+        grpc_p.create_dataset('NumMoments', data=moments, dtype=np.int32)
+        grpc_p.create_dataset('NumRandoms', data=random, dtype=np.int32)
+        grpc_p.create_dataset('NumPoints', data=point, dtype=np.int32)
+        grpc_p.create_dataset('NumDisorder', data=dis, dtype=np.int32)
 
     if calculation.get_conductivity_dc:
         grpc_p = grpc.create_group('conductivity_dc')
@@ -978,6 +987,9 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
             temp.append(single_cond_dc['temperature'])
             direction.append(single_cond_dc['direction'])
 
+        if len(calculation.get_conductivity_dc) > 1:
+            raise SystemExit('Only a single function request of each type is currently allowed. Please use another '
+                             'configuration file for the same functionality.')
         grpc_p.create_dataset('NumMoments', data=np.asarray(moments), dtype=np.int32)
         grpc_p.create_dataset('NumRandoms', data=np.asarray(random), dtype=np.int32)
         grpc_p.create_dataset('NumPoints', data=np.asarray(point), dtype=np.int32)
@@ -997,6 +1009,9 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
             temp.append(single_cond_opt['temperature'])
             direction.append(single_cond_opt['direction'])
 
+        if len(calculation.get_conductivity_optical) > 1:
+            raise SystemExit('Only a single function request of each type is currently allowed. Please use another '
+                             'configuration file for the same functionality.')
         grpc_p.create_dataset('NumMoments', data=np.asarray(moments), dtype=np.int32)
         grpc_p.create_dataset('NumRandoms', data=np.asarray(random), dtype=np.int32)
         grpc_p.create_dataset('NumPoints', data=np.asarray(point), dtype=np.int32)
@@ -1017,6 +1032,9 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
             direction.append(single_cond_opt_non['direction'])
             special.append(single_cond_opt_non['special'])
 
+        if len(calculation.get_conductivity_optical_nonlinear) > 1:
+            raise SystemExit('Only a single function request of each type is currently allowed. Please use another '
+                             'configuration file for the same functionality.')
         grpc_p.create_dataset('NumMoments', data=np.asarray(moments), dtype=np.int32)
         grpc_p.create_dataset('NumRandoms', data=np.asarray(random), dtype=np.int32)
         grpc_p.create_dataset('NumPoints', data=np.asarray(point), dtype=np.int32)
@@ -1038,6 +1056,9 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
             gamma.append(single_singlshot_cond['gamma'])
             direction.append(single_singlshot_cond['direction'])
 
+        if len(calculation.get_singleshot_conductivity_dc) > 1:
+            raise SystemExit('Only a single function request of each type is currently allowed. Please use another '
+                             'configuration file for the same functionality.')
         grpc_p.create_dataset('NumMoments', data=np.asarray(moments), dtype=np.int32)
         grpc_p.create_dataset('NumRandoms', data=np.asarray(random), dtype=np.int32)
         grpc_p.create_dataset('NumDisorder', data=np.asarray(dis), dtype=np.int32)
