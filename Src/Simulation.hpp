@@ -2,19 +2,6 @@
 #define _SIMULATION_HPP
 #include "queue.hpp"
 
-//int custom_find(int *arr, int arr_size, int value_to_search){
-  /* This function searches array 'arr' for any occurence of number 'value to search'.
-   * If it exists, it exits and returns the index where it occurs.
-   * Otherwise, returns -1
-   */
-  //for(int i = 0; i < arr_size; i++){
-    //if(*(arr+i) == value_to_search)
-      //return i;
-  //}
-	
-  //return -1;	
-//}
-
 
 std::complex<double> green(int n, int sigma, std::complex<double> energy){
   const std::complex<double> i(0.0,1.0); 
@@ -70,14 +57,33 @@ public:
       // This will allow us to obtain an estimate for the time it'll take
       // for the program to run
       Global.kpm_iteration_time = simul.time_kpm(100);
-      debug_message("kpm iteration time:");
-      debug_message(Global.kpm_iteration_time);
-      debug_message("\n");
+#pragma omp master 
+      {
+      verbose_message("On average, a KPM iteration takes ");
+      verbose_message(Global.kpm_iteration_time);
+      verbose_message(" seconds.\n");
+      double queue_time = 0;
+      double ss_queue_time = 0;
+      // obtain the times for the singlehsot queue
+      for(unsigned int i = 0; i < ss_queue.size(); i++){
+        ss_queue.at(i).embed_time(Global.kpm_iteration_time);
+        ss_queue_time += ss_queue.at(i).time_length;
+      }
       
+      // obtain the times for the normal queue
+			for(unsigned int i = 0; i < queue.size(); i++){
+        queue.at(i).embed_time(Global.kpm_iteration_time);
+        queue_time += queue.at(i).time_length;
+      }
+
+      verbose_message("The entire calculation will take around ");
+      verbose_message(print_time(queue_time + ss_queue_time));
+      verbose_message("\n");
+      }
+#pragma omp barrier
+
       // execute the singleshot queue
       for(unsigned int i = 0; i < ss_queue.size(); i++){
-
-        std::cout << print_time(ss_queue.at(i).time_required(Global.kpm_iteration_time)) << "\n";
         simul.Single_Shot(EnergyScale, ss_queue.at(i)); 
       }
       

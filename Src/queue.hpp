@@ -99,6 +99,7 @@ class measurement_queue{
     int NDisorder;
     int NRandom;
     std::string label;
+    double time_length;
     measurement_queue(std::string dir_string, std::vector<int> moments, int disorder, int random, std::string name){
       direction_string = dir_string;
       NMoments = moments;
@@ -107,13 +108,16 @@ class measurement_queue{
       label = name;
     };
 
-    double time_required(double avg_duration){
+
+    void embed_time(double avg_duration){
       int prod = 1;
       for(unsigned int i = 0; i < NMoments.size(); i++)
         prod *= NMoments.at(i);
 
-      return prod*avg_duration;
-    }
+      time_length = prod*avg_duration;
+    };
+
+
 };
 
 
@@ -234,12 +238,9 @@ class singleshot_measurement_queue{
     std::string label;
     double time_length;
 
-
-    double time_required(double avg_duration){
-      return NMoments*NMoments*avg_duration;
-    }
-
-
+    void embed_time(double avg_duration){
+      time_length = NMoments*avg_duration;
+    };
 
     singleshot_measurement_queue(std::string dir_string, int moments, int disorder, 
         int random, std::string name, Eigen::Array<double, -1, 1> energies, double gamma){
