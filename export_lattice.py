@@ -887,8 +887,6 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
     grp_dis = grp.create_group('StructuralDisorder')
     if disorded_structural:
 
-    if disorded_structural:
-
         if isinstance(disorded_structural, list):
             num_dis = len(disorded_structural)
         else:

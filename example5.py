@@ -4,9 +4,10 @@ and to ask the measurement of the DOS with 2048 moments and
 the SingleShot xx conductivity for a set of Fermi Energies and a defined gamma 
 """
 import matplotlib.pyplot as plt
-import export_lattice as ex
 import numpy as np
 import pybinding as pb
+
+from export_lattice import Configuration, Calculation, Modification, Disorder, StructuralDisorder, export_lattice
 
 energy_scale = 3.06
 
@@ -28,16 +29,16 @@ def graphene_initial(onsite=(0, 0)):
     )
 
     lat.add_hoppings(
-        ([ 0, 0], 'A', 'B', - 1),
+        ([0, 0], 'A', 'B', - 1),
         ([-1, 0], 'A', 'B', - 1),
         ([-1, 1], 'A', 'B', - 1)
     )
 
-    disorder = ex.Disorder(lat)
+    disorder = Disorder(lat)
     disorder.add_disorder('A', 'Deterministic', 0.0, 0)
     disorder.add_disorder('B', 'Deterministic', 0.0, 0)
 
-    struc_disorder = ex.StructuralDisorder(lat, concentration=0.004)
+    struc_disorder = StructuralDisorder(lat, concentration=0.004)
     struc_disorder.add_vacancy('A')
     struc_disorder.add_vacancy('B')
 
@@ -50,18 +51,18 @@ nx = ny = 1
 lx = 256
 ly = 256
 
-configuration = ex.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
-                                 is_complex=False, precision=1, energy_scale=energy_scale)
+configuration = Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
+                              is_complex=False, precision=1, energy_scale=energy_scale)
 
 NPontos = 10
 M = 512
 g1 = 0.1
-calculation = ex.Calculation(fname=['DOS','SingleCondXX'],
-                             num_moments=[M,M], num_random=[1,1], 
-                             num_disorder=[1,1], 
-                             energy=[[0.3/NPontos * i  for i in range(NPontos)]],
-                             gamma=[[g1]])
+calculation = Calculation(configuration)
 
-modification = ex.Modification(magnetic_field=False)
-ex.export_lattice(lattice, configuration, calculation, modification, 'example5.h5',
-                  disorder=disorder, disorded_structural=disorded_structural)
+calculation.dos(num_points=1000, num_moments=M, num_random=1, num_disorder=1)
+calculation.singleshot_conductivity_dc(direction='xx', num_moments=M, num_random=1, num_disorder=1,
+                                       energy=[0.3 / NPontos * i for i in range(NPontos)], gamma=g1)
+
+modification = Modification(magnetic_field=False)
+export_lattice(lattice, configuration, calculation, modification, 'example5.h5',
+               disorder=disorder, disorded_structural=disorded_structural)
