@@ -6,6 +6,8 @@ import pybinding as pb
 from export_lattice import Configuration, Calculation, Modification, export_lattice
 
 energy_scale = 3.06
+
+
 def graphene_initial(onsite=(0, 0)):
     theta = np.pi / 3
     a1 = np.array([1 + np.cos(theta), np.sin(theta)])
@@ -36,7 +38,7 @@ lx = 128
 ly = 128
 
 configuration = Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
-                                 is_complex=False, precision=1, energy_scale=energy_scale)
+                              is_complex=False, precision=1, energy_scale=energy_scale)
 
 calculation = Calculation(configuration)
 calculation.conductivity_optical(num_points=1000, num_disorder=1, num_random=1, num_moments=128, direction='xx')
@@ -44,4 +46,3 @@ calculation.conductivity_optical(num_points=1000, num_disorder=1, num_random=1, 
 modification = Modification(magnetic_field=False)
 
 export_lattice(lattice, configuration, calculation, modification, 'example2.h5')
-

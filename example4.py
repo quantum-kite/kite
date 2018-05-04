@@ -25,15 +25,15 @@ def graphene_initial(onsite=(0, 0)):
     )
 
     lat.add_hoppings(
-        ([-1, 0], 'A', 'B', - 1 / energy_scale),
-        ([-1, 1], 'A', 'B', - 1 / energy_scale)
+        ([-1, 0], 'A', 'B', - 1),
+        ([-1, 1], 'A', 'B', - 1)
     )
 
     node0 = [[+0, +0], 'A']
     node1 = [[+0, +0], 'B']
     struc_disorder_one = ex.StructuralDisorder(lat, concentration=1.00)
     struc_disorder_one.add_structural_disorder(
-        (*node0, *node1, -1 / energy_scale)
+        (*node0, *node1, -1)
     )
     return lat, [struc_disorder_one]
 
@@ -44,11 +44,11 @@ nx = ny = 1
 lx = 256
 ly = 256
 
-configuration = ex.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
-                                 is_complex=False, precision=1, energy_scale=energy_scale)
+configuration = Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
+                              is_complex=False, precision=1, energy_scale=energy_scale)
 calculation = Calculation(configuration)
 calculation.dos(num_points=1000, num_random=1, num_disorder=1, num_moments=256)
 
 modification = Modification(magnetic_field=False)
 export_lattice(lattice, configuration, calculation, modification, 'example4.h5',
-                  disorded_structural=disorded_structural)
+               disorded_structural=disorded_structural)

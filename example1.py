@@ -4,6 +4,7 @@ import numpy as np
 import pybinding as pb
 
 from export_lattice import Configuration, Calculation, Modification, export_lattice
+
 # define lattice of monolayer graphene with 1[nm] interatomic distance and t=1/3[eV] hopping,
 # EnergyScale is the scaling factor of the hopping parameters, important for the rescaling of the spectral quantity.
 #  INFO: other examples are defined in define_lattice.py script
@@ -59,7 +60,7 @@ ly = 256
 # - info if the exported hopping and onsite data should be complex,
 # - info of the precision of the exported hopping and onsite data, 0 - float, 1 - double, and 2 - long double.
 configuration = Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
-                                 is_complex=False, precision=1, energy_scale=energy_scale)
+                              is_complex=False, precision=1, energy_scale=energy_scale)
 
 calculation = Calculation(configuration)
 calculation.dos(num_points=1000, num_moments=1024, num_random=1, num_disorder=1)
