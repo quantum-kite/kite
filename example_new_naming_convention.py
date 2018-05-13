@@ -79,7 +79,7 @@ calculation.dos(num_points=1000, num_random=1, num_disorder=1, num_moments=1024)
                                    # direction='xx', temperature=10)
 # calculation.singleshot_conductivity_dc(energy=[(n/100.0 - 0.5)*energy_scale*2 for n in range(101)], num_moments=512, num_random=1, num_disorder=1,
                                                # direction='xx', gamma=0.01)
-calculation.conductivity_optical_nonlinear(num_points=1000, num_moments=64, num_random=1, num_disorder=1,
+calculation.conductivity_optical_nonlinear(num_points=1000, num_moments=512, num_random=1, num_disorder=1,
                                                    direction='xxx', temperature=1.0, special=1)
 
 # make modification object which caries info about (TODO: Other modifications can be added here)
