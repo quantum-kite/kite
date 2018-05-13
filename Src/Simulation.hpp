@@ -6,7 +6,7 @@
 std::complex<double> green(int n, int sigma, std::complex<double> energy){
   const std::complex<double> i(0.0,1.0); 
   std::complex<double> sq = sqrt(1.0 - energy*energy);
-  return pow(-1,n)*2.0*sigma/sq*i*exp(-sigma*n*1.0*acos(energy)*i);
+  return 2.0*sigma/sq*i*exp(-sigma*n*1.0*acos(energy)*i);
 }
 
 
@@ -76,9 +76,7 @@ public:
         queue_time += queue.at(i).time_length;
       }
 
-      verbose_message("The entire calculation will take around ");
-      verbose_message(print_time(queue_time + ss_queue_time));
-      verbose_message("\n");
+      std::cout << "The entire calculation will take around " << print_time(queue_time + ss_queue_time) << ".\n";
       }
 #pragma omp barrier
 
@@ -538,7 +536,7 @@ public:
 
   void Single_Shot(double EScale, singleshot_measurement_queue queue) {
     // Calculate the longitudinal dc conductivity for a single value of the energy
-
+    
     
     // Obtain the relevant quantities from the queue
     int NRandomV = queue.NRandom;
@@ -549,7 +547,7 @@ public:
     std::string indices = queue.direction_string;
     std::string name_dataset = queue.label;
     
-		 
+    
 		 
     // Process the indices
     debug_message("Entered Single_Shot");
@@ -565,7 +563,7 @@ public:
 	  
     debug_message("Strings: "); debug_message(first_string); 
     debug_message(" ");         debug_message(second_string);debug_message(".\n");
-
+    
     for(unsigned int i = 0; i < first_string.size(); i++){
       if(first_string[i]=='y')
 	      first_indices.at(i) = 1;
@@ -590,7 +588,7 @@ public:
     
     KPM_Vector<T,D> phi1(2, *this);
     KPM_Vector<T,D> phi2(2, *this);
-		
+    
 	
     //int a = 4;
     //int b = 4;
@@ -615,7 +613,7 @@ public:
 		      
 	      // calculate the left vector
 	      phi.set_index(0);				
-		      
+        
         
 	      // |phi> = v |phi_0>
 	      phi.Velocity(phi.v.col(0).data(), phi0.v.col(0).data(), first_indices.at(0));
@@ -631,7 +629,7 @@ public:
       		phi.template Multiply<1>();
       		phi1.v.col(0) += phi.v.col(phi.get_index())*green(n, 1, energy).imag();
 	      }
-		      
+        
 	      // multiply phi1 by the velocity operator again. 
 	      // We need a temporary vector to mediate the operation, which will be |phi>
 	      phi.v.col(0) = phi1.v.col(0);
@@ -686,7 +684,7 @@ public:
       unsigned int number_of_orbitals = r.Orb; 	// This is necessary because the normalization factor inside the random 
       // vectors is not the number of lattice sites N but the number of states, 
       // which is N*number_of_orbitals
-      unsigned int spin_degeneracy = 1;
+      unsigned int spin_degeneracy = 2;
       
       double factor = -4.0*spin_degeneracy*number_of_orbitals/M_PI/unit_cell_area;	// This is in units of sigma_0, hence the 4
       Global.singleshot_cond *= factor;

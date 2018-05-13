@@ -8,10 +8,10 @@ from export_lattice import Configuration, Calculation, Modification, export_latt
 # define lattice of monolayer graphene with 1[nm] interatomic distance and t=1/3[eV] hopping,
 # EnergyScale is the scaling factor of the hopping parameters, important for the rescaling of the spectral quantity.
 #  INFO: other examples are defined in define_lattice.py script
-energy_scale = 3.06
+energy_scale = 3.8
 
 
-def graphene_initial(onsite=(0, 0)):
+def graphene_initial(onsite=(1.673819742, -1.673819742)):
     """Return the basic lattice specification for monolayer graphene with nearest neighbor"""
 
     theta = np.pi / 3
@@ -47,11 +47,11 @@ lattice = graphene_initial()
 
 # number of decomposition parts in each direction of matrix. This divides the lattice into various sections,
 # each of which is calculated in parallel
-nx = ny = 1
+nx = ny = 2
 
 # number of unit cells in each direction.
-lx = 256
-ly = 256
+lx = 1024
+ly = 1024
 
 # make config object which caries info about
 # - the number of decomposition parts [nx, ny],
@@ -74,13 +74,13 @@ configuration = Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[T
 # direction ID 'xx': 0, 'yy': 1, 'zz': 2, 'xy': 3, 'xz': 4, 'yx': 3, 'yz': 5, 'zx': 4, 'zy': 5
 calculation = Calculation(configuration)
 calculation.dos(num_points=1000, num_random=1, num_disorder=1, num_moments=1024)
-calculation.conductivity_optical(num_points=1000, num_random=1, num_disorder=1, num_moments=256, direction='xx')
-calculation.conductivity_dc(num_points=1000, num_moments=256, num_random=2, num_disorder=1,
-                                    direction='xx', temperature=300)
-calculation.singleshot_conductivity_dc(energy=[0, 0.1], num_moments=256, num_random=1, num_disorder=1,
-                                               direction='xx', gamma=0.1)
-calculation.conductivity_optical_nonlinear(num_points=1000, num_moments=256, num_random=1, num_disorder=1,
-                                                   direction='xyx', temperature=0, special=1)
+# calculation.conductivity_optical(num_points=1000, num_random=1, num_disorder=1, num_moments=512, direction='xx')
+# calculation.conductivity_dc(num_points=1000, num_moments=512, num_random=1, num_disorder=1,
+                                   # direction='xx', temperature=10)
+# calculation.singleshot_conductivity_dc(energy=[(n/100.0 - 0.5)*energy_scale*2 for n in range(101)], num_moments=512, num_random=1, num_disorder=1,
+                                               # direction='xx', gamma=0.01)
+calculation.conductivity_optical_nonlinear(num_points=1000, num_moments=64, num_random=1, num_disorder=1,
+                                                   direction='xxx', temperature=1.0, special=1)
 
 # make modification object which caries info about (TODO: Other modifications can be added here)
 # - magnetic field can be set to True. Default case is False. In exported file it's converted to 1 and 0.
@@ -91,6 +91,6 @@ modification = Modification(magnetic_field=False)
 export_lattice(lattice, configuration, calculation, modification, 'example_new_naming_convention.h5')
 
 # plotting the lattice
-lattice.plot()
+# lattice.plot()
 # plt.show()
 

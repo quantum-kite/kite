@@ -3,23 +3,18 @@
 #include "H5Cpp.h"
 #include "tensor.hpp"
 #include "myHDF5.hpp"
-#include "info.hpp"
+#include "systemInfo.hpp"
+#include "conductivity_dc.hpp"
+#include "conductivity_optical.hpp"
+#include "conductivity_nonlinear.hpp"
+#include "dos.hpp"
 #include "calculate_simple.hpp"
 #include "parse_input.hpp"
-
-//#####################################################################################
-//#####################################################################################
-//#####################################################################################
-//#####################################################################################
-//#####################################################################################
-//#####################################################################################
-
-//TO DO:
-// Clarify what each quantity to be calculate_simpled means. Cond, SingleCond, OptCond????
 
 //https://support.hdfgroup.org/HDF5/doc/cpplus_RM/readdata_8cpp-example.html
 
 #define debug 1
+#define debug1 1
 
 void choose_simulation_type(char *name){
 	debug_message("Entered choose_simulation.\n");
@@ -42,11 +37,15 @@ void choose_simulation_type(char *name){
 	
 	file.close();
 	
-	 if(dim < 1 || dim > 3)
+	if(dim < 1 || dim > 2){
+    std::cout << "Invalid value for the dimension of the system. Exiting.\n";
 		exit(0);
+  }
   
-	if(precision < 0 || precision > 2)
+	if(precision < 0 || precision > 2){
+    std::cout << "Invalid value for the precision of the data values. Exiting. \n";
 		exit(0);
+  }
 
 	if(complex < 0 || complex > 1)
 		exit(0);

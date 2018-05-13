@@ -3,22 +3,6 @@
 
 
 
-template <typename T>	
-std::complex<T> integrate(Eigen::Matrix<T, -1, 1> energies, Eigen::Matrix<std::complex<T>, -1, 1> integrand){
-	if(energies.rows() != integrand.rows() or energies.cols() != integrand.cols()){
-		std::cout << "x and y arrays in the integrator must have the same number of elements. Exiting.\n";
-		exit(1);
-	}
-	
-	int N = energies.cols()*energies.rows();
-	std::complex<T> sum(0,0);
-	
-	for(int i = 0; i < N - 1; i++){
-		sum += (energies(i) - energies(i+1))*(integrand(i) + integrand(i+1))/T(2.0);
-	}
-	
-	return sum;
-}
 /*
 template <typename T>
 std::complex<T> contract(std::complex<T>(*f)(int, std::complex<T>), T omega, int N_moments,
@@ -120,7 +104,7 @@ std::complex<T> contract(std::complex<T>(*f1)(int, std::complex<T>), T omega1, i
 }
 */
 
-
+/*
 template <typename T>
 Eigen::Matrix<std::complex<T>, -1, 1> contract_nint(
     std::function<T(int, T)> f0, int N_moments, 
@@ -148,18 +132,15 @@ Eigen::Matrix<std::complex<T>, -1, 1> contract_nint(
         
 
     return GammaE;
-}
+}*/
 
-
+/*
 template <typename T>
 std::complex<T> contract1(
     std::function<T(int, T)> f0, int N_moments, 
     const Eigen::Array<std::complex<T>, -1, -1>& Gamma, 
     const Eigen::Matrix<T, -1, 1>& energies){
 
-    // First of all, contact the index that will not depend on the frequency.
-    // That is the index of the delta function, that's why we need to know its
-    // position.
 
     int N_energies = energies.rows();
 
@@ -179,9 +160,10 @@ std::complex<T> contract1(
 
     return integrate(energies, GammaE);
 }
-
+*/
+/*
 template <typename T>
-Eigen::Matrix<std::complex<T>, -1, 1> contract1(
+Eigen::Matrix<std::complex<T>, -1, 1> contract2(
     std::function<T(int, T)> f0, int delta_position, 
     std::function<std::complex<T>(int, T)> f1, int N_moments, 
     const Eigen::Array<std::complex<T>, -1, -1>& Gamma, 
@@ -262,50 +244,8 @@ Eigen::Matrix<std::complex<T>, -1, 1> contract1(
     verbose_message("Left contract.\n");
     return cond;
 }
+*/
 
-
-
-
-template <typename T>
-T fermi_function(T energy, T mu, T beta){
-	return 1.0/(1.0 + exp(beta*(energy - mu)));
-}
-
-
-template<typename T, unsigned DIM>
-void calc_dos_simple(info<T,DIM> *config, double lim, int N_energies){
-  // Calculates the density of states
-  debug_message("Entered calc_dos_simple.\n");
-
-
-
-
-  int N_moments = config->num_moments(0);
-
-  Eigen::Matrix<T, -1, 1> energies;
-  Eigen::Matrix<std::complex<T>, -1, 1> DOS;
-	energies = Eigen::Matrix<T, -1, 1>::LinSpaced(N_energies, -lim, lim); 
-	DOS = Eigen::Matrix<std::complex<T>, -1, 1>::Zero(N_energies); 
-   
-
-
-  for(int i = 0; i < N_moments; i++){
-    for(int j = 0; j < N_energies; j++){
-      DOS(j) += config->MU(i)*delta(i, energies(j))*kernel_jackson(i,N_moments)/(1.0 + (double)(i==0));
-    }
-  }
-
-
-  
-	std::ofstream myfile;
-	myfile.open ("DOS.dat");
-	for(int i=0; i < energies.rows()*energies.cols(); i++){
-		myfile  << energies(i)*config->energy_scale << " " << DOS(i).real() << " " << DOS(i).imag()<< "\n";
-	}
-	
-	myfile.close();
-	debug_message("Left calc_dos.\n");
-};
 
 /*
 template <typename U, unsigned DIM>
@@ -481,143 +421,75 @@ void calc_optical_cond_simple_explicit(info<U,DIM> *config, std::string cond_axi
 
 
 
+
+
 template <typename U, unsigned DIM>
-void calc_optical_cond_simple(info<U,DIM> *config, std::string cond_axis){
-	debug_message("Entered calc_optical_cond.\n");
-	/* Calculates the optical conductivity for a set of frequencies in the range [-sigma, sigma].
-	 * These frequencies are in the KPM scale, that is, the scale where the energy is in the range ]-1,1[.
-	 * T is the number of frequency intervals in the range [0,sigma].
-	 * R is the number of energy intervals inside each frequency interval.
-	 * beta and e_fermi are not in the KPM scale, so they must be converted.
-	 */
-	double beta = 200;
-  double e_fermi = 0.0;
-
-	// Convert beta and e_fermi to the KPM scale
-	beta *= config->energy_scale;
-	e_fermi /= config->energy_scale;
-	
-	// Calculate the number of frequencies and energies needed to perform the calculation.
-	int N_omegas = 200;
-	int N_energies = 401;
-  double lim = 0.999;
-	std::complex<U> imaginary(0.0, 1.0);
-
-  Eigen::Matrix<U, -1, 1> energies;
-  int N_moments = -1;
-
-  energies  = Eigen::Matrix<U, -1, 1>::LinSpaced(N_energies, -lim, lim);
+void calculate_conductivity_nonlinear(system_info<U, DIM>& sysinfo){
   
-
-  verbose_message(cond_axis); 
-	if(cond_axis == "xx"){
-		//N_moments.at(0) = config->num_moments(config->CondXX);
-		//N_moments.at(1) = config->num_moments(config->CondXX);
-		N_moments = config->num_moments(config->CondXX);
+  conductivity_nonlinear<U, DIM> info(sysinfo);
+  if(info.isRequired){
+    info.read();
+    info.calculate();
   }
-	
-  else	if(cond_axis == "xy"){
-		//N_moments.at(0) = config->num_moments(config->CondXY);
-		//N_moments.at(1) = config->num_moments(config->CondXY);
-		N_moments = config->num_moments(config->CondXY);
-  }
-  
-  else{
-    std::cout << "Unknown direction in calc_optical_cond_simple.\n";
-    exit(1);
-  }
-  
+  std::cout << "cond_nonlinear is required? " << info.isRequired << "\n";
 
-  
-  verbose_message("Setting lambda functions\n");
-
-  // Functions that are going to be used by the contractor
-
-  std::function<U(int, U)> deltaF = [beta, e_fermi, N_moments](int n, U energy)->U{
-    return delta(n, energy)/(1.0 + U(n==0))*fermi_function(energy, e_fermi, beta)*kernel_jackson(n, N_moments);
-  };
-
-
-  Eigen::Matrix<U, -1, 1> frequencies;
-  frequencies = Eigen::Matrix<U, -1, 1>::Zero(N_omegas,1);
-  for(int i = 0; i < N_omegas; i++)
-  {
-    frequencies(i) = i*1.0/N_omegas*3;
-  }
-
-  Eigen::Matrix<std::complex<U>, -1, 1> temp1; 
-  Eigen::Matrix<std::complex<U>, -1, 1> temp2; 
-  Eigen::Matrix<std::complex<U>, -1, 1> cond; 
-  std::complex<U> temp3 = 0; 
-
-  temp1 = Eigen::Matrix<std::complex<U>, -1, 1>::Zero(N_omegas, 1);
-  temp2 = Eigen::Matrix<std::complex<U>, -1, 1>::Zero(N_omegas, 1);
-  cond  = Eigen::Matrix<std::complex<U>, -1, 1>::Zero(N_omegas, 1);
-
-  temp1 = contract1(deltaF, 0, greenAscat(0.01), N_moments, config->GammaXX, energies, frequencies);
-  temp2 = contract1(deltaF, 1, greenRscat(0.01), N_moments, config->GammaXX, energies, frequencies);
-  temp3 = contract1(deltaF, N_moments, config->LambdaXX, energies);
-
-  std::complex<U> freq;
-  for(int i = 0; i < N_omegas; i++){
-    freq = std::complex<U>(frequencies(i), 0.01);  
-    std::cout << freq.real() << " ";
-    std::cout << (temp1(i)/freq).real()  << " " << (temp1(i)/freq).imag() << " ";
-    std::cout << (temp2(i)/freq).real()  << " " << (temp2(i)/freq).imag() << " ";
-    std::cout << (temp3/freq).real()     << " " << (temp3/freq).imag()    << "\n";
-    cond(i) += (temp1(i) + temp2(i) + temp3)/freq;
-  }
-  cond *= imaginary*U(4.0*config->num_orbitals*config->spin_degeneracy/config->unit_cell_area);
-	
-  
-   //Output to a file
-  std::ofstream myfile;
-  myfile.open ("optical_cond.dat");
-  for(int i=0; i < N_omegas; i++)
-    myfile  << frequencies.real()(i)*config->energy_scale << " " << cond.real()(i) << " " << cond.imag()(i) << "\n";
-  
-  myfile.close();
-  debug_message("Left calc_optical_cond.\n");
-
-
-
-
-      
-    
-
-  
-
-
-  
-
-
-  
-
-  
 };
 
+template <typename U, unsigned DIM>
+void calculate_conductivity_optical(system_info<U, DIM>& sysinfo){
+  
+  conductivity_optical<U, DIM> info(sysinfo);
+  if(info.isRequired){
+    info.read();
+    info.calculate();
+  }
+  std::cout << "cond_optical is required? " << info.isRequired << "\n";
 
+};
+
+template <typename U, unsigned DIM>
+void calculate_conductivity_dc(system_info<U, DIM>& sysinfo){
+  
+  conductivity_dc<U, DIM> info(sysinfo);
+  if(info.isRequired){
+    info.read();
+    info.calculate();
+  }
+  std::cout << "cond_dc is required? " << info.isRequired << "\n";
+
+};
+
+template <typename U, unsigned DIM>
+void calculate_dos(system_info<U, DIM>& sysinfo){
+  
+  dos<U, DIM> info(sysinfo); // The constructor checks whether this quantity is required
+  if(info.isRequired){
+    info.read();
+    info.calculate();
+  }
+  std::cout << "dos is required? " << info.isRequired << "\n";
+
+};
 
 template <typename U, unsigned DIM>
 void calculate_simple(char *name){
 	debug_message("Entered calculate_simple.\n");
+  // Tries to calculate all the quantities that it can calculate.
+  // In each of those functions, we'll try to retrieve the relevant quantities
+  // from the configuration file. If they cannot be retrieved, that means that
+  // they were not asked for, and the program moves on to the next quantity
+  
+  system_info<U, DIM> info;
+  info = system_info<U, DIM>(std::string(name));
+  info.read();
+  calculate_dos<U, DIM>(info);
+  calculate_conductivity_dc<U, DIM>(info);
+  calculate_conductivity_optical<U, DIM>(info);
+  calculate_conductivity_nonlinear<U, DIM>(info);
 
-	info<U,DIM> config(name);
-	config.read();
-	
-	if(config.DOS >= 0){
-		double lim;
-		int N_energies = 1001;
-		verbose_message("Calculating the density of states with "); verbose_message(N_energies); verbose_message(" energies... ");
-		calc_dos_simple<U,DIM>(&config, lim = 1.0, N_energies);
-		verbose_message("Done.\n");
-	}
-	
-  if(config.CondXX >= 0){
-    verbose_message("calculating the optical conductivity");
-    calc_optical_cond_simple(&config, "xx");
-  }
+
 	debug_message("Left calculate_simple.\n");
+
 }
 
 

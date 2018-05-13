@@ -132,8 +132,8 @@ std::vector<measurement_queue> fill_queue(char *name){
       int NMoments, NRandom, NDisorder;
        debug_message("DOS: checking if we need to calculate DOS.\n");
        get_hdf5<int>(&NMoments,  file, (char *)   "/Calculation/dos/NumMoments");
-       //get_hdf5<int>(&NDisorder, file, (char *)   "/Calculation/dos/NumDisorder");
-       NDisorder = 1;
+       get_hdf5<int>(&NDisorder, file, (char *)   "/Calculation/dos/NumDisorder");
+       //NDisorder = 1;
        get_hdf5<int>(&NRandom,   file, (char *)   "/Calculation/dos/NumRandoms");
        //dos = true;
        queue.push_back(measurement_queue("", {NMoments}, NDisorder, NRandom, "/Calculation/dos/MU"));
@@ -146,8 +146,8 @@ std::vector<measurement_queue> fill_queue(char *name){
        get_hdf5<int>(&direction, file, (char *) "/Calculation/conductivity_optical/Direction");
        get_hdf5<int>(&NMoments, file, (char *)  "/Calculation/conductivity_optical/NumMoments");
        get_hdf5<int>(&NRandom, file, (char *)   "/Calculation/conductivity_optical/NumRandoms");
-       //get_hdf5<int>(&NDisorder, file, (char *)   "/Calculation/conductivity_optical/NumDisorder");
-       NDisorder = 1;
+       get_hdf5<int>(&NDisorder, file, (char *)   "/Calculation/conductivity_optical/NumDisorder");
+       //NDisorder = 1;
        //conductivity_optical = true;
       
        // convert the numerical value for the direction into the string that represents it
@@ -167,8 +167,8 @@ std::vector<measurement_queue> fill_queue(char *name){
        get_hdf5<int>(&direction, file, (char *) "/Calculation/conductivity_dc/Direction");
        get_hdf5<int>(&NMoments, file, (char *)  "/Calculation/conductivity_dc/NumMoments");
        get_hdf5<int>(&NRandom, file, (char *)   "/Calculation/conductivity_dc/NumRandoms");
-       //get_hdf5<int>(&NDisorder, file, (char *) "/Calculation/conductivity_dc/NumDisorder");
-       NDisorder = 1;
+       get_hdf5<int>(&NDisorder, file, (char *) "/Calculation/conductivity_dc/NumDisorder");
+       //NDisorder = 1;
        //conductivity_dc = true;
 
        // convert the numerical value for the direction into the string that represents it
@@ -187,10 +187,10 @@ std::vector<measurement_queue> fill_queue(char *name){
        get_hdf5<int>(&direction, file, (char *)   "/Calculation/conductivity_optical_nonlinear/Direction");
        get_hdf5<int>(&NMoments, file, (char *)  "/Calculation/conductivity_optical_nonlinear/NumMoments");
        get_hdf5<int>(&NRandom, file, (char *)   "/Calculation/conductivity_optical_nonlinear/NumRandoms");
-       //get_hdf5<int>(&NDisorder, file, (char *)   "/Calculation/conductivity_optical_nonlinear/NumDisorder");
+       get_hdf5<int>(&NDisorder, file, (char *)   "/Calculation/conductivity_optical_nonlinear/NumDisorder");
        get_hdf5<int>(&special, file, (char *)   "/Calculation/conductivity_optical_nonlinear/Special");
        //conductivity_optical_nonlinear = true;
-       NDisorder = 1;
+       //NDisorder = 1;
 
        // convert the numerical value for the direction into the string that represents it
        std::string dir(num2str3(direction));                                                // xxx Gamma0
@@ -281,7 +281,7 @@ std::vector<singleshot_measurement_queue> fill_singleshot_queue(char *name){
          std::cout << "Invalid singleshot direction. Exiting.\n";
          exit(1);
        }
-
+       
       // We also need to determine the number of energies that we need to calculate
       H5::DataSet * dataset_energy     	= new H5::DataSet(file->openDataSet("/Calculation/singleshot_conductivity_dc/Energy"));
       H5::DataSpace * dataspace_energy 	= new H5::DataSpace(dataset_energy->getSpace());
@@ -296,7 +296,7 @@ std::vector<singleshot_measurement_queue> fill_singleshot_queue(char *name){
       queue.push_back(singleshot_measurement_queue(direction_string, NMoments,
             NDisorder, NRandom, "/Calculation/singleshot_conductivity_dc/SingleShot",
             energies, gamma));
-
+      
     } catch(H5::Exception& e) {debug_message("singleshot dc: no need to calculate it.\n");}
 
     delete file;
