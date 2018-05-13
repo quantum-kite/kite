@@ -10,6 +10,12 @@ private:
   std::size_t   stride_ghosts[2];
   LatticeStructure<2u>       & r;
   Hamiltonian<T,2u>          & h;
+  T               ***mult_t1_mag;
+  Coordinates<std::size_t,3>   x;
+  T                        *phi0;
+  T                       *phiM1;
+  T                       *phiM2;
+  const std::size_t          std;
 public:
   typedef typename extract_value_type<T>::value_type value_type;
   using KPM_VectorBasis<T,2>::simul;
@@ -20,17 +26,24 @@ public:
   using KPM_VectorBasis<T,2>::aux_test;
   using KPM_VectorBasis<T,2>::inc_index;
   
-  KPM_Vector(int mem, Simulation<T,2> & sim) : KPM_VectorBasis<T,2>(mem, sim), r(sim.r), h(sim.h){
+  KPM_Vector(int mem, Simulation<T,2> & sim) : KPM_VectorBasis<T,2>(mem, sim), r(sim.r), h(sim.h), x(r.Ld), std(x.basis[1]) {
     unsigned d;
     Coordinates <std::size_t, 3>     z(r.Ld);
     Coordinates <int, 3> x(r.nd), dist(r.nd);
 
+    mult_t1_mag = new T**[r.Orb];
+    for(unsigned io = 0; io < r.Orb; io++)
+      {
+	mult_t1_mag[io] = new T*[h.hr.NHoppings(io)];
+	for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
+	  mult_t1_mag[io][ib] = new T[STRIDE];
+      }
 
     for(unsigned d = 0; d < 2; d++)
-	for(unsigned b = 0; b < 2; b++)
+      for(unsigned b = 0; b < 2; b++)
 	{
-	    MemIndBeg[d][b] = new std::size_t[r.Orb];
-	    MemIndEnd[d][b] = new std::size_t[r.Orb];
+	  MemIndBeg[d][b] = new std::size_t[r.Orb];
+	  MemIndEnd[d][b] = new std::size_t[r.Orb];
 	    
 	}
     
@@ -68,12 +81,19 @@ public:
   
   ~KPM_Vector(void){
     for(unsigned d = 0; d < 2; d++)
-	for(unsigned b = 0; b < 2; b++)
+      for(unsigned b = 0; b < 2; b++)
 	{
-	    delete MemIndBeg[d][b];
-	    delete MemIndEnd[d][b];
+	  delete MemIndBeg[d][b];
+	  delete MemIndEnd[d][b];
 	    
 	}
+    for(unsigned io = 0; io < r.Orb;io++)
+      {	
+	for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
+	  delete mult_t1_mag[io][ib];
+	delete mult_t1_mag[io];
+      }
+    delete mult_t1_mag;
   }
   
   void initiate_vector() {
@@ -98,160 +118,154 @@ public:
   };
   
   template < unsigned MULT> 
-  void Multiply() {
-	  vverbose_message("Entered Multiply");
-
-    /*
-      Mosaic Multiplication using a TILE of STRIDE x STRIDE 
-      Right Now We expect that both ld[0] and ld[1]  are multiple of STRIDE
-      MULT = 0 : For the case of the Velocity/Hamiltonian
-      MULT = 1 : For the case of the KPM_iteration
-    */
-
+  void build_regular_phases(int i1)
+  {
+    unsigned l[2 + 1], count;
+    Coordinates<std::ptrdiff_t, 3>  global(r.Lt);
+    Coordinates<std::ptrdiff_t, 3> local1(r.Ld);
     Coordinates<std::size_t,3> x(r.Ld);
-    
-    // Relative to magnetic field
-    
-    Coordinates<std::ptrdiff_t, 3> global(r.Lt), global1(r.Lt), global2(r.Lt), local1(r.Ld), local2(r.Ld); 
-    Eigen::Map<Eigen::Matrix<std::ptrdiff_t,2,1>> v_global1(global1.coord), v_global2(global2.coord), v_local1(local1.coord), v_local2(local2.coord);
-    
-    unsigned l[2 + 1];
     std::fill_n(l, 2, 3);
     l[2]  = r.Orb;
     Coordinates<std::ptrdiff_t, 2 + 1> b3(l);    
     Eigen::Map<Eigen::Matrix<std::ptrdiff_t,2, 1>> vee(b3.coord); // Column vector
     
     
-    std::complex<double> im(0,1.0);
-    double phase;
-    Eigen::Matrix<double, 1, 2> temp_vect;
-    
-    
-    std::size_t i0, i1;
-    inc_index();
-    T * phi0 = v.col(index).data();
-    T * phiM1 = v.col((memory + index - 1) % memory ).data();
-    T * phiM2 = v.col((memory + index - 2) % memory ).data();
-    
-    vverbose_message("Before initializing tiles that have deffects connecting elements of a previous tile.");
-    // Initialize tiles that have deffects connecting elements of a previous tile
-    for(auto istr = h.cross_mozaic_indexes.begin(); istr != h.cross_mozaic_indexes.end() ; istr++)
+    for(unsigned io = 0; io < r.Orb; io++)
       {
-	i0 = ((*istr) % (r.lStr[0]) ) * STRIDE + NGHOSTS;
-	i1 = ((*istr) / r.lStr[0] ) * STRIDE + NGHOSTS;
-	for(std::size_t io = 0; io < r.Orb; io++)
-	  {
-	    const std::size_t ip = io * x.basis[2] ;
-	    const std::size_t std = x.basis[1];
-	    const std::size_t j0 = ip + i0 + i1 * std;
-	    const std::size_t j1 = j0 + STRIDE * std;
+	const std::size_t ip = io * x.basis[2] ;
+	const std::size_t j0 = ip + 0 + i1 * std;
+	const std::size_t j1 = j0 + STRIDE * std;
 
+	for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
+	  {
+	    b3.set_coord(h.hr.dist(ib,io));        
+	    vee.array() -= 1;
+	    count = 0;
 	    for(std::size_t j = j0; j < j1; j += std )
-	      for(std::size_t i = j; i < j + STRIDE ; i++)
-		phi0[i] = - value_type(MULT) * phiM2[i];
+	      {
+		r.convertCoordinates(global, local1.set_coord(j));
+		value_type phase = vee(0)*global.coord[1]*r.vect_pot(0,1);
+		mult_t1_mag[io][ib][count] = value_type(MULT + 1) * h.hr.hopping(ib, io) * h.peierls(phase);
+		count++;
+	      }
 	  }
       }
+  }
     
-    vverbose_message("Before periodic component");
-    for( i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1 += STRIDE  )
-      for( i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0 += STRIDE )
-	{
-	  vverbose_message("Before periodic component + Anderson disorder");
-	  // Periodic component of the Hamiltonian + Anderson disorder
-	  std::size_t istr = (i1 - NGHOSTS) /STRIDE * r.lStr[0] + (i0 - NGHOSTS)/ STRIDE;
+  template < unsigned MULT> 
+  void initiate_stride(std::size_t & istr)
+  {
+    std::size_t i0, i1;
+    const std::size_t std = x.basis[1];
+    // Periodic component of the Hamiltonian + Anderson disorder
+    i0 = ((istr) % (r.lStr[0]) ) * STRIDE + NGHOSTS;
+    i1 = ((istr) / r.lStr[0] ) * STRIDE + NGHOSTS;
 			
-	  for(std::size_t io = 0; io < r.Orb; io++)
-	    {
-	      const std::size_t ip = io * x.basis[2];
-	      const std::size_t dd = (h.Anderson_orb_address[io] - io)*r.Nd;
-	      const std::size_t std = x.basis[1]; // this already takes the orbital into account
-	      const std::size_t j0 = ip + i0 + i1 * std;
-	      const std::size_t j1 = j0 + STRIDE * std; //j0 and j1 define the limits of the for cycle
+    for(std::size_t io = 0; io < r.Orb; io++)
+      {
+	const std::size_t ip = io * x.basis[2];
+	const std::size_t j0 = ip + i0 + i1 * std;
+	const std::size_t j1 = j0 + STRIDE * std; //j0 and j1 define the limits of the for cycle
 
 
-	    vverbose_message("Before initialize phi0");
-	      // Initialize phi0
-
-	      if(h.cross_mozaic.at(istr)){
-		  vverbose_message("mosaic\n");
-		for(std::size_t j = j0; j < j1; j += std )
-		  for(std::size_t i = j; i < j + STRIDE ; i++){
-		      vverbose_message("zeroing\n");
-		    phi0[i] = - value_type(MULT) * phiM2[i];
-		  }
-	      }
+	for(std::size_t j = j0; j < j1; j += std )
+	  for(std::size_t i = j; i < j + STRIDE ; i++)
+	    phi0[i] = - value_type(MULT) * phiM2[i];
+      }
+  }
 				
-	      vverbose_message("Before Anderson disorder");
-	      // Anderson disorder
-	      if( h.Anderson_orb_address[io] >= 0)
-		{
-		vverbose_message("inside if\n");
-		  for(std::size_t j = j0; j < j1; j += std )
-		    for(std::size_t i = j; i < j + STRIDE ; i++)
-		      phi0[i] += value_type(MULT + 1) * phiM1[i] * h.U_Anderson.at(i - dd);
-		}
-	      else if (h.Anderson_orb_address[io] == - 1)
-		{
-		vverbose_message("inside elif\n");
-		  for(std::size_t j = j0; j < j1; j += std )
-		    for(std::size_t i = j; i < j + STRIDE ; i++)
-		      phi0[i] += value_type(MULT + 1) * phiM1[i] * h.U_Orbital.at(io);
-		}
+  template < unsigned MULT> 
+  void inline mult_local_disorder(const  std::size_t & j0, const  std::size_t & io)
+  {
+    const std::size_t j1 = j0 + STRIDE * std;
+    const std::size_t dd = (h.Anderson_orb_address[io] - io)*r.Nd;
+    // Anderson disorder
+    if( h.Anderson_orb_address[io] >= 0)
+      {
+	for(std::size_t j = j0; j < j1; j += std )
+	  for(std::size_t i = j; i < j + STRIDE ; i++)
+	    phi0[i] += value_type(MULT + 1) * phiM1[i] * h.U_Anderson.at(i - dd);
+      }
+    else if (h.Anderson_orb_address[io] == - 1)
+      {
+	for(std::size_t j = j0; j < j1; j += std )
+	  for(std::size_t i = j; i < j + STRIDE ; i++)
+	    phi0[i] += value_type(MULT + 1) * phiM1[i] * h.U_Orbital.at(io);
+      }
+  }
 	      
-	      vverbose_message("Before hoppings");
-	      // Hoppings
-	      for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
-		{
-		  const std::ptrdiff_t d1 = h.hr.distance(ib, io);
-		  const T t1 =  value_type(MULT + 1) * h.hr.hopping(ib, io);
-		  b3.set_coord(h.hr.dist(ib,io));        
-		  vee.array() -= 1; 
-					
-		  for(std::size_t j = j0; j < j1; j += std ){
-		    r.convertCoordinates(global, local1.set_coord(j));
-		    phase = vee(0)*global.coord[1]*r.vect_pot(0,1);
-						
-		    for(std::size_t i = j; i < j + STRIDE ; i++){								
-		      phi0[i] += t1 * phiM1[i + d1] * peierls2(phase);								
-		    }
-		  }
-		}
-	    }
+  void inline mult_regular_hoppings(const  std::size_t & j0, const  std::size_t & io)
+  {
+    std::size_t count;
+    const std::size_t j1 = j0 + STRIDE * std;
+    // Hoppings
+    for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
+      {
+	const std::ptrdiff_t d1 = h.hr.distance(ib, io);
+	count = 0;
+	for(std::size_t j = j0; j < j1; j += std )
+	  {
+	    const T t1 = mult_t1_mag[io][ib][count++];
+	    for(std::size_t i = j; i < j + STRIDE ; i++)
+	      phi0[i] += t1 * phiM1[i + d1];								
+	  }
+      }
+  }
 			
 			
-	  vverbose_message("Before structural disorder");	
-	  // Structural disorder contribution - iterate over the disorder models			
-	  for(auto id = h.hd.begin(); id != h.hd.end(); id++)		   
-	    for(std::size_t i = 0; i <  id->position.at(istr).size(); i++)
-	      {
+  // Structural disorder contribution - iterate over the disorder models			
+  template <unsigned MULT> 
+  void Multiply() {
+    vverbose_message("Entered Multiply");
+    
+    /*
+      Mosaic Multiplication using a TILE of STRIDE x STRIDE 
+      Right Now We expect that both ld[0] and ld[1]  are multiple of STRIDE
+      MULT = 0 : For the case of the Velocity/Hamiltonian
+      MULT = 1 : For the case of the KPM_iteration
+    */
+    std::size_t i0, i1;
+    inc_index();
+    phi0 = v.col(index).data();
+    phiM1 = v.col((memory + index - 1) % memory ).data();
+    phiM2 = v.col((memory + index - 2) % memory ).data();
+    
+    // Initialize tiles that have deffects connecting elements of a previous tile
+    for(auto istr = h.cross_mozaic_indexes.begin(); istr != h.cross_mozaic_indexes.end() ; istr++)
+      initiate_stride<MULT>(*istr);
+    
+    for( i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1 += STRIDE  )
+      {
+	build_regular_phases<MULT>(i1);
 		
-		std::size_t ip = id->position.at(istr)[i];
-		for(unsigned k = 0; k < id->hopping.size(); k++)
-		  {
-		    std::size_t k1 = ip + id->node_position[id->element1[k]];
-		    std::size_t k2 = ip + id->node_position[id->element2[k]];
+	for( i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0 += STRIDE )
+	  {
 		    
-		    // These four lines pertrain only to the magnetic field
-		    r.convertCoordinates(global1, local1.set_coord(k1));
-		    r.convertCoordinates(global2, local1.set_coord(k2));
-		    temp_vect = (v_global2 - v_global1).template cast<double>().matrix().transpose();
-		    phase = temp_vect*r.vect_pot*v_global1.template cast<double>().matrix();
-		    phi0[k1] += value_type(MULT + 1) * id->hopping[k] * phiM1[k2] * peierls2(phase);
-		  }
+	    std::size_t istr = (i1 - NGHOSTS) /STRIDE * r.lStr[0] + (i0 - NGHOSTS)/ STRIDE;
+	    if(h.cross_mozaic.at(istr))
+	      initiate_stride<MULT>(istr);
+	    // These four lines pertrain only to the magnetic field
+	    for(std::size_t io = 0; io < r.Orb; io++)
+	      {
+		const std::size_t ip = io * x.basis[2];
+		const std::size_t j0 = ip + i0 + i1 * std;
 		
-		for(std::size_t k = 0; k < id->U.size(); k++)
-		  {
-		    std::size_t k1 = ip + id->node_position[id->element[k]];
-		    phi0[k1] += value_type(MULT + 1) * id->U[k] * phiM1[k1];
-		  }
+		// Local Energy
+		mult_local_disorder<MULT>(j0, io);
+		
+		// Hoppings
+		mult_regular_hoppings(j0, io);
 	      }
+	    for(auto id = h.hd.begin(); id != h.hd.end(); id++)
+	      id->template multiply_defect<MULT>(istr, phi0, phiM1);
 	  	    
-	  // Empty the vacancies in the tile
-	  auto & hV = h.hV.position.at(istr);
-	  for(auto k = hV.begin(); k != hV.end(); k++)
-	    phi0[*k] = 0.;
+	    // Empty the vacancies in the tile
+	    auto & hV = h.hV.position.at(istr);
+	    for(auto k = hV.begin(); k != hV.end(); k++)
+	      phi0[*k] = 0.;
 
-	}
+	  }
+      }
 
     for(auto vc =  h.hV.vacancies_with_defects.begin(); vc != h.hV.vacancies_with_defects.end(); vc++)
       phi0[*vc] = 0.;
@@ -263,35 +277,17 @@ public:
        located on the neighbour domains.
        We already subtract the vacancies from these contributions 
     */
-    vverbose_message("Before broken impurities");	
     for(auto id = h.hd.begin(); id != h.hd.end(); id++)
-      for(std::size_t i = 0; i < id->border_element1.size(); i++)
-	{
-	  std::size_t i1 = id->border_element1[i];
-	  std::size_t i2 = id->border_element2[i];
+      id->template multiply_broken_defect<MULT>(phi0, phiM1);
 	  
-	  // These four lines pertrain only to the magnetic field
-	  r.convertCoordinates(global1, local1.set_coord(i1));
-	  r.convertCoordinates(global2, local1.set_coord(i2));
-	  temp_vect  = (v_global2 - v_global1).template cast<double>().matrix().transpose();
-	  phase = temp_vect*r.vect_pot*v_global1.template cast<double>().matrix();
-	  
-	  phi0[i1] += value_type(MULT + 1) * id->border_hopping[i] * phiM1[i2] * peierls2(phase);
-	}
-    
-    for(auto id = h.hd.begin(); id != h.hd.end(); id++)
-      for(std::size_t i = 0; i < id->border_element.size(); i++)
-	{
-	  std::size_t i1 = id->border_element[i];
-	  phi0[i1] += value_type(MULT + 1) * id->border_U[i] * phiM1[i1];
-	}
-
-
-    //    h.hV.test_field(phi0); 
-    vverbose_message("Exchange boundaries");	
+    // These four lines pertrain only to the magnetic field
     Exchange_Boundaries();
-    verbose_message("Left Multiply");	
   };
+	  
+    
+
+
+  //    h.hV.test_field(phi0); 
   
   void Velocity( T * phi0, T * phiM1, int axis) {
     /*
@@ -588,7 +584,6 @@ public:
 	auto neigh_right  = simul.Global.ghosts.begin() + 2 * block[d][1] * BSize;
 	std::copy(neigh_right,         neigh_right + BSize , ghosts_right );     // From the left to the right
 	std::copy(neigh_left + BSize,  neigh_left + 2*BSize, ghosts_left  )  ;   // From the right to the left
-
 	
 #pragma omp barrier	
 	for(std::size_t io = 0; io < r.Orb; io++)
@@ -596,13 +591,10 @@ public:
 	    std::size_t il = MemIndEnd[d][0][io];
 	    std::size_t ir = MemIndEnd[d][1][io];
 	    
-	    
 	    for(std::size_t i = 0; i < max[d]; i++)
 	      {
 		for(int ig = 0; ig < NGHOSTS; ig++)
 		  {
-		    
-		    
 		    phi[il + ig*stride_ghosts[d]] = ghosts_left [i + (ig + NGHOSTS*io) * max[d]];
 		    phi[ir + ig*stride_ghosts[d]] = ghosts_right[i + (ig + NGHOSTS*io) * max[d]];
 		  }
@@ -614,58 +606,7 @@ public:
       
   }
   
-
-  /*  
-      void Exchange_Boundaries() {
-      
-      const unsigned D = 2u;
-      //
-      // Exchange the Borders of phi.v.col(index)
-      //
-      Coordinates<unsigned,3> x(r.Ld); 
-      T  *phi1 = v.col(index).data();
-    
-    
-      for(unsigned d = 0; d <  D; d++)  // We will transfer the orientations perpendicular  to d
-      {
-      unsigned int BSize = r.Orb * max[d] * NGHOSTS;
-      unsigned d1 = (d + 1) % D;
-      const int st = x.basis[d1]; 
-	
-      for(unsigned io = 0; io < r.Orb; io++)
-      for(unsigned b = 0; b < 2u; b++)
-      {
-      const unsigned bi = (io + b * r.Orb) * max[d] * NGHOSTS;
-      unsigned I        = MemIndBeg[d][b] + io * x.basis[D] - st;
-      for(unsigned i = 0; i < max[d]; i++ )
-      simul.ghosts.at(bi + i) = phi1[ I += st ];
-      }
-
-
-	
-      // Copy to the  shared memory
-      std::copy( simul.ghosts.begin(), simul.ghosts.begin() + 2 * BSize, simul.Global.ghosts.begin() + 2 * BSize * r.thread_id );
-
-	
-      #pragma omp barrier
-	
-      for(unsigned b = 0; b < 2; b++)
-      std::copy(simul.Global.ghosts.begin() + block[d][b] , simul.Global.ghosts.begin() + block[d][b] +  BSize, simul.ghosts.begin() + (1-b) * BSize );
-      #pragma omp barrier
-	
-      for(unsigned io = 0; io < r.Orb; io++) // Copy back from the shared memory
-      for(unsigned b = 0; b < 2; b++)
-      {
-      const unsigned bi = (io + b * r.Orb) * max[d];
-      unsigned I        = MemIndEnd[d][b] + io * x.basis[D] - st;
-	      
-      for(unsigned i = 0; i < max[d]; i++ )
-      phi1[ I += st ] =  simul.ghosts.at(bi + i);
-      }
-      } 
-
-      };
-  */  
+ 
   void test_boundaries_system() {
 
     /*
@@ -741,18 +682,6 @@ public:
 	for(int d = 0; d < NGHOSTS; d++)
 	  v(x.set({(long) (r.Ld[0] - 1 - d),i1,io}).index, mem_index) *= 0;
 
-  };
-    
-  template <typename U = T>
-  typename std::enable_if<is_tt<std::complex, U>::value, U>::type peierls2(double phase) {
-    std::complex<double> im(0,1.0);
-    return U(exp(im*phase));
-  };
-  
-  template <typename U = T>
-  typename std::enable_if<!is_tt<std::complex, U>::value, U>::type peierls2(double phase) {
-    //std::cout << "Shouldn't be here..\n";
-    return 1.0;
   };
   
 };

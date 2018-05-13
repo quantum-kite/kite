@@ -5,8 +5,7 @@ struct Defect_Operator  {
   unsigned                       NumberNodes;                        // Number of nodes in the deffect
   std::vector <T>                          U;                        // local energies
   std::vector <unsigned>             element;                        // nodes with local energies
-  std::vector <T>                    hopping;                        // vector of the non-zero values of the hopping operator operator
-  std::vector <T>           hopping_magnetic;                        // 
+  std::vector <T>                    hopping;                        // vector of the non-zero values of the hopping operator operator                // 
   std::vector <T>                       V[D];
   std::vector <T>                   V2[D][D];
   std::vector <unsigned>            element1;                        // vector with the nodes 
@@ -17,7 +16,6 @@ struct Defect_Operator  {
   std::vector <std::size_t>  border_element1;                        // Position of broken deffects in hopping terms                     
   std::vector <std::size_t>  border_element2;                        // Position of broken deffects in hopping terms                     
   std::vector <T>             border_hopping;
-  std::vector <T>    border_hopping_magnetic;
   std::vector <T>                border_V[D];                                           
   std::vector <T>            border_V2[D][D];   
   std::vector <T>                   border_U;                                                 
@@ -25,6 +23,8 @@ struct Defect_Operator  {
   LatticeStructure <D>                   & r;
   Simulation <T,D>                   & simul;
   std::vector <std::vector<std::size_t>> position;                   // vector of vectors with positions in the lattice of the Orbital 0 of the defects for each stride block
+  Eigen::Array<T, -1, -1>        new_hopping;
+  typedef typename extract_value_type<T>::value_type value_type;
   
   Defect_Operator(Simulation <T,D> & sim, std::string & defect, H5::H5File *file) : r(sim.r), simul(sim), position(sim.r.NStr)
   {
@@ -54,7 +54,6 @@ struct Defect_Operator  {
     
     tmpI.resize(n);
     hopping.resize(n);
-    hopping_magnetic.resize(n);
     element1.resize(n);
     element2.resize(n);
     
@@ -105,47 +104,33 @@ struct Defect_Operator  {
     
     /* Build Velocity */ 
     
-    Coordinates<std::ptrdiff_t, D + 1> Lda(r.Ld), Ldb(r.Ld);
-    Eigen::Map<Eigen::Matrix<std::ptrdiff_t,D, 1>> va(Lda.coord), vb(Ldb.coord); // Column vector
-    Eigen::Matrix<double, D, 1> dr_R;
-    Eigen::Matrix<double, D, 1> dr_a;
-    Eigen::Matrix<double, D, 1> orbital_difference_R;
-    Eigen::Matrix<double, D, 1> lattice_difference_R;
-    Eigen::Matrix<double, D, 1> orbital_difference_a;
-    Eigen::Matrix<double, D, 1> lattice_difference_a;
+    Coordinates<std::ptrdiff_t, D + 1> Lda(r.Ld), Ldb(r.Ld),  Lta(r.Lt);
+    Eigen::Map<Eigen::Matrix<std::ptrdiff_t,D, 1>> va(Lda.coord), vb(Ldb.coord), Vta(Lta.coord) ; // Column vector
+    Eigen::Matrix<double, D, 1> dif_R, dif_O, sum_O, ra;
+    Eigen::Matrix<double, D, D> matA = r.rLat.inverse().transpose() * r.vect_pot * r.rLat.inverse();
+    new_hopping = Eigen::Matrix<T, Eigen::Dynamic,Eigen::Dynamic>::Zero(hopping.size(), r.Ld[D - 1]);
     
     
     for(unsigned ih = 0; ih < hopping.size(); ih++)
       {
+	double phase1, phase2;
+	for(std::size_t iv = NGHOSTS; iv < r.Ld[D - 1] - NGHOSTS; iv++)
+	  {
+	    std::size_t ip = NGHOSTS + iv *Lda.basis[D - 1];
+	    Lda.set_coord(static_cast<std::ptrdiff_t>( ip + node_position[element1.at(ih)]));
+	    Ldb.set_coord(static_cast<std::ptrdiff_t>( ip + node_position[element2.at(ih)]));
+	    dif_R = r.rLat * (va - vb).template cast<double>();
+	    dif_O = r.rOrb.col(Lda.coord[D]) - r.rOrb.col(Ldb.coord[D]);
+	    sum_O = r.rOrb.col(Ldb.coord[D]) + r.rOrb.col(Lda.coord[D]);
+	    r.convertCoordinates(Lta, Lda);
+	    ra = r.rLat * Vta.template cast<double>();
 	
-	Lda.set_coord(static_cast<std::ptrdiff_t>(r.Nd/2 + node_position[element1.at(ih)]));
-	Ldb.set_coord(static_cast<std::ptrdiff_t>(r.Nd/2 + node_position[element2.at(ih)]));
-
-	// difference vectors in real-space coordinates
-	orbital_difference_R = r.rOrb.col(Ldb.coord[D]) - r.rOrb.col(Lda.coord[D]);
-	lattice_difference_R = r.rLat * (vb - va).template cast<double>();
-	dr_R = orbital_difference_R + lattice_difference_R;
-	
-	// difference vectors in lattice coordinates
-	orbital_difference_a = r.rLat.inverse() * orbital_difference_R;
-	lattice_difference_a = r.rLat.inverse() * lattice_difference_R;
-	dr_a = orbital_difference_a + lattice_difference_a;
-	
-	
-	// periodic part of the Peierls phase. 
-	// If the kpm vector is not complex, peierls1(phase) will return 1.0, so it is effectively harmless.
-	//double phase = ((0.5*dr_a.transpose() + (r.rLat.inverse()*r.rOrb.col(Lda.coord[D])).transpose())*r.vect_pot*dr_a - lattice_difference_a.transpose()*r.vect_pot*r.rLat.inverse()*r.rOrb.col(Ldb.coord[D]))(0,0);
-	double phase = (-(-0.5*dr_a.transpose() + (r.rLat.inverse()*r.rOrb.col(Ldb.coord[D])).transpose())*r.vect_pot*dr_a + lattice_difference_a.transpose()*r.vect_pot*r.rLat.inverse()*r.rOrb.col(Lda.coord[D]))(0,0);
-	hopping_magnetic.at(ih) = hopping.at(ih) * peierls1(phase);
-	hopping.at(ih) = hopping_magnetic.at(ih);
-	
-	
-	for(unsigned dim = 0; dim < D; dim++)
-	  V[dim].push_back( hopping.at(ih) * T(dr_R(dim)) );
-
-	for(unsigned dim1 = 0; dim1 < D; dim1++)
-	  for(unsigned dim2 = 0; dim2 < D; dim2++)
-	    V2[dim1][dim2].push_back( hopping.at(ih) * T(dr_R(dim1)) * T(dr_R(dim2)));
+	    phase1 =  0.5 * (dif_R + sum_O).transpose() * (matA * (dif_R + dif_O)).matrix();
+	    phase2 =  - dif_R.transpose() * (matA * r.rOrb.col(Lda.coord[D])).matrix();
+	    double phase3 =  - dif_R.transpose() * (matA * ra).matrix();	   
+	    new_hopping(ih, iv) = hopping.at(ih) * simul.h.peierls(phase1 + phase2 + phase3);
+	  }
+	hopping.at(ih) *= simul.h.peierls(phase1 + phase2);
       }
     
     debug_message("Left Defect_Operator constructor.\n");
@@ -365,18 +350,60 @@ struct Defect_Operator  {
     debug_message("Left generate_disorder\n");
   }
   
+  template <unsigned MULT>
+  void multiply_defect(std::size_t istr, T* & phi0, T* & phiM1)
+  {
+    Coordinates<std::ptrdiff_t, 3>  local1(r.Ld);
+
+    for(std::size_t i = 0; i <  position.at(istr).size(); i++)
+      {
+	std::size_t ip = position.at(istr)[i];
+	std::size_t iv = local1.set_coord(ip).coord[D - 1];
+	for(unsigned k = 0; k < hopping.size(); k++)
+	  {
+	    std::size_t k1 = ip + node_position[element1[k]];
+	    std::size_t k2 = ip + node_position[element2[k]];
 
 
-  template <typename U = T>
-  typename std::enable_if<is_tt<std::complex, U>::value, U>::type peierls1(double phase) {
-    std::complex<double> im(0,1.0);
-    return U(exp(im*phase));
-  };
   
-  template <typename U = T>
-  typename std::enable_if<!is_tt<std::complex, U>::value, U>::type peierls1(double phase) {
-    return 1.0;
-  };
+	    phi0[k1] += value_type(MULT + 1) * new_hopping(k, iv) * phiM1[k2] ;
+	  }
 
+	for(std::size_t k = 0; k < U.size(); k++)
+	  {
+	    std::size_t k1 = ip + node_position[element[k]];
+	    phi0[k1] += value_type(MULT + 1) * U[k] * phiM1[k1];
+	  }
+      }
+  }
+
+  template <unsigned MULT>
+  void multiply_broken_defect(T* & phi0, T* & phiM1)
+  {
+    Coordinates<std::ptrdiff_t, 3> global1(r.Lt), global2(r.Lt), local1(r.Ld) ;
+    Eigen::Map<Eigen::Matrix<std::ptrdiff_t,2,1>> v_global1(global1.coord), v_global2(global2.coord);
+    double phase;
+
+    Eigen::Matrix<double, 1, 2> temp_vect;
+    for(std::size_t i = 0; i < border_element1.size(); i++)
+      {
+	std::size_t i1 = border_element1[i];
+	std::size_t i2 = border_element2[i];
+	
+	// These four lines pertrain only to the magnetic field
+	r.convertCoordinates(global1, local1.set_coord(i1));
+	r.convertCoordinates(global2, local1.set_coord(i2));
+	temp_vect  = (v_global2 - v_global1).template cast<double>().matrix().transpose();
+	phase = temp_vect(0)*r.vect_pot(0,1)*v_global1(1); //.template cast<double>().matrix();
+	
+	phi0[i1] += value_type(MULT + 1) * border_hopping[i] * phiM1[i2] * simul.h.peierls(phase);
+      }
+    
+    for(std::size_t i = 0; i < border_element.size(); i++)
+      {
+	std::size_t i1 = border_element[i];
+	phi0[i1] += value_type(MULT + 1) * border_U[i] * phiM1[i1];
+      }
+  }
   
 };
