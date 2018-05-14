@@ -228,9 +228,11 @@ template <typename T>
 Eigen::Matrix<std::complex<T>, -1, 1> contract3(
     std::function<T(int, T)> f0, int delta_position, 
     std::function<std::complex<T>(int, T)> f1, int N_moments, 
+    std::function<std::complex<T>(int, T)> f2, int N_moments2, 
     const Eigen::Array<std::complex<T>, -1, -1>& Gamma, 
     const Eigen::Matrix<T, -1, 1>& energies, 
-    const Eigen::Matrix<T, -1, 1>& frequencies){
+    const Eigen::Matrix<T, -1, 1>& frequencies,
+    const Eigen::Matrix<T, -1, 1>& frequencies2){
 
     // First of all, contract the index that will not depend on the frequency.
     // That is the index of the delta function, that's why we need to know its
@@ -238,11 +240,12 @@ Eigen::Matrix<std::complex<T>, -1, 1> contract3(
     verbose_message("Entered contract 2d.\n");
 
     int N_energies = energies.rows();
-    int N_freqs = frequencies.rows();
+    int N_freqs1 = frequencies.rows();
+    int N_freqs2 = frequencies2.rows();
 
     T energy;
-    Eigen::Matrix<std::complex<T>, -1, -1> GammaEN;
-    GammaEN = Eigen::Matrix<std::complex<T>, -1, -1>::Zero(N_energies, N_moments);
+    Eigen::Matrix<std::complex<T>, -1, -1> GammaENN;
+    GammaENN = Eigen::Matrix<std::complex<T>, -1, -1>::Zero(N_energies, N_moments*N_moments);
    
     verbose_message("First part of the calculation.\n");
 
@@ -251,24 +254,37 @@ Eigen::Matrix<std::complex<T>, -1, 1> contract3(
         energy = energies(e);
         for(int n = 0; n < N_moments; n++){
           for(int m = 0; m < N_moments; m++){
-            GammaEN(e, n) += Gamma(n,m)*f0(m, energy);
-            //std::cout << "e:" << energy;
-            //std::cout << "n:" << n;
-            //std::cout << "m:" << m;
-            //std::cout << "GammaNN:" << Gamma(n.m);
-            //std::cout << "f0:" << f0(m;
+            for(int p = 0; p < N_moments; p++){
+             GammaENN(e, n*N_moments + m) += Gamma(n*N_moments*N_moments + m*N_moments + p)*f0(p, energy);
+            }
           }
         }
       }
     }
+      
 
-    
-    else if(delta_position == 1){
+    if(delta_position == 1){
       for(int e = 0; e < N_energies; e++){
         energy = energies(e);
         for(int n = 0; n < N_moments; n++){
           for(int m = 0; m < N_moments; m++){
-            GammaEN(e, n) += Gamma(m,n)*f0(m, energy);
+            for(int p = 0; p < N_moments; p++){
+             GammaENN(e, n*N_moments + m) += Gamma(n*N_moments*N_moments + p*N_moments + m)*f0(p, energy);
+            }
+          }
+        }
+      }
+    }
+      
+
+    if(delta_position == 2){
+      for(int e = 0; e < N_energies; e++){
+        energy = energies(e);
+        for(int n = 0; n < N_moments; n++){
+          for(int m = 0; m < N_moments; m++){
+            for(int p = 0; p < N_moments; p++){
+             GammaENN(e, n*N_moments + m) += Gamma(p*N_moments*N_moments + m*N_moments + n)*f0(p, energy);
+            }
           }
         }
       }
@@ -284,23 +300,42 @@ Eigen::Matrix<std::complex<T>, -1, 1> contract3(
     // Now contract the remaining index. This index does depend on the
     // frequency argument
     
-    T freq;
+    Eigen::Matrix<std::complex<T>, -1, 1> GammaEN;
+    GammaEN = Eigen::Matrix<std::complex<T>, -1, 1>::Zero(N_energies, N_moments);
     Eigen::Matrix<std::complex<T>, -1, 1> GammaE;
     GammaE = Eigen::Matrix<std::complex<T>, -1, 1>::Zero(N_energies, 1);
     
-    Eigen::Matrix<std::complex<T>, -1, 1> cond;
-    cond = Eigen::Matrix<std::complex<T>, -1, 1>::Zero(N_freqs, 1);
+    T freq1, freq2;
 
-    for(int w1 = 0; w1 < N_freqs; w1++){
-      freq = frequencies(w1);
-      for(int e = 0; e < N_energies; e++){
-        energy = energies(e) + freq;
-        GammaE(e) = 0;
-        for(int n = 0; n < N_moments; n++){
-          GammaE(e) += GammaEN(e, n)*f1(n, energy);
+    Eigen::Matrix<std::complex<T>, -1, -1> cond;
+    cond = Eigen::Matrix<std::complex<T>, -1, -1>::Zero(N_freqs1, N_freqs2);
+
+    for(int w2 = 0; w2 < N_freqs2; w2++){
+      freq2 = frequencies2(w2);
+      for(int w1 = 0; w1 < N_freqs1; w1++){
+        freq1 = frequencies(w1);
+
+
+        for(int m = 0; m < N_moments; m++){
+          for(int e = 0; e < N_energies; e++){
+            energy = energies(e) + freq1;
+            GammaEN(e, m) = 0;
+            for(int n = 0; n < N_moments; n++){
+              GammaEN(e, m) += GammaENN(e, m*N_moments + n)*f1(n, energy);
+            }
+          }
         }
+
+        for(int e = 0; e < N_energies; e++){
+          Gamma(e) = 0;
+          energy = energies(e) + freq2;
+          for(int m = 0; m < N_moments; m++){
+            GammaE(e) += GammaEN(e,m)*f2(m, energy);
+          }
+        }
+        cond(w1, w2) = integrate(energies, GammaE);
+    
       }
-      cond(w1) = integrate(energies, GammaE);
     }
     verbose_message("Left contract.\n");
     return cond;

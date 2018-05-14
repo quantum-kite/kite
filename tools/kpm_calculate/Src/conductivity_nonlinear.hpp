@@ -51,7 +51,7 @@ conductivity_nonlinear<T, DIM>::conductivity_nonlinear(system_info<T, DIM>& info
   systemInfo = info;
 
   // location of the information about the conductivity
-  dirName = "/Calculation/conductivity_nonlinear/";
+  dirName = "/Calculation/conductivity_optical_nonlinear/";
   
   // check whether the conductivity_nonlinear was asked for
   try{
@@ -76,15 +76,17 @@ void conductivity_nonlinear<T, DIM>::read(){
     std::cout << "Data for nonlinear conductivity does not exist. Exiting.\n";
     exit(1);
   }
+
   
   // Fetch the direction of the conductivity and convert it to a string
   get_hdf5(&direction, &file, (char*)(dirName+"Direction").c_str());									
-  std::string dirString = num2str2(direction);
+  std::string dirString = num2str3(direction);
 
   // Fetch the number of Chebyshev Moments, temperature and number of points
 	get_hdf5(&NumMoments, &file, (char*)(dirName+"NumMoments").c_str());	
 	get_hdf5(&temperature, &file, (char*)(dirName+"Temperature").c_str());	
 	get_hdf5(&NumPoints, &file, (char*)(dirName+"NumPoints").c_str());	
+	get_hdf5(&special, &file, (char*)(dirName+"Special").c_str());	
 
 
   // Check whether the matrices we're going to retrieve are complex or not
@@ -97,9 +99,11 @@ void conductivity_nonlinear<T, DIM>::read(){
   bool hasGamma3 = false;
 
 
+  std::cout << "special:" << special << "\n";
+  std::cout << "dirstring:" << dirString << "\n";
   // Retrieve the Gamma0 Matrix. This matrix is not needed for the special case
   std::string MatrixName = dirName + "Gamma0" + dirString;
-  if(!special){
+  if(special == 0){
     try{
       verbose_message("Filling the Gamma0 matrix.\n");
       Gamma0 = Eigen::Array<std::complex<T>,-1,-1>::Zero(1, NumMoments);
@@ -150,7 +154,7 @@ void conductivity_nonlinear<T, DIM>::read(){
 
 
   // Retrieve the Gamma2 Matrix
-  std::string MatrixName = dirName + "Gamma2" + dirString;
+  MatrixName = dirName + "Gamma2" + dirString;
   try{
 		verbose_message("Filling the Gamma2 matrix.\n");
 		Gamma2 = Eigen::Array<std::complex<T>,-1,-1>::Zero(NumMoments, NumMoments);
@@ -177,7 +181,7 @@ void conductivity_nonlinear<T, DIM>::read(){
   // Retrieve the Gamma3 Matrix. This is the biggest matrix and doesn't need to be
   // calculated when we want hBN because it is identically zero.
   if(special == 0){
-    std::string MatrixName = dirName + "Gamma3" + dirString;
+    MatrixName = dirName + "Gamma3" + dirString;
     try{
       verbose_message("Filling the Gamma3 matrix.\n");
       Gamma3 = Eigen::Array<std::complex<T>,-1,-1>::Zero(1, NumMoments*NumMoments*NumMoments);
@@ -231,15 +235,22 @@ void conductivity_nonlinear<U, DIM>::calculate(){
   // ########################################################
 
   // 1/kT, where k is the Boltzmann constant in eV/K
+  
+  if(special != 1){
+    std::cout << "The general second order case has not yet been implemented. Please set special=1 to calculate for HBN\n";
+    exit(1);
+  }
+  
+  //temperature = 300.0/systemInfo.energy_scale;
   U beta = 1.0/8.6173303*pow(10,5)/temperature;
 
   
-  U e_fermi = 0.1;
+  U e_fermi = 0.0;
   std::cout << "Using default value for the Fermi energy: " << e_fermi << " in the KPM scale [-1, 1].\n";
 
-  U scat = 0.01;
+  U scat = 0.003388299;
   //U scat = 0.0032679;
-  std::cout << "Using default value for the scattering broadening: " << scat << "in the KPM scale [-1,1].\n"; 
+  std::cout << "Using default value for the scattering broadening: " << scat << " in the KPM scale [-1,1].\n"; 
 
 	
 	// Calculate the number of frequencies and energies needed to perform the calculation.
@@ -248,7 +259,7 @@ void conductivity_nonlinear<U, DIM>::calculate(){
   Eigen::Matrix<U, -1, 1> energies;
   energies  = Eigen::Matrix<U, -1, 1>::LinSpaced(N_energies, -lim, lim);
 
-	int N_omegas = 200;
+	int N_omegas = 1000;
   double minFreq = 0.01;
   double maxFreq = 1.5;
   Eigen::Matrix<U, -1, 1> frequencies;
@@ -277,18 +288,19 @@ void conductivity_nonlinear<U, DIM>::calculate(){
 
   temp1 = Eigen::Matrix<std::complex<U>, -1, 1>::Zero(N_omegas, 1);
   temp2 = Eigen::Matrix<std::complex<U>, -1, 1>::Zero(N_omegas, 1);
+  temp3 = Eigen::Matrix<std::complex<U>, -1, 1>::Zero(1, 1);
+  temp4 = Eigen::Matrix<std::complex<U>, -1, 1>::Zero(1, 1);
   cond  = Eigen::Matrix<std::complex<U>, -1, 1>::Zero(N_omegas, 1);
 
-
-  temp1 = contract2<U>(deltaF, 0, greenAscat<U>(scat), NumMoments, Gamma, energies, -frequencies);
-  temp2 = contract2<U>(deltaF, 1, greenRscat<U>(scat), NumMoments, Gamma, energies, frequencies);
-  temp3 = contract2<U>(deltaF, 0, greenAscat<U>(scat), NumMoments, Gamma, energies, -frequencies2);
-  temp4 = contract2<U>(deltaF, 1, greenRscat<U>(scat), NumMoments, Gamma, energies, frequencies2);
+  temp1 = contract2<U>(deltaF, 0, greenAscat<U>(scat), NumMoments, Gamma2, energies, -frequencies);
+  temp2 = contract2<U>(deltaF, 1, greenRscat<U>(scat), NumMoments, Gamma2, energies, frequencies);
+  temp3 = contract2<U>(deltaF, 0, greenAscat<U>(scat), NumMoments, Gamma1, energies, -frequencies2);
+  temp4 = contract2<U>(deltaF, 1, greenRscat<U>(scat), NumMoments, Gamma1, energies, frequencies2);
 
   std::complex<U> freq;
   for(int i = 0; i < N_omegas; i++){
     freq = std::complex<U>(frequencies(i), scat);  
-    cond(i) += (temp1(i) + temp2(i) + temp3(0) + temp4(0)/freq/freq;
+    cond(i) += (temp1(i) + temp2(i) + U(0.5)*(temp3(0,0) + temp4(0,0)))/freq/freq;
   }
   cond *= -imaginary*U(4.0*systemInfo.num_orbitals*systemInfo.spin_degeneracy/systemInfo.unit_cell_area);
 
