@@ -33,6 +33,7 @@ def graphene_initial(onsite=(0, 0)):
 lattice = graphene_initial()
 
 nx = ny = 2
+
 lx = 128
 ly = 128
 

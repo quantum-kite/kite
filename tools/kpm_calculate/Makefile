@@ -6,8 +6,8 @@ CINCLUDE+= -I$(HOME)/include/eigen3 -I/opt/local/include/eigen3
 CLIBS = -L/usr/local/hdf5/lib/ -L/usr/lib/x86_64-linux-gnu/hdf5/serial -lhdf5_hl_cpp -lhdf5_cpp -lhdf5_hl -lhdf5  
 VPATH = .
 OBJS = *.o
-DEBUG?=0
-VERBOSE?=0
+DEBUG=0
+VERBOSE=1
 
 all:    clean
 	cd Src; $(CC) $(CFLAGS) $(CINCLUDE) -c *.cpp -DDEBUG=${DEBUG} -DVERBOSE=${VERBOSE}

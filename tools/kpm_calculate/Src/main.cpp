@@ -3,23 +3,18 @@
 #include "H5Cpp.h"
 #include "tensor.hpp"
 #include "myHDF5.hpp"
-#include "info.hpp"
-#include "calculate.hpp"
-
-
-//#####################################################################################
-//#####################################################################################
-//#####################################################################################
-//#####################################################################################
-//#####################################################################################
-//#####################################################################################
-
-//TO DO:
-// Clarify what each quantity to be calculated means. Cond, SingleCond, OptCond????
+#include "systemInfo.hpp"
+#include "conductivity_dc.hpp"
+#include "conductivity_optical.hpp"
+#include "conductivity_nonlinear.hpp"
+#include "dos.hpp"
+#include "calculate_simple.hpp"
+#include "parse_input.hpp"
 
 //https://support.hdfgroup.org/HDF5/doc/cpplus_RM/readdata_8cpp-example.html
 
-
+#define debug 1
+#define debug1 1
 
 void choose_simulation_type(char *name){
 	debug_message("Entered choose_simulation.\n");
@@ -42,11 +37,15 @@ void choose_simulation_type(char *name){
 	
 	file.close();
 	
-	 if(dim < 1 || dim > 3)
+	if(dim < 1 || dim > 2){
+    std::cout << "Invalid value for the dimension of the system. Exiting.\n";
 		exit(0);
+  }
   
-	if(precision < 0 || precision > 2)
+	if(precision < 0 || precision > 2){
+    std::cout << "Invalid value for the precision of the data values. Exiting. \n";
 		exit(0);
+  }
 
 	if(complex < 0 || complex > 1)
 		exit(0);
@@ -57,57 +56,57 @@ void choose_simulation_type(char *name){
 		case 0:
 		{
 			verbose_message("The program is using data type: float.\nDimension: 1.\n");
-			calculate<float, 1u>(name);
+			calculate_simple<float, 1u>(name);
 			break;
 		}
 		case 1:
 		{
 			verbose_message("The program is using data type: float.\nDimension: 2.\n");
-			calculate<float, 2u>(name);
+			calculate_simple<float, 2u>(name);
 			break;
 		}
 		case 2:
 		{
 			verbose_message("The program is using data type: float.\nDimension: 3.\n");
-			calculate<float, 3u>(name);
+			calculate_simple<float, 3u>(name);
 			break;			
 		}
 		case 3:
 		{
 			verbose_message("The program is using data type: double.\nDimension: 1.\n");
-			calculate<double, 1u>(name);
+			calculate_simple<double, 1u>(name);
 			break;
 		}
 #endif
 		case 4:
 		{
 			verbose_message("The program is using data type: double.\nDimension: 2.\n");
-			calculate<double, 2u>(name);
+			calculate_simple<double, 2u>(name);
 			break;
 		}
 		case 5:
 		{
 			verbose_message("The program is using data type: double.\nDimension: 3.\n");
-			calculate<double, 3u>(name);
+			calculate_simple<double, 3u>(name);
 			break;
 		}
 #ifdef debug1
 		case 6:
 		{
 			verbose_message("The program is using data type: long double.\nDimension: 1.\n");
-			calculate<long double, 1u>(name);
+			calculate_simple<long double, 1u>(name);
 			break;
 		}
 		case 7:
 		{
 			verbose_message("The program is using data type: long double.\nDimension: 2.\n");
-			calculate<long double, 2u>(name);
+			calculate_simple<long double, 2u>(name);
 			break;
 		}
 		case 8:
 		{
 			verbose_message("The program is using data type: long double.\nDimension: 3.\n");
-			calculate<long double, 3u>(name);
+			calculate_simple<long double, 3u>(name);
 			break;
 		}
 #endif
@@ -123,7 +122,7 @@ void choose_simulation_type(char *name){
 
 
 int main(int argc, char *argv[]){
-	
+	//parser(argc, argv);
 	choose_simulation_type(argv[1]);
 	return 0;
 }
