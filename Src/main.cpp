@@ -35,7 +35,7 @@
 #define DEBUG 1
 #define VERBOSE 0
 #define VVERBOSE 0
-#define COMPILE_MAIN 0
+#define COMPILE_MAIN 1
 
 #ifdef VERBOSE
 #if VERBOSE==1
