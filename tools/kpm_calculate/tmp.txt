@@ -1,3 +1,0 @@
-rm -f Src/*.o Src/*~ core *~
-cd Src; g++ -fopenmp -std=gnu++11 -march=native  -O3 -ffast-math -Wall -DEIGEN_DONT_PARALLELIZE  -I/opt/local/include -I/usr/local/include -ISrc  -I/usr/local/hdf5/include -I/usr/include/hdf5/serial  -I/home/simao/include/eigen3 -I/opt/local/include/eigen3  -c *.cpp -DDEBUG=0 -DVERBOSE=1
-Makefile:13: recipe for target 'all' failed
