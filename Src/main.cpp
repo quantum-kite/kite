@@ -201,11 +201,13 @@ int main(int argc, char *argv[])
       class GlobalSimulation <std::complex<double>, 1u> h(argv[1]);
       break;
     }
+#endif    
   case 13:
     {
       class GlobalSimulation <std::complex<double>, 2u> h(argv[1]);
       break;
     }
+#if COMPILE_MAIN==1  
   case 14:
     {
       class GlobalSimulation <std::complex<double>, 3u> h(argv[1]);

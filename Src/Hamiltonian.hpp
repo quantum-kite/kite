@@ -169,6 +169,12 @@ public:
       U_Anderson.resize( sum * r.Nd);    
   }
   
+  void build_velocity(std::vector<unsigned> & components, unsigned n)
+  {
+    hr.build_velocity(components, n);
+    for(auto i = hd.begin(); i != hd.end(); i++)
+      i->build_velocity(components, n);
+  }
   
   void distribute_AndersonDisorder()
   {

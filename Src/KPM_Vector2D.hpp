@@ -117,8 +117,8 @@ public:
     
   };
   
-  template < unsigned MULT> 
-  void build_regular_phases(int i1)
+  template < unsigned MULT,bool VELOCITY> 
+  void build_regular_phases(int i1, unsigned axis)
   {
     unsigned l[2 + 1], count;
     Coordinates<std::ptrdiff_t, 3>  global(r.Lt);
@@ -138,14 +138,16 @@ public:
 
 	for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
 	  {
+	    T tt  = value_type(MULT + 1) * h.hr.hopping(ib, io);
 	    b3.set_coord(h.hr.dist(ib,io));        
 	    vee.array() -= 1;
 	    count = 0;
+	    if (VELOCITY)  tt  *=  h.hr.v.at(axis)(ib,io);
 	    for(std::size_t j = j0; j < j1; j += std )
 	      {
 		r.convertCoordinates(global, local1.set_coord(j));
 		value_type phase = vee(0)*global.coord[1]*r.vect_pot(0,1);
-		mult_t1_mag[io][ib][count] = value_type(MULT + 1) * h.hr.hopping(ib, io) * h.peierls(phase);
+		mult_t1_mag[io][ib][count] =  tt * h.peierls(phase);
 		count++;
 	      }
 	  }
@@ -218,17 +220,32 @@ public:
   void Multiply() {
     vverbose_message("Entered Multiply");
     
+    unsigned i = 0;
     /*
       Mosaic Multiplication using a TILE of STRIDE x STRIDE 
       Right Now We expect that both ld[0] and ld[1]  are multiple of STRIDE
       MULT = 0 : For the case of the Velocity/Hamiltonian
       MULT = 1 : For the case of the KPM_iteration
     */
-    std::size_t i0, i1;
     inc_index();
     phi0 = v.col(index).data();
     phiM1 = v.col((memory + index - 1) % memory ).data();
     phiM2 = v.col((memory + index - 2) % memory ).data();
+    KPM_MOTOR<MULT, false>(phi0, phiM1, phiM2, i);
+  };
+
+
+  void Velocity(T * phi0,T * phiM1, unsigned axis) {
+    KPM_MOTOR<0u, true>(phi0, phiM1, phiM1, axis);
+  };
+  
+  template <unsigned MULT, bool VELOCITY>
+  void KPM_MOTOR(T * phi0a, T * phiM1a, T *phiM2a, unsigned axis)
+  {
+    std::size_t i0, i1;    
+    phi0 = phi0a;
+    phiM1 = phiM1a;
+    phiM2 = phiM2a;
     
     // Initialize tiles that have deffects connecting elements of a previous tile
     for(auto istr = h.cross_mozaic_indexes.begin(); istr != h.cross_mozaic_indexes.end() ; istr++)
@@ -236,7 +253,7 @@ public:
     
     for( i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1 += STRIDE  )
       {
-	build_regular_phases<MULT>(i1);
+	build_regular_phases<MULT,VELOCITY>(i1, axis);
 		
 	for( i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0 += STRIDE )
 	  {
@@ -251,13 +268,13 @@ public:
 		const std::size_t j0 = ip + i0 + i1 * std;
 		
 		// Local Energy
-		mult_local_disorder<MULT>(j0, io);
+		if(!VELOCITY) mult_local_disorder<MULT>(j0, io);
 		
 		// Hoppings
 		mult_regular_hoppings(j0, io);
 	      }
 	    for(auto id = h.hd.begin(); id != h.hd.end(); id++)
-	      id->template multiply_defect<MULT>(istr, phi0, phiM1);
+	      id->template multiply_defect<MULT, VELOCITY>(istr, phi0, phiM1, axis);
 	  	    
 	    // Empty the vacancies in the tile
 	    auto & hV = h.hV.position.at(istr);
@@ -278,268 +295,14 @@ public:
        We already subtract the vacancies from these contributions 
     */
     for(auto id = h.hd.begin(); id != h.hd.end(); id++)
-      id->template multiply_broken_defect<MULT>(phi0, phiM1);
+      id->template multiply_broken_defect<MULT,VELOCITY>(phi0, phiM1,axis);
 	  
     // These four lines pertrain only to the magnetic field
     Exchange_Boundaries();
-  };
-	  
-    
-
-
-  //    h.hV.test_field(phi0); 
-  
-  void Velocity( T * phi0, T * phiM1, int axis) {
-    /*
-      Mosaic Multiplication using a TILE of STRIDE x STRIDE 
-      Right Now We expect that both ld[0] and ld[1]  are multiple of STRIDE
-      MULT = 0 : For the case of the Velocity/Hamiltonian
-      MULT = 1 : For the case of the KPM_iteration
-    */
-    T zero = assign_value<T>(double(0), double(0));
-    Coordinates<std::size_t,3> x(r.Ld);
-    std::size_t i0, i1;
-
-    // Initialize tiles that have deffects connecting elements of a previous tile
-    for(auto istr = h.cross_mozaic_indexes.begin(); istr != h.cross_mozaic_indexes.end() ; istr++)
-      {
-	i0 = ((*istr) % (r.lStr[0]) ) * STRIDE + NGHOSTS;
-	i1 = ((*istr) / r.lStr[0] ) * STRIDE + NGHOSTS;
-	for(std::size_t io = 0; io < r.Orb; io++)
-	  {
-	    const std::size_t ip = io * x.basis[2] ;
-	    const std::size_t std = x.basis[1];
-	    const std::size_t j0 = ip + i0 + i1 * std;
-	    const std::size_t j1 = j0 + STRIDE * std;
-	    
-	    for(std::size_t j = j0; j < j1; j += std )
-	      for(std::size_t i = j; i < j + STRIDE ; i++)
-		phi0[i] = zero;
-	  }
       }
     
-    for( i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1 += STRIDE  )
-      for( i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0 += STRIDE )
-	{
 	  // Periodic component of the Hamiltonian + Anderson disorder
-	  std::size_t istr = (i1 - NGHOSTS) /STRIDE * r.lStr[0] + (i0 - NGHOSTS)/ STRIDE;
 	  
-	  for(std::size_t io = 0; io < r.Orb; io++)
-	    {
-	      const std::size_t ip = io * x.basis[2] ;
-	      const std::size_t std = x.basis[1];
-	      const std::size_t j0 = ip + i0 + i1 * std;
-	      const std::size_t j1 = j0 + STRIDE * std;
-
-	      // Initialize phi0
-	      
-	      if(h.cross_mozaic.at(istr))
-		for(std::size_t j = j0; j < j1; j += std )
-		  for(std::size_t i = j; i < j + STRIDE ; i++)
-		    phi0[i] = zero;
-	      
-	      // Hoppings
-	      for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
-		{
-		  const std::ptrdiff_t  d1 = h.hr.distance(ib, io);
-		  const T t1 =   h.hr.V[axis](ib, io);
-		  
-		  for(std::size_t j = j0; j < j1; j += std )
-		    for(std::size_t i = j; i < j + STRIDE ; i++)
-		      phi0[i] += t1 * phiM1[i + d1];// * Peierls_Phase(i, i + d1);
-		}
-	    }
-	  
-	  // Structural disorder contribution
-	  
-	  for(auto id = h.hd.begin(); id != h.hd.end(); id++)
-	    for(std::size_t i = 0; i <  id->position.at(istr).size(); i++)
-	      {
-		std::size_t ip = id->position.at(istr)[i];
-		for(unsigned k = 0; k < id->hopping.size(); k++)
-		  {
-		    std::size_t k1 = ip + id->node_position[id->element1[k]];
-		    std::size_t k2 = ip + id->node_position[id->element2[k]];
-		    phi0[k1] +=  (id->V[axis])[k] * phiM1[k2];// * Peierls_Phase(k1, k2);
-		  }
-	      }
-	  
-	  // Empty the vacancies in the tile
-	  auto & hV = h.hV.position.at(istr);
-	  for(auto k = hV.begin(); k != hV.end(); k++)
-	    phi0[*k] = 0.;
-	}
-
-    for(auto vc =  h.hV.vacancies_with_defects.begin(); vc != h.hV.vacancies_with_defects.end(); vc++)
-      phi0[*vc] = 0.;
-
-    
-    //  Broken impurities
-    for(auto id = h.hd.begin(); id != h.hd.end(); id++)
-      for(std::size_t i = 0; i < id->border_element1.size(); i++)
-	{
-	  std::size_t i1 = id->border_element1[i];
-	  std::size_t i2 = id->border_element2[i];
-	  phi0[i1] +=  (id->border_V[axis])[i] * phiM1[i2];// * Peierls_Phase(i1, i2);
-	}
-    
-    Exchange_Boundaries();
-  };
-
-
-
-  void Velocity2( T * phi0, T * phiM1, int axis1, int axis2) {
-    /*
-      Mosaic Multiplication using a TILE of STRIDE x STRIDE 
-      Right Now We expect that both ld[0] and ld[1]  are multiple of STRIDE
-      MULT = 0 : For the case of the Velocity/Hamiltonian
-      MULT = 1 : For the case of the KPM_iteration
-    */
-    T zero = assign_value<T>(double(0), double(0));
-    Coordinates<std::size_t,3> x(r.Ld);
-    std::size_t i0, i1;
-    
-    // Initialize tiles that have deffects connecting elements of a previous tile
-    for(auto istr = h.cross_mozaic_indexes.begin(); istr != h.cross_mozaic_indexes.end() ; istr++)
-      {
-	i0 = ((*istr) % (r.lStr[0]) ) * STRIDE + NGHOSTS;
-	i1 = ((*istr) / r.lStr[0] ) * STRIDE + NGHOSTS;
-	for(std::size_t io = 0; io < r.Orb; io++)
-	  {
-	    const std::size_t ip = io * x.basis[2] ;
-	    const std::size_t std = x.basis[1];
-	    const std::size_t j0 = ip + i0 + i1 * std;
-	    const std::size_t j1 = j0 + STRIDE * std;
-	    
-	    for(std::size_t j = j0; j < j1; j += std )
-	      for(std::size_t i = j; i < j + STRIDE ; i++)
-		phi0[i] = zero;
-	  }
-      }
-    
-    for( i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1 += STRIDE  )
-      for( i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0 += STRIDE )
-	{
-	  // Periodic component of the Hamiltonian + Anderson disorder
-	  std::size_t istr = (i1 - NGHOSTS) /STRIDE * r.lStr[0] + (i0 - NGHOSTS)/ STRIDE;
-	  
-	  for(std::size_t io = 0; io < r.Orb; io++)
-	    {
-	      const std::size_t ip = io * x.basis[2] ;
-	      const std::size_t std = x.basis[1];
-	      const std::size_t j0 = ip + i0 + i1 * std;
-	      const std::size_t j1 = j0 + STRIDE * std;
-
-	      // Initialize phi0
-	      if(h.cross_mozaic.at(istr))
-		for(std::size_t j = j0; j < j1; j += std )
-		  for(std::size_t i = j; i < j + STRIDE ; i++)
-		    phi0[i] = zero;
-	      
-	      // Hoppings
-	      for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
-		{
-		  const std::ptrdiff_t  d1 = h.hr.distance(ib, io);
-		  const T t1 =   h.hr.V2[axis1][axis2](ib, io);
-		  
-		  for(std::size_t j = j0; j < j1; j += std )
-		    for(std::size_t i = j; i < j + STRIDE ; i++)
-		      phi0[i] += t1 * phiM1[i + d1];// * Peierls_Phase(i, i + d1);
-		}
-	    }
-	  
-	  // Structural disorder contribution
-	  
-	  for(auto id = h.hd.begin(); id != h.hd.end(); id++)
-	    for(std::size_t i = 0; i <  id->position.at(istr).size(); i++)
-	      {
-		std::size_t ip = id->position.at(istr)[i];
-		for(unsigned k = 0; k < id->hopping.size(); k++)
-		  {
-		    std::size_t k1 = ip + id->node_position[id->element1[k]];
-		    std::size_t k2 = ip + id->node_position[id->element2[k]];
-		    phi0[k1] +=  (id->V2[axis1][axis2])[k]* phiM1[k2];// * Peierls_Phase(k1, k2);
-		  }
-	      }
-	  
-	  // Empty the vacancies in the tile
-	  auto & hV = h.hV.position.at(istr);
-	  for(auto k = hV.begin(); k != hV.end(); k++)
-	    phi0[*k] = 0.;
-	}
-    
-    for(auto vc =  h.hV.vacancies_with_defects.begin(); vc != h.hV.vacancies_with_defects.end(); vc++)
-      phi0[*vc] = 0.;
-    
-    //  Broken impurities
-    for(auto id = h.hd.begin(); id != h.hd.end(); id++)
-      for(std::size_t i = 0; i < id->border_element1.size(); i++)
-	{
-	  std::size_t i1 = id->border_element1[i];
-	  std::size_t i2 = id->border_element2[i];
-	  phi0[i1] +=  (id->border_V2[axis1][axis2])[i] * phiM1[i2];// * Peierls_Phase(i1, i2);
-	}
-        
-    Exchange_Boundaries();
-  };
-
-  
-  T VelocityInternalProduct( T * bra, T * ket, int axis)
-  {
-    Coordinates<std::size_t,3> x(r.Ld);
-    const std::size_t STRIDE0 = 4;    
-    const std::size_t STRIDE1 = 4;
-    typedef typename extract_value_type<T>::value_type value_type;
-    T sum;
-    sum *= value_type(0.);
-    
-    for(std::size_t io = 0; io < r.Orb; io++)
-      {
-	const std::size_t ip = io * x.basis[2];
-	for(std::size_t i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1 += STRIDE1  )
-	  for(std::size_t i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0 += STRIDE0 )
-	    {
-	      const std::size_t std = x.basis[1];
-	      const std::size_t j0 = ip + i0 + i1 * std;
-	      const std::size_t j1 = j0 + STRIDE1 * std;
-	      
-	      for(std::size_t ib = 0; ib < h.hr.NHoppings(io); ib++)
-		{
-		  const  std::ptrdiff_t  d1 = h.hr.distance(ib, io);
-		  const T    t1 = h.hr.V[axis](ib, io);
-		  
-		  for(std::size_t j = j0; j < j1; j += std )
-		    for(std::size_t i = j; i < j + STRIDE0 ; i++)
-		      sum += std::conj(bra[i]) * t1 * ket[i + d1];
-		}
-	    }
-      }
-    return sum;
-  };
-
-  
-
-  template < unsigned MULT> 
-  void Multiply2() {
-    
-    inc_index();
-    T * phi0 = v.col(index).data();
-    T * phiM1 = v.col((memory + index - 1) % memory ).data();
-    T * phiM2 = v.col((memory + index - 2) % memory ).data();
-    
-    for(std::size_t io = 0; io < int(r.Orb); io++)
-      for(std::size_t iy = NGHOSTS; iy < int(r.Ld[1]) - NGHOSTS; iy++)
-	for(std::size_t ix = NGHOSTS; ix < int(r.Ld[0]) - NGHOSTS; ix++)
-	  {
-	    std::size_t i = ix + iy * r.Ld[0] + io * r.Nd;  
-	    phi0[i] = - value_type(MULT) * phiM2[i];
-	    for(std::size_t ib = 0; ib < h.NHoppings(io); ib++)
-	      phi0[i] +=  value_type(MULT + 1) * h.t(ib, io) * phiM1[i + h.d(ib, io) ];
-	  }
-    
-    
-    Exchange_Boundaries();    
-  };
   
 
   void Exchange_Boundaries() {

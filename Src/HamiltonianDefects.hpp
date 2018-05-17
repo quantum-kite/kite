@@ -1,13 +1,13 @@
 
 template <typename T,unsigned D>
 struct Defect_Operator  {
+  typedef typename extract_value_type<T>::value_type value_type;
   double                                   p;                        // Concentration of defects
   unsigned                       NumberNodes;                        // Number of nodes in the deffect
   std::vector <T>                          U;                        // local energies
   std::vector <unsigned>             element;                        // nodes with local energies
   std::vector <T>                    hopping;                        // vector of the non-zero values of the hopping operator operator                // 
-  std::vector <T>                       V[D];
-  std::vector <T>                   V2[D][D];
+  std::vector<std::vector <value_type>>         v;                        // temporary generalized velocities
   std::vector <unsigned>            element1;                        // vector with the nodes 
   std::vector <unsigned>            element2;                        // vector with the nodes
   std::vector <std::ptrdiff_t> node_position;                        // Relative distances of the nodes to the defect position
@@ -16,15 +16,14 @@ struct Defect_Operator  {
   std::vector <std::size_t>  border_element1;                        // Position of broken deffects in hopping terms                     
   std::vector <std::size_t>  border_element2;                        // Position of broken deffects in hopping terms                     
   std::vector <T>             border_hopping;
-  std::vector <T>                border_V[D];                                           
-  std::vector <T>            border_V2[D][D];   
+  std::vector<std::vector <value_type>>  border_v;                        // temporary generalized velocities
   std::vector <T>                   border_U;                                                 
   std::vector <std::size_t>   border_element;                        // Position of broken deffects site energy                                   
   LatticeStructure <D>                   & r;
   Simulation <T,D>                   & simul;
   std::vector <std::vector<std::size_t>> position;                   // vector of vectors with positions in the lattice of the Orbital 0 of the defects for each stride block
   Eigen::Array<T, -1, -1>        new_hopping;
-  typedef typename extract_value_type<T>::value_type value_type;
+
   
   Defect_Operator(Simulation <T,D> & sim, std::string & defect, H5::H5File *file) : r(sim.r), simul(sim), position(sim.r.NStr)
   {
@@ -113,7 +112,7 @@ struct Defect_Operator  {
     
     for(unsigned ih = 0; ih < hopping.size(); ih++)
       {
-	double phase1, phase2;
+	double phase1 = 0., phase2 = 0., phase3 = 0.;
 	for(std::size_t iv = NGHOSTS; iv < r.Ld[D - 1] - NGHOSTS; iv++)
 	  {
 	    std::size_t ip = NGHOSTS + iv *Lda.basis[D - 1];
@@ -127,7 +126,7 @@ struct Defect_Operator  {
 	
 	    phase1 =  0.5 * (dif_R + sum_O).transpose() * (matA * (dif_R + dif_O)).matrix();
 	    phase2 =  - dif_R.transpose() * (matA * r.rOrb.col(Lda.coord[D])).matrix();
-	    double phase3 =  - dif_R.transpose() * (matA * ra).matrix();	   
+	    phase3 =  - dif_R.transpose() * (matA * ra).matrix();	   
 	    new_hopping(ih, iv) = hopping.at(ih) * simul.h.peierls(phase1 + phase2 + phase3);
 	  }
 	hopping.at(ih) *= simul.h.peierls(phase1 + phase2);
@@ -280,21 +279,7 @@ struct Defect_Operator  {
 		border_element1.push_back( Latt.index );	    
 		border_element2.push_back(Latt.index + simul.Global.element2_diff[i]);
 		border_hopping.push_back(simul.Global.hopping[i]);
-		Ldb.set_coord(static_cast<std::ptrdiff_t>(Latt.index + simul.Global.element2_diff[i] ));
 		
-		// difference vectors in real-space coordinates
-		orbital_difference_R = r.rOrb.col(Ldb.coord[D]) - r.rOrb.col(Latt.coord[D]);
-		lattice_difference_R = r.rLat * (vb - va).template cast<double>();
-		dr_R = orbital_difference_R + lattice_difference_R;
-		
-		
-		
-		for(unsigned dim = 0; dim < D; dim++)
-		  border_V[dim].push_back(simul.Global.hopping[i] * T(dr_R(dim)));
-		
-		for(unsigned dim1 = 0; dim1 < D; dim1++)
-		  for(unsigned dim2 = 0; dim2 < D; dim2++)
-		    border_V2[dim1][dim2].push_back(simul.Global.hopping[i] * T(dr_R(dim1))* T(dr_R(dim2)));
 	      }
 	  }
       
@@ -350,10 +335,10 @@ struct Defect_Operator  {
     debug_message("Left generate_disorder\n");
   }
   
-  template <unsigned MULT>
-  void multiply_defect(std::size_t istr, T* & phi0, T* & phiM1)
+  template <unsigned MULT, bool VELOCITY>
+  void multiply_defect(std::size_t istr, T* & phi0, T* & phiM1, unsigned axis)
   {
-    Coordinates<std::ptrdiff_t, 3>  local1(r.Ld);
+    Coordinates<std::ptrdiff_t, D + 1>  local1(r.Ld);
 
     for(std::size_t i = 0; i <  position.at(istr).size(); i++)
       {
@@ -366,9 +351,13 @@ struct Defect_Operator  {
 
 
   
+	    if(VELOCITY)
+	      phi0[k1] += value_type(MULT + 1) * v.at(axis).at(k)*new_hopping(k, iv) * phiM1[k2] ;
+	    else
 	    phi0[k1] += value_type(MULT + 1) * new_hopping(k, iv) * phiM1[k2] ;
 	  }
 
+	if(!VELOCITY)
 	for(std::size_t k = 0; k < U.size(); k++)
 	  {
 	    std::size_t k1 = ip + node_position[element[k]];
@@ -377,10 +366,10 @@ struct Defect_Operator  {
       }
   }
 
-  template <unsigned MULT>
-  void multiply_broken_defect(T* & phi0, T* & phiM1)
+  template <unsigned MULT, bool VELOCITY>
+  void multiply_broken_defect(T* & phi0, T* & phiM1, unsigned axis)
   {
-    Coordinates<std::ptrdiff_t, 3> global1(r.Lt), global2(r.Lt), local1(r.Ld) ;
+    Coordinates<std::ptrdiff_t, D + 1> global1(r.Lt), global2(r.Lt), local1(r.Ld) ;
     Eigen::Map<Eigen::Matrix<std::ptrdiff_t,2,1>> v_global1(global1.coord), v_global2(global2.coord);
     double phase;
 
@@ -396,13 +385,67 @@ struct Defect_Operator  {
 	temp_vect  = (v_global2 - v_global1).template cast<double>().matrix().transpose();
 	phase = temp_vect(0)*r.vect_pot(0,1)*v_global1(1); //.template cast<double>().matrix();
 	
+	if(VELOCITY)
+	  phi0[i1] += value_type(MULT + 1) * border_v.at(axis).at(i) * border_hopping[i] * phiM1[i2] * simul.h.peierls(phase);
+	else
 	phi0[i1] += value_type(MULT + 1) * border_hopping[i] * phiM1[i2] * simul.h.peierls(phase);
       }
     
+    if(!VELOCITY)
     for(std::size_t i = 0; i < border_element.size(); i++)
       {
 	std::size_t i1 = border_element[i];
 	phi0[i1] += value_type(MULT + 1) * border_U[i] * phiM1[i1];
+      }
+  }
+  void build_velocity(std::vector<unsigned> & components, unsigned n)
+  {
+    Coordinates<std::ptrdiff_t, D + 1> Lda(r.Ld), Ldb(r.Ld);
+    Eigen::Map<Eigen::Matrix<std::ptrdiff_t,D, 1>> va(Lda.coord), vb(Ldb.coord); // Column vector
+    Eigen::Matrix<double, D, 1> orbital_difference_R;
+    Eigen::Matrix<double, D, 1> lattice_difference_R;
+    Eigen::Matrix<double, D, 1> dr_R;
+    if ( n == v.size())
+      v.push_back(std::vector<value_type>(hopping.size()));
+    if ( n == border_v.size())
+      border_v.push_back(std::vector<value_type>(border_hopping.size()));
+    if(n > v.size())
+      std::cout << "Simao esta a fazer asneira" << std::endl;
+    
+    std::vector<value_type> & v1 = v.at(n);
+    std::vector<value_type> & border_v1 = border_v.at(n);  
+
+    std::ptrdiff_t ip = 0;
+    for(unsigned i = 0; i < D; i++)
+      ip += simul.r.Ld[i]/2 * Lda.basis[i];
+    Lda.set_coord(ip);
+    
+    for(unsigned ih = 0; ih < hopping.size(); ih++)
+      {
+	
+	Lda.set_coord(static_cast<std::ptrdiff_t>(ip + node_position[element1.at(ih)]));
+	Ldb.set_coord(static_cast<std::ptrdiff_t>(ip + node_position[element2.at(ih)]));
+	lattice_difference_R = r.rLat * (vb - va).template cast<double>();
+	orbital_difference_R = r.rOrb.col(Ldb.coord[D]) - r.rOrb.col(Lda.coord[D]);
+	dr_R = orbital_difference_R + lattice_difference_R;
+	v1.at(ih) = value_type(1);
+	for(unsigned i = 0; i < components.size(); i++)
+	  v1.at(ih) *= value_type(dr_R(components.at(i)));
+      }
+	
+
+  
+    
+    for(unsigned ih = 0; ih < border_hopping.size(); ih++)
+      {
+	Lda.set_coord(static_cast<std::ptrdiff_t>(border_element1.at(ih)));
+	Ldb.set_coord(static_cast<std::ptrdiff_t>(border_element2.at(ih)));
+	lattice_difference_R = r.rLat * (vb - va).template cast<double>();
+	orbital_difference_R = r.rOrb.col(Ldb.coord[D]) - r.rOrb.col(Lda.coord[D]);
+	dr_R = orbital_difference_R + lattice_difference_R;
+	border_v1.at(ih) = value_type(1);
+	for(unsigned i = 0; i < components.size(); i++)
+	  border_v1.at(ih) *= value_type(dr_R(components.at(i)));
       }
   }
   

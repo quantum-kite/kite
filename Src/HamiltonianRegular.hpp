@@ -4,16 +4,14 @@
 
 template <typename T, unsigned D>
 struct Periodic_Operator {
+  typedef typename extract_value_type<T>::value_type         value_type;
   Simulation<T,D> & simul;
                                                                               // Non-diagonal component of the operator
   Eigen::Array<unsigned,    Eigen::Dynamic, 1 >            NHoppings;         // Number of elements different from Zero from each orbital
   Eigen::Array<std::ptrdiff_t, Eigen::Dynamic, Eigen::Dynamic> distance;      // Distance in the basis 
   Eigen::Array<   T, Eigen::Dynamic, Eigen::Dynamic> hopping;                 // Hopping
-  Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> dist;
-  Eigen::Array<   T, Eigen::Dynamic, Eigen::Dynamic> hopping_magnetic; 	      // Hoppings with magnetic field, periodic part
-  Eigen::Array<   T, Eigen::Dynamic, Eigen::Dynamic> V[D];                    // Velocity [r,h]
-  Eigen::Array<   T, Eigen::Dynamic, Eigen::Dynamic> V2[D][D];                // Velocity [r,[r,h]]
-  
+  std::vector<Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic>>        v;
+  Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> dist; 
   Periodic_Operator(Simulation<T,D> & sim) : simul(sim) {
     debug_message("Entered Periodic_Operator constructor.\n");
     
@@ -26,17 +24,7 @@ struct Periodic_Operator {
       std::size_t max  	= NHoppings.maxCoeff();
       distance 			= Eigen::Matrix< std::ptrdiff_t, Eigen::Dynamic, Eigen::Dynamic>  (max, sim.r.Orb);
       dist 				= Eigen::Matrix< int, Eigen::Dynamic, Eigen::Dynamic>  (max, sim.r.Orb);
-      hopping  			= Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>(max, sim.r.Orb);
-      hopping_magnetic  = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>(max, sim.r.Orb);
-      
-      
-      for(unsigned i = 0; i < D; i++)
-        V[i]    = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>(max, sim.r.Orb);
-       
-      
-      for(unsigned i = 0; i < D; i++)
-				for(unsigned j = 0; j < D; j++)
-					V2[i][j] = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>(max, sim.r.Orb);
+      hopping  		= Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic>(max, sim.r.Orb);
 
       get_hdf5<T>(hopping.data(), file, (char *) "/Hamiltonian/Hoppings");          // Read Hoppings
       get_hdf5<int>(dist.data(), file, (char *) "/Hamiltonian/d");                  // Read the distances
@@ -104,27 +92,46 @@ struct Periodic_Operator {
           // If the kpm vector is not complex, peierls1(phase) will return 1.0, so it is effectively harmless.
           //double phase = ((0.5*dr_a.transpose() + (r.rLat.inverse()*r.rOrb.col(io)).transpose())*r.vect_pot*dr_a - lattice_difference_a.transpose()*r.vect_pot*r.rLat.inverse()*r.rOrb.col(b3.coord[D] + io))(0,0);
           double phase = ((-0.5*dr_a.transpose() + (r.rLat.inverse()*r.rOrb.col(b3.coord[D] + io)).transpose())*r.vect_pot*(-dr_a) + lattice_difference_a.transpose()*r.vect_pot*r.rLat.inverse()*r.rOrb.col(io))(0,0);
-          
-          
-          hopping_magnetic(i,io) = hopping(i,io) * peierls1(phase);
-          hopping(i,io) = hopping_magnetic(i,io);
-          
-          //if(DEBUG) std::cout << "Finished calculating the phase.\n" << std::flush;
-          
-          for(unsigned dim = 0; dim < D; dim++)
-            V[dim](i,io) = hopping(i,io) * T( dr(dim) );
-          
-            
-          for(unsigned dim1 = 0; dim1 < D; dim1++)
-            for(unsigned dim2 = 0; dim2 < D; dim2++)
-              V2[dim1][dim2](i,io) = hopping(i,io) * T( dr(dim1) )* T( dr(dim2) );
-              
-          
-						
-	  
+          hopping(i,io) *= peierls1(phase);    
         }
     debug_message("Left Convert_Build.\n");
   };
+          
+          
+  void build_velocity(std::vector<unsigned> & components, unsigned n)
+  {
+    Coordinates<std::ptrdiff_t, D + 1> Lda(simul.r.Ld), Ldb(simul.r.Ld);
+    Eigen::Map<Eigen::Matrix<std::ptrdiff_t,D, 1>> va(Lda.coord), vb(Ldb.coord); // Column vector
+    Eigen::Matrix<double, D, 1> orbital_difference_R;
+    Eigen::Matrix<double, D, 1> lattice_difference_R;
+    Eigen::Matrix<double, D, 1> dr_R;
+    if(n == v.size())
+      v.push_back(Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic>(hopping.rows(), hopping.cols()) );
+          
+    if(n > v.size())
+      std::cout << "Simao esta a fazer asneira" << std::endl;
+          //if(DEBUG) std::cout << "Finished calculating the phase.\n" << std::flush;
+    Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic> & v1 = v.at(n);
+    for(unsigned io = 0; io < simul.r.Orb; io++)
+      {
+	std::ptrdiff_t ip = io*Lda.basis[D];
+	for(unsigned i = 0; i < D; i++)
+	  ip += simul.r.Ld[i]/2 * Lda.basis[i];
+	Lda.set_coord(ip);
+          
+	for(unsigned ih = 0; ih < NHoppings(io); ih++)
+	  {
+	    Lda.set_coord(ip);
+	    Ldb.set_coord(ip + distance(ih,io));
+	    lattice_difference_R = simul.r.rLat * (vb - va).template cast<double>();
+	    orbital_difference_R = simul.r.rOrb.col(Ldb.coord[D]) - simul.r.rOrb.col(Lda.coord[D]);
+	    dr_R = orbital_difference_R + lattice_difference_R;
+	    v1(ih,io) = value_type(1);
+	    for(unsigned i = 0; i < components.size(); i++)
+	      v1(ih,io) *= value_type(dr_R(components.at(i)));
+	  }
+      }
+  }	  
 	
   template <typename U = T>
   typename std::enable_if<is_tt<std::complex, U>::value, U>::type peierls1(double phase) {

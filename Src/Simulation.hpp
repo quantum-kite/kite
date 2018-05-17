@@ -65,7 +65,8 @@ public:
       double queue_time = 0;
       double ss_queue_time = 0;
       // obtain the times for the singlehsot queue
-      for(unsigned int i = 0; i < ss_queue.size(); i++){
+	for(unsigned int i = 0; i < ss_queue.size(); i++)
+	  {
         ss_queue.at(i).embed_time(Global.kpm_iteration_time);
         ss_queue_time += ss_queue.at(i).time_length;
       }
@@ -76,7 +77,9 @@ public:
         queue_time += queue.at(i).time_length;
       }
 
-      std::cout << "The entire calculation will take around " << print_time(queue_time + ss_queue_time) << ".\n";
+	verbose_message("The entire calculation will take around ");
+	verbose_message(print_time(queue_time + ss_queue_time));
+	verbose_message("\n");
       }
 #pragma omp barrier
 
@@ -169,7 +172,7 @@ public:
     // First of all, we need to process the indices_string into something the program can use
     // Each element of this vector is a list of the indices of a generalized velocity operator
 #pragma omp barrier
-    std::vector<std::vector<int>> indices = process_string(indices_string);
+    std::vector<std::vector<unsigned>> indices = process_string(indices_string);
     int dim = indices.size();
 		
 		
@@ -212,7 +215,6 @@ public:
     KPM_Vector<T,D> *kpm1 = kpm_vector.at(1);
     T * kpm0data = kpm0->v.col(0).data();
     T * kpm1data = kpm1->v.col(kpm1->get_index()).data();
-    int axis0, axis1;
 			
 			
     // Make sure the local gamma matrix is zeroed
@@ -221,6 +223,8 @@ public:
     long average = 0;
     for(int disorder = 0; disorder < NDisorder; disorder++){
       h.generate_disorder();
+      for(unsigned it = 0; it < indices.size(); it++)
+	h.build_velocity(indices.at(it), it);
       for(int randV = 0; randV < NRandomV; randV++){
 	
 	
@@ -235,33 +239,16 @@ public:
 	case 0:
 	  verbose_message("case 0");
 	  break;
-	case 1:
+	default:
 						
 	  verbose_message("case 1");
-	  axis0 = indices.at(0).at(0);
-	  kpm0->Velocity(kpm0data, kpm1data, axis0);  
+      	  kpm0->Velocity(kpm0data, kpm1data, 0u); 
 	  kpm0->empty_ghosts(0);
 	  kpm0->v.col(0) = -kpm0->v.col(0); // This minus sign is due to the fact that this Velocity operator is not self-adjoint
 						
 						
 	  break;
 					
-	case 2:
-	  verbose_message("case 2");
-	  axis0 = indices.at(0).at(0);
-	  axis1 = indices.at(0).at(1);
-						
-	  kpm0->Velocity2(kpm0data, kpm1data, axis0, axis1);  
-	  kpm0->empty_ghosts(0);
-	  break;
-						
-	case 3:
-	  std::cout << "The matrix you're trying to calculate requires an operator that is not yet implemented: Velocity3.\n";
-	  exit(0);
-						
-	default:
-	  std::cout << "The matrix you're trying to calculate requires an operator that is not yet implemented.\n";
-	  exit(0);
 		
 	}
 					
@@ -285,7 +272,7 @@ public:
     debug_message("Left Measure_Gamma\n");
   }
 	
-  void recursive_KPM(int depth, int max_depth, std::vector<int> N_moments, long *average, long *index_gamma, std::vector<std::vector<int>> indices, std::vector<KPM_Vector<T,D>*> *kpm_vector, Eigen::Array<T, -1, -1> *gamma){
+  void recursive_KPM(int depth, int max_depth, std::vector<int> N_moments, long *average, long *index_gamma, std::vector<std::vector<unsigned>> indices, std::vector<KPM_Vector<T,D>*> *kpm_vector, Eigen::Array<T, -1, -1> *gamma){
     verbose_message("Entered recursive_KPM\n");
     typedef typename extract_value_type<T>::value_type value_type;
 		
@@ -296,7 +283,6 @@ public:
 			
       T * kpm1data;
       T * kpm2data;
-      int axis1, axis2;
 			
       //std::cout << "first branch. Depth: " << depth << "\n" << std::flush;
 			
@@ -307,31 +293,13 @@ public:
 	case 0:
 	  //std::cout << "case0\n"<< std::flush;
 	  break;
-	case 1:
+	default:
 	  //std::cout << "case1\n"<< std::flush;
-	  axis1 = indices.at(depth).at(0);
 	  kpm1data = kpm1->v.col(kpm1->get_index()).data();
 	  kpm2data = kpm2->v.col(kpm2->get_index()).data();
 						
 	  //std::cout << "indices.at(" << depth << "): " << axis1 << "\n"<< std::flush;
-	  kpm2->Velocity(kpm2data, kpm1data, axis1); 
-						
-	  break;
-						
-	case 2:
-	  //std::cout << "case2\n"<< std::flush;
-	  axis1 = indices.at(depth).at(0);
-	  axis2 = indices.at(depth).at(1);
-	  kpm1data = kpm1->v.col(kpm1->get_index()).data();
-	  kpm2data = kpm2->v.col(kpm2->get_index()).data();
-						
-	  kpm2->Velocity2(kpm2data, kpm1data, axis1, axis2); 
-						
-	  break;
-						
-	default:
-	  //std::cout << "The matrix you're trying to calculate requires an operator that is not yet implemented.\n";
-	  exit(0);
+	  kpm2->Velocity(kpm2data, kpm1data, max_depth - depth); 											
 						
 	}
 				
@@ -375,7 +343,7 @@ public:
   }
 	
 	
-  std::vector<std::vector<int>> process_string(std::string indices_string){
+  std::vector<std::vector<unsigned>> process_string(std::string indices_string){
     // First of all, split the indices string by commas ','
     std::vector<std::string> strings;
     int end_pos = 0;
@@ -394,13 +362,13 @@ public:
 		
 		
 		
-    std::vector<std::vector<int>> indices;
+    std::vector<std::vector<unsigned>> indices;
 		
     for(int i = 0; i < dim; i++){
 			
       int len_str = strings.at(i).size();
       int single_digit;
-      std::vector<int> temp;
+      std::vector<unsigned> temp;
 			
       for(int j = 0; j < len_str; j++){
 	char single_char = strings.at(i)[j];
@@ -427,7 +395,7 @@ public:
     return indices;
   }
 
-  void store_gamma(Eigen::Array<T, -1, -1> *gamma, std::vector<int> N_moments, std::vector<std::vector<int>> indices, std::string name_dataset){
+  void store_gamma(Eigen::Array<T, -1, -1> *gamma, std::vector<int> N_moments, std::vector<std::vector<unsigned>> indices, std::string name_dataset){
     debug_message("Entered store_gamma\n");
     /* Depending on the type of Gamma matrix we're calculating, there may be some symmetries
      * among the matrix entries that could be taken into account.
@@ -551,7 +519,7 @@ public:
 		 
     // Process the indices
     debug_message("Entered Single_Shot");
-    std::vector<int> first_indices, second_indices;
+    std::vector<unsigned> first_indices, second_indices;
 		
     int comma_location = indices.find_first_of(',');
 	
@@ -598,15 +566,19 @@ public:
     cond_array = Eigen::Array<T, -1, -1>::Zero(1, N_energies);
     debug_message("Starting calculating.\n");
 
-    for(int ener = 0; ener < N_energies; ener++){
+    for(int ener = 0; ener < N_energies; ener++)
+      {
       std::complex<double> energy(energy_array(ener), finite_gamma);
       debug_message("Finished setting complex energy.\n");
       long average = 0;
       for(int disorder = 0; disorder < NDisorder; disorder++){
         debug_message("Before disorder.\n");
 	      h.generate_disorder();
+	  h.build_velocity(first_indices ,0u);
+	  h.build_velocity(second_indices ,1u);
         debug_message("After disorder.\n");
-    	  for(int randV = 0; randV < NRandomV; randV++){
+	  for(int randV = 0; randV < NRandomV; randV++)
+	    {
           debug_message("Started calculating the first vector.\n");
 	      phi0.initiate_vector();					
 	      phi0.Exchange_Boundaries(); 	
@@ -616,7 +588,7 @@ public:
         
         
 	      // |phi> = v |phi_0>
-	      phi.Velocity(phi.v.col(0).data(), phi0.v.col(0).data(), first_indices.at(0));
+	      phi.Velocity(phi.v.col(0).data(), phi0.v.col(0).data(), 0u);
         debug_message("Multiplied by velocity.\n");
 	      phi.Exchange_Boundaries();	
 	      phi1.v.col(0) = phi.v.col(phi.get_index())*green(0, 1, energy).imag()/2.0;
@@ -633,7 +605,7 @@ public:
 	      // multiply phi1 by the velocity operator again. 
 	      // We need a temporary vector to mediate the operation, which will be |phi>
 	      phi.v.col(0) = phi1.v.col(0);
-	      phi.Velocity(phi1.v.col(0).data(), phi.v.col(0).data(), second_indices.at(0));
+	      phi.Velocity(phi1.v.col(0).data(), phi.v.col(0).data(), 1u); 
 	      phi1.empty_ghosts(0);
 		  
         debug_message("Finished calculating the first vector.\n");
