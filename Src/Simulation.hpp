@@ -554,8 +554,8 @@ public:
     KPM_Vector<T,D> phi0(1, *this);
     KPM_Vector<T,D> phi (2, *this);
     
-    KPM_Vector<T,D> phi1(2, *this);
-    KPM_Vector<T,D> phi2(2, *this);
+    KPM_Vector<T,D> phi1(1, *this);
+    KPM_Vector<T,D> phi2(1, *this);
     
 	
     //int a = 4;
