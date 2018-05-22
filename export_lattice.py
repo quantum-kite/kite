@@ -446,7 +446,7 @@ class Calculation:
                                 'zzx': 24, 'zzy': 25, 'zzz': 26}
         self._avail_dir_sngl = {'xx': 0, 'yy': 1, 'zz': 2}
 
-    def dos(self, num_points, num_moments, num_random, num_disorder):
+    def dos(self, num_points, num_moments, num_random, num_disorder=1):
         """Calculate the density of states as a function of energy
 
         Parameters
@@ -464,7 +464,7 @@ class Calculation:
         self._dos.append({'num_points': num_points, 'num_moments': num_moments, 'num_random': num_random,
                           'num_disorder': num_disorder})
 
-    def conductivity_dc(self, direction, num_points, num_moments, num_random, num_disorder, temperature=0):
+    def conductivity_dc(self, direction, num_points, num_moments, num_random, num_disorder=1, temperature=0):
         """Calculate the density of states as a function of energy
 
         Parameters
@@ -493,7 +493,7 @@ class Calculation:
                  'num_random': num_random, 'num_disorder': num_disorder,
                  'temperature': temperature / self._scaling_factor})
 
-    def conductivity_optical(self, direction, num_points, num_moments, num_random, num_disorder, temperature=0):
+    def conductivity_optical(self, direction, num_points, num_moments, num_random, num_disorder=1, temperature=0):
         """Calculate the density of states as a function of energy
 
         Parameters
@@ -522,7 +522,7 @@ class Calculation:
                  'num_random': num_random, 'num_disorder': num_disorder,
                  'temperature': temperature / self._scaling_factor})
 
-    def conductivity_optical_nonlinear(self, direction, num_points, num_moments, num_random, num_disorder,
+    def conductivity_optical_nonlinear(self, direction, num_points, num_moments, num_random, num_disorder=1,
                                        temperature=0, **kwargs):
         """Calculate the density of states as a function of energy
 
@@ -557,7 +557,7 @@ class Calculation:
                  'num_moments': num_moments, 'num_random': num_random, 'num_disorder': num_disorder,
                  'temperature': temperature / self._scaling_factor, 'special': special})
 
-    def singleshot_conductivity_dc(self, energy, direction, gamma, num_moments, num_random, num_disorder):
+    def singleshot_conductivity_dc(self, energy, direction, gamma, num_moments, num_random, num_disorder=1):
         """Calculate the density of states as a function of energy
 
         Parameters
