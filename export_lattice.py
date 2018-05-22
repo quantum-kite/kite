@@ -584,7 +584,7 @@ class Calculation:
         else:
             self._singleshot_conductivity_dc.append(
                 {'energy': np.array(energy) / self._scaling_factor, 'direction': self._avail_dir_sngl[direction],
-                 'gamma': gamma / self._scaling_factor, 'num_moments': num_moments,
+                 'gamma': np.array(gamma) / self._scaling_factor, 'num_moments': num_moments,
                  'num_random': num_random, 'num_disorder': num_disorder})
 
 
