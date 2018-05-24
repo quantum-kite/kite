@@ -21,7 +21,7 @@
 #include <math.h>
 #include <initializer_list>
 
-#define MEMORY   10
+#define MEMORY   128
 #define PATTERNS  4
 #define NGHOSTS   2
 #ifndef STRIDE
@@ -35,7 +35,8 @@
 #define DEBUG 1
 #define VERBOSE 0
 #define VVERBOSE 0
-#define COMPILE_MAIN 1
+#define COMPILE_MAIN 0
+#define ESTIMATE_TIME 1
 
 #ifdef VERBOSE
 #if VERBOSE==1

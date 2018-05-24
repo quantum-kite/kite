@@ -114,7 +114,7 @@ class measurement_queue{
       for(unsigned int i = 0; i < NMoments.size(); i++)
         prod *= NMoments.at(i);
 
-      time_length = prod*avg_duration;
+      time_length = prod*avg_duration*NDisorder*NRandom;
     };
 
 
@@ -239,7 +239,7 @@ class singleshot_measurement_queue{
     double time_length;
 
     void embed_time(double avg_duration){
-      time_length = NMoments*avg_duration;
+      time_length = NMoments*avg_duration*2*NDisorder*NRandom*singleshot_energies.rows();
     };
 
     singleshot_measurement_queue(std::string dir_string, int moments, int disorder, 

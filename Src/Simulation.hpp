@@ -56,30 +56,47 @@ public:
       // Measure the average time it takes to run a multiplication
       // This will allow us to obtain an estimate for the time it'll take
       // for the program to run
-      Global.kpm_iteration_time = simul.time_kpm(100);
+
+      // Maybe put this inside an #if statement??
+#pragma omp master
+      {
+        if(ESTIMATE_TIME == 1){
+          std::cout << "Estimating how long a KPM iteration will take.\n";
+          std::cout << "To disable this feature and these messages set the flag ESTIMATE_TIME";
+          std::cout << " in Src/main.cpp to 0.\nAveraging over 100 iterations.\n";
+        }
+      }
+#pragma omp barrier
+      
+      if(ESTIMATE_TIME == 1)
+        Global.kpm_iteration_time = simul.time_kpm(100);
+      
 #pragma omp master 
       {
-      verbose_message("On average, a KPM iteration takes ");
-      verbose_message(Global.kpm_iteration_time);
-      verbose_message(" seconds.\n");
-      double queue_time = 0;
-      double ss_queue_time = 0;
-      // obtain the times for the singlehsot queue
-	for(unsigned int i = 0; i < ss_queue.size(); i++)
-	  {
-        ss_queue.at(i).embed_time(Global.kpm_iteration_time);
-        ss_queue_time += ss_queue.at(i).time_length;
-      }
-      
-      // obtain the times for the normal queue
-			for(unsigned int i = 0; i < queue.size(); i++){
-        queue.at(i).embed_time(Global.kpm_iteration_time);
-        queue_time += queue.at(i).time_length;
-      }
+        if(ESTIMATE_TIME == 1){
 
-	verbose_message("The entire calculation will take around ");
-	verbose_message(print_time(queue_time + ss_queue_time));
-	verbose_message("\n");
+          std::cout << "On average, a KPM iteration takes ";
+          std::cout << Global.kpm_iteration_time;
+          std::cout << " seconds. \nEstimating how long the whole simulation will take...\n";
+
+          double queue_time = 0;
+          double ss_queue_time = 0;
+          // obtain the times for the singlehsot queue
+          for(unsigned int i = 0; i < ss_queue.size(); i++){
+            ss_queue.at(i).embed_time(Global.kpm_iteration_time);
+            ss_queue_time += ss_queue.at(i).time_length;
+          }
+          
+          // obtain the times for the normal queue
+          for(unsigned int i = 0; i < queue.size(); i++){
+            queue.at(i).embed_time(Global.kpm_iteration_time);
+            queue_time += queue.at(i).time_length;
+          }
+
+          std::cout << "The entire calculation will take around ";
+          std::cout << print_time(queue_time + ss_queue_time);
+          std::cout << "\n";
+        }
       }
 #pragma omp barrier
 
@@ -89,18 +106,12 @@ public:
       }
       
       // execute the regular queue
-			for(unsigned int i = 0; i < queue.size(); i++){
+      for(unsigned int i = 0; i < queue.size(); i++){
         simul.Measure_Gamma(queue.at(i));			
       }
-
-
-
     }
-    
     debug_message("Left global_simulation\n");
   };
-  
-  
 };
 #endif
 
@@ -120,6 +131,37 @@ public:
   };
   
   
+
+  void cheb_iteration(KPM_Vector<T,D>* kpm, long int current_iteration){
+    // Performs a chebyshev iteration
+    if(current_iteration == 0){
+      kpm->template Multiply<0>(); 
+    } else {
+      kpm->template Multiply<1>(); 
+    }
+  };
+  
+
+  void generalized_velocity(KPM_Vector<T,D>* kpm0, KPM_Vector<T,D>* kpm1, 
+      std::vector<std::vector<unsigned>> indices, int pos){
+    // Check which generalized velocity operator needs to be calculated. 
+    // reads from kpm1 and writes on kpm0
+
+    T * kpm1data = kpm1->v.col(kpm1->get_index()).data();
+    T * kpm0data = kpm0->v.col(kpm0->get_index()).data();
+
+    switch(indices.at(pos).size()){
+    case 0:
+      verbose_message("case 0");
+      break;
+
+    default:
+      verbose_message("default");
+	    kpm0->Velocity(kpm0data, kpm1data, pos); 											
+      break;
+    }
+  }
+
 
   void Measure_Gamma(measurement_queue queue) {
     debug_message("Entered Measure_Gamma.\n");
@@ -182,6 +224,130 @@ public:
       std::cout << "Dimension of the Gamma matrix does not match the number of chebyshev moments. Aborting.\n";
       exit(0);
     }
+    
+    if(dim == 2 and MEMORY > 2){
+      std::cout << "using memory blocks\n";
+      Gamma2D(NRandomV, NDisorder, N_moments, indices, name_dataset);
+    } else {
+      std::cout << "using recursive\n";
+      GammaGeneral(NRandomV, NDisorder, N_moments, indices, name_dataset);
+    }
+
+
+    debug_message("Left Measure_Gamma\n");
+  }
+	
+  void Gamma2D(int NRandomV, int NDisorder, std::vector<int> N_moments, 
+      std::vector<std::vector<unsigned>> indices, std::string name_dataset){
+    // This function calculates all the kinds of one-dimensional Gamma matrices
+    // such as Tr[Tn]    Tr[v^xx Tn]     etc
+
+    typedef typename extract_value_type<T>::value_type value_type;
+
+    //  --------- INITIALIZATIONS --------------
+    
+    KPM_Vector<T,D> kpm0(1, *this);      // initial random vector
+    KPM_Vector<T,D> kpm1(2, *this); // left vector that will be Chebyshev-iterated on
+    KPM_Vector<T,D> kpm2(MEMORY, *this); // right vector that will be Chebyshev-iterated on
+		KPM_Vector<T,D> kpm3(MEMORY, *this); // kpm1 multiplied by the velocity
+
+    // initialize the local gamma matrix and set it to 0
+    int size_gamma = 1;
+    for(int i = 0; i < 2; i++){
+      if(N_moments.at(i) % 2 != 0){
+        std::cout << "The number of moments must be an even number, due to limitations of the program. Aborting\n";
+        exit(0);
+      }
+      size_gamma *= N_moments.at(i);
+    }
+
+    //std::cout << "############ size gamma: " << size_gamma << "\n";
+    Eigen::Array<T, -1, -1> gamma = Eigen::Array<T, -1, -1 >::Zero(1, size_gamma);
+ 
+    // finished initializations
+
+
+    
+    
+    // start the kpm iteration
+    long average = 0;
+    for(int disorder = 0; disorder < NDisorder; disorder++){
+      h.generate_disorder();
+      for(unsigned it = 0; it < indices.size(); it++)
+        h.build_velocity(indices.at(it), it);
+      for(int randV = 0; randV < NRandomV; randV++){
+        
+
+        kpm0.initiate_vector();			// original random vector. This sets the index to zero
+        kpm0.Exchange_Boundaries();
+	      kpm1.set_index(0);
+
+        generalized_velocity(&kpm1, &kpm0, indices, 0);
+        
+        // run through the left loop MEMORY iterations at a time
+        for(int n = 0; n < N_moments.at(0); n+=MEMORY){
+          
+          // Iterate MEMORY times. The first time this occurs, we must exclude the zeroth
+          // case, because it is already calculated, it's the identity
+          for(int i = n; i < n + MEMORY; i++){
+            //std::cout << "left i:" << i << " n:" << n << "\n";
+            if(i!=0){
+              //std::cout << "inside left\n";
+              cheb_iteration(&kpm1, i-1);
+              //std::cout << "index: " << kpm1.get_index() << "\n";
+            }
+
+            kpm3.set_index(i%MEMORY);
+            generalized_velocity(&kpm3, &kpm1, indices, 1);
+            kpm3.empty_ghosts(i%MEMORY);
+            
+            //std::cout << "index3: " << kpm3.get_index() << "\n";
+          }
+          
+          // copy the |0> vector to |kpm2>
+          kpm2.set_index(0);
+          kpm2.v.col(0) = kpm0.v.col(0);
+          for(int m = 0; m < N_moments.at(1); m+=MEMORY){
+
+            // iterate MEMORY times, just like before. No need to multiply by v here
+            for(int i = m; i < m + MEMORY; i++){
+              //std::cout << "right i:" << i << " m:" << m << "\n";
+              if(i!=0){
+                //std::cout << "inside right\n";
+                cheb_iteration(&kpm2, i-1);
+              //std::cout << "index2: " << kpm2.get_index() << "\n";
+              }
+            }
+            
+            // Finally, do the matrix product and store the result in the Gamma matrix
+            Eigen::Matrix<T, -1, -1> kpm_product;
+            kpm_product = Eigen::Matrix<T, -1, -1>::Zero(MEMORY, MEMORY); // this line is not necessary
+            kpm_product = kpm3.v.adjoint() * kpm2.v; 
+            Eigen::Matrix<T, -1, -1> flatten;
+            flatten = Eigen::Matrix<T,-1,-1>::Zero(1, 1);
+            for(int i = 0; i < MEMORY; i++)
+              for(int j = 0; j < MEMORY; j++){
+                flatten(0) = kpm_product(i,j);
+                gamma.matrix().block(0,(n+i)*N_moments.at(0) + m + j, 1, 1) +=
+                  (flatten - gamma.matrix().block(0,(n+i)*N_moments.at(0) + m + j,1,1))/value_type(average + 1);			
+              }
+          }
+        }
+        average++;
+      }
+    } 
+    store_gamma(&gamma, N_moments, indices, name_dataset);
+  };
+  void GammaGeneral(int NRandomV, int NDisorder, std::vector<int> N_moments,
+      std::vector<std::vector<unsigned>> indices, std::string name_dataset){
+    
+    int dim = indices.size();
+		
+    // Check if the dimensions match
+    if(dim != int(N_moments.size())){
+      std::cout << "Dimension of the Gamma matrix does not match the number of chebyshev moments. Aborting.\n";
+      exit(0);
+    }
 			
     // Determine the size of the gamma matrix we want to calculate
     int size_gamma = 1;
@@ -224,7 +390,8 @@ public:
     for(int disorder = 0; disorder < NDisorder; disorder++){
       h.generate_disorder();
       for(unsigned it = 0; it < indices.size(); it++)
-	h.build_velocity(indices.at(it), it);
+        h.build_velocity(indices.at(it), it);
+
       for(int randV = 0; randV < NRandomV; randV++){
 	
 	
@@ -267,11 +434,9 @@ public:
 	delete kpm_vector.at(0);
     for(int i = 0; i < dim; i++)
 		delete kpm_vector.at(i+1);
-		
-		
-    debug_message("Left Measure_Gamma\n");
-  }
 	
+  }
+
   void recursive_KPM(int depth, int max_depth, std::vector<int> N_moments, long *average, long *index_gamma, std::vector<std::vector<unsigned>> indices, std::vector<KPM_Vector<T,D>*> *kpm_vector, Eigen::Array<T, -1, -1> *gamma){
     verbose_message("Entered recursive_KPM\n");
     typedef typename extract_value_type<T>::value_type value_type;
@@ -480,7 +645,6 @@ public:
   double time_kpm(int N_average){
      //This function serves to provide an estimate of the time it takes for each kpm iteration
       
-     
 #pragma omp barrier
     KPM_Vector<T,D> kpm0(1, *this);
     KPM_Vector<T,D> kpm1(2, *this);
@@ -512,141 +676,110 @@ public:
     int N_cheb_moments = queue.NMoments;
     Eigen::Array<double, -1, 1> energy_array = queue.singleshot_energies;
     double finite_gamma = queue.single_gamma;
-    std::string indices = queue.direction_string;
+    std::string indices_string = queue.direction_string;
     std::string name_dataset = queue.label;
-    
-    
-		 
-    // Process the indices
-    debug_message("Entered Single_Shot");
-    std::vector<unsigned> first_indices, second_indices;
-		
-    int comma_location = indices.find_first_of(',');
-	
-    std::string first_string, second_string;
-    first_string = indices.substr(0, comma_location);
-    second_string = indices.substr(comma_location+1);		
-    first_indices.resize(first_string.size()); 
-    second_indices.resize(second_string.size());
-	  
-    debug_message("Strings: "); debug_message(first_string); 
-    debug_message(" ");         debug_message(second_string);debug_message(".\n");
-    
-    for(unsigned int i = 0; i < first_string.size(); i++){
-      if(first_string[i]=='y')
-	      first_indices.at(i) = 1;
-      else
-	      first_indices.at(i) = 0;
-    }
-		
-    for(unsigned  int i = 0; i < second_string.size(); i++){
-      if(second_string[i]=='y')
-	      second_indices.at(i) = 1;
-      else
-	      second_indices.at(i) = 0;
-    }
-   
-    
-    //Done processing the indices
-		
-		
-    typedef typename extract_value_type<T>::value_type value_type;
-    KPM_Vector<T,D> phi0(1, *this);
-    KPM_Vector<T,D> phi (2, *this);
-    
-    KPM_Vector<T,D> phi1(1, *this);
-    KPM_Vector<T,D> phi2(1, *this);
-    
-	
-    //int a = 4;
-    //int b = 4;
-		
-    Eigen::Array<T, -1, -1> cond_array;
     int N_energies = energy_array.cols()*energy_array.rows(); //one of them is one. 
-    cond_array = Eigen::Array<T, -1, -1>::Zero(1, N_energies);
-    debug_message("Starting calculating.\n");
+    
 
-    for(int ener = 0; ener < N_energies; ener++)
-      {
+    // process the string with indices and verify if the demanded
+    // calculation is meaningful. For that to be true, this has to be a 
+    // longitudinal conductivity
+    std::vector<std::vector<unsigned>> indices = process_string(indices_string);
+    if(indices.at(0).at(0) != indices.at(1).at(0)){
+      std::cout << "SingleShot is only meaningful for the longitudinal conductivity.";
+      std::cout << "Please use directions 'x,x' or 'y,y'. Exiting.\n";
+      exit(0);
+    }
+
+
+		// initialize the kpm vectors necessary for this calculation
+    typedef typename extract_value_type<T>::value_type value_type;
+    KPM_Vector<T,D> phi (2, *this);
+    KPM_Vector<T,D> phi0(1, *this);
+    KPM_Vector<T,D> phi1(1, *this);
+	
+    // initialize the conductivity array
+    Eigen::Array<T, -1, -1> cond_array;
+    cond_array = Eigen::Array<T, -1, -1>::Zero(1, N_energies);
+
+
+
+    // iteration over each energy
+    for(int ener = 0; ener < N_energies; ener++){
       std::complex<double> energy(energy_array(ener), finite_gamma);
-      debug_message("Finished setting complex energy.\n");
+
+      // iteration over disorder and the number of random vectors
       long average = 0;
       for(int disorder = 0; disorder < NDisorder; disorder++){
-        debug_message("Before disorder.\n");
 	      h.generate_disorder();
-	  h.build_velocity(first_indices ,0u);
-	  h.build_velocity(second_indices ,1u);
-        debug_message("After disorder.\n");
-	  for(int randV = 0; randV < NRandomV; randV++)
-	    {
-          debug_message("Started calculating the first vector.\n");
-	      phi0.initiate_vector();					
-	      phi0.Exchange_Boundaries(); 	
-		      
-	      // calculate the left vector
-	      phi.set_index(0);				
+    	  h.build_velocity(indices.at(0),0u);
+    	  h.build_velocity(indices.at(1),1u);
+
+        for(int randV = 0; randV < NRandomV; randV++){
+
+          // initialize the random vector
+          phi0.initiate_vector();					
+          phi0.Exchange_Boundaries(); 	
+            
+          // calculate the left KPM vector
+          phi.set_index(0);				
+          phi1.v.col(0).setZero();
+          generalized_velocity(&phi, &phi0, indices, 0);      // |phi> = v |phi_0>
+
+          for(int n = 0; n < N_cheb_moments; n++){		
+            if(n!=0) cheb_iteration(&phi, n-1);
+
+            phi1.v.col(0) += phi.v.col(phi.get_index())
+              *green(n, 1, energy).imag()/(1.0 + int(n==0));
+          }
+          
+          // multiply phi1 by the velocity operator again. 
+          // We need a temporary vector to mediate the operation, which will be |phi>
+          phi.v.col(0) = phi1.v.col(0);
+          phi.set_index(0);
+          phi.Exchange_Boundaries();
+          generalized_velocity(&phi1, &phi, indices, 1);
+          phi1.empty_ghosts(0);
         
-        
-	      // |phi> = v |phi_0>
-	      phi.Velocity(phi.v.col(0).data(), phi0.v.col(0).data(), 0u);
-        debug_message("Multiplied by velocity.\n");
-	      phi.Exchange_Boundaries();	
-	      phi1.v.col(0) = phi.v.col(phi.get_index())*green(0, 1, energy).imag()/2.0;
-		      
-	      phi.template Multiply<0>();		
-	      phi1.v.col(0) += phi.v.col(1)*green(1, 1, energy).imag();
-		     
-        debug_message("Finished first cheb.\n");
-	      for(int n = 2; n < N_cheb_moments; n++){		
-      		phi.template Multiply<1>();
-      		phi1.v.col(0) += phi.v.col(phi.get_index())*green(n, 1, energy).imag();
-	      }
-        
-	      // multiply phi1 by the velocity operator again. 
-	      // We need a temporary vector to mediate the operation, which will be |phi>
-	      phi.v.col(0) = phi1.v.col(0);
-	      phi.Velocity(phi1.v.col(0).data(), phi.v.col(0).data(), 1u); 
-	      phi1.empty_ghosts(0);
-		  
-        debug_message("Finished calculating the first vector.\n");
-	      
-        // calculate the right vector
-	      phi.set_index(0);			
-	      phi.v.col(0) = phi0.v.col(0);
-		      
-	      phi2.v.col(0) = phi.v.col(phi.get_index())*green(0, 1, energy).imag()/2.0;
-        
-	      phi.template Multiply<0>();		
-	      phi2.v.col(0) += phi.v.col(1)*green(1, 1, energy).imag();
-		      
-	      for(int n = 2; n < N_cheb_moments; n++){		
-		      phi.template Multiply<1>();
-      		phi2.v.col(0) += phi.v.col(phi.get_index())*green(n, 1, energy).imag();
-	      }
-        
-	      cond_array(ener) += (T(phi1.v.col(0).adjoint()*phi2.v.col(0)) - cond_array(ener))/value_type(average+1);						
-	      average++;
-        debug_message("Finished calculating the second vector.\n");
-	    }
-	}
+          
+
+          // calculate the right KPM vector. Now we may reuse phi0
+          phi.set_index(0);			
+          phi.v.col(0) = phi0.v.col(0);
+          phi0.v.col(0).setZero(); 
+
+          for(int n = 0; n < N_cheb_moments; n++){		
+            if(n!=0) cheb_iteration(&phi, n-1);
+
+            phi0.v.col(0) += phi.v.col(phi.get_index())
+              *green(n, 1, energy).imag()/(1.0 + int(n==0));
+          }
+          
+          
+          // finally, the dot product of phi1 and phi0 yields the conductivity
+          cond_array(ener) += (T(phi1.v.col(0).adjoint()*phi0.v.col(0)) - 
+              cond_array(ener))/value_type(average+1);						
+          average++;
+        }
+      }
     }
-    
-    // the gamma matrix has been calculated. Now we're going to use the 
+    // finished calculating the longitudinal DC conductivity for all the energies
+    // Now let's store the gamma matrix. Now we're going to use the 
     // property that gamma is hermitian: gamma_nm=gamma_mn*
     
 #pragma omp master
     { 
-      Global.singleshot_cond = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic > :: Zero(1, energy_array.rows()*energy_array.cols());
+      Global.singleshot_cond = Eigen::Matrix<T, -1, -1> :: Zero(1, N_energies);
     }
 #pragma omp barrier
     
-	  
+    
     //std::cout << "IMPORTANT ! ! !:\n V is not hermitian. Make sure you take this into account\n";
     // in this case there's no problem. both V are anti-hermitic, so the minus signs cancel
 #pragma omp critical
     Global.singleshot_cond += cond_array;			
 #pragma omp barrier
-
+    
     
 #pragma omp master
     {
@@ -654,8 +787,8 @@ public:
       // Fixing the factor
       double unit_cell_area = fabs(r.rLat.determinant());
       unsigned int number_of_orbitals = r.Orb; 	// This is necessary because the normalization factor inside the random 
-      // vectors is not the number of lattice sites N but the number of states, 
-      // which is N*number_of_orbitals
+                                                // vectors is not the number of lattice sites N but the number of states, 
+                                                // which is N*number_of_orbitals
       unsigned int spin_degeneracy = 2;
       
       double factor = -4.0*spin_degeneracy*number_of_orbitals/M_PI/unit_cell_area;	// This is in units of sigma_0, hence the 4
@@ -670,7 +803,7 @@ public:
         store_data(1, ener) = Global.singleshot_cond.real()(ener);
       }
       
-
+      
 			
       H5::H5File * file = new H5::H5File(name, H5F_ACC_RDWR);
       write_hdf5(store_data, file, name_dataset);
