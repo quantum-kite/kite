@@ -1,4 +1,4 @@
-Quantum Kite is a multi threaded C++ package for efficient evaluation of spectral properties of Large-Scale Tight-Binding (TB) Hamiltonians. Under the assumptions of the basic knowledge of TB approximation, inside this tutorial we will present the code functionalities through different examples in form of inline code and gists which you can simply copy or download from our Github page _add_link_ and run. For more information on the TB method we suggest you to take a look at the section Resources _add_link_. If you encountered a peculiar problem, found a bug, or have any further question, we encourage you to contact us _add_link_, and we will try to respond as soon as possible.
+Quantum Kite is a multi threaded C++ package developed for efficient evaluation of spectral properties of Large-Scale Tight-Binding (TB) Hamiltonians. Under the assumptions of the basic knowledge of TB approximation, inside this tutorial we will present the code functionalities through different examples in form of inline code and gists which you can simply copy or download from our Github page _add_link_ and run. For more information on the TB method we suggest you to take a look at the section Resources _add_link_. If you encountered a peculiar problem, found a bug, or have any further question, we encourage you to contact us _add_link_, and we will try to respond as soon as possible.
 
 # Code workflow
 
@@ -28,7 +28,7 @@ Before going to examples, let's see how to load Pybinding.
 
 If all the requirements are fulfilled, Pybinding package can be imported in the python script. In all the scripts in this tutorial, required packages will be included with following aliases.
 
-```
+```python
 import pybinding as pb
 import numpy as np
 import matplotlib.pyplot as plt
@@ -37,7 +37,7 @@ import matplotlib.pyplot as plt
 If you want to use predefined styles for visualization, you can simply
 write:
 
- ```
+ ```python
  pb.pltutils.use_style()
  ```
 
@@ -56,7 +56,7 @@ Let's make a simple square lattice with a single lattice site.
 
 First, import all the packages:
 
-```
+```python
 import pybinding as pb
 import numpy as np
 import matplotlib.pyplot as plt
@@ -64,7 +64,7 @@ import matplotlib.pyplot as plt
 
 Defining the lattice vectors and making the lattice has following syntax:
 
-```
+```python
 a1 = np.array([1,0]) # [nm] define the first lattice vector
 a2 = np.array([0, 1]) # [nm] define the second lattice vector
 
@@ -73,7 +73,7 @@ lat = pb.Lattice(a1=a1, a2=a2) # define a lattice object
 
 Now we can add the desired lattice site:
 
-```
+```python
 lat.add_sublattices(
     # make a lattice site (sublattice) with a tuple
     # (name, position, and onsite potential)
@@ -83,7 +83,7 @@ lat.add_sublattices(
 
 and adding hoppings between the neighboring sites:
 
-```
+```python
 lat.add_hoppings(
     # make an hopping between lattice site with a tuple
     # (relative unit cell index, site from, site to, hopping energy)
@@ -111,14 +111,14 @@ reason for not getting any results.
 
 Now we can plot the lattice:
 
-```
+```python
 lat.plot()
 plt.show()
 ```
 
 or visualize the Brillouin zone:
 
-```
+```python
 lat.plot_brillouin_zone()
 plt.show()
 ```
@@ -130,7 +130,7 @@ https://gist.github.com/MAndelkovic/a5f085ce48b5d28de68b03b08008b57f
 
 After making the Lattice object, we can output both the model and information about the quantities that we want to calculate. For this, we need an additional functionalities that can be imported:
 
-```
+```python
 import export_lattice as ex
 ```
 In this script three different classes are defined:
@@ -149,7 +149,7 @@ These three will forward the information about the system being made. Objects of
 The scaling is done automatically in background and you shouldn't worry much about this, except being sure that scaled Hamiltonian ```H/energy_scale``` will have spectrum in the range [-1, 1].
 
 An example of making a ```Configuration``` object can be following:
-```
+```python
 configuration = ex.Configuration(divisions=[2, 2], length=[128, 128], boundaries=[True, True],
                                  is_complex=False, precision=0, energy_scale=10)
 ```
@@ -182,7 +182,7 @@ Following parameters are optional and are available for a function that supports
 * ```gamma``` - kernel parameter that mimics broadening [eV] (check this!!!)
 
 In a single request, you can add multiple functions that you want to evaluate like:
-```
+```python
 calculation = ex.Calculation(fname=['DOS', 'conductivity_dc', 'conductivity_optical_nonlinear',
                                     'singleshot_conductivity_dc'],
                              num_moments=[1024, 1, 1, 1], num_random=[1, 1, 1, 1], temperature=[100, 0],
@@ -191,11 +191,11 @@ calculation = ex.Calculation(fname=['DOS', 'conductivity_dc', 'conductivity_opti
 
 The last object of a class ```Modification``` defines special modifiers of the system. At the moment, only ```magnetic_field``` is available as an optional boolean parameter, which if ```True``` adds minimal value of the magnetic field that will obey a commensurability condition between the magnetic and material unit cell (single flux quanta through the surface of unit cell).
 It can be defined as:
-```
+```python
 modification = ex.Modification(magnetic_field=False)
 ```
 When these objects are defined, we can export the file that will contain set of input instructions for Quantum Kite:
-```
+```python
 ex.export_lattice(lattice, configuration, calculation, modification, 'example_new_naming_convention.h5')
 ```
 The following script merges all of the above mentioned in a singe place:
