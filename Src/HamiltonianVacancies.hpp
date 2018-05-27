@@ -24,16 +24,15 @@ struct Vacancy_Operator {
     // Distribute Vacancies
     
     for( std::size_t i = 0; i < r.N ; i++)
-      for(unsigned j = 0; j < concentration.size(); j++)
-	for(unsigned k = 0; k < concentration.size(); k++)
-	  if(simul.rnd.get() < concentration[k])
-	    for(auto o = orbitals.at(k).begin(); o != orbitals.at(k).end(); o++)
-	      {
-		latt.set_coord(i + std::size_t(*o) * r.N );         // Set Vacancy position inside the domain
-		r.convertCoordinates(latStr,latt);                  // Get stride position
-		r.convertCoordinates(Latt,latt);                    // Get Domain coordinates
-		position.at(latStr.index).push_back(Latt.index);    // store the position by stride 
-	      }
+      for(unsigned k = 0; k < concentration.size(); k++)
+	if(simul.rnd.get() < concentration[k])
+	  for(auto o = orbitals.at(k).begin(); o != orbitals.at(k).end(); o++)
+	    {
+	      latt.set_coord(i + std::size_t(*o) * r.N );         // Set Vacancy position inside the domain
+	      r.convertCoordinates(latStr,latt);                  // Get stride position
+	      r.convertCoordinates(Latt,latt);                    // Get Domain coordinates
+	      position.at(latStr.index).push_back(Latt.index);    // store the position by stride 
+	    }
   };
   
   void add_model(double p, std::vector <int> & orb)
