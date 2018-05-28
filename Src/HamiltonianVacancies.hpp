@@ -73,7 +73,7 @@ struct Vacancy_Operator {
 	if( abs(phi0[*vc]) > __DBL_EPSILON__)
 	  {
 	    std::cout << "Disparate" << std::endl;
-	    exit(0);
+	    exit(1);
 	  }
   }
   

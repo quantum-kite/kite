@@ -124,16 +124,32 @@ public:
       get_hdf5<unsigned>(Bd, file, (char *) "/Boundaries");
       get_hdf5<unsigned>(nd, file, (char *) "/Divisions");      
       
-	  MagneticField.resize  (1);
-	  MagneticField.at(0) = 0;
-	try {
-		H5::Exception::dontPrint();
-		get_hdf5<int>(MagneticField.data(),  file, (char *)   "/Hamiltonian/MagneticField");
-	}
-	catch (H5::Exception& e){}
+      // verify if the number of boundaries divides the length
+      if(Lt[0]%nd[0] != 0){
+        std::cout << "The number of divisions in the x direction ("<< nd[0] <<") must ";
+        std::cout << "be a divisor of the length of that side ("<< Lt[0] <<"). Exiting.\n";
+        exit(1);
+      }
+      if(Lt[1]%nd[1] != 0){
+        std::cout << "The number of divisions in the y direction ("<< nd[1] <<") must ";
+        std::cout << "be a divisor of the length of that side ("<< Lt[1] <<"). Exiting.\n";
+        exit(1);
+      }
+
+
+
+      MagneticField.resize  (1);
+      MagneticField.at(0) = 0;
+      try {
+        H5::Exception::dontPrint();
+        get_hdf5<int>(MagneticField.data(),  file, (char *)   "/Hamiltonian/MagneticField");
+      }
+      catch (H5::Exception& e){}
 	        
       file->close();
     }
+
+
     
     // Set the vector potential
     vect_pot.setZero();
@@ -185,7 +201,8 @@ public:
       size = (2 * std::max(Ld[0] * Ld[1], std::max(Ld[0] * ld[2] , ld[1]*ld[2]) ) * Orb * n_threads) * NGHOSTS;
       break;
     default:
-      exit(0);
+      std::cout << "Error in LatticeBuilding.hpp. Exiting.\n";
+      exit(1);
     }
     return size;
   };

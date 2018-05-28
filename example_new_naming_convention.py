@@ -73,10 +73,10 @@ configuration = Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[T
 
 # direction ID 'xx': 0, 'yy': 1, 'zz': 2, 'xy': 3, 'xz': 4, 'yx': 3, 'yz': 5, 'zx': 4, 'zy': 5
 calculation = Calculation(configuration)
-calculation.dos(num_points=1000, num_random=1, num_disorder=1, num_moments=1024)
-calculation.conductivity_optical(num_points=1000, num_random=1, num_disorder=1, num_moments=128, direction='xx')
-# calculation.conductivity_dc(num_points=1000, num_moments=64, num_random=1, num_disorder=1,
-                                   # direction='xx', temperature=10)
+# calculation.dos(num_points=1000, num_random=1, num_disorder=1, num_moments=1024)
+# calculation.conductivity_optical(num_points=1000, num_random=1, num_disorder=1, num_moments=512, direction='xx')
+calculation.conductivity_dc(num_points=1000, num_moments=512, num_random=1, num_disorder=1,
+                                   direction='xx', temperature=10)
 calculation.singleshot_conductivity_dc(energy=[(n/100.0 - 0.5)*energy_scale*2 for n in range(101)], num_moments=512, num_random=1, num_disorder=1,
                                                direction='xx', gamma=0.01)
 # calculation.conductivity_optical_nonlinear(num_points=1000, num_moments=512, num_random=1, num_disorder=1,
@@ -88,7 +88,7 @@ modification = Modification(magnetic_field=False)
 
 # export the lattice from the lattice object, config and calculation object and the name of the file
 # the disorder is optional. If there is disorder in the lattice for now it should be given separately
-export_lattice(lattice, configuration, calculation, modification, 'smoltest1.h5')
+export_lattice(lattice, configuration, calculation, modification, 'optical_cond_xx.h5')
 
 # plotting the lattice
 # lattice.plot()

@@ -151,14 +151,11 @@ public:
     T * kpm0data = kpm0->v.col(kpm0->get_index()).data();
 
     switch(indices.at(pos).size()){
-    case 0:
-      verbose_message("case 0");
-      break;
-
-    default:
-      verbose_message("default");
-	    kpm0->Velocity(kpm0data, kpm1data, pos); 											
-      break;
+      case 0:
+        break;
+      default:
+        kpm0->Velocity(kpm0data, kpm1data, pos); 											
+        break;
     }
   }
 
@@ -222,14 +219,17 @@ public:
     // Check if the dimensions match
     if(dim != int(N_moments.size())){
       std::cout << "Dimension of the Gamma matrix does not match the number of chebyshev moments. Aborting.\n";
-      exit(0);
+      exit(1);
     }
     
     if(dim == 2 and MEMORY > 2){
-      std::cout << "using memory blocks\n";
+      if(N_moments.at(0)%MEMORY!=0 or N_moments.at(1)%MEMORY!=0){
+        std::cout << "The number of Chebyshev moments ("<< N_moments.at(0)<<","<< N_moments.at(1)<<")"; 
+        std::cout << "has to be a multiple of MEMORY ("<< MEMORY <<"). Exiting.\n";
+        exit(1);
+      }
       Gamma2D(NRandomV, NDisorder, N_moments, indices, name_dataset);
     } else {
-      std::cout << "using recursive\n";
       GammaGeneral(NRandomV, NDisorder, N_moments, indices, name_dataset);
     }
 
@@ -256,7 +256,7 @@ public:
     for(int i = 0; i < 2; i++){
       if(N_moments.at(i) % 2 != 0){
         std::cout << "The number of moments must be an even number, due to limitations of the program. Aborting\n";
-        exit(0);
+        exit(1);
       }
       size_gamma *= N_moments.at(i);
     }
@@ -338,6 +338,7 @@ public:
     } 
     store_gamma(&gamma, N_moments, indices, name_dataset);
   };
+
   void GammaGeneral(int NRandomV, int NDisorder, std::vector<int> N_moments,
       std::vector<std::vector<unsigned>> indices, std::string name_dataset){
     
@@ -346,42 +347,30 @@ public:
     // Check if the dimensions match
     if(dim != int(N_moments.size())){
       std::cout << "Dimension of the Gamma matrix does not match the number of chebyshev moments. Aborting.\n";
-      exit(0);
+      exit(1);
     }
 			
     // Determine the size of the gamma matrix we want to calculate
     int size_gamma = 1;
     for(int i = 0; i < dim; i++){
       if(N_moments.at(i) % 2 != 0){
-	std::cout << "The number of moments must be an even number, due to limitations of the program. Aborting\n";
-	exit(0);
+        std::cout << "The number of moments must be an even number, due to limitations of the program. Aborting\n";
+        exit(1);
       }
       size_gamma *= N_moments.at(i);
     }
-		
-    // Estimate of the time it'll take to run this function. 
-    // It doesn't take into account parallelization or velocity matrix products
-    /*debug_message("This will take around ");
-      debug_message(size_gamma*Global.kpm_iteration_time);
-      debug_message(" seconds\n");*/
-		
 		
 		
     // Initialize the KPM vectors that will be needed to run the program 
     std::vector<KPM_Vector<T,D>*> kpm_vector(dim+1);
     kpm_vector.at(0) = new KPM_Vector<T,D> (1, *this);
     for(int i = 0; i < dim; i++)
-		kpm_vector.at(i+1) = new KPM_Vector<T,D> (2, *this);
-		
-		//kpm_vector.push_back(KPM_Vector<T,D> (2, *this));
+		  kpm_vector.at(i+1) = new KPM_Vector<T,D> (2, *this);
 		
 		
     // Define some pointers to make the code easier to read
     KPM_Vector<T,D> *kpm0 = kpm_vector.at(0);
     KPM_Vector<T,D> *kpm1 = kpm_vector.at(1);
-    T * kpm0data = kpm0->v.col(0).data();
-    T * kpm1data = kpm1->v.col(kpm1->get_index()).data();
-			
 			
     // Make sure the local gamma matrix is zeroed
     Eigen::Array<T, -1, -1> gamma = Eigen::Array<T, -1, -1 >::Zero(1, size_gamma);
@@ -393,51 +382,36 @@ public:
         h.build_velocity(indices.at(it), it);
 
       for(int randV = 0; randV < NRandomV; randV++){
-	
-	
-	kpm0->initiate_vector();			// original random vector
-	kpm1->set_index(0);
-	kpm1->v.col(0) = kpm0->v.col(0);
-	kpm1->Exchange_Boundaries();
-	// Check which generalized velocity operator needs to be calculated. 
-	// This replaces the original random vector |0> by v|0> 
-				
-	switch(indices.at(0).size()){
-	case 0:
-	  verbose_message("case 0");
-	  break;
-	default:
-						
-	  verbose_message("case 1");
-      	  kpm0->Velocity(kpm0data, kpm1data, 0u); 
-	  kpm0->empty_ghosts(0);
-	  kpm0->v.col(0) = -kpm0->v.col(0); // This minus sign is due to the fact that this Velocity operator is not self-adjoint
-						
-						
-	  break;
-					
-		
-	}
-					
-	long index_gamma = 0;
-	recursive_KPM(1, dim, N_moments, &average, &index_gamma, indices, &kpm_vector, &gamma);
-				
-				
-	average++;
+        
+        kpm0->initiate_vector();			// original random vector
+        kpm1->set_index(0);
+        kpm1->v.col(0) = kpm0->v.col(0);
+        kpm1->Exchange_Boundaries();
+
+        // replace <0| by  <0|v. Note that v is not self-adjoint in this formulation
+        generalized_velocity(kpm0, kpm1, indices, 0);
+        int factor = 1 - (indices.at(0).size() % 2)*2;		
+        kpm0->v.col(0) = factor*kpm0->v.col(0); // This factor is due to the fact that this Velocity operator is not self-adjoint
+
+        kpm0->empty_ghosts(0);
+        long index_gamma = 0;
+        recursive_KPM(1, dim, N_moments, &average, &index_gamma, indices, &kpm_vector, &gamma);
+      	average++;
       }
     } 
 		
 		
     store_gamma(&gamma, N_moments, indices, name_dataset);
 		
-	// delete the kpm_vector
-	delete kpm_vector.at(0);
+    // delete the kpm_vector
+    delete kpm_vector.at(0);
     for(int i = 0; i < dim; i++)
-		delete kpm_vector.at(i+1);
+      delete kpm_vector.at(i+1);
 	
   }
 
-  void recursive_KPM(int depth, int max_depth, std::vector<int> N_moments, long *average, long *index_gamma, std::vector<std::vector<unsigned>> indices, std::vector<KPM_Vector<T,D>*> *kpm_vector, Eigen::Array<T, -1, -1> *gamma){
+  void recursive_KPM(int depth, int max_depth, std::vector<int> N_moments, long *average, long *index_gamma, 
+      std::vector<std::vector<unsigned>> indices, std::vector<KPM_Vector<T,D>*> *kpm_vector, Eigen::Array<T, -1, -1> *gamma){
     verbose_message("Entered recursive_KPM\n");
     typedef typename extract_value_type<T>::value_type value_type;
 		
@@ -453,55 +427,41 @@ public:
 			
 			
       for(int p = 0; p < N_moments.at(depth - 1); p++){
-	kpm2->set_index(0);
-	switch(indices.at(depth).size()){
-	case 0:
-	  //std::cout << "case0\n"<< std::flush;
-	  break;
-	default:
-	  //std::cout << "case1\n"<< std::flush;
-	  kpm1data = kpm1->v.col(kpm1->get_index()).data();
-	  kpm2data = kpm2->v.col(kpm2->get_index()).data();
-						
-	  //std::cout << "indices.at(" << depth << "): " << axis1 << "\n"<< std::flush;
-	  kpm2->Velocity(kpm2data, kpm1data, max_depth - depth); 											
-						
-	}
+        kpm2->set_index(0);
+        switch(indices.at(depth).size()){
+        case 0:
+          break;
+        default:
+          kpm1data = kpm1->v.col(kpm1->get_index()).data();
+          kpm2data = kpm2->v.col(kpm2->get_index()).data();
+                  
+          kpm2->Velocity(kpm2data, kpm1data, max_depth - depth); 											
+        }
 				
-				
-	recursive_KPM(depth + 1, max_depth, N_moments, average, index_gamma, indices, kpm_vector, gamma);
-	//std::cout << "left second branch\n" << std::flush;
-	if(p == 0){
-	  //std::cout << "p=0\n" << std::flush;
-	  kpm1->template Multiply<0>(); 
-	}
-	else if(p < N_moments.at(depth-1) - 1){
-	  //std::cout << "p!=0\n" << std::flush;
-	  kpm1->template Multiply<1>(); 
-	}
-			
+        recursive_KPM(depth + 1, max_depth, N_moments, average, index_gamma, indices, kpm_vector, gamma);
+        if(p == 0){
+          kpm1->template Multiply<0>(); 
+        }
+        else if(p < N_moments.at(depth-1) - 1){
+          kpm1->template Multiply<1>(); 
+        }
       }
 			
     } else {
       KPM_Vector<T,D> *kpm0 = kpm_vector->at(0);
       KPM_Vector<T,D> *kpm1 = kpm_vector->at(depth);
 			
-      //std::cout << "second branch. Depth: " << depth << "\n" << std::flush<< std::flush;
       kpm1->template Multiply<0>();		
-      //std::cout << "You failed at multiplication\n" << std::flush<< std::flush;	
       gamma->matrix().block(0,*index_gamma,1,2) += (kpm0->v.adjoint() * kpm1->v - gamma->matrix().block(0,*index_gamma,1,2))/value_type(*average + 1);			
       *index_gamma += 2;
 	
-      for(int m = 2; m < N_moments.at(depth - 1); m += 2)
-	{
-	  kpm1->template Multiply<1>();
-	  kpm1->template Multiply<1>();
-	  gamma->matrix().block(0, *index_gamma,1,2) += (kpm0->v.adjoint() * kpm1->v - gamma->matrix().block(0,*index_gamma,1,2))/value_type(*average + 1);
-	  //std::cout << "product: " << kpm0->v.adjoint() * kpm1->v << "\n";
-				
-	  *index_gamma += 2;
-	}
-			
+      for(int m = 2; m < N_moments.at(depth - 1); m += 2){
+        kpm1->template Multiply<1>();
+        kpm1->template Multiply<1>();
+        gamma->matrix().block(0, *index_gamma,1,2) += (kpm0->v.adjoint() * kpm1->v - gamma->matrix().block(0,*index_gamma,1,2))/value_type(*average + 1);
+            
+        *index_gamma += 2;
+      }
     }
 		
     verbose_message("Left recursive_KPM\n");
@@ -546,7 +506,7 @@ public:
 	  } else {
 	    // This block should never run
 	    std::cout << "Please enter a valid expression.\n";
-	    exit(0);
+	    exit(1);
 	  }
 	} 
 	temp.push_back(single_digit);
@@ -624,7 +584,7 @@ public:
       default:
 	{
 	  std::cout << "You're trying to store a matrix that is not expected by the program. Exiting.\n";
-	  exit(0);
+	  exit(1);
 	}
       }
     
@@ -680,7 +640,6 @@ public:
     std::string name_dataset = queue.label;
     int N_energies = energy_array.cols()*energy_array.rows(); //one of them is one. 
     
-
     // process the string with indices and verify if the demanded
     // calculation is meaningful. For that to be true, this has to be a 
     // longitudinal conductivity
@@ -688,7 +647,7 @@ public:
     if(indices.at(0).at(0) != indices.at(1).at(0)){
       std::cout << "SingleShot is only meaningful for the longitudinal conductivity.";
       std::cout << "Please use directions 'x,x' or 'y,y'. Exiting.\n";
-      exit(0);
+      exit(1);
     }
 
 
