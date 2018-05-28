@@ -180,13 +180,13 @@ public:
   void inline mult_local_disorder(const  std::size_t & j0, const  std::size_t & io)
   {
     const std::size_t j1 = j0 + STRIDE * std;
-    const std::size_t dd = (h.Anderson_orb_address[io] - io)*r.Nd;
+    const std::ptrdiff_t dd = (h.Anderson_orb_address[io] - std::ptrdiff_t(io))*r.Nd;
     // Anderson disorder
     if( h.Anderson_orb_address[io] >= 0)
       {
 	for(std::size_t j = j0; j < j1; j += std )
 	  for(std::size_t i = j; i < j + STRIDE ; i++)
-	    phi0[i] += value_type(MULT + 1) * phiM1[i] * h.U_Anderson.at(i - dd);
+	    phi0[i] += value_type(MULT + 1) * phiM1[i] * h.U_Anderson.at(i + dd);
       }
     else if (h.Anderson_orb_address[io] == - 1)
       {
