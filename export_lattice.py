@@ -1,7 +1,9 @@
 import numpy as np
 import h5py as hp
+import pybinding as pb
 
 from scipy.sparse import coo_matrix
+from scipy.spatial import cKDTree
 
 
 # Class that introduces Structural Disorder into the initially built lattice.
@@ -18,7 +20,6 @@ from scipy.sparse import coo_matrix
 # columns are conjugated values,
 # - NodeOnsite: array of nodes that have onsite disorder,
 # - U0: value of the onsite disorder.
-
 class StructuralDisorder:
     def __init__(self, lattice, concentration):
 
@@ -38,7 +39,18 @@ class StructuralDisorder:
         self._nodes_to = []
         self._nodes_onsite = []
 
+        # only used for scaling
+        self._sub_from = []
+        self._sub_to = []
+        self._sub_onsite = []
+        self._rel_idx_onsite = []
+        self._rel_idx_to = []
+        self._rel_idx_from = []
+        self._onsite = []
+        self._hopping = []
+
         self._orbital_vacancy = []
+        self._vacancy_sub = []
 
         self._num_nodes = 0
         self._nodes_map = dict()
@@ -113,7 +125,7 @@ class StructuralDisorder:
         names, sublattices = zip(*self._lattice.sublattices.items())
 
         if sub not in names:
-            raise SystemExit('Desired initial sublattice doesnt exist in the chosen lattice! ')
+            raise SystemExit('Desired initial sublattice doesn\'t exist in the chosen lattice! ')
 
         indx = names.index(sub)
         lattice_sub = sublattices[indx]
@@ -128,8 +140,16 @@ class StructuralDisorder:
             it.iternext()
 
         self._orbital_vacancy.append(orbital_vacancy)
+        self._vacancy_sub.append(sub)
 
     def add_local_bond_disorder(self, relative_index_from, from_sub, relative_index_to, to_sub, hoppings):
+
+        # save the info used for manual scaling
+        self._sub_from.append(from_sub)
+        self._sub_to.append(to_sub)
+        self._rel_idx_to.append(relative_index_to)
+        self._rel_idx_from.append(relative_index_from)
+        self._hopping.append(np.atleast_1d(hoppings))
 
         orbital_from = []
         orbital_to = []
@@ -234,6 +254,12 @@ class StructuralDisorder:
             self._num_nodes = len(nodes_map)
 
     def add_local_onsite_disorder(self, relative_index, sub, value):
+
+        # save the info used for manual scaling
+        self._sub_onsite.append(sub)
+        self._rel_idx_onsite.append(relative_index)
+        self._onsite.append(np.atleast_1d(value))
+
         orbital_onsite = []
         orbital_onsite_en = []
 
@@ -305,6 +331,8 @@ class Disorder:
         self._stdv = []
         # orbital that has the chosen disorder.
         self._orbital = []
+        # sublattice that has the chosen disorder.
+        self._sub_name = []
 
         num_orbitals = np.zeros(lattice.nsub, dtype=np.uint64)
         for name, sub in lattice.sublattices.items():
@@ -317,7 +345,7 @@ class Disorder:
         self._lattice = lattice
 
     # class method that introduces the disorder to the lattice
-    def add_disorder(self, sublattice, dis_type, mean_value, standard_deviation):
+    def add_disorder(self, sublattice, dis_type, mean_value, standard_deviation=0):
         if isinstance(dis_type, list):
             if isinstance(sublattice, list):
                 for indx, name in enumerate(sublattice):
@@ -383,6 +411,7 @@ class Disorder:
                   '\n')
             raise SystemExit('All parameters should have the same length! ')
 
+        self._sub_name.append(sublattice_name * len(mean_value))
         self._type = orbital_dis_type
         self._type_id = orbital_dis_type_id
         self._mean = orbital_dis_mean
@@ -392,12 +421,18 @@ class Disorder:
 
 class Modification:
     def __init__(self, **kwargs):
-        self._magnetic_field = kwargs.get('magnetic_field', False)
+        self._magnetic_field = kwargs.get('magnetic_field', None)
+        self._flux = kwargs.get('flux', None)
 
     @property
     def magnetic_field(self):  # magnetic_field:
-        """Returns true if magnetic field is on, else off."""
+        """Returns true if magnetic field is on, else False."""
         return self._magnetic_field
+
+    @property
+    def flux(self):  # flux:
+        """Returns the number of multiples of flux quantum."""
+        return self._flux
 
 
 class Calculation:
@@ -433,6 +468,7 @@ class Calculation:
             raise TypeError("You're forwarding a wrong type!")
 
         self._scaling_factor = configuration.energy_scale
+        self._energy_shift = configuration.energy_shift
         self._dos = []
         self._conductivity_dc = []
         self._conductivity_optical = []
@@ -583,7 +619,8 @@ class Calculation:
             raise SystemExit('Invalid direction!')
         else:
             self._singleshot_conductivity_dc.append(
-                {'energy': np.atleast_1d(energy) / self._scaling_factor, 'direction': self._avail_dir_sngl[direction],
+                {'energy': (np.atleast_1d(energy) - self._energy_shift) / self._scaling_factor,
+                 'direction': self._avail_dir_sngl[direction],
                  'gamma': np.array(gamma) / self._scaling_factor, 'num_moments': num_moments,
                  'num_random': num_random, 'num_disorder': num_disorder})
 
@@ -591,7 +628,7 @@ class Calculation:
 class Configuration:
 
     def __init__(self, divisions=(1, 1), length=(1, 1), boundaries=(False, False), is_complex=False, precision=1,
-                 energy_scale=1):
+                 spectrum_range=None):
         """Define basic parameters used in the calculation
 
        Parameters
@@ -607,12 +644,19 @@ class Configuration:
        precision : int
             Integer which defines the precision of the number used in the calculation. Float - 0, double - 1,
             long double - 2.
-        energy_scale : float
+       spectrum_range : Optional[Tuple[float, float]]
             Energy scale which defines the scaling factor of all the energy related parameters. The scaling is done
-            automatically in the background after this definition.
+            automatically in the background after this definition. If the term is not specified, a rough estimate of the
+            bounds is found.
        """
 
-        self._energy_scale = energy_scale
+        if spectrum_range:
+            self._energy_scale = (spectrum_range[1] - spectrum_range[0]) / 2
+            self._energy_shift = (spectrum_range[1] + spectrum_range[0]) / 2
+        else:
+            self._energy_scale = None
+            self._energy_shift = None
+
         self._is_complex = int(is_complex)
         self._precision = precision
         self._divisions = divisions
@@ -646,6 +690,11 @@ class Configuration:
         return self._energy_scale
 
     @property
+    def energy_shift(self):
+        """Returns the energy shift of the hopping parameters around which the spectrum is centered."""
+        return self._energy_shift
+
+    @property
     def comp(self):  # -> is_complex:
         """Returns 0 if hamiltonian is real and 1 elsewise."""
         return self._is_complex
@@ -677,6 +726,237 @@ class Configuration:
         return self._htype
 
 
+def make_pybinding_model(lattice, disorder=None, disorder_structural=None, **kwargs):
+    """Build a Pybinding model with disorder used in Kite. Bond disorder or magnetic field are not currently supported.
+
+    Parameters
+    ----------
+    lattice : pb.Lattice
+        Pybinding lattice object that carries the info about the unit cell vectors, unit cell cites, hopping terms and
+        onsite energies.
+    disorder : Disorder
+        Class that introduces Disorder into the initially built lattice. For more info check the Disorder class.
+    disorder_structural : StructuralDisorder
+        Class that introduces StructuralDisorder into the initially built lattice. For more info check the
+        StructuralDisorder class.
+    **kwargs: Optional arguments like shape .
+
+    """
+
+    shape = kwargs.get('shape', None)
+    if disorder_structural:
+        # check if there's a bond disorder term
+        # return an error if so
+        disorder_struc_list = disorder_structural
+        if not isinstance(disorder_structural, list):
+            disorder_struc_list = [disorder_structural]
+
+        for idx_struc, dis_struc in enumerate(disorder_struc_list):
+            if len(dis_struc._sub_from):
+                raise SystemExit(
+                    'Automatic scaling is not supported when bond disorder is specified. Please select the scaling '
+                    'bounds manually.')
+
+    def gaussian_disorder(sub, mean_value, stdv):
+        """Add gaussian disorder with selected mean value and standard deviation to the pybinding model.
+
+        Parameters
+        ----------
+        sub : str
+            Select a sublattice where disorder should be added.
+        mean_value : float
+            Select a mean value of the disorder.
+        stdv : float
+            Select standard deviation of the disorder.
+        """
+
+        @pb.onsite_energy_modifier
+        def modify_energy(energy, sub_id):
+            rand_onsite = np.random.normal(loc=mean_value, scale=stdv, size=len(energy[sub_id == sub]))
+            energy[sub_id == sub] += rand_onsite
+            return energy
+
+        return modify_energy
+
+    def deterministic_disorder(sub, mean_value):
+        """Add deterministic disorder with selected mean value to the Pybinding model.
+
+        Parameters
+        ----------
+        sub : str
+            Select a sublattice where disorder should be added.
+        mean_value : float
+            Select a mean value of the disorder.
+
+        """
+
+        @pb.onsite_energy_modifier
+        def modify_energy(energy, sub_id):
+            onsite = mean_value * np.ones(len(energy[sub_id == sub]))
+            energy[sub_id == sub] += onsite
+            return energy
+
+        return modify_energy
+
+    def uniform_disorder(sub, mean_value, stdv):
+        """Add uniform disorder with selected mean value and standard deviation to the Pybinding model.
+
+        Parameters
+        ----------
+        sub : str
+            Select a sublattice where disorder should be added.
+        mean_value : float
+            Select a mean value of the disorder.
+        stdv : float
+            Select standard deviation of the disorder.
+        """
+
+        @pb.onsite_energy_modifier
+        def modify_energy(energy, sub_id):
+            a = mean_value - stdv * np.sqrt(3)
+            b = mean_value + stdv * np.sqrt(3)
+
+            rand_onsite = np.random.uniform(low=a, high=b, size=len(energy[sub_id == sub]))
+            energy[sub_id == sub] += rand_onsite
+
+            return energy
+
+        return modify_energy
+
+    def vacancy_disorder(sub, concentration):
+        """Add vacancy disorder with selected concentration to the Pybinding model.
+
+        Parameters
+        ----------
+        sub : str
+            Select a sublattice where disorder should be added.
+        concentration : float
+            Concentration of the vacancy disorder.
+        """
+
+        @pb.site_state_modifier(min_neighbors=2)
+        def modifier(state, sub_id):
+            rand_vec = np.random.rand(len(state))
+            vacant_sublattice = np.logical_and(sub_id == sub, rand_vec < concentration)
+
+            state[vacant_sublattice] = False
+            return state
+
+        return modifier
+
+    def local_onsite_disorder(positions, value):
+        """Add onsite disorder as a part of StructuralDisorder class to the Pybinding model.
+
+        Parameters
+        ----------
+        positions : np.ndarray
+            Select positions where disorder should appear
+        value : np.ndarray
+            Value of the disordered onsite term.
+        """
+        space_size = np.array(positions).shape[1]
+
+        @pb.onsite_energy_modifier
+        def modify_energy(x, y, z, energy):
+            # all_positions = np.column_stack((x, y, z))[0:space_size, :]
+            all_positions = np.stack([x, y, z], axis=1)[:, 0:space_size]
+
+            kdtree1 = cKDTree(positions)
+            kdtree2 = cKDTree(all_positions)
+
+            d_max = 0.05
+            # find the closest elements between two trees, with d < d_max. Finds the desired elements from the
+            # parameters x, y, z being used inside the modifier function.
+            coo = kdtree1.sparse_distance_matrix(kdtree2, d_max, output_type='coo_matrix')
+
+            energy[coo.col] += value
+
+            return energy
+
+        return modify_energy
+
+    if not shape:
+        referent_size = 100
+        a1, a2 = lattice.vectors
+        norm_a1 = np.linalg.norm(a1)
+        norm_a2 = np.linalg.norm(a2)
+        num_a1 = referent_size / norm_a1
+        num_a2 = referent_size / norm_a2
+        shape = pb.rectangle(4 * num_a1 * norm_a1, 4 * num_a2 * norm_a2)
+        trans_symm = pb.translational_symmetry(a1=num_a1 * norm_a1, a2=num_a2 * norm_a2)
+        param = [shape, trans_symm]
+    else:
+        param = [shape]
+
+    model = pb.Model(lattice, *param)
+
+    if disorder:
+        disorder_list = disorder
+        if not isinstance(disorder, list):
+            disorder_list = [disorder]
+        for dis in disorder_list:
+            for idx in range(len(dis._type)):
+                if dis._type[idx].lower() == 'uniform':
+                    model.add(
+                        uniform_disorder(dis._sub_name[idx], dis._mean[idx], dis._stdv[idx]))
+                if dis._type[idx].lower() == 'gaussian':
+                    model.add(
+                        gaussian_disorder(dis._sub_name[idx], dis._mean[idx], dis._stdv[idx]))
+                if dis._type[idx].lower() == 'deterministic':
+                    model.add(deterministic_disorder(dis._sub_name[idx], dis._mean[idx]))
+
+    if disorder_structural:
+
+        disorder_struc_list = disorder_structural
+        if not isinstance(disorder_structural, list):
+            disorder_struc_list = [disorder_structural]
+
+        for idx_struc, dis_struc in enumerate(disorder_struc_list):
+            num_sites = model.system.num_sites
+            rand_vec = np.random.rand(num_sites)
+            space_size = np.array(lattice.vectors).shape[0]
+
+            for vac in dis_struc._vacancy_sub:
+                model.add(vacancy_disorder(sub=vac, concentration=dis_struc._concentration))
+
+            for idx in range(len(dis_struc._sub_onsite)):
+                names, sublattices = zip(*model.lattice.sublattices.items())
+
+                sublattice_alias = names.index(dis_struc._sub_onsite[idx])
+
+                select_sublattice = model.system.sublattices == sublattice_alias
+                sub_and_rand = np.logical_and(select_sublattice, rand_vec < dis_struc._concentration)
+
+                # generates a set of random positions that will be added to the nodes in structural disorder, problem
+                # because when only one sublattice is selected, effective concentration will be lower
+                positions = np.stack([model.system.positions.x[sub_and_rand],
+                                      model.system.positions.y[sub_and_rand],
+                                      model.system.positions.z[sub_and_rand]], axis=1)[:, 0:space_size]
+
+                # ref_pos = np.stack([model.system.positions.x[def_site_idx], model.system.positions.y[def_site_idx],
+                #                     model.system.positions.z[def_site_idx]], axis=1)[:, 0:space_size]
+
+                # get the position of onsite disordered sublattice
+                vectors = np.array(lattice.vectors)[:, 0:space_size]
+                pos_sub = lattice.sublattices[dis_struc._sub_onsite[idx]].position[0:space_size]
+
+                # make an array of positions of sites where the onsite disorder will be added
+                pos = pos_sub + np.dot(vectors.T, np.array(dis_struc._rel_idx_onsite[idx]))
+                select_pos = positions + pos
+
+                # add the onsite with value dis_struc._onsite[idx]
+                model.add(local_onsite_disorder(select_pos, dis_struc._onsite[idx]))
+
+    return model
+
+
+def estimate_bounds(lattice, disorder=None, disorder_structural=None):
+    model = make_pybinding_model(lattice, disorder, disorder_structural)
+    kpm = pb.kpm(model)
+    a, b = kpm.scaling_factors
+    return -a + b, a + b
+
+
 def export_lattice(lattice, config, calculation, modification, filename, **kwargs):
     """Export the lattice and related parameters to the *.h5 file
 
@@ -691,12 +971,14 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
     calculation : Calculation
         Calculation object that defines the requested functions for the calculation.
     modification : Modification
-        Modification object, has the magnetic field operator which can be True or False.
+        Modification object, has the magnetic field selection, either in terms of field, or in the number of flux
+        quantum through the selected system.
     filename : string
         Output filename.
     **kwargs: Optional arguments like Disorder or Disorder_structural.
 
     """
+
     # hamiltonian is complex 1 or real 0
     complx = int(config.comp)
 
@@ -711,14 +993,27 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
         config.set_type()
 
     # check if magnetic field is On
-    if modification.magnetic_field and complx == 0:
+    if modification.magnetic_field or modification.flux and complx == 0:
         print('Magnetic field is added but is_complex identifier is 0. Automatically turning is_complex to 1!')
         config._is_complex = 1
         config.set_type()
 
+    # hamiltonian is complex 1 or real 0
+    complx = int(config.comp)
+
     # get the lattice vectors and set the size of space (1D, 2D or 3D) as the total number of vectors.
     disorder = kwargs.get('disorder', None)
     disorded_structural = kwargs.get('disorded_structural', None)
+
+    # if bounds are not specified, find a rough estimate
+    if not config.energy_scale:
+        print('Automatic scaling is being done. If unexpected results are produced, consider selecting the bounds '
+              'manually. \nEstimate of the spectrum bounds with a safety factor is: ')
+        e_min, e_max = estimate_bounds(lattice, disorder, disorded_structural)
+        print('({:.2f}, {:.2f} eV)'.format(e_min, e_max))
+        # add a safety factor for a scaling factor
+        config._energy_scale = (e_max - e_min) / (2 * 0.9)
+        config._energy_shift = (e_max + e_min) / 2
 
     vectors = np.asarray(lattice.vectors)
     space_size = vectors.shape[0]
@@ -739,8 +1034,10 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
         position_atoms[sub.alias_id, :] = sub.position[0:space_size]
         # define hopping dict from relative hopping index from and to id (relative number of sublattice in relative
         # index lattice) and onsite
+        # energy shift is substracted from onsite potential, this is later added to the hopping dictionary,
+        # hopping terms shouldn't be substracted
         hopping = {'relative_index': np.zeros(space_size, dtype=np.int32), 'from_id': sub.alias_id,
-                   'to_id': sub.alias_id, 'hopping_energy': sub.energy}
+                   'to_id': sub.alias_id, 'hopping_energy': sub.energy - config.energy_shift}
         hoppings.append(hopping)
 
     # num_orbitals = np.asarray(num_orbitals)
@@ -831,13 +1128,15 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
     f.create_dataset('L', data=config.leng, dtype='u4')
     # periodic boundary conditions, 0 - no, 1 - yes.
     bound = config.bound
-    print('Periodic boundary conditions are set along x and y direction respec. to', bool(bound[0]), 'and ',
-          bool(bound[1]), 'At the moment, no other boundary conditions are possible.')
+    print('\nPeriodic boundary conditions are set along x and y direction respec. to', bool(bound[0]), 'and ',
+          bool(bound[1]), '\nAt the moment, no other boundary conditions are possible.')
     f.create_dataset('Boundaries', data=bound, dtype='u4')
     # number of divisions of the in each direction of hamiltonian. nx x ny = num_threads
-    print('Chosen number of decomposition parts is:', config.div[0], 'x', config.div[1],
-          'INFO: this product will correspond to the total number of threads. '
-          'You should choose at most the number of processor cores you have.')
+    print('\nChosen number of decomposition parts is:', config.div[0], 'x', config.div[1],
+          '\nINFO: this product will correspond to the total number of threads. '
+          '\nYou should choose at most the number of processor cores you have.'
+          '\nWARNING: System size need\'s to be an integer multiple of [STRIDE * ', config.div[0], ' and STRIDE * ',
+          config.div[1], '] \nwhere STRIDE is selected when compiling the C++ code. \n')
     f.create_dataset('Divisions', data=config.div, dtype='u4')
     # space dimension of the lattice 1D, 2D, 3D
     f.create_dataset('DIM', data=space_size, dtype='u4')
@@ -849,6 +1148,8 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
     f.create_dataset('NOrbitals', data=np.sum(num_orbitals), dtype='u4')
     # scaling factor for the hopping parameters
     f.create_dataset('EnergyScale', data=config.energy_scale, dtype=np.float64)
+    # shift factor for the hopping parameters
+    f.create_dataset('EnergyShift', data=config.energy_shift, dtype=np.float64)
     # Hamiltonian group
     grp = f.create_group('Hamiltonian')
     # Hamiltonian group
@@ -858,21 +1159,44 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
 
     if complx:
         # hoppings
-        grp.create_dataset('Hoppings', data=t.astype(config.type) / config.energy_scale)
+        grp.create_dataset('Hoppings', data=(t.astype(config.type)) / config.energy_scale)
     else:
         # hoppings
-        grp.create_dataset('Hoppings', data=t.real.astype(config.type) / config.energy_scale)
+        grp.create_dataset('Hoppings', data=(t.real.astype(config.type)) / config.energy_scale)
 
     # magnetic field
-    if modification.magnetic_field:
-        grp.create_dataset('MagneticField', data=int(modification.magnetic_field), dtype='u4')
+    if modification.magnetic_field or modification.flux:
+        # find the minimum commensurate magnetic field
+        if not space_size == 2:
+            raise SystemExit('Magnetic field is currently supported only in 2D!')
+        hbar = 6.58211899 * 10 ** -16  #: [eV*s]
+        phi0 = 2 * np.pi * hbar  #: [V*s] flux quantum
+        unit_cell_area = np.linalg.norm(np.cross(vectors[0, :], vectors[1, :])) * 1e-18
+        magnetic_field_min = phi0 / (config.leng[0] * unit_cell_area)
+        print('For a selected system size, minimum field is: ', magnetic_field_min)
+
+        multiply_bmin = 0
+        if modification.magnetic_field:
+            multiply_bmin = int(round(modification.magnetic_field / magnetic_field_min))
+
+            if multiply_bmin == 0:
+                raise SystemExit('The system is to small for a desired field.')
+            print('Closest_field to the one you selected is {:.2f} T'.format(
+                  multiply_bmin * magnetic_field_min))
+
+        if modification.flux:
+            multiply_bmin = modification.flux
+            print('Selected field is {:.2f} T'.format(multiply_bmin*magnetic_field_min))
+        grp.create_dataset('MagneticField', data=int(multiply_bmin), dtype='u4')
 
     grp_dis = grp.create_group('Disorder')
 
     if disorder:
         grp_dis.create_dataset('OnsiteDisorderModelType', data=disorder._type_id, dtype=np.int32)
         grp_dis.create_dataset('OrbitalNum', data=disorder._orbital, dtype=np.int32)
-        grp_dis.create_dataset('OnsiteDisorderMeanValue', data=np.array(disorder._mean) / config.energy_scale,
+        # no need to substract config.energy_scale from mean value as it's already subtracted once from onsite energy
+        grp_dis.create_dataset('OnsiteDisorderMeanValue',
+                               data=(np.array(disorder._mean)) / config.energy_scale,
                                dtype=np.float64)
         grp_dis.create_dataset('OnsiteDisorderMeanStdv', data=np.array(disorder._stdv) / config.energy_scale,
                                dtype=np.float64)
@@ -940,20 +1264,20 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
 
                 # Onsite disorder energy
                 grp_dis_type.create_dataset('U0',
-                                            data=np.asarray(disorded_struct._disorder_onsite).real.astype(
-                                                config.type) / config.energy_scale)
+                                            data=(np.asarray(disorded_struct._disorder_onsite).real.astype(
+                                                config.type)) / config.energy_scale)
                 # Bond disorder hopping
                 disorder_hopping = disorded_struct._disorder_hopping
                 if complx:
                     # hoppings
                     grp_dis_type.create_dataset('Hopping',
-                                                data=np.asarray(disorder_hopping).astype(
-                                                    config.type).flatten() / config.energy_scale)
+                                                data=(np.asarray(disorder_hopping).astype(
+                                                    config.type).flatten()) / config.energy_scale)
                 else:
                     # hoppings
                     grp_dis_type.create_dataset('Hopping',
-                                                data=np.asarray(disorder_hopping).real.astype(
-                                                    config.type).flatten() / config.energy_scale)
+                                                data=(np.asarray(disorder_hopping).real.astype(
+                                                    config.type).flatten()) / config.energy_scale)
 
     # Calculation function defined with num_moments, num_random vectors, and num_disorder etc. realisations
     grpc = f.create_group('Calculation')
