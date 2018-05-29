@@ -168,7 +168,7 @@ void system_info<T, DIM>::read(){
 	orbital_positions = Eigen::Array<double,-1,-1>::Zero(num_orbitals, num_orbitals);	// position of each of those orbitals
 	get_hdf5(orbital_positions.data(), &file, (char*)"OrbPositions");
 	
-	spin_degeneracy = 2; // put by hand?
+	spin_degeneracy = 1; // put by hand?
 	
 	
 	// Information about the data types

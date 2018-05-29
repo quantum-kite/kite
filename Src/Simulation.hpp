@@ -748,9 +748,9 @@ public:
       unsigned int number_of_orbitals = r.Orb; 	// This is necessary because the normalization factor inside the random 
                                                 // vectors is not the number of lattice sites N but the number of states, 
                                                 // which is N*number_of_orbitals
-      unsigned int spin_degeneracy = 2;
+      unsigned int spin_degeneracy = 1;
       
-      double factor = -4.0*spin_degeneracy*number_of_orbitals/M_PI/unit_cell_area;	// This is in units of sigma_0, hence the 4
+      double factor = -4.0*spin_degeneracy*number_of_orbitals/unit_cell_area/2.0;	// This is in units of sigma_0, hence the 4
       Global.singleshot_cond *= factor;
       
       // Create array to store the data

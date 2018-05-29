@@ -160,7 +160,7 @@ void conductivity_dc<U, DIM>::calculate(){
     for(int n = 0; n < NumMoments; n++){
       for(int m = 0; m < NumMoments; m++){
         //factor = 1.0/(1.0 + U(m==0));
-        factor = -1.0/(1.0 + U(m==0))/M_PI;
+        factor = 1.0/(1.0 + U(m==0));
         //GammaEN(i,n) += Gamma(n,m)*delta(m,energies(i))*kernel_jackson<U>(m, NumMoments)*factor;
         GammaEN(i,n) += Gamma(n,m)*green(m, 1, complexEnergyP).imag()*factor;
       }
@@ -173,13 +173,13 @@ void conductivity_dc<U, DIM>::calculate(){
   GammaE = Eigen::Array<std::complex<U>, -1, -1>::Zero(NEnergies, 1);
 
   U energy;
-  U den = -systemInfo.num_orbitals*systemInfo.spin_degeneracy/systemInfo.unit_cell_area*4.0; 
+  U den = systemInfo.num_orbitals*systemInfo.spin_degeneracy/systemInfo.unit_cell_area*4.0/2.0; 
   for(int i = 0; i < NEnergies; i++){
     complexEnergyP = std::complex<U>(energies(i), scat);
     complexEnergyN = std::complex<U>(energies(i), -scat);
     for(int n = 0; n < NumMoments; n++){
       factor = 1.0/(1.0 + U(n==0));
-      GammaE(i) += GammaEN(i,n)*(dgreen<U>(n, 1, complexEnergyP) - dgreen<U>(n, -1, complexEnergyN))*factor*den;
+      GammaE(i) += (GammaEN(i,n)*dgreen<U>(n, 1, complexEnergyP) - std::conj(GammaEN(i,n))*dgreen<U>(n, -1, complexEnergyN))*factor*den;
       //GammaE(i) += GammaEN(i,n)*green(n, 1, energies(i))*factor*den;
     }
   }

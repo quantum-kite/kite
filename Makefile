@@ -21,7 +21,7 @@ OBJS = *.o
 
 stride=64
 memory=128
-compile_main=0
+compile_main=1
 verbose=0
 debug=1
 estimate_time=1

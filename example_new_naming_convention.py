@@ -60,7 +60,7 @@ ly = 512
 # - info if the exported hopping and onsite data should be complex,
 # - info of the precision of the exported hopping and onsite data, 0 - float, 1 - double, and 2 - long double.
 configuration = Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
-                                      is_complex=False, precision=0, energy_scale=energy_scale)
+                                      is_complex=True, precision=0, energy_scale=energy_scale)
 
 # make calculation object which caries info about
 # - the desired function:
@@ -73,22 +73,22 @@ configuration = Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[T
 
 # direction ID 'xx': 0, 'yy': 1, 'zz': 2, 'xy': 3, 'xz': 4, 'yx': 3, 'yz': 5, 'zx': 4, 'zy': 5
 calculation = Calculation(configuration)
-# calculation.dos(num_points=1000, num_random=1, num_disorder=1, num_moments=1024)
-# calculation.conductivity_optical(num_points=1000, num_random=1, num_disorder=1, num_moments=512, direction='xx')
-calculation.conductivity_dc(num_points=1000, num_moments=512, num_random=1, num_disorder=1,
-                                   direction='xx', temperature=10)
-calculation.singleshot_conductivity_dc(energy=[(n/100.0 - 0.5)*energy_scale*2 for n in range(101)], num_moments=512, num_random=1, num_disorder=1,
+calculation.dos(num_points=1000, num_random=1, num_disorder=1, num_moments=1024)
+calculation.conductivity_optical(num_points=1000, num_random=1, num_disorder=1, num_moments=512, direction='xx')
+calculation.conductivity_dc(num_points=1000, num_moments=256, num_random=1, num_disorder=1,
+                                   direction='xy', temperature=1)
+calculation.singleshot_conductivity_dc(energy=[(n/100.0 - 0.5)*energy_scale*2 for n in range(101)], num_moments=256, num_random=1, num_disorder=1,
                                                direction='xx', gamma=0.01)
-# calculation.conductivity_optical_nonlinear(num_points=1000, num_moments=512, num_random=1, num_disorder=1,
-                                                   # direction='xxx', temperature=1.0, special=1)
+calculation.conductivity_optical_nonlinear(num_points=1000, num_moments=256, num_random=1, num_disorder=1,
+                                                   direction='xxx', temperature=1.0, special=1)
 
 # make modification object which caries info about (TODO: Other modifications can be added here)
 # - magnetic field can be set to True. Default case is False. In exported file it's converted to 1 and 0.
-modification = Modification(magnetic_field=False)
+modification = Modification(magnetic_field=True)
 
 # export the lattice from the lattice object, config and calculation object and the name of the file
 # the disorder is optional. If there is disorder in the lattice for now it should be given separately
-export_lattice(lattice, configuration, calculation, modification, 'optical_cond_xx.h5')
+export_lattice(lattice, configuration, calculation, modification, 'smoltest.h5')
 
 # plotting the lattice
 # lattice.plot()

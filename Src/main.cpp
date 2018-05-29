@@ -258,7 +258,8 @@ int main(int argc, char *argv[]){
 #endif
   default:
       { 
-      std::cout << "Unexpected parameters. Please use valid values for the precision, dimension and 'complex' flag. Exiting.\n";
+      std::cout << "Unexpected parameters. Please use valid values for the precision, dimension and 'complex' flag.";
+      std::cout << "Check if the code has been compiled with support for complex functions. Exiting.\n";
       exit(0);
       }
   }
