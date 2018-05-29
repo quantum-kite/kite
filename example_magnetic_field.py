@@ -1,12 +1,7 @@
-import matplotlib.pyplot as plt
-import numpy as np
-import pybinding as pb
-
 from pybinding.repository import graphene
 
 
-from export_lattice import Configuration, Calculation, Modification, Disorder, StructuralDisorder, \
-    export_lattice, make_pybinding_model
+from export_lattice import Configuration, Calculation, Modification, export_lattice
 
 
 lattice = graphene.monolayer()
