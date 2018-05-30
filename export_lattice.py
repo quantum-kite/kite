@@ -345,7 +345,7 @@ class Disorder:
         self._lattice = lattice
 
     # class method that introduces the disorder to the lattice
-    def add_disorder(self, sublattice, dis_type, mean_value, standard_deviation=0):
+    def add_disorder(self, sublattice, dis_type, mean_value, standard_deviation=0.):
         if isinstance(dis_type, list):
             if isinstance(sublattice, list):
                 for indx, name in enumerate(sublattice):
@@ -527,7 +527,7 @@ class Calculation:
             self._conductivity_dc.append(
                 {'direction': self._avail_dir_full[direction], 'num_points': num_points, 'num_moments': num_moments,
                  'num_random': num_random, 'num_disorder': num_disorder,
-                 'temperature': temperature / self._scaling_factor})
+                 'temperature': temperature})
 
     def conductivity_optical(self, direction, num_points, num_moments, num_random, num_disorder=1, temperature=0):
         """Calculate the density of states as a function of energy
@@ -556,7 +556,7 @@ class Calculation:
             self._conductivity_optical.append(
                 {'direction': self._avail_dir_full[direction], 'num_points': num_points, 'num_moments': num_moments,
                  'num_random': num_random, 'num_disorder': num_disorder,
-                 'temperature': temperature / self._scaling_factor})
+                 'temperature': temperature})
 
     def conductivity_optical_nonlinear(self, direction, num_points, num_moments, num_random, num_disorder=1,
                                        temperature=0, **kwargs):
@@ -591,7 +591,7 @@ class Calculation:
             self._conductivity_optical_nonlinear.append(
                 {'direction': self._avail_dir_nonl[direction], 'num_points': num_points,
                  'num_moments': num_moments, 'num_random': num_random, 'num_disorder': num_disorder,
-                 'temperature': temperature / self._scaling_factor, 'special': special})
+                 'temperature': temperature, 'special': special})
 
     def singleshot_conductivity_dc(self, energy, direction, gamma, num_moments, num_random, num_disorder=1):
         """Calculate the density of states as a function of energy
@@ -619,9 +619,9 @@ class Calculation:
             raise SystemExit('Invalid direction!')
         else:
             self._singleshot_conductivity_dc.append(
-                {'energy': (np.atleast_1d(energy) - self._energy_shift) / self._scaling_factor,
+                {'energy': (np.atleast_1d(energy)),
                  'direction': self._avail_dir_sngl[direction],
-                 'gamma': np.array(gamma) / self._scaling_factor, 'num_moments': num_moments,
+                 'gamma': np.array(gamma), 'num_moments': num_moments,
                  'num_random': num_random, 'num_disorder': num_disorder})
 
 
@@ -1318,7 +1318,7 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
         grpc_p.create_dataset('NumRandoms', data=np.asarray(random), dtype=np.int32)
         grpc_p.create_dataset('NumPoints', data=np.asarray(point), dtype=np.int32)
         grpc_p.create_dataset('NumDisorder', data=np.asarray(dis), dtype=np.int32)
-        grpc_p.create_dataset('Temperature', data=np.asarray(temp), dtype=np.float64)
+        grpc_p.create_dataset('Temperature', data=np.asarray(temp) / config.energy_scale, dtype=np.float64)
         grpc_p.create_dataset('Direction', data=np.asarray(direction), dtype=np.int32)
 
     if calculation.get_conductivity_optical:
@@ -1340,7 +1340,7 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
         grpc_p.create_dataset('NumRandoms', data=np.asarray(random), dtype=np.int32)
         grpc_p.create_dataset('NumPoints', data=np.asarray(point), dtype=np.int32)
         grpc_p.create_dataset('NumDisorder', data=np.asarray(dis), dtype=np.int32)
-        grpc_p.create_dataset('Temperature', data=np.asarray(temp), dtype=np.float64)
+        grpc_p.create_dataset('Temperature', data=np.asarray(temp) / config.energy_scale, dtype=np.float64)
         grpc_p.create_dataset('Direction', data=np.asarray(direction), dtype=np.int32)
 
     if calculation.get_conductivity_optical_nonlinear:
@@ -1363,7 +1363,7 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
         grpc_p.create_dataset('NumRandoms', data=np.asarray(random), dtype=np.int32)
         grpc_p.create_dataset('NumPoints', data=np.asarray(point), dtype=np.int32)
         grpc_p.create_dataset('NumDisorder', data=np.asarray(dis), dtype=np.int32)
-        grpc_p.create_dataset('Temperature', data=np.asarray(temp), dtype=np.float64)
+        grpc_p.create_dataset('Temperature', data=np.asarray(temp) / config.energy_scale, dtype=np.float64)
         grpc_p.create_dataset('Direction', data=np.asarray(direction), dtype=np.int32)
         grpc_p.create_dataset('Special', data=np.asarray(special), dtype=np.int32)
 
@@ -1386,8 +1386,9 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
         grpc_p.create_dataset('NumMoments', data=np.asarray(moments), dtype=np.int32)
         grpc_p.create_dataset('NumRandoms', data=np.asarray(random), dtype=np.int32)
         grpc_p.create_dataset('NumDisorder', data=np.asarray(dis), dtype=np.int32)
-        grpc_p.create_dataset('Energy', data=np.asarray(energies), dtype=np.float64)
-        grpc_p.create_dataset('Gamma', data=np.asarray(gamma), dtype=np.float64)
+        grpc_p.create_dataset('Energy', data=(np.asarray(energies) - config.energy_shift) / config.energy_scale,
+                              dtype=np.float64)
+        grpc_p.create_dataset('Gamma', data=np.asarray(gamma) / config.energy_scale, dtype=np.float64)
         grpc_p.create_dataset('Direction', data=np.asarray(direction), dtype=np.int32)
 
     f.close()
