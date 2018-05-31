@@ -9,7 +9,6 @@ from pybinding.constants import hbar
 from export_lattice import Configuration, Calculation, Modification, Disorder, StructuralDisorder, \
     export_lattice, make_pybinding_model
 
-
 lattice = graphene.monolayer()
 
 # add Disorder
@@ -56,8 +55,14 @@ ly = 1024
 # spectrum_range=[e_min, e_max] manually select Hamiltonian bounds.
 # if spectrum_range is not selected automatic scaling of a Pybinding model with equivalent disorder strength
 # is done in the background.
+
+# example: automated scaling
+# configuration = Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True], is_complex=False,
+#                               precision=1)
+
+# example: manual scaling
 configuration = Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
-                              is_complex=False, precision=1)
+                              is_complex=False, precision=1, spectrum_range=[-10, 10])
 
 calculation = Calculation(configuration)
 calculation.dos(num_points=10000, num_moments=1024, num_random=1, num_disorder=1)
