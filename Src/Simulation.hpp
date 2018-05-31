@@ -63,7 +63,7 @@ public:
         if(ESTIMATE_TIME == 1){
           std::cout << "Estimating how long a KPM iteration will take.\n";
           std::cout << "To disable this feature and these messages set the flag ESTIMATE_TIME";
-          std::cout << " in Src/main.cpp to 0.\nAveraging over 100 iterations.\n";
+          std::cout << " in the Makefile to 0.\nAveraging over 100 iterations.\n";
         }
       }
 #pragma omp barrier

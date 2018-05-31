@@ -107,7 +107,7 @@ public:
   std::size_t NStr; // Number of lattice postions of the sub-domain without ghosts
   unsigned Orb; // Number of orbitals
   unsigned thread_id; // thread identification
-  std::vector <int> MagneticField;
+  int MagneticField;
   
   Eigen::Matrix<double, D, D> vect_pot; // vector potential
   
@@ -138,11 +138,10 @@ public:
 
 
 
-      MagneticField.resize  (1);
-      MagneticField.at(0) = 0;
+      MagneticField = 0;
       try {
         H5::Exception::dontPrint();
-        get_hdf5<int>(MagneticField.data(),  file, (char *)   "/Hamiltonian/MagneticField");
+        get_hdf5<int>(&MagneticField,  file, (char *)   "/Hamiltonian/MagneticField");
       }
       catch (H5::Exception& e){}
 	        
@@ -153,8 +152,7 @@ public:
     
     // Set the vector potential
     vect_pot.setZero();
-    if(MagneticField.at(0))
-		vect_pot(0,1) = 1.0/Lt[0]*2.0*M_PI;
+		vect_pot(0,1) = MagneticField*1.0/Lt[0]*2.0*M_PI;
     
     
 
