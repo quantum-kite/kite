@@ -190,7 +190,7 @@ Here we list features/functions that are available at the moment:
   * ```conductivity_optical``` - optical conductivity linear response, parameters: ```direction```, ```temperature```, ```num_points```
   * ```conductivity_dc``` - zero frequency conductivity linear response, parameters: ```direction```, ```temperature```, ```num_points```
   * ```conductivity_optical_nonlinear``` - zero frequency conductivity in linear response, parameters: ```direction```, ```temperature```, ```num_points```
-  * ```singleshot_conductivity_dc``` - single energy zero frequency longitudinal conductivity (zero temperature), parameters: ```direction``` (limited to longitudinal direction), ```energy```, ```gamma```.
+  * ```singleshot_conductivity_dc``` - single energy zero frequency longitudinal conductivity (zero temperature), parameters: ```direction``` (limited to longitudinal direction), ```energy```, ```eta```.
 
   The following parameters are optional and are available for a function that supports them, for more info check previous definitions of function names:
 
@@ -199,7 +199,7 @@ Here we list features/functions that are available at the moment:
 * ```num_points```  is the number of points the in energy axis that is going to be used by the post-processing tool to output the density of states.
 * ```special``` - simplified form of nonlinear optical conductivity hBN example
 * ```energy``` - selected value of energy at which we want to calculate the singleshot_conductivity_dc
-* ```gamma``` - Imaginary term in the denominator of the Green function that provides a controled  broadening [eV]  (for technical details, see [Resources](http://quantum-kite.com/resources/)).
+* ```eta``` - Imaginary term in the denominator of the Green function that provides a controled  broadening [eV]  (for technical details, see [Resources](http://quantum-kite.com/resources/)).
 
 As a result, **calculation** is structured in the following way:
 
@@ -212,7 +212,7 @@ calculation.conductivity_optical(num_points=1000, num_random=1, num_disorder=1, 
 
 calculation.conductivity_dc(num_points=1000, num_moments=256, num_random=1, num_disorder=1,direction='xy', temperature=1)
 
-calculation.singleshot_conductivity_dc(energy=[(n/100.0 - 0.5)*2 for n in range(101)], num_moments=256, num_random=1, num_disorder=1,direction='xx', gamma=0.02)
+calculation.singleshot_conductivity_dc(energy=[(n/100.0 - 0.5)*2 for n in range(101)], num_moments=256, num_random=1, num_disorder=1,direction='xx', eta=0.02)
 
 calculation.conductivity_optical_nonlinear(num_points=1000, num_moments=256, num_random=1, num_disorder=1,direction='xxx', temperature=1.0, special=1)
 

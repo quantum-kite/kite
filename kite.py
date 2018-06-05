@@ -593,7 +593,7 @@ class Calculation:
                  'num_moments': num_moments, 'num_random': num_random, 'num_disorder': num_disorder,
                  'temperature': temperature, 'special': special})
 
-    def singleshot_conductivity_dc(self, energy, direction, gamma, num_moments, num_random, num_disorder=1):
+    def singleshot_conductivity_dc(self, energy, direction, eta, num_moments, num_random, num_disorder=1):
         """Calculate the density of states as a function of energy
 
         Parameters
@@ -603,7 +603,7 @@ class Calculation:
         direction : string
             direction in xyz coordinates along which the conductivity is calculated.
             Supports 'xx', 'yy', 'zz'.
-        gamma : Float
+        eta : Float
             Parameter that affects the broadening of the kernel function.
         num_moments : int
             Number of polynomials in the Chebyshev expansion.
@@ -621,7 +621,7 @@ class Calculation:
             self._singleshot_conductivity_dc.append(
                 {'energy': (np.atleast_1d(energy)),
                  'direction': self._avail_dir_sngl[direction],
-                 'gamma': np.array(gamma), 'num_moments': num_moments,
+                 'eta': np.array(eta), 'num_moments': num_moments,
                  'num_random': num_random, 'num_disorder': num_disorder})
 
 
@@ -1370,14 +1370,14 @@ def config_system(lattice, config, calculation, modification, filename, **kwargs
     if calculation.get_singleshot_conductivity_dc:
         grpc_p = grpc.create_group('singleshot_conductivity_dc')
 
-        moments, random, dis, energies, gamma, direction = [], [], [], [], [], []
+        moments, random, dis, energies, eta, direction = [], [], [], [], [], []
 
         for single_singlshot_cond in calculation.get_singleshot_conductivity_dc:
             moments.append(single_singlshot_cond['num_moments'])
             random.append(single_singlshot_cond['num_random'])
             dis.append(single_singlshot_cond['num_disorder'])
             energies.append(single_singlshot_cond['energy'])
-            gamma.append(single_singlshot_cond['gamma'])
+            eta.append(single_singlshot_cond['eta'])
             direction.append(single_singlshot_cond['direction'])
 
         if len(calculation.get_singleshot_conductivity_dc) > 1:
@@ -1388,7 +1388,7 @@ def config_system(lattice, config, calculation, modification, filename, **kwargs
         grpc_p.create_dataset('NumDisorder', data=np.asarray(dis), dtype=np.int32)
         grpc_p.create_dataset('Energy', data=(np.asarray(energies) - config.energy_shift) / config.energy_scale,
                               dtype=np.float64)
-        grpc_p.create_dataset('Gamma', data=np.asarray(gamma) / config.energy_scale, dtype=np.float64)
+        grpc_p.create_dataset('Gamma', data=np.asarray(eta) / config.energy_scale, dtype=np.float64)
         grpc_p.create_dataset('Direction', data=np.asarray(direction), dtype=np.int32)
 
     f.close()
