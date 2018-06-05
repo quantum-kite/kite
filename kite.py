@@ -957,7 +957,7 @@ def estimate_bounds(lattice, disorder=None, disorder_structural=None):
     return -a + b, a + b
 
 
-def export_lattice(lattice, config, calculation, modification, filename, **kwargs):
+def config_system(lattice, config, calculation, modification, filename, **kwargs):
     """Export the lattice and related parameters to the *.h5 file
 
     Parameters

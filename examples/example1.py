@@ -1,6 +1,6 @@
 import numpy as np
 import pybinding as pb
-import kite_config as kite
+import kite
 
 energy_scale = 3.06
 
@@ -65,7 +65,7 @@ modification = kite.Modification(magnetic_field=False)
 
 # export the lattice from the lattice object, config and calculation object and the name of the file
 # the disorder is optional. If there is disorder in the lattice for now it should be given separately
-kite.export_lattice(lattice, configuration, calculation, modification, 'example1.h5')
+kite.config_system(lattice, configuration, calculation, modification, 'example1.h5')
 
 # plotting the lattice
 lattice.plot()

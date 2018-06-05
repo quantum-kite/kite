@@ -1,4 +1,4 @@
-import kite_config as kite
+import kite
 import numpy as np
 import pybinding as pb
 
@@ -47,5 +47,5 @@ calculation = kite.Calculation(configuration)
 calculation.dos(num_points=1000, num_random=1, num_disorder=1, num_moments=256)
 
 modification = kite.Modification(magnetic_field=False)
-kite.export_lattice(lattice, configuration, calculation, modification, 'example4.h5',
-                    disorded_structural=disorded_structural)
+kite.config_system(lattice, configuration, calculation, modification, 'example4.h5',
+                   disorded_structural=disorded_structural)

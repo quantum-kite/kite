@@ -1,4 +1,4 @@
-import kite_config as kite
+import kite
 
 from pybinding.repository import graphene
 
@@ -27,5 +27,5 @@ modification = kite.Modification(magnetic_field=400)
 
 # export the lattice from the lattice object, config and calculation object and the name of the file
 # the disorder is optional. If there is disorder in the lattice for now it should be given separately
-kite.export_lattice(lattice, configuration, calculation, modification, 'magnetic_field.h5')
+kite.config_system(lattice, configuration, calculation, modification, 'magnetic_field.h5')
 # adding the same magnetic field to the pybinding model won't work due to different size of the system!!!

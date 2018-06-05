@@ -1,4 +1,4 @@
-import kite_config as kite
+import kite
 import numpy as np
 import pybinding as pb
 
@@ -58,7 +58,7 @@ calculation.dos(num_moments=1024, num_random=1, num_disorder=1, num_points=1000)
 
 modification = kite.Modification(magnetic_field=False)
 
-kite.export_lattice(lattice, configuration, calculation, modification, 'example8.h5')
+kite.config_system(lattice, configuration, calculation, modification, 'example8.h5')
 
 # plotting the lattice
 lattice.plot()
