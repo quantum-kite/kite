@@ -1,18 +1,21 @@
-Quantum Kite is a multithreaded C++ package for efficient evaluation of spectral properties of Large-Scale Tight-Binding (TB) Hamiltonians.
- 
-This is our First release. KITE is still under development and debug. Information about the to-do list for a second release is available in README file. Suggestions for improvements and bug reports please send to support at quantum-kite.com.
+Quantum Kite is a multithreaded C++ package for efficient evaluation of spectral properties of large-scale tight-binding (TB) hamiltonians.
+
+This is our pre-release, which means that KITE is still under development and debug. More information about the to-do list for the first release is available in the README file. Suggestions for improvements and bug reports please send us an e-mail to support at quantum-kite.com.
 
 KITE is written in C++ but has an interface in python, based on pybinding, a tight-binding package for python. The instructions bellow include the installation of our software and the python interface.
 
-- [Linux](#linux)
-	- [Ubuntu Installation](#ubuntu-installation)
-	- [Compiling Libraries From Source Code](#compiling-libraries-from-source-code)
-- [Mac OS X](#mac-os-x)	
-
+- **Linux**
+	- <a href="#ubuntu">Ubuntu Installation</a>
+	- <a href="#source">Compiling Libraries From Source Code</a>
+		
+- <a href="#macosx"> Mac OS X </a>	
 
 ##Linux:
 
+<a name="linux"></a>
+<a name="ubuntu"></a>
 ###Ubuntu installation
+
 
 These instructions are geared towards Ubuntu LTS realese 16.04 although some of the instructions work for other distributions as well (for other Linux distributions, check the section *Compiling libraries from Source Code*)
 
@@ -67,7 +70,7 @@ cd tools/kpm_calculate
 make
 ~~~
 ####Compiling Libraries From Source Code
-
+<a name="source"></a>
 Instead of installing the dependencies with **apt-get** you can install the libraries manually. For KITE, the compiler must be up to date. The required dependencies are:
 
 * Eigen3
@@ -95,6 +98,7 @@ The calculations are configured using a python script which interfaces with Pybi
 http://docs.pybinding.site/en/stable/install/quick.html.
 
 ##Mac OS X:
+<a name="macosx"></a>
 In order to compile our source code, some libraries have to be present and the compiler must be up to date. There are several ways of installing the libraries and c++ in the OS X operational system. Our detailed instructions are focused on an installation in High Sierra OS X with [Homebrew](https://brew.sh/)
 To install Homebrew, run the following command in a terminal:
 ~~~bash
@@ -134,7 +138,7 @@ The calculations are configured using a python script which interfaces with Pybi
 ~~~bash
 brew install cmake
 ~~~
- 
+
 ~~~bash
 brew install python
 ~~~
@@ -162,14 +166,21 @@ make
 ~~~
 3. That’s it! If you want to compile the post-processing program as well, do
 ~~~bash
-cd tools/kpm_calculate
+cd tools/postprocessing
 make
 ~~~
 To generate the input file, try one of our examples:
 ~~~bash
 python3 example1.py
 ~~~
-It generates a file names example.h5 that is used as an input for KITE:
+It creates a file names example.h5 that is used as an input for KITE:
 ~~~bash
-./pp example1.h5
+./KITEx example1.h5
 ~~~
+This first example calculates the density of states of pure graphene. To obtain the data file, you need to postprocess the output:
+
+~~~bash
+./tools/postprocessing/KITEpos example1.h5
+~~~
+
+For more details on how to create Python scripts and postprocess the data, refer to [Documentation](https://quantum-kite.com/Documentation/)
