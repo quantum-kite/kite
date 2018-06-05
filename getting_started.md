@@ -240,7 +240,7 @@ kite.export_lattice(lattice, configuration, calculation, modification, 'test.h5'
 ```
 The following script merges all of the above mentioned in a singe place:
 
-https://gist.github.com/MAndelkovic/633949a568f5c7842381be265b49c02a
+https://gist.github.com/quantum-kite/19472b95b0348a161b8987137ea7e063
 
 Running the code and the postprocessing it:
 
@@ -253,17 +253,14 @@ Running the code and the postprocessing it:
 
 # Visualizing the data
 
-After calculating the quantity of interest and post processing the data,
-we can plot the resulting data with the following script (change the name of input data):
+After calculating the quantity of interest and post processing the data, we can plot the resulting data with the following script: 
 
-https://gist.github.com/MAndelkovic/a5b5f47509430458d193ba169f212177
-![Graphene DOS test local](figures/dos_test.png)
+https://gist.github.com/quantum-kite/9a935269845eae3f8590f364be12cb49
 
-Image from a local repo.
 
-![Graphene DOS test repo](https://raw.githubusercontent.com/MAndelkovic/scratch/master/dos_test.png)
+![Graphene DOS test repo](https://user-images.githubusercontent.com/39924384/40949791-13ea2fbc-6846-11e8-9702-c11a4da536db.png)
 
-Image from a GitHub repo.
+
 
 TODO: There are different classes from PB that should be documented,
 sweep plots, scatter etc. Can be very useful (I second this one!)
