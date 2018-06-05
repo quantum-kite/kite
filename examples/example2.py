@@ -1,9 +1,7 @@
 import matplotlib.pyplot as plt
-import export_lattice as ex
+import kite_config as kite
 import numpy as np
 import pybinding as pb
-
-from export_lattice import Configuration, Calculation, Modification, export_lattice
 
 energy_scale = 3.06
 
@@ -32,17 +30,17 @@ def graphene_initial(onsite=(0, 0)):
 
 lattice = graphene_initial()
 
-nx = ny = 2
+nx = ny = 1
 
 lx = 128
 ly = 128
 
-configuration = Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
-                              is_complex=False, precision=1, energy_scale=energy_scale)
+configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
+                                   is_complex=False, precision=1, spectrum_range=[-energy_scale, energy_scale])
 
-calculation = Calculation(configuration)
+calculation = kite.Calculation(configuration)
 calculation.conductivity_optical(num_points=1000, num_disorder=1, num_random=1, num_moments=128, direction='xx')
 
-modification = Modification(magnetic_field=False)
+modification = kite.Modification(magnetic_field=False)
 
-export_lattice(lattice, configuration, calculation, modification, 'example2.h5')
+kite.export_lattice(lattice, configuration, calculation, modification, 'example2.h5')

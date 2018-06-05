@@ -1,8 +1,6 @@
-import matplotlib.pyplot as plt
+import kite_config as kite
 import numpy as np
 import pybinding as pb
-
-from export_lattice import Configuration, Calculation, Modification, Disorder, StructuralDisorder, export_lattice
 
 # define lattice of monolayer graphene with 1[nm] interatomic distance and t=1/3[eV] hopping,
 # EnergyScale is the scaling factor of the hopping parameters, important for the rescaling of the spectral quantity.
@@ -45,7 +43,7 @@ def graphene_initial(onsite=(0, 0)):
     # Deterministic and Uniform. Each of the needs the have mean value, and standard deviation, where standard deviation
     # of deterministic disorder should be 0.
 
-    disorder = Disorder(lat)
+    disorder = kite.Disorder(lat)
     disorder.add_disorder('A', 'Gaussian', 0.5, 0.1)
     disorder.add_disorder('B', 'Uniform', 0.2, 0.1)
 
@@ -60,7 +58,7 @@ def graphene_initial(onsite=(0, 0)):
     node4 = [[+0, +1], 'A']
     node5 = [[-1, +1], 'B']
 
-    struc_disorder_one = StructuralDisorder(lat, concentration=0.05)
+    struc_disorder_one = kite.StructuralDisorder(lat, concentration=0.05)
     struc_disorder_one.add_structural_disorder(
         # add bond disorder in the form [from unit cell], 'sublattice_from', [to_unit_cell], 'sublattice_to', value:
         (*node0, *node1, 1),
@@ -74,7 +72,7 @@ def graphene_initial(onsite=(0, 0)):
     )
     # It is possible to add multiple different disorder type which should be forwarded to the export_lattice function
     # as a list.
-    struc_disorder_two = StructuralDisorder(lat, concentration=0.2)
+    struc_disorder_two = kite.StructuralDisorder(lat, concentration=0.2)
     struc_disorder_two.add_structural_disorder(
         (*node0, *node1, 0.1),
         (*node4, *node5, 0.1),
@@ -83,7 +81,7 @@ def graphene_initial(onsite=(0, 0)):
     )
     struc_disorder_two.add_vacancy('B')
 
-    struc_disorder_three = StructuralDisorder(lat, concentration=0.01)
+    struc_disorder_three = kite.StructuralDisorder(lat, concentration=0.01)
     struc_disorder_three.add_vacancy('A')
 
     # if there is disorder it should be returned separately from the lattice
@@ -99,16 +97,16 @@ nx = ny = 1
 lx = 256
 ly = 256
 
-configuration = Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
-                              is_complex=False, precision=1, energy_scale=energy_scale)
+configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
+                                   is_complex=False, precision=1, spectrum_range=[-energy_scale, energy_scale])
 
-calculation = Calculation(configuration)
+calculation = kite.Calculation(configuration)
 calculation.dos(num_moments=1024, num_random=1, num_disorder=1, num_points=1000)
 
-modification = Modification(magnetic_field=False)
+modification = kite.Modification(magnetic_field=False)
 
-export_lattice(lattice, configuration, calculation, modification, 'example6.h5',
-               disorder=disorder, disorded_structural=disorded_structural)
+kite.export_lattice(lattice, configuration, calculation, modification, 'example6.h5',
+                    disorder=disorder, disorded_structural=disorded_structural)
 
 # plotting the lattice
 lattice.plot()

@@ -1,8 +1,6 @@
-import matplotlib.pyplot as plt
+import kite_config as kite
 import numpy as np
 import pybinding as pb
-
-from export_lattice import Configuration, Calculation, Modification, export_lattice
 
 energy_scale = 4.02
 
@@ -35,11 +33,11 @@ nx = ny = 2
 lx = 512
 ly = 512
 
-configuration = Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
-                              is_complex=False, precision=1, energy_scale=energy_scale)
+configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
+                                   is_complex=False, precision=1, spectrum_range=[-energy_scale, energy_scale])
 
-calculation = Calculation(configuration)
+calculation = kite.Calculation(configuration)
 calculation.dos(num_points=1000, num_moments=256, num_random=1, num_disorder=1)
 
-modification = Modification(magnetic_field=False)
-export_lattice(lattice, configuration, calculation, modification, 'example3.h5')
+modification = kite.Modification(magnetic_field=False)
+kite.export_lattice(lattice, configuration, calculation, modification, 'example3.h5')
