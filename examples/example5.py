@@ -3,7 +3,7 @@ This Example shows how to add Vacancies to a graphene lattice
 and to ask the measurement of the DOS with 2048 moments and 
 the SingleShot xx conductivity for a set of Fermi Energies and a defined gamma 
 """
-import kite_config as kite
+import kite
 import numpy as np
 import pybinding as pb
 
@@ -62,5 +62,5 @@ calculation.singleshot_conductivity_dc(direction='xx', num_moments=M, num_random
                                        energy=[0.3 / NPontos * i for i in range(NPontos)], gamma=g1)
 
 modification = kite.Modification(magnetic_field=False)
-kite.export_lattice(lattice, configuration, calculation, modification, 'example5.h5',
-                    disorder=disorder, disorded_structural=disorded_structural)
+kite.config_system(lattice, configuration, calculation, modification, 'example5.h5',
+                   disorder=disorder, disorded_structural=disorded_structural)

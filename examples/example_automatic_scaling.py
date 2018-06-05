@@ -1,4 +1,4 @@
-import kite_config as kite
+import kite
 import matplotlib.pyplot as plt
 import numpy as np
 import pybinding as pb
@@ -69,8 +69,8 @@ modification = kite.Modification(magnetic_field=False)
 
 # export the lattice from the lattice object, config and calculation object and the name of the file
 # the disorder is optional. If there is disorder in the lattice for now it should be given separately
-kite.export_lattice(lattice, configuration, calculation, modification, 'auto_scaling.h5', disorder=disorder,
-                    disorded_structural=disorder_struc)
+kite.config_system(lattice, configuration, calculation, modification, 'auto_scaling.h5', disorder=disorder,
+                   disorded_structural=disorder_struc)
 
 # it's possible to make roughly an equivalent model using pybinding (more disorder realisations you select, more similar
 # it will be)

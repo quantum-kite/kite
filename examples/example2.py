@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-import kite_config as kite
+import kite
 import numpy as np
 import pybinding as pb
 
@@ -43,4 +43,4 @@ calculation.conductivity_optical(num_points=1000, num_disorder=1, num_random=1, 
 
 modification = kite.Modification(magnetic_field=False)
 
-kite.export_lattice(lattice, configuration, calculation, modification, 'example2.h5')
+kite.config_system(lattice, configuration, calculation, modification, 'example2.h5')
