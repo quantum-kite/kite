@@ -1,34 +1,30 @@
 # Getting started
 
-Quantum Kite is a multi threaded C++ package for efficient evaluation of spectral properties of Large-Scale Tight-Binding (TB) Hamiltonians. Under the assumptions of the basic knowledge of TB approximation, in this tutorial we will present the code functionalities through different examples in form of inline code and gists which you can simply copy or download from our Github page _add_link_ and run. For a detailed   information on the method behind the package, we suggest you to take a look at the section [Resources](http://quantum-kite.com/resources/). If you encountered a  problem, found a bug, or have any further question, we encourage you to contact us _add_link.
+Quantum Kite is a multi threaded C++ package for efficient evaluation of spectral properties of large-scale tight-binding (TB) hamiltonians. In this tutorial, we will present the code functionalities through different examples in form of inline codes and gists that you can simply copy or download from our [Github page](https://github.com/quantum-kite) and run. For a detailed  information on the method behind the package, we suggest you to take a look at the section [Resources](http://quantum-kite.com/resources/). If you find a problem, a bug, or have any further question, we encourage you to [contact us](https://quantum-kite.com/contact/).
 
 ## Code workflow
 
-The code is divided in three different layers. The starting point, which is the interface between the user and the C++ code, is based on a Python script. At this level,  the definition of a TB model uses  Pybinding, a python package to study TB hamiltonians. In the next sections we will show a couple of simple examples and introduce basic functionalities of the Pybinding package, which will be used to build the model. For more  advanced examples you can check in the section _add_link_.
+The code is divided in three different layers. The starting point, which is the interface between the user and the C++ code, is based on a Python script. At this level,  the definition of a TB model uses  [Pybinding](http://docs.pybinding.site/en/stable/), a python package to study TB hamiltonians. In the next sections we will introduce basic functionalities of the Pybinding package, which will be used to build the model and the basic funcionalities of Kite. For more  advanced examples you can check https://quantum-kite.com/category/examples/.
 
-Quantum Kite is shipped as a source code that can be compiled following the instruction provided in the section [Installation](https://quantum-kite.com/installation/) . The code consists of the transport, and the post-processing code.
-The interconnections between different part of the code is done using the Hierarchical Data Format (HDF5 package). The model is made with a python script and it is exported as a *.h5 file, which is used later as a TB input to Quantum Kite. All the output data of the simulation is saved in the same *h5 file that is finally posprocessed by posprocessing tools that produce  different *.dat files for the calculated quantities. 
-
-As a last step, after obtaining the desired quantity, we can visualize the resulting data using a simple python script.
-https://gist.github.com/MAndelkovic/a5b5f47509430458d193ba169f212177.
+Quantum Kite is shipped as a source code that can be compiled following the instruction provided in the section [Installation](https://quantum-kite.com/installation/) . The package contains a the transport code and also a post-processing code.
+The interconnection between different parts of the package is done using the Hierarchical Data Format (HDF5 package). The model is built with a python script and it is exported, together with the calculation settings, to a *.h5 file, which is used later as a TB input to Quantum Kite. All the output data of the simulation is saved in the same *h5 file that is finally posprocessed by posprocessing tools that produce  different *.dat files for the calculated quantities. 
 
 In short, the code workflow is the following:
 
-* Use a python script to build andexport a TB model from Pybinding and define the settings for Quantum Kite.
-* Run Quantum Kite with for a defined TB model.
-* Run post-processingTools.
+* Use a python script to build and export a TB model from Pybinding and define the settings for Quantum Kite.
+* Run Quantum Kite with a defined TB model.
+* Run post-processing tools.
 * Visualise the data.
 
-If you want to make this more automatic, you can use the following Bash
-script https://gist.github.com/MAndelkovic/37c87d573b62c9504a44ac92771142c3.
 
-## Making and exporting a TB model from Pybinding
 
-Before going to examples, let's see how to load Pybinding.
+## Building and exporting a TB model from Pybinding
+
+Before going to the examples, let's see how to load Pybinding.
 
 ### Importing the package
 
-If all the requirements are fulfilled, Pybinding package can be imported in the python script. In all the scripts of this tutorial, the required packages will be included with following aliases:
+If all the installation requirements are fulfilled, Pybinding package can be imported in the python script. In all the scripts of this tutorial, the required packages will be included with the following aliases:
 
 ```python
 import pybinding as pb
@@ -47,7 +43,7 @@ inside the script.
 
 ### Building the model
 
-The most important object for building a TB model is pb.Lattice, which carries the full information about the unit cell (position of lattice sites, sublattices, orbitals, lattice vectors and hopping parameters). These are all input parameters for the Lattice. Pybinding also provide additional available features based on the real-space information, as for example, the reciprocal vectors and the Brillouin zone. 
+The most important object for building a TB model is pb.Lattice, which carries the full information about the unit cell (position of lattice sites, sublattices, orbitals, lattice vectors and hopping parameters). These are the input parameters for the Lattice. Pybinding also provide additional features based on the real-space information, as for example, the reciprocal vectors and the Brillouin zone. 
 
 To ilustrate how the python script works, let us  make a simple square lattice with a single lattice site.
 
@@ -110,30 +106,30 @@ lat.plot_brillouin_zone()
 plt.show()
 ```
 
-We can try to build  a slightly advanced example, a graphene lattice:
-https://gist.github.com/MAndelkovic/a5f085ce48b5d28de68b03b08008b57f
+We can try to build  a slightly advanced example,like a [graphene lattice](https://gist.github.com/quantum-kite/4b7593e9aa082b1d242c5e6b2361c3f3).
+
 
 For more advanced examples and pre-defined lattices, please refere to pybinding documentation.
 
 ## Incorporating disorder
 
-It is possible to incorporate different types of disorder, including a variety of onsite and bond disorders. This is covered in a specific tutorial with more advanced examples, as it is not a necessary part of the script.
+It is possible to incorporate different types of disorder, including a variety of onsite and bond disorders. This is covered in a [specific tutorial](https://quantum-kite.com/category/capabilities/adding-disorder/) with more advanced examples, as it is not a necessary part of the script.
 
-##  Exporting the model, setting and the quantities to be calculated by Kite
+##  Exporting the model, the settings and the quantities to be calculated by Kite
 
-After making the Lattice object, we  export the model and and the information about the quantities that we want to calculate to a hdf file. For this, we need additional functionalities provided by *kite* that can be imported  with:
+After making the lattice object, we  export the model and  the information about the quantities that we want to calculate to a hdf file. For this, we need additional functionalities provided by *kite* that can be imported  with:
 
 ```python
 from kite_config import Configuration, Calculation, Modification, Disorder, StructuralDisorder, \
     export_lattice, make_pybinding_model
 
 ```
-In this script three different classes are defined:
+In this script, three different classes are defined:
 1. ```Configuration```
 2. ```Calculation```
 3. ```Modification```
 
-These three classes provide all the information about the system that is used in the calculation and the quantities we want to calculate. 
+These three classes provide all the information about the system that is used in the calculation and also the quantities we want to calculate. 
 ### Configuration
 The objects of class ```Configuration``` carry the info about:
 
@@ -145,7 +141,7 @@ The objects of class ```Configuration``` carry the info about:
   nx = ny = 2
   ```
 
-  This decomposition allows a great speed up in of the calculation that scales with the the number of decomposed parts. We recommend its usage. However, Product of these values of **nx** and **ny**  is the number of threads that the code uses. It cannot exceed the number of cores available in your computer. One must also notice that it is not efficient to decompose small systems with lateral sizes smaller than 128 unit cells of a normal lattice.
+  This decomposition allows a great speed up of the calculation that scales with the the number of decomposed parts. We recommend its usage. However, the product of the values of **nx** and **ny**  is the number of threads that the code uses. It cannot exceed the number of cores available in your computer. One must also notice that it is not efficient to decompose small systems with lateral sizes smaller than 128 unit cells of a normal lattice.
 
   
 
@@ -158,11 +154,11 @@ The objects of class ```Configuration``` carry the info about:
   ly = 256
   ```
 
-  The lateral size of the decomposed parts will be given by **lx/nx** and **ly/ny** that need to be integer numbers.
+  The lateral size of the decomposed parts are given by **lx/nx** and **ly/ny** that need to be integer numbers.
 
-* ```boundaries``` - boolean value defining periodic boundaries along each direction. **True** for periodic boundary conditions, and **False** for open boundary conditions. For now, the *Kite* only accepts *periodic boundary conditions*.
+* ```boundaries``` - boolean value defining periodic boundaries along each direction. **True** for periodic boundary conditions, and **False** for open boundary conditions. For now,  *Kite* only accepts *periodic boundary conditions*.
 
-* ```is_complex``` - boolean value that defines whether the Hamiltonian is complex or not. For optimisation purposes, **kite** only considers and stores complex data with the setting  **is_complex=True**. **False** indicates real values.
+* ```is_complex``` - boolean value that defines whether the Hamiltonian is complex or not. For optimisation purposes, *Kite* only considers and stores complex data with the setting  **is_complex=True**. **False** indicates real values.
 
 * ```precision``` - integer identifier of data type that the system uses. For optimisation purposes, **kite** also allows the user to define the precision of the calculation. Use  **0** for float, **1** for double, and **2** for long double.
 
@@ -222,7 +218,7 @@ calculation.conductivity_optical_nonlinear(num_points=1000, num_moments=256, num
 
 ```
 
-**Important:  the user can decide what function are used in calculation, however, it is not possible to provide the same function twice with different paramenters. The code only accepts one defined function for each hdf file.  The user should generate different hdf files if a same function with different paramenters is needed.**
+**Important:  the user can decide what functions are used in a calculation. However, it is not possible to provide the same function twice with different paramenters. The code only accepts one defined function for each hdf file.  One should generate different hdf files if a same function with different paramenters is needed.**
 
 ### Modification
 
@@ -238,11 +234,11 @@ When these objects are defined, we can export the file that will contain set of 
 ```python
 kite.export_lattice(lattice, configuration, calculation, modification, 'test.h5')
 ```
-The following script merges all of the above mentioned in a singe place:
+The following organizes all the instructions  in a single file:
 
 https://gist.github.com/quantum-kite/19472b95b0348a161b8987137ea7e063
 
-Running the code and the postprocessing it:
+To run the  code and the postprocess it, use
 
 ```bash
 ./KITEx test.h5 
@@ -253,7 +249,7 @@ Running the code and the postprocessing it:
 
 # Visualizing the data
 
-After calculating the quantity of interest and post processing the data, we can plot the resulting data with the following script: 
+After calculating the quantity of interest and post-processing the data, we can plot the resulting data with the following script: 
 
 https://gist.github.com/quantum-kite/9a935269845eae3f8590f364be12cb49
 
@@ -262,8 +258,7 @@ https://gist.github.com/quantum-kite/9a935269845eae3f8590f364be12cb49
 
 
 
-TODO: There are different classes from PB that should be documented,
-sweep plots, scatter etc. Can be very useful (I second this one!)
+If you want to make these steps more automatic, you can use the following Bash
+script
 
-
-## TODO: Tutorial about the types of disorder and more on exporting the lattice...
+ https://gist.github.com/quantum-kite/c002610a4d43a478cf0f967129f97da7.
