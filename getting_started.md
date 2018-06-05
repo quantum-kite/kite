@@ -121,7 +121,7 @@ After making the lattice object, we  export the model and  the information about
 
 ```python
 from kite_config import Configuration, Calculation, Modification, Disorder, StructuralDisorder, \
-    export_lattice, make_pybinding_model
+    config_system, make_pybinding_model
 
 ```
 In this script, three different classes are defined:
@@ -232,7 +232,7 @@ Finally, it is time to export all the settings to a hdf5 that is the input for K
 When these objects are defined, we can export the file that will contain set of input instructions for Quantum Kite:
 
 ```python
-kite.export_lattice(lattice, configuration, calculation, modification, 'test.h5')
+kite.config_system(lattice, configuration, calculation, modification, 'test.h5')
 ```
 The following organizes all the instructions  in a single file:
 
