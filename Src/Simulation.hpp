@@ -61,9 +61,11 @@ public:
 #pragma omp master
       {
         if(ESTIMATE_TIME == 1){
-          std::cout << "Estimating how long a KPM iteration will take.\n";
-          std::cout << "To disable this feature and these messages set the flag ESTIMATE_TIME";
-          std::cout << " in the Makefile to 0.\nAveraging over 100 iterations.\n";
+          std::cout << "------ TIME ESTIMATE -------\n";
+          std::cout << "Estimating how long a KPM iteration will take. This is a rather rough ";
+          std::cout << "estimate because it only takes into account the KPM iteration time. ";
+          std::cout << "To disable this feature and this message set the flag ESTIMATE_TIME";
+          std::cout << " in the Makefile to 0.\nAveraging over 100 iterations...\n";
         }
       }
 #pragma omp barrier
@@ -95,20 +97,30 @@ public:
 
           std::cout << "The entire calculation will take around ";
           std::cout << print_time(queue_time + ss_queue_time);
-          std::cout << "\n";
+          std::cout << "\n----------------------------\n\n";
         }
       }
 #pragma omp barrier
 
+      verbose_message("------- CALCULATIONS -------\n");
       // execute the singleshot queue
       for(unsigned int i = 0; i < ss_queue.size(); i++){
+        verbose_message("Calculating SingleShot. This will take around ");
+        verbose_message(print_time(ss_queue.at(i).time_length));
+        verbose_message("\n");
         simul.Single_Shot(EnergyScale, ss_queue.at(i)); 
       }
       
       // execute the regular queue
       for(unsigned int i = 0; i < queue.size(); i++){
+        verbose_message("Calculating ");
+        verbose_message(queue.at(i).label);
+        verbose_message(". This will take around ");
+        verbose_message(print_time(queue.at(i).time_length));
+        verbose_message("\n");
         simul.Measure_Gamma(queue.at(i));			
       }
+      verbose_message("----------------------------\n\n");
     }
     debug_message("Left global_simulation\n");
   };
@@ -412,7 +424,7 @@ public:
 
   void recursive_KPM(int depth, int max_depth, std::vector<int> N_moments, long *average, long *index_gamma, 
       std::vector<std::vector<unsigned>> indices, std::vector<KPM_Vector<T,D>*> *kpm_vector, Eigen::Array<T, -1, -1> *gamma){
-    verbose_message("Entered recursive_KPM\n");
+    debug_message("Entered recursive_KPM\n");
     typedef typename extract_value_type<T>::value_type value_type;
 		
 		
@@ -464,7 +476,7 @@ public:
       }
     }
 		
-    verbose_message("Left recursive_KPM\n");
+    debug_message("Left recursive_KPM\n");
   }
 	
 	
@@ -750,7 +762,7 @@ public:
                                                 // which is N*number_of_orbitals
       unsigned int spin_degeneracy = 1;
       
-      double factor = -4.0*spin_degeneracy*number_of_orbitals/unit_cell_area/2.0;	// This is in units of sigma_0, hence the 4
+      double factor = -2.0*spin_degeneracy*number_of_orbitals/unit_cell_area;	// This is in units of sigma_0, hence the 4
       Global.singleshot_cond *= factor;
       
       // Create array to store the data

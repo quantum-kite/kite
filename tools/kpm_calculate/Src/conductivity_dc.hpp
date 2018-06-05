@@ -22,6 +22,7 @@ class conductivity_dc{
     int NumPoints = -1;
     int NumRandoms;
     double temperature = -1;
+    double units = unit_scale;
 
 
     // information about the Hamiltonian
@@ -93,7 +94,7 @@ void conductivity_dc<T, DIM>::read(){
   // Retrieve the Gamma Matrix
   std::string MatrixName = dirName + "Gamma" + dirString;
   try{
-		verbose_message("Filling the Gamma matrix.\n");
+		debug_message("Filling the Gamma matrix.\n");
 		Gamma = Eigen::Array<std::complex<T>,-1,-1>::Zero(NumMoments, NumMoments);
 		
 		if(complex)
@@ -127,9 +128,7 @@ void conductivity_dc<U, DIM>::calculate(){
   U scat = 0.0032679;
   U beta = 1.0/8.6173303*pow(10,5)/temperature;
   U minEnergy, maxEnergy;
-  //U beta = 20000.0;
-  //int NEnergies = NumPoints;
-  int NEnergies = 5000;
+  int NEnergies = 3000;
   Eigen::Matrix<U, -1, 1> energies;
   if(systemInfo.EnergyLimitsKnown){
     minEnergy = systemInfo.minEnergy;
@@ -138,15 +137,30 @@ void conductivity_dc<U, DIM>::calculate(){
   else{
     minEnergy = -0.99;
     maxEnergy = 0.99;
-    std::cout << "Using default limits for the integration in the energies.\n";
-    std::cout << "For a more precise evaluation, calculate the density of states as well.\n";
+    verbose_message("  - Using default limits for the integration in the energies.\n");
+    verbose_message("  - For a more precise evaluation, calculate the density of states as well.\n");
   }
-    minEnergy = -0.99;
-    maxEnergy = 0.99;
+
+  int NFermiEnergies = NumPoints;
+  double minFermiEnergy = -1.0;
+  double maxFermiEnergy = 1.0;
+    //minEnergy = -0.99;
+    //maxEnergy = 0.99;
+
+
+  verbose_message("  Beta (1/kT) (in KPM units): "); verbose_message(beta); verbose_message("\n");
+  //verbose_message("  Fermi energi (in KPM units): "); verbose_message(e_fermi); verbose_message("\n");
+  //verbose_message("  Using kernel for delta function: Jackson\n");
+  verbose_message("  Using broadening parameter for Green's function (in KPM units): ");
+    verbose_message(scat); verbose_message("\n");
+  verbose_message("  Number of energies: "); verbose_message(NEnergies); verbose_message("\n");
+  verbose_message("  Energy range (in KPM units): ["); verbose_message(minEnergy); verbose_message(",");
+    verbose_message(maxEnergy); verbose_message("]\n");
+  verbose_message("  Number of Fermi energies: "); verbose_message(NFermiEnergies); verbose_message("\n");
+  verbose_message("  Fermi energies range (in KPM units): ["); verbose_message(minFermiEnergy); verbose_message(",");
+    verbose_message(maxFermiEnergy); verbose_message("]\n");
+  verbose_message("  File name: condDC.dat\n");
   energies = Eigen::Matrix<U, -1, 1>::LinSpaced(NEnergies, minEnergy, maxEnergy);
-
-  std::cout << "minEnergy:" << systemInfo.minEnergy << " maxEnergy:" << systemInfo.maxEnergy << "\n";
-
 
   // First perform the part of the product that only depends on the
   // chebyshev polynomial of the first kind
@@ -160,7 +174,7 @@ void conductivity_dc<U, DIM>::calculate(){
     for(int n = 0; n < NumMoments; n++){
       for(int m = 0; m < NumMoments; m++){
         //factor = 1.0/(1.0 + U(m==0));
-        factor = 1.0/(1.0 + U(m==0));
+        factor = -1.0/(1.0 + U(m==0))/M_PI;
         //GammaEN(i,n) += Gamma(n,m)*delta(m,energies(i))*kernel_jackson<U>(m, NumMoments)*factor;
         GammaEN(i,n) += Gamma(n,m)*green(m, 1, complexEnergyP).imag()*factor;
       }
@@ -173,7 +187,7 @@ void conductivity_dc<U, DIM>::calculate(){
   GammaE = Eigen::Array<std::complex<U>, -1, -1>::Zero(NEnergies, 1);
 
   U energy;
-  U den = systemInfo.num_orbitals*systemInfo.spin_degeneracy/systemInfo.unit_cell_area*4.0/2.0; 
+  U den = systemInfo.num_orbitals*systemInfo.spin_degeneracy/systemInfo.unit_cell_area/units; 
   for(int i = 0; i < NEnergies; i++){
     complexEnergyP = std::complex<U>(energies(i), scat);
     complexEnergyN = std::complex<U>(energies(i), -scat);
@@ -185,19 +199,11 @@ void conductivity_dc<U, DIM>::calculate(){
   }
 
 
-
-  int NFermiEnergies = 1000;
-  double minFermiEnergy = -1.0;
-  double maxFermiEnergy = 1.0;
-  std::cout << "Using default Fermi energies: " << NFermiEnergies << " points from ";
-  std::cout << minFermiEnergy*systemInfo.energy_scale << " to " << maxFermiEnergy*systemInfo.energy_scale << ".\n";
-
   Eigen::Matrix<std::complex<U>, -1, 1> condDC;
   condDC = Eigen::Matrix<std::complex<U>, -1, 1>::Zero(NFermiEnergies, 1);
 
   Eigen::Matrix<U, -1, 1> fermiEnergies;
   fermiEnergies = Eigen::Matrix<U, -1, 1>::LinSpaced(NFermiEnergies, minFermiEnergy, maxFermiEnergy);
-
 
   Eigen::Matrix<std::complex<U>, -1, 1> integrand;
   integrand = Eigen::Matrix<std::complex<U>, -1, 1>::Zero(NEnergies, 1);
@@ -219,7 +225,5 @@ void conductivity_dc<U, DIM>::calculate(){
     myfile  << fermiEnergies(i)*systemInfo.energy_scale << " " << condDC.real()(i) << " " << condDC.imag()(i) << "\n";
   
   myfile.close();
-  std::cout<<"-----Line "<<__LINE__<<"-----\n"<<std::flush;
-
 
 };

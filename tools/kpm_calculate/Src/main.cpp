@@ -13,8 +13,6 @@
 
 //https://support.hdfgroup.org/HDF5/doc/cpplus_RM/readdata_8cpp-example.html
 
-#define debug 1
-#define debug1 1
 
 void choose_simulation_type(char *name){
 	debug_message("Entered choose_simulation.\n");
@@ -55,57 +53,57 @@ void choose_simulation_type(char *name){
 #ifdef debug1
 		case 0:
 		{
-			verbose_message("The program is using data type: float.\nDimension: 1.\n");
+			debug_message("The program is using data type: float.\nDimension: 1.\n");
 			calculate_simple<float, 1u>(name);
 			break;
 		}
 		case 1:
 		{
-			verbose_message("The program is using data type: float.\nDimension: 2.\n");
+			debug_message("The program is using data type: float.\nDimension: 2.\n");
 			calculate_simple<float, 2u>(name);
 			break;
 		}
 		case 2:
 		{
-			verbose_message("The program is using data type: float.\nDimension: 3.\n");
+			debug_message("The program is using data type: float.\nDimension: 3.\n");
 			calculate_simple<float, 3u>(name);
 			break;			
 		}
 		case 3:
 		{
-			verbose_message("The program is using data type: double.\nDimension: 1.\n");
+			debug_message("The program is using data type: double.\nDimension: 1.\n");
 			calculate_simple<double, 1u>(name);
 			break;
 		}
 #endif
 		case 4:
 		{
-			verbose_message("The program is using data type: double.\nDimension: 2.\n");
+			debug_message("The program is using data type: double.\nDimension: 2.\n");
 			calculate_simple<double, 2u>(name);
 			break;
 		}
 		case 5:
 		{
-			verbose_message("The program is using data type: double.\nDimension: 3.\n");
+			debug_message("The program is using data type: double.\nDimension: 3.\n");
 			calculate_simple<double, 3u>(name);
 			break;
 		}
 #ifdef debug1
 		case 6:
 		{
-			verbose_message("The program is using data type: long double.\nDimension: 1.\n");
+			debug_message("The program is using data type: long double.\nDimension: 1.\n");
 			calculate_simple<long double, 1u>(name);
 			break;
 		}
 		case 7:
 		{
-			verbose_message("The program is using data type: long double.\nDimension: 2.\n");
+			debug_message("The program is using data type: long double.\nDimension: 2.\n");
 			calculate_simple<long double, 2u>(name);
 			break;
 		}
 		case 8:
 		{
-			verbose_message("The program is using data type: long double.\nDimension: 3.\n");
+			debug_message("The program is using data type: long double.\nDimension: 3.\n");
 			calculate_simple<long double, 3u>(name);
 			break;
 		}
@@ -122,7 +120,31 @@ void choose_simulation_type(char *name){
 
 
 int main(int argc, char *argv[]){
+  verbose_message("------- WELCOME TO KITE -------\n");
+  verbose_message("Welcome to Kite, the high-performance quantum transport software.");
+  verbose_message("This is KITEx, the post-processing tool that uses the output from kite");
+  verbose_message(" to calculate several transport quantities, such as:\n");
+  verbose_message("- density of states\n");
+  verbose_message("- linear optical conductivity\n");
+  verbose_message("- second-order optical conductivity (currently only for hBN)\n");
+  verbose_message("- DC conductivity\n");
+  verbose_message("-------------------------------\n\n");
+
+  verbose_message("------- FLAGS SET -------\n");
+  verbose_message("DEBUG: "); verbose_message(DEBUG); verbose_message("\n");
+  verbose_message("VERBOSE: "); verbose_message(VERBOSE); verbose_message("\n");
+  verbose_message("-------------------------\n\n");
+
+  verbose_message("------- INFORMATION -------\n");
+  verbose_message("All linear conductivities are in units of e^2/h.\n");
+  verbose_message("Reduced Planck's constant h_bar = 1.\n");
+  verbose_message("Electron charge e = 1.\n");
+  verbose_message("---------------------------\n\n");
+
+
+
 	//parser(argc, argv);
 	choose_simulation_type(argv[1]);
 	return 0;
+  verbose_message("Done.\n");
 }

@@ -425,50 +425,43 @@ void calc_optical_cond_simple_explicit(info<U,DIM> *config, std::string cond_axi
 
 template <typename U, unsigned DIM>
 void calculate_conductivity_nonlinear(system_info<U, DIM>& sysinfo){
-  
   conductivity_nonlinear<U, DIM> info(sysinfo);
   if(info.isRequired){
+    verbose_message("Calculating the nonlinear conductivity. Currently, only the ");
+    verbose_message("specific case of hBN is implemented\n");
     info.read();
     info.calculate();
   }
-  std::cout << "cond_nonlinear is required? " << info.isRequired << "\n";
-
 };
 
 template <typename U, unsigned DIM>
 void calculate_conductivity_optical(system_info<U, DIM>& sysinfo){
-  
   conductivity_optical<U, DIM> info(sysinfo);
   if(info.isRequired){
+    verbose_message("Calculating the optical conductivity.\n");
     info.read();
     info.calculate();
   }
-  std::cout << "cond_optical is required? " << info.isRequired << "\n";
-
 };
 
 template <typename U, unsigned DIM>
 void calculate_conductivity_dc(system_info<U, DIM>& sysinfo){
-  
   conductivity_dc<U, DIM> info(sysinfo);
   if(info.isRequired){
+    verbose_message("Calculating the DC conductivity.\n");
     info.read();
     info.calculate();
   }
-  std::cout << "cond_dc is required? " << info.isRequired << "\n";
-
 };
 
 template <typename U, unsigned DIM>
 void calculate_dos(system_info<U, DIM>& sysinfo){
-  
   dos<U, DIM> info(sysinfo); // The constructor checks whether this quantity is required
   if(info.isRequired){
+    verbose_message("Calculating the density of states.\n");
     info.read();
     info.calculate();
   }
-  std::cout << "dos is required? " << info.isRequired << "\n";
-
 };
 
 template <typename U, unsigned DIM>
@@ -482,10 +475,13 @@ void calculate_simple(char *name){
   system_info<U, DIM> info;
   info = system_info<U, DIM>(std::string(name));
   info.read();
+
+  verbose_message("------- CALCULATIONS ------- \n");
   calculate_dos<U, DIM>(info);
   calculate_conductivity_dc<U, DIM>(info);
   calculate_conductivity_optical<U, DIM>(info);
   calculate_conductivity_nonlinear<U, DIM>(info);
+  verbose_message("---------------------------- \n\n");
 
 
 	debug_message("Left calculate_simple.\n");

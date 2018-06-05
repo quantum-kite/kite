@@ -12,7 +12,7 @@ VERBOSE=1
 all:    clean
 	cd Src; $(CC) $(CFLAGS) $(CINCLUDE) -c *.cpp -DDEBUG=${DEBUG} -DVERBOSE=${VERBOSE}
 	@echo "linking..."
-	cd Src; $(CC) $(OBJS) $(CLIBS) $(CFLAGS) -o ../calc_kpm
+	cd Src; $(CC) $(OBJS) $(CLIBS) $(CFLAGS) -o ../KITEx
 	rm -f Src/*.o
 	cd ..
 

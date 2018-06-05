@@ -152,7 +152,7 @@ void system_info<T, DIM>::read(){
   // conductivity, or density of states, etc.
 	
 	// Basic information about the lattice 
-	verbose_message("Reading basic information about the lattice: Dimension DIM, Length L and primitive lattice vectors LattVectors\n");
+	debug_message("Reading basic information about the lattice: Dimension DIM, Length L and primitive lattice vectors LattVectors\n");
 	dim = DIM;										// two-dimensional or three-dimensional
 	size = Eigen::Array<int,1,-1>::Zero(1,dim);		// size of the sample
 	get_hdf5(size.data(), &file, (char*)"L");
@@ -162,7 +162,7 @@ void system_info<T, DIM>::read(){
 	get_hdf5(vectors.data(), &file, (char*)"LattVectors");
 	unit_cell_area = fabs(vectors.matrix().determinant());	// Use the basis vectors to determine the area of the unit cell
 	
-	verbose_message("Reading the energy scale, number of orbitals NOrbitals and their positions OrbPositions\n");
+	debug_message("Reading the energy scale, number of orbitals NOrbitals and their positions OrbPositions\n");
 	get_hdf5(&energy_scale, &file, (char*)"EnergyScale");								// energy scale
 	get_hdf5(&num_orbitals, &file, (char*)"NOrbitals");									// number of orbitals in each unit cell	
 	orbital_positions = Eigen::Array<double,-1,-1>::Zero(num_orbitals, num_orbitals);	// position of each of those orbitals
@@ -172,7 +172,7 @@ void system_info<T, DIM>::read(){
 	
 	
 	// Information about the data types
-	verbose_message("Reading data type and checking whether it is complex.\n");
+	debug_message("Reading data type and checking whether it is complex.\n");
 	int precision = 1, complex;
 	get_hdf5(&complex, &file, (char *) "/IS_COMPLEX");
 	get_hdf5(&precision,  &file, (char *) "/PRECISION");

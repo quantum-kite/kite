@@ -11,7 +11,15 @@
 #define outcol "\033[1;31m"
 #define outres "\033[0m"
 
+#define DEBUG 0
+#define debug1 0
 #define VERBOSE 1
+
+// The first scale is 1/2pi and corresponds to the conductance quantum per spin e^2/h
+// The second scale is the universal conductivity of graphene e^2/4h_bar
+#define scale1 0.159154943
+#define scale2 0.25
+#define unit_scale 0.159154943
 
 #ifdef VERBOSE
 	#if VERBOSE==1

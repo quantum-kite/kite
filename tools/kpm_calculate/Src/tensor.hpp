@@ -36,7 +36,7 @@ template <typename TC>
 TC green(int n, int sigma, TC energy){
 	const TC i(0.0,1.0); 
 	TC sq = sqrt(TC(1.0) - energy*energy);
-	return TC(2.0*sigma)/sq*i*exp(-TC(sigma*n)*acos(energy)*i);
+	return -TC(2.0*sigma)/sq*i*exp(-TC(sigma*n)*acos(energy)*i);
 }
 
 template <typename T>
@@ -45,7 +45,7 @@ std::complex<T> dgreen(int n, int sigma, std::complex<T> energy){
   
   std::complex<T> den = T(1.0) - energy*energy;
   std::complex<T>  sq = sqrt(den);
-	return T(2.0*sigma)/den*i*exp(-T(sigma*n)*acos(energy)*i)*(T(n*sigma)*i + energy/sq);
+	return -T(2.0*sigma)/den*i*exp(-T(sigma*n)*acos(energy)*i)*(T(n*sigma)*i + energy/sq);
 }
 
 

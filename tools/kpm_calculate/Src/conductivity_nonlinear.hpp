@@ -99,13 +99,13 @@ void conductivity_nonlinear<T, DIM>::read(){
   bool hasGamma3 = false;
 
 
-  std::cout << "special:" << special << "\n";
-  std::cout << "dirstring:" << dirString << "\n";
+  debug_message("special:" ); debug_message(special); debug_message("\n");
+  debug_message("dirstring: "); debug_message(dirString); debug_message("\n");
   // Retrieve the Gamma0 Matrix. This matrix is not needed for the special case
   std::string MatrixName = dirName + "Gamma0" + dirString;
   if(special == 0){
     try{
-      verbose_message("Filling the Gamma0 matrix.\n");
+      debug_message("Filling the Gamma0 matrix.\n");
       Gamma0 = Eigen::Array<std::complex<T>,-1,-1>::Zero(1, NumMoments);
       
       if(complex)
@@ -132,7 +132,7 @@ void conductivity_nonlinear<T, DIM>::read(){
   // Retrieve the Gamma1 Matrix
   MatrixName = dirName + "Gamma1" + dirString;
   try{
-		verbose_message("Filling the Gamma1 matrix.\n");
+		debug_message("Filling the Gamma1 matrix.\n");
 		Gamma1 = Eigen::Array<std::complex<T>,-1,-1>::Zero(NumMoments, NumMoments);
 		
 		if(complex)
@@ -156,7 +156,7 @@ void conductivity_nonlinear<T, DIM>::read(){
   // Retrieve the Gamma2 Matrix
   MatrixName = dirName + "Gamma2" + dirString;
   try{
-		verbose_message("Filling the Gamma2 matrix.\n");
+		debug_message("Filling the Gamma2 matrix.\n");
 		Gamma2 = Eigen::Array<std::complex<T>,-1,-1>::Zero(NumMoments, NumMoments);
 		
 		if(complex)
@@ -183,7 +183,7 @@ void conductivity_nonlinear<T, DIM>::read(){
   if(special == 0){
     MatrixName = dirName + "Gamma3" + dirString;
     try{
-      verbose_message("Filling the Gamma3 matrix.\n");
+      debug_message("Filling the Gamma3 matrix.\n");
       Gamma3 = Eigen::Array<std::complex<T>,-1,-1>::Zero(1, NumMoments*NumMoments*NumMoments);
       
       if(complex)
@@ -246,12 +246,7 @@ void conductivity_nonlinear<U, DIM>::calculate(){
 
   
   U e_fermi = 0.0;
-  std::cout << "Using default value for the Fermi energy: " << e_fermi << " in the KPM scale [-1, 1].\n";
-
   U scat = 0.003388299;
-  //U scat = 0.0032679;
-  std::cout << "Using default value for the scattering broadening: " << scat << " in the KPM scale [-1,1].\n"; 
-
 	
 	// Calculate the number of frequencies and energies needed to perform the calculation.
 	int N_energies = NumPoints;
@@ -266,8 +261,20 @@ void conductivity_nonlinear<U, DIM>::calculate(){
   Eigen::Matrix<U, -1, 1> frequencies2;
   frequencies = Eigen::Matrix<U, -1, 1>::LinSpaced(N_omegas, minFreq, maxFreq);
   frequencies2 = Eigen::Matrix<U, -1, 1>::Zero(1,1);
-  std::cout << "Using default range of frequencies: " << N_omegas << " points from " << minFreq << " to " << maxFreq;
-  std::cout << " in the KPM scale [-1,1]\n";
+
+  verbose_message("  Beta (1/kT) (in KPM units): "); verbose_message(beta); verbose_message("\n");
+  verbose_message("  Fermi energy (in KPM units): "); verbose_message(e_fermi); verbose_message("\n");
+  verbose_message("  Using kernel for delta function: Jackson\n");
+  verbose_message("  Using broadening parameter for Green's function (in KPM units): ");
+    verbose_message(scat); verbose_message("\n");
+  verbose_message("  special: "); verbose_message(special); verbose_message("\n");
+  verbose_message("  Number of energies: "); verbose_message(NumPoints); verbose_message("\n");
+  verbose_message("  Energy range (in KPM units): ["); verbose_message(-lim); verbose_message(",");
+    verbose_message(lim); verbose_message("]\n");
+  verbose_message("  Number of frequencies: "); verbose_message(N_omegas); verbose_message("\n");
+  verbose_message("  Frequency range (in KPM units): ["); verbose_message(minFreq); verbose_message(",");
+    verbose_message(maxFreq); verbose_message("]\n");
+  verbose_message("  File name: nonlinear_cond.dat\n");
 
 
 	std::complex<U> imaginary(0.0, 1.0);
@@ -302,7 +309,7 @@ void conductivity_nonlinear<U, DIM>::calculate(){
     freq = std::complex<U>(frequencies(i), scat);  
     cond(i) += (temp1(i) + temp2(i) + U(0.5)*(temp3(0,0) + temp4(0,0)))/freq/freq;
   }
-  cond *= -imaginary*U(4.0*systemInfo.num_orbitals*systemInfo.spin_degeneracy/systemInfo.unit_cell_area);
+  cond *= imaginary*U(systemInfo.energy_scale*systemInfo.num_orbitals*systemInfo.spin_degeneracy/systemInfo.unit_cell_area);
 
 	
   

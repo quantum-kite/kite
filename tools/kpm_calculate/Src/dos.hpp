@@ -88,7 +88,7 @@ void dos<T, DIM>::read(){
   // Retrieve the Gamma Matrix
   std::string MatrixName = dirName + "MU";
   try{
-		verbose_message("Filling the MU matrix.\n");
+		debug_message("Filling the MU matrix.\n");
 		MU = Eigen::Array<std::complex<T>,-1,-1>::Zero(1, NumMoments);
 		
 		if(complex)
@@ -119,9 +119,18 @@ void dos<U, DIM>::calculate(){
     exit(0);
   }
 
+  double Emax = 0.99;
+  double Emin = -Emax;
+  verbose_message("  Number of points: "); verbose_message(NumPoints); verbose_message("\n");
+  verbose_message("  Range of energies: ["); verbose_message(Emin); verbose_message(",");
+      verbose_message(Emax); verbose_message("]\n");
+  verbose_message("  Using kernel: Lorentz\n");
+  verbose_message("  File name: dos.dat\n");
+
+
   int NEnergies = NumPoints;
   Eigen::Matrix<U, -1, 1> energies;
-  energies = Eigen::Matrix<U, -1, 1>::LinSpaced(NEnergies, -0.95, 0.95);
+  energies = Eigen::Matrix<U, -1, 1>::LinSpaced(NEnergies, Emin, Emax);
 
 
 
@@ -170,7 +179,6 @@ void dos<U, DIM>::calculate(){
     
     if(b > threshold && !foundb){
       highest = energies(NEnergies - i -1);
-      std::cout << "i:" << i << "\n" << std::flush;
       if(i>0)
         highest = energies(NEnergies-i);
       foundb = true;

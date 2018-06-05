@@ -124,10 +124,9 @@ std::complex<T> contract1(
     std::function<T(int, T)> f0, int N_moments, 
     const Eigen::Array<std::complex<T>, -1, -1>& Gamma, 
     const Eigen::Matrix<T, -1, 1>& energies){
-
+    debug_message("Entered contract1\n");
 
     int N_energies = energies.rows();
-    std::cout << "N_energies:" << N_energies << "\n";
 
     T energy;
     Eigen::Matrix<std::complex<T>, -1, 1> GammaE;
@@ -140,6 +139,7 @@ std::complex<T> contract1(
       }
     }
     return integrate(energies, GammaE);
+    debug_message("Left contract1");
 }
 
 template <typename T>
@@ -153,7 +153,7 @@ Eigen::Matrix<std::complex<T>, -1, 1> contract2(
     // First of all, contract the index that will not depend on the frequency.
     // That is the index of the delta function, that's why we need to know its
     // position.
-    verbose_message("Entered contract 2d.\n");
+    debug_message("Entered contract 2d.\n");
 
     int N_energies = energies.rows();
     int N_freqs = frequencies.rows();
@@ -162,7 +162,7 @@ Eigen::Matrix<std::complex<T>, -1, 1> contract2(
     Eigen::Matrix<std::complex<T>, -1, -1> GammaEN;
     GammaEN = Eigen::Matrix<std::complex<T>, -1, -1>::Zero(N_energies, N_moments);
    
-    verbose_message("First part of the calculation.\n");
+    debug_message("First part of the calculation.\n");
 
     if(delta_position == 0){
       for(int e = 0; e < N_energies; e++){
@@ -198,7 +198,7 @@ Eigen::Matrix<std::complex<T>, -1, 1> contract2(
 
     
 
-    verbose_message("Second part of the calculation.\n");
+    debug_message("Second part of the calculation.\n");
     // Now contract the remaining index. This index does depend on the
     // frequency argument
     
@@ -220,7 +220,7 @@ Eigen::Matrix<std::complex<T>, -1, 1> contract2(
       }
       cond(w1) = integrate(energies, GammaE);
     }
-    verbose_message("Left contract.\n");
+    debug_message("Left contract.\n");
     return cond;
 }
 
@@ -237,7 +237,7 @@ Eigen::Matrix<std::complex<T>, -1, 1> contract3(
     // First of all, contract the index that will not depend on the frequency.
     // That is the index of the delta function, that's why we need to know its
     // position.
-    verbose_message("Entered contract 2d.\n");
+    debug_message("Entered contract 2d.\n");
 
     int N_energies = energies.rows();
     int N_freqs1 = frequencies.rows();
@@ -247,7 +247,7 @@ Eigen::Matrix<std::complex<T>, -1, 1> contract3(
     Eigen::Matrix<std::complex<T>, -1, -1> GammaENN;
     GammaENN = Eigen::Matrix<std::complex<T>, -1, -1>::Zero(N_energies, N_moments*N_moments);
    
-    verbose_message("First part of the calculation.\n");
+    debug_message("First part of the calculation.\n");
 
     if(delta_position == 0){
       for(int e = 0; e < N_energies; e++){
@@ -296,7 +296,7 @@ Eigen::Matrix<std::complex<T>, -1, 1> contract3(
 
     
 
-    verbose_message("Second part of the calculation.\n");
+    debug_message("Second part of the calculation.\n");
     // Now contract the remaining index. This index does depend on the
     // frequency argument
     
@@ -337,7 +337,7 @@ Eigen::Matrix<std::complex<T>, -1, 1> contract3(
     
       }
     }
-    verbose_message("Left contract.\n");
+    debug_message("Left contract.\n");
     return cond;
 }
 
@@ -388,7 +388,7 @@ void system_info<T, DIM>::read(){
   // conductivity, or density of states, etc.
 	
 	// Basic information about the lattice 
-	verbose_message("Reading basic information about the lattice: Dimension DIM, Length L and primitive lattice vectors LattVectors\n");
+	debug_message("Reading basic information about the lattice: Dimension DIM, Length L and primitive lattice vectors LattVectors\n");
 	dim = DIM;										// two-dimensional or three-dimensional
 	size = Eigen::Array<int,1,-1>::Zero(1,dim);		// size of the sample
 	get_hdf5(size.data(), &file, (char*)"L");
@@ -398,7 +398,7 @@ void system_info<T, DIM>::read(){
 	get_hdf5(vectors.data(), &file, (char*)"LattVectors");
 	unit_cell_area = fabs(vectors.matrix().determinant());	// Use the basis vectors to determine the area of the unit cell
 	
-	verbose_message("Reading the energy scale, number of orbitals NOrbitals and their positions OrbPositions\n");
+	debug_message("Reading the energy scale, number of orbitals NOrbitals and their positions OrbPositions\n");
 	get_hdf5(&energy_scale, &file, (char*)"EnergyScale");								// energy scale
 	get_hdf5(&num_orbitals, &file, (char*)"NOrbitals");									// number of orbitals in each unit cell	
 	orbital_positions = Eigen::Array<double,-1,-1>::Zero(num_orbitals, num_orbitals);	// position of each of those orbitals
@@ -408,7 +408,7 @@ void system_info<T, DIM>::read(){
 	
 	
 	// Information about the data types
-	verbose_message("Reading data type and checking whether it is complex.\n");
+	debug_message("Reading data type and checking whether it is complex.\n");
 	int precision = 1, complex;
 	get_hdf5(&complex, &file, (char *) "/IS_COMPLEX");
 	get_hdf5(&precision,  &file, (char *) "/PRECISION");

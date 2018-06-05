@@ -114,10 +114,12 @@ class measurement_queue{
       for(unsigned int i = 0; i < NMoments.size(); i++)
         prod *= NMoments.at(i);
 
-      time_length = prod*avg_duration*NDisorder*NRandom;
+      if(NMoments.size() == 2 and MEMORY > 2){
+        time_length = prod*avg_duration*NDisorder*NRandom/MEMORY;
+      } else {
+        time_length = prod*avg_duration*NDisorder*NRandom/2.0;
+      }
     };
-
-
 };
 
 

@@ -34,7 +34,7 @@
 #endif
 
 #ifndef DEBUG
-#define DEBUG 1
+#define DEBUG 0
 #endif
 
 #ifndef VERBOSE
@@ -46,7 +46,7 @@
 #endif
 
 #ifndef ESTIMATE_TIME
-#define ESTIMATE_TIME 1
+#define ESTIMATE_TIME 0
 #endif
 
 // other compilation parameters not set in the Makefile
@@ -61,7 +61,12 @@
 
 #ifdef VERBOSE
 #if VERBOSE==1
-#define verbose_message(VAR) std::cout<<VAR<<std::flush
+#define verbose_message(VAR)              \
+  _Pragma("omp master")                   \
+  {                                       \
+    std::cout<<VAR<<std::flush;           \
+  }                                       \
+  _Pragma("omp barrier")
 #else
 #define verbose_message(VAR) 
 #endif
@@ -69,9 +74,15 @@
 #define verbose_message(VAR) 
 #endif
 
+
 #ifdef VVERBOSE
 #if VVERBOSE==1
-#define vverbose_message(VAR) std::cout<<VAR<<std::flush
+#define vverbose_message(VAR)              \
+  _Pragma("omp master")                   \
+  {                                       \
+    std::cout<<VAR<<std::flush;           \
+  }                                       \
+  _Pragma("omp barrier")
 #else
 #define vverbose_message(VAR) 
 #endif
@@ -81,13 +92,14 @@
 
 #ifdef DEBUG
 #if DEBUG==1
-#define debug_message(VAR) std::cout << outcol << VAR << outres << std::flush
+#define debug_message(VAR) std::cout<<VAR<<std::flush; 
 #else
 #define debug_message(VAR) 
 #endif
 #else
 #define debug_message(VAR) 
 #endif
+
 
 template<typename T, unsigned D>
 class Simulation;
@@ -106,6 +118,24 @@ typedef int indextype;
 
 
 int main(int argc, char *argv[]){  
+  verbose_message("------- WELCOME TO KITE -------\n");
+  verbose_message("Welcome to Kite, the high-performance quantum transport software.\n");
+  verbose_message("-------------------------------\n\n");
+
+  verbose_message("------- INFORMATION -------\n");
+  verbose_message("All conductivities are in units of e^2/h.\n");
+  verbose_message("h_bar = 1.\n");
+  verbose_message("---------------------------\n\n");
+
+  verbose_message("------- FLAGS SET -------\n");
+  verbose_message("Flags set at compilation:\n");
+  verbose_message("DEBUG: "); verbose_message(DEBUG); verbose_message("\n");
+  verbose_message("VERBOSE: "); verbose_message(VERBOSE); verbose_message("\n");
+  verbose_message("STRIDE: "); verbose_message(STRIDE); verbose_message("\n");
+  verbose_message("MEMORY: "); verbose_message(MEMORY); verbose_message("\n");
+  verbose_message("ESTIMATE_TIME: "); verbose_message(ESTIMATE_TIME); verbose_message("\n");
+  verbose_message("-------------------------\n\n");
+
   debug_message("Starting program. The messages in red are debug messages. They may be turned off by setting DEBUG 0 in main.cpp\n");
 
   /* Define General characteristics of the data */  
@@ -263,6 +293,7 @@ int main(int argc, char *argv[]){
   }
   
   debug_message("Program ended with success!\n");
+  verbose_message("Done.");
   return 0;
 }
 

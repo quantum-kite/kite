@@ -22,6 +22,7 @@ class conductivity_optical{
     int NumPoints = -1;
     int NumRandoms;
     double temperature = -1;
+    double units = unit_scale;
 
 
     // information about the Hamiltonian
@@ -94,7 +95,7 @@ void conductivity_optical<T, DIM>::read(){
   // Retrieve the Gamma Matrix
   std::string MatrixName = dirName + "Gamma" + dirString;
   try{
-		verbose_message("Filling the Gamma matrix.\n");
+		debug_message("Filling the Gamma matrix.\n");
 		Gamma = Eigen::Array<std::complex<T>,-1,-1>::Zero(NumMoments, NumMoments);
 		
 		if(complex)
@@ -122,7 +123,7 @@ void conductivity_optical<T, DIM>::read(){
   // Retrieve the Lambda Matrix
   MatrixName = dirName + "Lambda" + dirString;
   try{
-		verbose_message("Filling the Lambda matrix.\n");
+		debug_message("Filling the Lambda matrix.\n");
 		Lambda = Eigen::Array<std::complex<T>,-1,-1>::Zero(1, NumMoments);
 		
 		if(complex)
@@ -163,15 +164,8 @@ void conductivity_optical<U, DIM>::calculate(){
 
   // 1/kT, where k is the Boltzmann constant in eV/K
   U beta = 1.0/8.6173303*pow(10,5)/temperature;
-
-  
   U e_fermi = 0.1;
-  std::cout << "Using default value for the Fermi energy: " << e_fermi << " in the KPM scale [-1, 1].\n";
-
   U scat = 0.01;
-  //U scat = 0.0032679;
-  std::cout << "Using default value for the scattering broadening: " << scat << "in the KPM scale [-1,1].\n"; 
-
 	
 	// Calculate the number of frequencies and energies needed to perform the calculation.
 	int N_energies = NumPoints;
@@ -184,8 +178,21 @@ void conductivity_optical<U, DIM>::calculate(){
   double maxFreq = 1.5;
   Eigen::Matrix<U, -1, 1> frequencies;
   frequencies = Eigen::Matrix<U, -1, 1>::LinSpaced(N_omegas, minFreq, maxFreq);
-  std::cout << "Using default range of frequencies: " << N_omegas << " points from " << minFreq << " to " << maxFreq;
-  std::cout << " in the KPM scale [-1,1]\n";
+
+  // Print out some useful information
+  verbose_message("  Beta (1/kT) (in KPM units): "); verbose_message(beta); verbose_message("\n");
+  verbose_message("  Fermi energi (in KPM units): "); verbose_message(e_fermi); verbose_message("\n");
+  verbose_message("  Using kernel for delta function: Jackson\n");
+  verbose_message("  Using broadening parameter for Green's function (in KPM units): ");
+    verbose_message(scat); verbose_message("\n");
+  verbose_message("  Number of energies: "); verbose_message(NumPoints); verbose_message("\n");
+  verbose_message("  Energy range (in KPM units): ["); verbose_message(-lim); verbose_message(",");
+    verbose_message(lim); verbose_message("]\n");
+  verbose_message("  Number of frequencies: "); verbose_message(N_omegas); verbose_message("\n");
+  verbose_message("  Frequency range (in KPM units): ["); verbose_message(minFreq); verbose_message(",");
+    verbose_message(maxFreq); verbose_message("]\n");
+  verbose_message("  File name: optical_cond.dat\n");
+
 
 
 	std::complex<U> imaginary(0.0, 1.0);
@@ -215,9 +222,9 @@ void conductivity_optical<U, DIM>::calculate(){
   std::complex<U> freq;
   for(int i = 0; i < N_omegas; i++){
     freq = std::complex<U>(frequencies(i), scat);  
-    cond(i) += (temp1(i) + temp2(i) - temp3)/freq;
+    cond(i) += (temp1(i) + temp2(i) + temp3)/freq;
   }
-  cond *= -imaginary*U(4.0*systemInfo.num_orbitals*systemInfo.spin_degeneracy/systemInfo.unit_cell_area);
+  cond *= imaginary*U(systemInfo.num_orbitals*systemInfo.spin_degeneracy/systemInfo.unit_cell_area/units);
 
 	
   
@@ -226,7 +233,7 @@ void conductivity_optical<U, DIM>::calculate(){
   myfile.open ("optical_cond.dat");
   for(int i=0; i < N_omegas; i++){
     freq = std::complex<U>(frequencies(i), scat);  
-    myfile   << frequencies.real()(i)*systemInfo.energy_scale << " " << cond.real()(i) << " " << cond.imag()(i) << "\n";
+    myfile << frequencies.real()(i)*systemInfo.energy_scale << " " << cond.real()(i) << " " << cond.imag()(i) << "\n";
   }
   myfile.close();
   debug_message("Left calc_optical_cond.\n");

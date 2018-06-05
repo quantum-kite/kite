@@ -20,16 +20,16 @@ VPATH = .
 OBJS = *.o
 
 stride=64
-memory=128
+memory=2
 compile_main=1
-verbose=0
-debug=1
+verbose=1
+debug=0
 estimate_time=1
 
 all:    clean
 	cd Src; $(CC) $(CFLAGS) $(CINCLUDE) -DSTRIDE=$(stride) -DDEBUG=$(debug) -DMEMORY=$(memory) -DCOMPILE_MAIN=$(compile_main) -DVERBOSE=$(verbose) -DESTIMATE_TIME=$(estimate_time)  -c *.cpp  
 	@echo "linking..."
-	cd Src; $(CC) $(OBJS) $(CLIBS) $(CFLAGS) -o ../pp
+	cd Src; $(CC) $(OBJS) $(CLIBS) $(CFLAGS) -o ../kite
 	rm -f Src/*.o
 	cd ..
 
@@ -38,7 +38,7 @@ all:    clean
 debug:  clean  
 	cd Src; $(CC) $(CFLAGS) $(CINCLUDE) $(CDEFS)  -DMEM1=$(MEM1) -DMEM2=$(MEM2) -c *.cpp   -g
 	@echo "linking..."
-	cd Src; $(CC) $(CLIBS) $(CFLAGS) $(CINCLUDE) $(CDEFS) $(OBJS)  -o ../pp -g
+	cd Src; $(CC) $(CLIBS) $(CFLAGS) $(CINCLUDE) $(CDEFS) $(OBJS)  -o ../kite -g
 	cd ..
 
 clean:
