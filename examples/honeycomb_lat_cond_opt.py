@@ -1,12 +1,21 @@
+""" Honeycomb lattice conductivity optical
+
+    Lattice : Honeycomb 1[nm] interatomic distance and t=1[eV] hopping;
+    Disorder : None;
+    Configuration : size of the system 128x128, without domain decomposition (nx=ny=1), periodic boundary conditions,
+                    double precision, automatic scaling;
+    Calculation : conductivity_optical along the 'xx' direction;
+    Modification : magnetic field is off;
+
+"""
+
+import kite
 import numpy as np
 import pybinding as pb
-import kite
-
-energy_scale = 3.06
 
 
-def graphene_initial(onsite=(0, 0)):
-    """Return the basic lattice specification for monolayer graphene with nearest neighbor"""
+def honeycomb_lattice(onsite=(0, 0)):
+    """Make a honeycomb lattice with nearest neighbor hopping"""
 
     theta = np.pi / 3
     a1 = np.array([1 + np.cos(theta), np.sin(theta)])
@@ -31,42 +40,31 @@ def graphene_initial(onsite=(0, 0)):
         ([0, 0], 'A', 'B', - 1),
         # between neighboring cells, between which atoms, and the value
         ([-1, 0], 'A', 'B', - 1),
-        ([-1, 1], 'A', 'B', - 1)
+        ([-1, 1], 'A', 'B', - 1),
     )
-
     return lat
 
 
-lattice = graphene_initial()
-
-# number of decomposition parts in each direction of matrix. This divides the lattice into various sections,
-# each of which is calculated in parallel
+# load a honeycomb lattice
+lattice = honeycomb_lattice()
+# number of decomposition parts in each direction of matrix.
+# This divides the lattice into various sections, each of which is calculated in parallel
 nx = ny = 1
-
 # number of unit cells in each direction.
-lx = 256
-ly = 256
-
+lx = ly = 128
 # make config object which caries info about
 # - the number of decomposition parts [nx, ny],
 # - lengths of structure [lx, ly]
 # - boundary conditions, setting True as periodic boundary conditions, and False elsewise,
 # - info if the exported hopping and onsite data should be complex,
 # - info of the precision of the exported hopping and onsite data, 0 - float, 1 - double, and 2 - long double.
+# - scaling, if None it's automatic, if present select spectrum_bound=[e_min, e_max]
 configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
-                                   is_complex=False, precision=1, spectrum_range=[-energy_scale, energy_scale])
-
+                                   is_complex=False, precision=1)
+# require the calculation of optical conductivity
 calculation = kite.Calculation(configuration)
-calculation.dos(num_points=1000, num_moments=1024, num_random=1, num_disorder=1)
-
-# make modification object which caries info about (TODO: Other modifications can be added here)
-# - magnetic field can be set to True. Default case is False. In exported file it's converted to 1 and 0.
+calculation.conductivity_optical(num_points=1000, num_disorder=1, num_random=1, num_moments=128, direction='xx')
+# make modification object which caries info about
+# - magnetic field can be set to True. Default case is False
 modification = kite.Modification(magnetic_field=False)
-
-# export the lattice from the lattice object, config and calculation object and the name of the file
-# the disorder is optional. If there is disorder in the lattice for now it should be given separately
-kite.config_system(lattice, configuration, calculation, modification, 'example1.h5')
-
-# plotting the lattice
-lattice.plot()
-# plt.show()
+kite.config_system(lattice, configuration, calculation, modification, 'honeycomb_lat_cond_opt.h5')

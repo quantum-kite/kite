@@ -1,24 +1,31 @@
+""" Honeycomb lattice with bond disorder
+
+    Lattice : Honeycomb 1[nm] interatomic distance and t=1[eV] hopping;
+    Disorder : Disorder class Gaussian and Uniform at different sublattices,
+               StructuralDisorder class vacancy and bond disorder;
+    Configuration : size of the system 256x256, without domain decomposition (nx=ny=1), periodic boundary conditions,
+                    double precision, manual scaling;
+    Calculation : dos;
+    Modification : magnetic field is off;
+
+"""
+
 import kite
 import numpy as np
 import pybinding as pb
 
-# define lattice of monolayer graphene with 1[nm] interatomic distance and t=1/3[eV] hopping,
-# EnergyScale is the scaling factor of the hopping parameters, important for the rescaling of the spectral quantity.
-#  INFO: other examples are defined in define_lattice.py script
-energy_scale = 6.06
 
+def honeycomb_lattice(onsite=(0, 0)):
+    """Make a honeycomb lattice with nearest neighbor hopping"""
 
-def graphene_initial(onsite=(0, 0)):
-    """Return the basic lattice specification for monolayer graphene with nearest neighbor"""
-
+    # define lattice vectors
     theta = np.pi / 3
     a1 = np.array([1 + np.cos(theta), np.sin(theta)])
     a2 = np.array([0, 2 * np.sin(theta)])
 
     # create a lattice with 2 primitive vectors
     lat = pb.Lattice(
-        a1=a1,
-        a2=a2
+        a1=a1, a2=a2
     )
 
     # Add sublattices
@@ -31,10 +38,10 @@ def graphene_initial(onsite=(0, 0)):
     # Add hoppings
     lat.add_hoppings(
         # inside the main cell, between which atoms, and the value
-        ([0, 0], 'A', 'B', - 1),
+        ([+0, +0], 'A', 'B', - 1),
         # between neighboring cells, between which atoms, and the value
-        ([-1, 0], 'A', 'B', - 1),
-        ([-1, 1], 'A', 'B', - 1)
+        ([-1, +0], 'A', 'B', - 1),
+        ([-1, +1], 'A', 'B', - 1)
     )
 
     # Add disorder
@@ -88,26 +95,28 @@ def graphene_initial(onsite=(0, 0)):
     return lat, disorder, [struc_disorder_one, struc_disorder_two, struc_disorder_three]
 
 
-lattice, disorder, disorded_structural = graphene_initial()
+lattice, disorder, disorded_structural = honeycomb_lattice()
 # number of decomposition parts in each direction of matrix.
 # This divides the lattice into various sections, each of which is calculated in parallel
 nx = ny = 1
-
 # number of unit cells in each direction.
-lx = 256
-ly = 256
-
+lx = ly = 256
+# make config object which caries info about
+# - the number of decomposition parts [nx, ny],
+# - lengths of structure [lx, ly]
+# - boundary conditions, setting True as periodic boundary conditions, and False elsewise,
+# - info if the exported hopping and onsite data should be complex,
+# - info of the precision of the exported hopping and onsite data, 0 - float, 1 - double, and 2 - long double.
+# - scaling, if None it's automatic, if present select spectrum_bound=[e_min, e_max]
+e_min, e_max = -6.06, 6.06
 configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
-                                   is_complex=False, precision=1, spectrum_range=[-energy_scale, energy_scale])
-
+                                   is_complex=False, precision=1, spectrum_range=[e_min, e_max])
+# require the calculation of DOS
 calculation = kite.Calculation(configuration)
 calculation.dos(num_moments=1024, num_random=1, num_disorder=1, num_points=1000)
-
+# make modification object which caries info about
+# - magnetic field can be set to True. Default case is False
 modification = kite.Modification(magnetic_field=False)
-
-kite.config_system(lattice, configuration, calculation, modification, 'example6.h5',
+# configure the *.h5 file
+kite.config_system(lattice, configuration, calculation, modification, 'honeycomb_lat_bond_disorder.h5',
                    disorder=disorder, disorded_structural=disorded_structural)
-
-# plotting the lattice
-lattice.plot()
-# plt.show()
