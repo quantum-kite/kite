@@ -1003,13 +1003,13 @@ def config_system(lattice, config, calculation, modification, filename, **kwargs
 
     # get the lattice vectors and set the size of space (1D, 2D or 3D) as the total number of vectors.
     disorder = kwargs.get('disorder', None)
-    disorded_structural = kwargs.get('disorded_structural', None)
+    disorder_structural = kwargs.get('disorder_structural', None)
 
     # if bounds are not specified, find a rough estimate
     if not config.energy_scale:
         print('Automatic scaling is being done. If unexpected results are produced, consider selecting the bounds '
               'manually. \nEstimate of the spectrum bounds with a safety factor is: ')
-        e_min, e_max = estimate_bounds(lattice, disorder, disorded_structural)
+        e_min, e_max = estimate_bounds(lattice, disorder, disorder_structural)
         print('({:.2f}, {:.2f} eV)'.format(e_min, e_max))
         # add a safety factor for a scaling factor
         config._energy_scale = (e_max - e_min) / (2 * 0.9)
@@ -1209,65 +1209,65 @@ def config_system(lattice, config, calculation, modification, filename, **kwargs
     grp_dis_vac = grp.create_group('Vacancy')
     idx_vacancy = 0
     grp_dis = grp.create_group('StructuralDisorder')
-    if disorded_structural:
+    if disorder_structural:
 
-        if isinstance(disorded_structural, list):
-            num_dis = len(disorded_structural)
+        if isinstance(disorder_structural, list):
+            num_dis = len(disorder_structural)
         else:
             num_dis = 1
-            disorded_structural = [disorded_structural]
+            disorder_structural = [disorder_structural]
 
         for idx in range(num_dis):
 
-            disorded_struct = disorded_structural[idx]
+            disorder_struct = disorder_structural[idx]
 
-            num_orb_vac = len(disorded_struct._orbital_vacancy)
+            num_orb_vac = len(disorder_struct._orbital_vacancy)
             if num_orb_vac > 0:
                 grp_dis_type = grp_dis_vac.create_group('Type{val}'.format(val=idx_vacancy))
-                grp_dis_type.create_dataset('Orbitals', data=np.asarray(disorded_struct._orbital_vacancy),
+                grp_dis_type.create_dataset('Orbitals', data=np.asarray(disorder_struct._orbital_vacancy),
                                             dtype=np.int32)
-                grp_dis_type.create_dataset('Concentration', data=disorded_struct._concentration,
+                grp_dis_type.create_dataset('Concentration', data=disorder_struct._concentration,
                                             dtype=np.float64)
                 grp_dis_type.create_dataset('NumOrbitals', data=num_orb_vac, dtype=np.int32)
                 idx_vacancy += 1
 
-            if disorded_struct._num_bond_disorder_per_type or disorded_struct._num_onsite_disorder_per_type:
+            if disorder_struct._num_bond_disorder_per_type or disorder_struct._num_onsite_disorder_per_type:
                 # Type idx
                 grp_dis_type = grp_dis.create_group('Type{val}'.format(val=idx))
                 # Concentration of this type
-                grp_dis_type.create_dataset('Concentration', data=np.asarray(disorded_struct._concentration),
+                grp_dis_type.create_dataset('Concentration', data=np.asarray(disorder_struct._concentration),
                                             dtype=np.float64)
                 # Number of bond disorder
                 grp_dis_type.create_dataset('NumBondDisorder',
-                                            data=2 * np.asarray(disorded_struct._num_bond_disorder_per_type),
+                                            data=2 * np.asarray(disorder_struct._num_bond_disorder_per_type),
                                             dtype=np.int32)
                 # Number of onsite disorder
                 grp_dis_type.create_dataset('NumOnsiteDisorder',
-                                            data=np.asarray(disorded_struct._num_onsite_disorder_per_type),
+                                            data=np.asarray(disorder_struct._num_onsite_disorder_per_type),
                                             dtype=np.int32)
 
                 # Node of the bond disorder from
-                grp_dis_type.create_dataset('NodeFrom', data=np.asarray(disorded_struct._nodes_from).flatten(),
+                grp_dis_type.create_dataset('NodeFrom', data=np.asarray(disorder_struct._nodes_from).flatten(),
                                             dtype=np.int32)
                 # Node of the bond disorder to
-                grp_dis_type.create_dataset('NodeTo', data=np.asarray(disorded_struct._nodes_to).flatten(),
+                grp_dis_type.create_dataset('NodeTo', data=np.asarray(disorder_struct._nodes_to).flatten(),
                                             dtype=np.int32)
                 # Node of the onsite disorder
-                grp_dis_type.create_dataset('NodeOnsite', data=np.asarray(disorded_struct._nodes_onsite),
+                grp_dis_type.create_dataset('NodeOnsite', data=np.asarray(disorder_struct._nodes_onsite),
                                             dtype=np.int32)
 
                 # Num nodes
-                grp_dis_type.create_dataset('NumNodes', data=disorded_struct._num_nodes, dtype=np.int32)
+                grp_dis_type.create_dataset('NumNodes', data=disorder_struct._num_nodes, dtype=np.int32)
                 # Orbital mapped for this node
-                grp_dis_type.create_dataset('NodePosition', data=np.asarray(disorded_struct._node_orbital),
+                grp_dis_type.create_dataset('NodePosition', data=np.asarray(disorder_struct._node_orbital),
                                             dtype=np.uint32)
 
                 # Onsite disorder energy
                 grp_dis_type.create_dataset('U0',
-                                            data=(np.asarray(disorded_struct._disorder_onsite).real.astype(
+                                            data=(np.asarray(disorder_struct._disorder_onsite).real.astype(
                                                 config.type)) / config.energy_scale)
                 # Bond disorder hopping
-                disorder_hopping = disorded_struct._disorder_hopping
+                disorder_hopping = disorder_struct._disorder_hopping
                 if complx:
                     # hoppings
                     grp_dis_type.create_dataset('Hopping',
