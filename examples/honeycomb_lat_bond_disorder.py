@@ -95,6 +95,7 @@ def honeycomb_lattice(onsite=(0, 0)):
     return lat, disorder, [struc_disorder_one, struc_disorder_two, struc_disorder_three]
 
 
+# load a honeycomb lattice, disorder and bond disorder
 lattice, disorder, disorded_structural = honeycomb_lattice()
 # number of decomposition parts in each direction of matrix.
 # This divides the lattice into various sections, each of which is calculated in parallel

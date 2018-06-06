@@ -1,32 +1,42 @@
+""" Onsite disorder
+
+    Lattice : Monolayer graphene;
+    Disorder : Disorder class Deterministic and Uniform at different sublattices,
+    Configuration : size of the system 512x512, without domain decomposition (nx=ny=1), periodic boundary conditions,
+                    double precision, manual scaling;
+    Calculation : dos;
+    Modification : magnetic field is off;
+"""
+
 import kite
 from pybinding.repository import graphene
 
-lattice = graphene.monolayer()
 
+# load graphene lattice and structural_disorder
+lattice = graphene.monolayer()
 # add Disorder
 disorder = kite.Disorder(lattice)
 disorder.add_disorder('B', 'Deterministic', -1.0)
 disorder.add_disorder('A', 'Uniform', +1.5, 1.0)
-
-nx = 1
-ny = 1
-
-lx = 512
-ly = 512
-
-# spectrum_range=[e_min, e_max] manually select Hamiltonian bounds.
-# if spectrum_range is not selected automatic scaling of a Pybinding model with equivalent disorder strength
-# is done in the background.
+# number of decomposition parts in each direction of matrix.
+# This divides the lattice into various sections, each of which is calculated in parallel
+nx = ny = 1
+# number of unit cells in each direction.
+lx = ly = 512
+# make config object which caries info about
+# - the number of decomposition parts [nx, ny],
+# - lengths of structure [lx, ly]
+# - boundary conditions, setting True as periodic boundary conditions, and False elsewise,
+# - info if the exported hopping and onsite data should be complex,
+# - info of the precision of the exported hopping and onsite data, 0 - float, 1 - double, and 2 - long double.
+# - scaling, if None it's automatic, if present select spectrum_bound=[e_min, e_max]
 configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
                                    is_complex=False, precision=1)
-
+# require the calculation of DOS
 calculation = kite.Calculation(configuration)
 calculation.dos(num_points=5000, num_moments=512, num_random=1, num_disorder=1)
-
-# make modification object which caries info about (TODO: Other modifications can be added here)
-# - magnetic field can be set to True. Default case is False. In exported file it's converted to 1 and 0.
+# make modification object which caries info about
+# - magnetic field can be set to True. Default case is False
 modification = kite.Modification(magnetic_field=False)
-
-# export the lattice from the lattice object, config and calculation object and the name of the file
-# the disorder is optional. If there is disorder in the lattice for now it should be given separately
+# configure the *.h5 file
 kite.config_system(lattice, configuration, calculation, modification, 'on_site_disorder.h5', disorder=disorder)

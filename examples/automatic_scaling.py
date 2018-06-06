@@ -3,7 +3,7 @@
     Lattice : Monolayer graphene;
     Disorder : Disorder class Deterministic and Uniform at different sublattices,
                StructuralDisorder class vacancy and bond disorder;
-    Configuration : size of the system 1024x1024, without domain decomposition (nx=ny=1), periodic boundary conditions,
+    Configuration : size of the system 256x256, without domain decomposition (nx=ny=1), periodic boundary conditions,
                     double precision, manual scaling;
     Calculation : dos;
     Modification : magnetic field is off;
