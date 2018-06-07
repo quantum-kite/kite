@@ -120,8 +120,7 @@ It is possible to incorporate different types of disorder, including a variety o
 After making the lattice object, we  export the model and  the information about the quantities that we want to calculate to a hdf file. For this, we need additional functionalities provided by *kite* that can be imported  with:
 
 ```python
-from kite_config import Configuration, Calculation, Modification, Disorder, StructuralDisorder, \
-    config_system, make_pybinding_model
+from kite import Configuration, Calculation, Modification, Disorder, StructuralDisorder, config_system, make_pybinding_model
 
 ```
 In this script, three different classes are defined:
