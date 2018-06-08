@@ -232,10 +232,10 @@ modification = ex.Modification(flux=0.1)
 ```
 Finally, it is time to export all the settings to a hdf5 that is the input for Kite:
 
-When these objects are defined, we can export the file that will contain set of input instructions for Quantum Kite:
+When these objects are defined, we can export the configuration to a file specified by ```filename``` (if this field is not specified, default name ```'kite_config.h5'``` is used) that will contain set of input instructions for Quantum Kite:
 
 ```python
-kite.config_system(lattice, configuration, calculation, modification, 'test.h5')
+kite.config_system(lattice, configuration, calculation, filename='test.h5')
 ```
 The following organizes all the instructions  in a single file:
 
