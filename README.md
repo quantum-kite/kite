@@ -120,8 +120,7 @@ It is possible to incorporate different types of disorder, including a variety o
 After making the lattice object, we  export the model and  the information about the quantities that we want to calculate to a hdf file. For this, we need additional functionalities provided by *kite* that can be imported  with:
 
 ```python
-from kite_config import Configuration, Calculation, Modification, Disorder, StructuralDisorder, \
-    export_lattice, make_pybinding_model
+from kite import Configuration, Calculation, Modification, Disorder, StructuralDisorder, config_system, make_pybinding_model
 
 ```
 In this script, three different classes are defined:
@@ -190,7 +189,7 @@ Here we list features/functions that are available at the moment:
   * ```conductivity_optical``` - optical conductivity linear response, parameters: ```direction```, ```temperature```, ```num_points```
   * ```conductivity_dc``` - zero frequency conductivity linear response, parameters: ```direction```, ```temperature```, ```num_points```
   * ```conductivity_optical_nonlinear``` - zero frequency conductivity in linear response, parameters: ```direction```, ```temperature```, ```num_points```
-  * ```singleshot_conductivity_dc``` - single energy zero frequency longitudinal conductivity (zero temperature), parameters: ```direction``` (limited to longitudinal direction), ```energy```, ```gamma```.
+  * ```singleshot_conductivity_dc``` - single energy zero frequency longitudinal conductivity (zero temperature), parameters: ```direction``` (limited to longitudinal direction), ```energy```, ```eta```.
 
   The following parameters are optional and are available for a function that supports them, for more info check previous definitions of function names:
 
@@ -199,7 +198,7 @@ Here we list features/functions that are available at the moment:
 * ```num_points```  is the number of points the in energy axis that is going to be used by the post-processing tool to output the density of states.
 * ```special``` - simplified form of nonlinear optical conductivity hBN example
 * ```energy``` - selected value of energy at which we want to calculate the singleshot_conductivity_dc
-* ```gamma``` - Imaginary term in the denominator of the Green function that provides a controled  broadening [eV]  (for technical details, see [Resources](http://quantum-kite.com/resources/)).
+* ```eta``` - Imaginary term in the denominator of the Green function that provides a controled  broadening [eV]  (for technical details, see [Resources](http://quantum-kite.com/resources/)).
 
 As a result, **calculation** is structured in the following way:
 
@@ -212,7 +211,7 @@ calculation.conductivity_optical(num_points=1000, num_random=1, num_disorder=1, 
 
 calculation.conductivity_dc(num_points=1000, num_moments=256, num_random=1, num_disorder=1,direction='xy', temperature=1)
 
-calculation.singleshot_conductivity_dc(energy=[(n/100.0 - 0.5)*2 for n in range(101)], num_moments=256, num_random=1, num_disorder=1,direction='xx', gamma=0.02)
+calculation.singleshot_conductivity_dc(energy=[(n/100.0 - 0.5)*2 for n in range(101)], num_moments=256, num_random=1, num_disorder=1,direction='xx', eta=0.02)
 
 calculation.conductivity_optical_nonlinear(num_points=1000, num_moments=256, num_random=1, num_disorder=1,direction='xxx', temperature=1.0, special=1)
 
@@ -222,17 +221,21 @@ calculation.conductivity_optical_nonlinear(num_points=1000, num_moments=256, num
 
 ### Modification
 
-The last object of a class ```Modification``` defines special modifiers. At the moment, only ```magnetic_field``` is available as an optional integer parameter, which if defined as 1 adds the minimal value of the magnetic field that obeys a commensurability condition between the magnetic unit cell and the material unit cell
+The last object of a class ```Modification``` defines special modifiers. At the moment, only ```magnetic_field``` and ```flux``` are available as optional parameters. Both are adding the magnetic field to the model, either with a selection of magnetic field value or as a percentage of flux quantum. If ```magnetic_field``` is defined, the closest value that obeys a commensurability condition between the magnetic unit cell and the material unit cell is selected. On the other hand, ```flux``` serves for specifying the magnetic field in terms of multiples of flux quantum. For example, ```flux=0.1``` adds the magnetic field whose flux through the unit cell is 10 times smaller than the magnetic flux quantum. In both cases the commensurate field value is returned as a message in the user terminal.
 It can be defined as:
 ```python
 modification = ex.Modification(magnetic_field=1)
+```
+or:
+```python
+modification = ex.Modification(flux=0.1)
 ```
 Finally, it is time to export all the settings to a hdf5 that is the input for Kite:
 
 When these objects are defined, we can export the file that will contain set of input instructions for Quantum Kite:
 
 ```python
-kite.export_lattice(lattice, configuration, calculation, modification, 'test.h5')
+kite.config_system(lattice, configuration, calculation, modification, 'test.h5')
 ```
 The following organizes all the instructions  in a single file:
 

@@ -957,7 +957,7 @@ def estimate_bounds(lattice, disorder=None, disorder_structural=None):
     return -a + b, a + b
 
 
-def config_system(lattice, config, calculation, modification, filename, **kwargs):
+def config_system(lattice, config, calculation, modification=None, **kwargs):
     """Export the lattice and related parameters to the *.h5 file
 
     Parameters
@@ -970,12 +970,10 @@ def config_system(lattice, config, calculation, modification, filename, **kwargs
         in the calculation.
     calculation : Calculation
         Calculation object that defines the requested functions for the calculation.
-    modification : Modification
-        Modification object, has the magnetic field selection, either in terms of field, or in the number of flux
-        quantum through the selected system.
-    filename : string
-        Output filename.
-    **kwargs: Optional arguments like Disorder or Disorder_structural.
+    modification : Modification = None
+        If specified modification object, has the magnetic field selection, either in terms of field, or in the number
+        of flux quantum through the selected system.
+    **kwargs: Optional arguments like filename, Disorder or Disorder_structural.
 
     """
 
@@ -992,6 +990,10 @@ def config_system(lattice, config, calculation, modification, filename, **kwargs
         config._is_complex = 1
         config.set_type()
 
+    # set default value
+    if not modification:
+        modification = Modification(magnetic_field=False)
+
     # check if magnetic field is On
     if modification.magnetic_field or modification.flux and complx == 0:
         print('Magnetic field is added but is_complex identifier is 0. Automatically turning is_complex to 1!')
@@ -1001,7 +1003,8 @@ def config_system(lattice, config, calculation, modification, filename, **kwargs
     # hamiltonian is complex 1 or real 0
     complx = int(config.comp)
 
-    # get the lattice vectors and set the size of space (1D, 2D or 3D) as the total number of vectors.
+    filename = kwargs.get('filename', 'kite_config.h5')
+
     disorder = kwargs.get('disorder', None)
     disorder_structural = kwargs.get('disorder_structural', None)
 
@@ -1185,7 +1188,11 @@ def config_system(lattice, config, calculation, modification, filename, **kwargs
                   multiply_bmin * magnetic_field_min))
 
         if modification.flux:
-            multiply_bmin = modification.flux
+            multiply_bmin = int(round(modification.flux * config.leng[0]))
+            if multiply_bmin == 0:
+                raise SystemExit('The system is to small for a desired field.')
+            print('Closest_field to the one you selected is {:.2f} T which in the terms of flux quantum is {:.2f}'.
+                  format(multiply_bmin * magnetic_field_min, multiply_bmin/config.leng[0]))
             print('Selected field is {:.2f} T'.format(multiply_bmin*magnetic_field_min))
         grp.create_dataset('MagneticField', data=int(multiply_bmin), dtype='u4')
 

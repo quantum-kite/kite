@@ -46,14 +46,12 @@ configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundari
 # configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
 #                                    is_complex=False, precision=1, spectrum_range=[-10, 10])
 
+# require the calculation of DOS
 calculation = kite.Calculation(configuration)
 calculation.dos(num_points=10000, num_moments=1024, num_random=1, num_disorder=1)
-# make modification object which caries info about
-# - magnetic field can be set to True. Default case is False
-modification = kite.Modification(magnetic_field=False)
 # configure the *.h5 file
-kite.config_system(lattice, configuration, calculation, modification, 'auto_scaling.h5', disorder=disorder,
-                   disorder_structural=disorder_struc)
+kite.config_system(lattice, configuration, calculation, filename='auto_scaling.h5',
+                   disorder=disorder, disorder_structural=disorder_struc)
 
 # make a rough estimate of KITE model using Pybinding,
 # (more disorder realisations you average, more similar it will be)

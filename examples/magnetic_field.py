@@ -34,12 +34,14 @@ configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundari
 # require the calculation of DOS
 calculation = kite.Calculation(configuration)
 calculation.dos(num_points=1000, num_moments=1024, num_random=1, num_disorder=1)
-# magnetic field can be set either as:
+# magnetic field can be set as a field inside the Modification object
+# either as:
 #  - a value of magnetic_field, the closest commensurate value is returned
-modification = kite.Modification(magnetic_field=400)
-#  - an integer multiple of flux quantum
-# modification = Modification(flux=1)
+# modification = kite.Modification(magnetic_field=400)
+# or as:
+# - an integer multiple of flux quantum
+modification = kite.Modification(flux=0.003)
 
 # configure the *.h5 file
-kite.config_system(lattice, configuration, calculation, modification, 'magnetic_field.h5')
-# adding the same magnetic field to the pybinding model won't work due to different size of the system!!!
+kite.config_system(lattice, configuration, calculation, modification, filename='magnetic_field.h5')
+# adding the same magnetic field to the Pybinding model won't work due to different size of the system!!!

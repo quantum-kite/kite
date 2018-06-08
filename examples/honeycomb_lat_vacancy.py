@@ -75,9 +75,6 @@ calculation = kite.Calculation(configuration)
 calculation.dos(num_points=1000, num_moments=num_moments, num_random=1, num_disorder=1)
 calculation.singleshot_conductivity_dc(direction='xx', num_moments=num_moments, num_random=1, num_disorder=1,
                                        energy=[0.3 / num_points * i for i in range(num_points)], eta=eta)
-# make modification object which caries info about
-# - magnetic field can be set to True. Default case is False
-modification = kite.Modification(magnetic_field=False)
 # configure the *.h5 file
-kite.config_system(lattice, configuration, calculation, modification, 'honeycomb_lat_vacancy.h5',
+kite.config_system(lattice, configuration, calculation, filename='honeycomb_lat_vacancy.h5',
                    disorder_structural=disorder_structural)

@@ -115,9 +115,6 @@ configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundari
 # require the calculation of DOS
 calculation = kite.Calculation(configuration)
 calculation.dos(num_moments=1024, num_random=1, num_disorder=1, num_points=1000)
-# make modification object which caries info about
-# - magnetic field can be set to True. Default case is False
-modification = kite.Modification(magnetic_field=False)
 # configure the *.h5 file
-kite.config_system(lattice, configuration, calculation, modification, 'honeycomb_lat_bond_disorder.h5',
+kite.config_system(lattice, configuration, calculation,  filename='honeycomb_lat_bond_disorder.h5',
                    disorder=disorder, disorded_structural=disorded_structural)

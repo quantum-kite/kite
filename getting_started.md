@@ -221,10 +221,14 @@ calculation.conductivity_optical_nonlinear(num_points=1000, num_moments=256, num
 
 ### Modification
 
-The last object of a class ```Modification``` defines special modifiers. At the moment, only ```magnetic_field``` is available as an optional integer parameter, which if defined as 1 adds the minimal value of the magnetic field that obeys a commensurability condition between the magnetic unit cell and the material unit cell 
+The last object of a class ```Modification``` defines special modifiers. At the moment, only ```magnetic_field``` and ```flux``` are available as optional parameters. Both are adding the magnetic field to the model, either with a selection of magnetic field value or as a percentage of flux quantum. If ```magnetic_field``` is defined, the closest value that obeys a commensurability condition between the magnetic unit cell and the material unit cell is selected. On the other hand, ```flux``` serves for specifying the magnetic field in terms of multiples of flux quantum. For example, ```flux=0.1``` adds the magnetic field whose flux through the unit cell is 10 times smaller than the magnetic flux quantum. In both cases the commensurate field value is returned as a message in the user terminal.
 It can be defined as:
 ```python
 modification = ex.Modification(magnetic_field=1)
+```
+or:
+```python
+modification = ex.Modification(flux=0.1)
 ```
 Finally, it is time to export all the settings to a hdf5 that is the input for Kite:
 
