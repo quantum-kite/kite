@@ -26,11 +26,11 @@
 // STRIDE is the size of the memory blocks used in the program
 // COMPILE_MAIN is a flag to prevent compilation of unnecessary parts of the code when testing
 #ifndef MEMORY
-#define MEMORY   2
+#define MEMORY 128
 #endif
 
 #ifndef STRIDE
-#define STRIDE    128
+#define STRIDE 256
 #endif
 
 #ifndef DEBUG
@@ -38,7 +38,7 @@
 #endif
 
 #ifndef VERBOSE
-#define VERBOSE 0
+#define VERBOSE 1
 #endif
 
 #ifndef COMPILE_MAIN
@@ -46,7 +46,7 @@
 #endif
 
 #ifndef ESTIMATE_TIME
-#define ESTIMATE_TIME 0
+#define ESTIMATE_TIME 1
 #endif
 
 // other compilation parameters not set in the Makefile
@@ -118,14 +118,45 @@ typedef int indextype;
 
 
 int main(int argc, char *argv[]){  
-  verbose_message("------- WELCOME TO KITE -------\n");
-  verbose_message("Welcome to Kite, the high-performance quantum transport software.\n");
-  verbose_message("-------------------------------\n\n");
+  verbose_message(
+      "+-----------------------------------------------------------------------------+\n"
+      "|               Green's Function Chebyshev Polynomial Approach                 \n"
+      "|                to Real-Space Quantum Transport Simulations                   \n"    
+      "|                                                                              \n"                                              
+      "|                        KITE | Pre-Release Beta 0.1                           \n"         
+      "|                        Kite home: quantum-kite.com                           \n"
+      "|                                                                              \n"
+      "|     Created by Simao M. Joao, Joao V. Lopes (Universidade do Porto),         \n"
+      "|       Tatiana G. Rappoport (Universidade Federal Rio de Janeiro),            \n"
+      "|         Misa Andelkovic, Lucian Covaci (University of Antwerp)               \n"
+      "|                and Aires Ferreira (University of York)                       \n"
+      "|                                                                              \n"                                            
+      "|     Funded by The Royal Society | royalsociety.org                           \n"
+      "|                                                                              \n"
+      "|  Copyright (C) 2018,  Simao M. Joao, Joao V. Lopes, Tatiana G. Rappoport,    \n"
+      "|  Misa Andelkovic, Lucian Covaci, Aires Ferreira                              \n"
+      "|                                                                              \n"
+      "|  This program is free software: you can redistribute it and/or modify        \n"
+      "|  it under the terms of the GNU General Public License as published by        \n"
+      "|  the Free Software Foundation, either version 3 of the License, or           \n"
+      "|  (at your option) any later version.                                         \n"
+      "|                                                                              \n"
+      "|  This program is distributed in the hope that it will be useful,             \n"
+      "|  but WITHOUT ANY WARRANTY; without even the implied warranty of              \n"
+      "|  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                        \n"
+      "|  See the GNU General Public License for more details.                        \n"
+      "+-----------------------------------------------------------------------------+\n"
+      );
 
-  verbose_message("------- INFORMATION -------\n");
-  verbose_message("All conductivities are in units of e^2/h.\n");
-  verbose_message("h_bar = 1.\n");
-  verbose_message("---------------------------\n\n");
+  verbose_message(
+      "\n------- INFORMATION -------                                    \n"
+      "All first-order conductivities are in units of e^2/h.            \n"
+      "To stop seeing these messages, set VERBOSE to 0 in the Makefile. \n"
+      "To see debug messages, set DEBUG to 1 in the Makefile.           \n"
+      "To have a rough estimate of the duration of the calculation, set ESTIMATE_TIME "
+      "to 1 in the Makefile. \n"
+      "---------------------------                                      \n\n"
+      );
 
   verbose_message("------- FLAGS SET -------\n");
   verbose_message("Flags set at compilation:\n");
@@ -136,6 +167,7 @@ int main(int argc, char *argv[]){
   verbose_message("ESTIMATE_TIME: "); verbose_message(ESTIMATE_TIME); verbose_message("\n");
   verbose_message("-------------------------\n\n");
 
+  verbose_message("\nStarting program...\n");
   debug_message("Starting program. The messages in red are debug messages. They may be turned off by setting DEBUG 0 in main.cpp\n");
 
   /* Define General characteristics of the data */  

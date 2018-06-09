@@ -148,16 +148,17 @@ void conductivity_dc<U, DIM>::calculate(){
     //maxEnergy = 0.99;
 
 
-  verbose_message("  Beta (1/kT) (in KPM units): "); verbose_message(beta); verbose_message("\n");
+  verbose_message("  All units are in the range [-1,1]\n");
+  verbose_message("  Beta (1/kT): "); verbose_message(beta); verbose_message("\n");
   //verbose_message("  Fermi energi (in KPM units): "); verbose_message(e_fermi); verbose_message("\n");
   //verbose_message("  Using kernel for delta function: Jackson\n");
-  verbose_message("  Using broadening parameter for Green's function (in KPM units): ");
+  verbose_message("  Using broadening parameter for Green's function: ");
     verbose_message(scat); verbose_message("\n");
   verbose_message("  Number of energies: "); verbose_message(NEnergies); verbose_message("\n");
-  verbose_message("  Energy range (in KPM units): ["); verbose_message(minEnergy); verbose_message(",");
+  verbose_message("  Energy range: ["); verbose_message(minEnergy); verbose_message(",");
     verbose_message(maxEnergy); verbose_message("]\n");
   verbose_message("  Number of Fermi energies: "); verbose_message(NFermiEnergies); verbose_message("\n");
-  verbose_message("  Fermi energies range (in KPM units): ["); verbose_message(minFermiEnergy); verbose_message(",");
+  verbose_message("  Fermi energies range: ["); verbose_message(minFermiEnergy); verbose_message(",");
     verbose_message(maxFermiEnergy); verbose_message("]\n");
   verbose_message("  File name: condDC.dat\n");
   energies = Eigen::Matrix<U, -1, 1>::LinSpaced(NEnergies, minEnergy, maxEnergy);
@@ -214,7 +215,7 @@ void conductivity_dc<U, DIM>::calculate(){
     for(int j = 0; j < NEnergies; j++){
       energy = energies(j);
       integrand(j) = GammaE(j)*fermi_function(energy, fermi, beta);
-    condDC(i) = integrate(energies, integrand);
+    condDC(i) = integrate(energies, integrand)*std::complex<U>(0.0,1.0);
     }
   }
 

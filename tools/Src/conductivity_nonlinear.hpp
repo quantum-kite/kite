@@ -246,33 +246,36 @@ void conductivity_nonlinear<U, DIM>::calculate(){
 
   
   U e_fermi = 0.0;
+  //U scat = 0.003388299;
   U scat = 0.003388299;
+  std::cout << "scattering: " << scat << "####\n";
 	
 	// Calculate the number of frequencies and energies needed to perform the calculation.
 	int N_energies = NumPoints;
-  double lim = 0.99;
+  double lim = 0.995;
   Eigen::Matrix<U, -1, 1> energies;
   energies  = Eigen::Matrix<U, -1, 1>::LinSpaced(N_energies, -lim, lim);
 
-	int N_omegas = 1000;
-  double minFreq = 0.01;
-  double maxFreq = 1.5;
+	int N_omegas = 1001;
+  double minFreq = 0;
+  double maxFreq = 2.0;
   Eigen::Matrix<U, -1, 1> frequencies;
   Eigen::Matrix<U, -1, 1> frequencies2;
   frequencies = Eigen::Matrix<U, -1, 1>::LinSpaced(N_omegas, minFreq, maxFreq);
   frequencies2 = Eigen::Matrix<U, -1, 1>::Zero(1,1);
 
-  verbose_message("  Beta (1/kT) (in KPM units): "); verbose_message(beta); verbose_message("\n");
-  verbose_message("  Fermi energy (in KPM units): "); verbose_message(e_fermi); verbose_message("\n");
+  verbose_message("  All the units are in the range [-1,1]\n");
+  verbose_message("  Beta (1/kT): "); verbose_message(beta); verbose_message("\n");
+  verbose_message("  Fermi energy: "); verbose_message(e_fermi); verbose_message("\n");
   verbose_message("  Using kernel for delta function: Jackson\n");
-  verbose_message("  Using broadening parameter for Green's function (in KPM units): ");
+  verbose_message("  Using broadening parameter for Green's function: ");
     verbose_message(scat); verbose_message("\n");
   verbose_message("  special: "); verbose_message(special); verbose_message("\n");
   verbose_message("  Number of energies: "); verbose_message(NumPoints); verbose_message("\n");
-  verbose_message("  Energy range (in KPM units): ["); verbose_message(-lim); verbose_message(",");
+  verbose_message("  Energy range: ["); verbose_message(-lim); verbose_message(",");
     verbose_message(lim); verbose_message("]\n");
   verbose_message("  Number of frequencies: "); verbose_message(N_omegas); verbose_message("\n");
-  verbose_message("  Frequency range (in KPM units): ["); verbose_message(minFreq); verbose_message(",");
+  verbose_message("  Frequency range: ["); verbose_message(minFreq); verbose_message(",");
     verbose_message(maxFreq); verbose_message("]\n");
   verbose_message("  File name: nonlinear_cond.dat\n");
 
@@ -307,11 +310,10 @@ void conductivity_nonlinear<U, DIM>::calculate(){
   std::complex<U> freq;
   for(int i = 0; i < N_omegas; i++){
     freq = std::complex<U>(frequencies(i), scat);  
-    cond(i) += (temp1(i) + temp2(i) + U(0.5)*(temp3(0,0) + temp4(0,0)))/freq/freq;
+    cond(i) += (/*temp1(i) + temp2(i) + */U(0.5)*(temp3(0,0) + temp4(0,0)))/freq/freq;
   }
-  cond *= imaginary*U(systemInfo.energy_scale*systemInfo.num_orbitals*systemInfo.spin_degeneracy/systemInfo.unit_cell_area);
+  cond *= imaginary*U(systemInfo.num_orbitals*systemInfo.spin_degeneracy/systemInfo.unit_cell_area/systemInfo.energy_scale);
 
-	
   
   //Output to a file
   std::ofstream myfile;

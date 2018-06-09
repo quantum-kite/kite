@@ -19,17 +19,15 @@ CLIBS += -lhdf5_hl_cpp -lhdf5_cpp -lhdf5_hl -lhdf5
 VPATH = .
 OBJS = *.o
 
-stride=64
-memory=2
-compile_main=1
+compile_main=0
 verbose=1
 debug=0
 estimate_time=1
 
 all:    clean
-	cd Src; $(CC) $(CFLAGS) $(CINCLUDE) -DSTRIDE=$(stride) -DDEBUG=$(debug) -DMEMORY=$(memory) -DCOMPILE_MAIN=$(compile_main) -DVERBOSE=$(verbose) -DESTIMATE_TIME=$(estimate_time)  -c *.cpp  
+	cd Src; $(CC) $(CFLAGS) $(CINCLUDE) -DDEBUG=$(debug) -DCOMPILE_MAIN=$(compile_main) -DVERBOSE=$(verbose) -DESTIMATE_TIME=$(estimate_time)  -c *.cpp  
 	@echo "linking..."
-	cd Src; $(CC) $(OBJS) $(CLIBS) $(CFLAGS) -o ../kite
+	cd Src; $(CC) $(OBJS) $(CLIBS) $(CFLAGS) -o ../KITEx
 	rm -f Src/*.o
 	cd ..
 
@@ -38,7 +36,7 @@ all:    clean
 debug:  clean  
 	cd Src; $(CC) $(CFLAGS) $(CINCLUDE) $(CDEFS)  -DMEM1=$(MEM1) -DMEM2=$(MEM2) -c *.cpp   -g
 	@echo "linking..."
-	cd Src; $(CC) $(CLIBS) $(CFLAGS) $(CINCLUDE) $(CDEFS) $(OBJS)  -o ../kite -g
+	cd Src; $(CC) $(CLIBS) $(CFLAGS) $(CINCLUDE) $(CDEFS) $(OBJS)  -o ../KITEx -g
 	cd ..
 
 clean:

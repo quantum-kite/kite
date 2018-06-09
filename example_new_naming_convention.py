@@ -8,15 +8,15 @@ from export_lattice import Configuration, Calculation, Modification, export_latt
 # define lattice of monolayer graphene with 1[nm] interatomic distance and t=1/3[eV] hopping,
 # EnergyScale is the scaling factor of the hopping parameters, important for the rescaling of the spectral quantity.
 #  INFO: other examples are defined in define_lattice.py script
-energy_scale = 3.06
+energy_scale = 3.8
 
 
-def graphene_initial(onsite=(0.0, 0.0)):
+def graphene_initial(onsite=(1.695652174, -1.695652174)):
     """Return the basic lattice specification for monolayer graphene with nearest neighbor"""
 
     theta = np.pi / 3
-    a1 = np.array([1 + np.cos(theta), np.sin(theta)])
-    a2 = np.array([0, 2 * np.sin(theta)])
+    a1 = np.array([2 * np.sin(theta), 0])
+    a2 = np.array([np.sin(theta), 1 + np.cos(theta)])
 
     # create a lattice with 2 primitive vectors
     lat = pb.Lattice(
@@ -28,7 +28,7 @@ def graphene_initial(onsite=(0.0, 0.0)):
     lat.add_sublattices(
     # name, position, and onsite potential
     ('A', [0, 0], onsite[0]),
-    ('B', [1, 0], onsite[1])
+    ('B', [0, 1], onsite[1])
     )
 
     # Add hoppings
@@ -36,8 +36,8 @@ def graphene_initial(onsite=(0.0, 0.0)):
     # inside the main cell, between which atoms, and the value
     ([0, 0], 'A', 'B', - 1),
     # between neighboring cells, between which atoms, and the value
-    ([-1, 0], 'A', 'B', - 1),
-    ([-1, 1], 'A', 'B', - 1)
+    ([0, -1], 'A', 'B', - 1),
+    ([1, -1], 'A', 'B', - 1)
     )
 
     return lat
@@ -50,8 +50,8 @@ lattice = graphene_initial()
 nx = ny = 2
 
 # number of unit cells in each direction.
-lx = 512
-ly = 512
+lx = 2048
+ly = 2048
 
 # make config object which caries info about
 # - the number of decomposition parts [nx, ny],
@@ -60,7 +60,8 @@ ly = 512
 # - info if the exported hopping and onsite data should be complex,
 # - info of the precision of the exported hopping and onsite data, 0 - float, 1 - double, and 2 - long double.
 configuration = Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
-                                      is_complex=True, precision=0, energy_scale=energy_scale)
+                                      is_complex=False, precision=0, spectrum_range=[-energy_scale, energy_scale])
+
 
 # make calculation object which caries info about
 # - the desired function:
@@ -73,22 +74,22 @@ configuration = Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[T
 
 # direction ID 'xx': 0, 'yy': 1, 'zz': 2, 'xy': 3, 'xz': 4, 'yx': 3, 'yz': 5, 'zx': 4, 'zy': 5
 calculation = Calculation(configuration)
-calculation.dos(num_points=1000, num_random=1, num_disorder=1, num_moments=1024)
-calculation.conductivity_optical(num_points=1000, num_random=1, num_disorder=1, num_moments=512, direction='xx')
-calculation.conductivity_dc(num_points=1000, num_moments=256, num_random=1, num_disorder=1,
-                                   direction='xy', temperature=1)
-calculation.singleshot_conductivity_dc(energy=[(n/100.0 - 0.5)*energy_scale*2 for n in range(101)], num_moments=256, num_random=1, num_disorder=1,
-                                               direction='xx', gamma=0.01)
-calculation.conductivity_optical_nonlinear(num_points=1000, num_moments=256, num_random=1, num_disorder=1,
-                                                   direction='xxx', temperature=1.0, special=1)
+# calculation.dos(num_points=1000, num_random=1, num_disorder=1, num_moments=1024)
+# calculation.conductivity_optical(num_points=1000, num_random=1, num_disorder=1, num_moments=512, direction='xx')
+# calculation.conductivity_dc(num_points=1000, num_moments=256, num_random=1, num_disorder=1,
+                                   # direction='xy', temperature=1)
+# calculation.singleshot_conductivity_dc(energy=[(n/100.0 - 0.5)*energy_scale*2 for n in range(101)], num_moments=256, num_random=1, num_disorder=1,
+                                               # direction='xx', gamma=0.01)
+calculation.conductivity_optical_nonlinear(num_points=1000, num_moments=1024, num_random=1, num_disorder=1,
+                                                   direction='yyy', temperature=1.0, special=1)
 
 # make modification object which caries info about (TODO: Other modifications can be added here)
 # - magnetic field can be set to True. Default case is False. In exported file it's converted to 1 and 0.
-modification = Modification(magnetic_field=True)
+modification = Modification(magnetic_field=False)
 
 # export the lattice from the lattice object, config and calculation object and the name of the file
 # the disorder is optional. If there is disorder in the lattice for now it should be given separately
-export_lattice(lattice, configuration, calculation, modification, 'smoltest.h5')
+export_lattice(lattice, configuration, calculation, modification, 'hbnL2048N1024yyy.h5')
 
 # plotting the lattice
 # lattice.plot()

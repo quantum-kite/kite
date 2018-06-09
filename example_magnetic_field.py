@@ -23,7 +23,7 @@ calculation.dos(num_points=10000, num_moments=1024, num_random=1, num_disorder=1
 
 # magnetic field can be set either as:
 #  - a value of magnetic_field, the closest commensurate value is returned
-modification = Modification(magnetic_field=800)
+modification = Modification(magnetic_field=400)
 #  - an integer multiple of flux quantum
 # modification = Modification(flux=10)
 

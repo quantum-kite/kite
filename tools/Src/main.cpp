@@ -120,7 +120,38 @@ void choose_simulation_type(char *name){
 
 
 int main(int argc, char *argv[]){
-  verbose_message("------- WELCOME TO KITE -------\n");
+  verbose_message(
+      "+-----------------------------------------------------------------------------+\n"
+      "|               Green's Function Chebyshev Polynomial Approach                 \n"
+      "|                to Real-Space Quantum Transport Simulations                   \n"    
+      "|                                                                              \n"                                              
+      "|                        KITE | Pre-Release Beta 0.1                           \n"         
+      "|                        Kite home: quantum-kite.com                           \n"
+      "|                                                                              \n"
+      "|     Created by Simao M. Joao, Joao V. Lopes (Universidade do Porto),         \n"
+      "|       Tatiana G. Rappoport (Universidade Federal Rio de Janeiro),            \n"
+      "|         Misa Andelkovic, Lucian Covaci (University of Antwerp)               \n"
+      "|                and Aires Ferreira (University of York)                       \n"
+      "|                                                                              \n"                                            
+      "|     Funded by The Royal Society | royalsociety.org                           \n"
+      "|                                                                              \n"
+      "|  Copyright (C) 2018,  Simao M. Joao, Joao V. Lopes, Tatiana G. Rappoport,    \n"
+      "|  Misa Andelkovic, Lucian Covaci, Aires Ferreira                              \n"
+      "|                                                                              \n"
+      "|  This program is free software: you can redistribute it and/or modify        \n"
+      "|  it under the terms of the GNU General Public License as published by        \n"
+      "|  the Free Software Foundation, either version 3 of the License, or           \n"
+      "|  (at your option) any later version.                                         \n"
+      "|                                                                              \n"
+      "|  This program is distributed in the hope that it will be useful,             \n"
+      "|  but WITHOUT ANY WARRANTY; without even the implied warranty of              \n"
+      "|  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                        \n"
+      "|  See the GNU General Public License for more details.                        \n"
+      "+-----------------------------------------------------------------------------+\n"
+      );
+
+
+  /*verbose_message("------- WELCOME TO KITE -------\n");
   verbose_message("Welcome to Kite, the high-performance quantum transport software.");
   verbose_message("This is KITEx, the post-processing tool that uses the output from kite");
   verbose_message(" to calculate several transport quantities, such as:\n");
@@ -128,19 +159,23 @@ int main(int argc, char *argv[]){
   verbose_message("- linear optical conductivity\n");
   verbose_message("- second-order optical conductivity (currently only for hBN)\n");
   verbose_message("- DC conductivity\n");
-  verbose_message("-------------------------------\n\n");
+  verbose_message("-------------------------------\n\n");*/
+
+  verbose_message(
+      "\n------- INFORMATION -------                                    \n"
+      "All first-order conductivities are in units of e^2/h.            \n"
+      "To stop seeing these messages, set VERBOSE to 0 in the Makefile. \n"
+      "To see debug messages, set DEBUG to 1 in the Makefile.           \n"
+      "---------------------------                                      \n\n"
+      );
 
   verbose_message("------- FLAGS SET -------\n");
   verbose_message("DEBUG: "); verbose_message(DEBUG); verbose_message("\n");
   verbose_message("VERBOSE: "); verbose_message(VERBOSE); verbose_message("\n");
   verbose_message("-------------------------\n\n");
 
-  verbose_message("------- INFORMATION -------\n");
-  verbose_message("All linear conductivities are in units of e^2/h.\n");
-  verbose_message("Reduced Planck's constant h_bar = 1.\n");
-  verbose_message("Electron charge e = 1.\n");
-  verbose_message("---------------------------\n\n");
 
+  verbose_message("\nStarting program...\n\n");
 
 
 	//parser(argc, argv);

@@ -164,8 +164,8 @@ void conductivity_optical<U, DIM>::calculate(){
 
   // 1/kT, where k is the Boltzmann constant in eV/K
   U beta = 1.0/8.6173303*pow(10,5)/temperature;
-  U e_fermi = 0.1;
-  U scat = 0.01;
+  U e_fermi = 0.2/systemInfo.energy_scale;
+  U scat = 0.0166/systemInfo.energy_scale;
 	
 	// Calculate the number of frequencies and energies needed to perform the calculation.
 	int N_energies = NumPoints;
@@ -173,23 +173,24 @@ void conductivity_optical<U, DIM>::calculate(){
   Eigen::Matrix<U, -1, 1> energies;
   energies  = Eigen::Matrix<U, -1, 1>::LinSpaced(N_energies, -lim, lim);
 
-	int N_omegas = 200;
+	int N_omegas = 600;
   double minFreq = 0.01;
   double maxFreq = 1.5;
   Eigen::Matrix<U, -1, 1> frequencies;
   frequencies = Eigen::Matrix<U, -1, 1>::LinSpaced(N_omegas, minFreq, maxFreq);
 
   // Print out some useful information
-  verbose_message("  Beta (1/kT) (in KPM units): "); verbose_message(beta); verbose_message("\n");
-  verbose_message("  Fermi energi (in KPM units): "); verbose_message(e_fermi); verbose_message("\n");
+  verbose_message("  All units are in the energy scale [-1,1]\n");
+  verbose_message("  Beta (1/kT): "); verbose_message(beta); verbose_message("\n");
+  verbose_message("  Fermi energy: "); verbose_message(e_fermi); verbose_message("\n");
   verbose_message("  Using kernel for delta function: Jackson\n");
-  verbose_message("  Using broadening parameter for Green's function (in KPM units): ");
+  verbose_message("  Using broadening parameter for Green's function: ");
     verbose_message(scat); verbose_message("\n");
   verbose_message("  Number of energies: "); verbose_message(NumPoints); verbose_message("\n");
-  verbose_message("  Energy range (in KPM units): ["); verbose_message(-lim); verbose_message(",");
+  verbose_message("  Energy range: ["); verbose_message(-lim); verbose_message(",");
     verbose_message(lim); verbose_message("]\n");
   verbose_message("  Number of frequencies: "); verbose_message(N_omegas); verbose_message("\n");
-  verbose_message("  Frequency range (in KPM units): ["); verbose_message(minFreq); verbose_message(",");
+  verbose_message("  Frequency range: ["); verbose_message(minFreq); verbose_message(",");
     verbose_message(maxFreq); verbose_message("]\n");
   verbose_message("  File name: optical_cond.dat\n");
 
