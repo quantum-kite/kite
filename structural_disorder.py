@@ -1,17 +1,20 @@
-import matplotlib.pyplot as plt
+""" Bond disorder
+
+    Lattice : Honeycomb 1[nm] interatomic distance and t=1[eV] hopping;
+    Disorder : StructuralDisorder class bond and vacancy disorder;
+    Configuration : size of the system 512x512, without domain decomposition (nx=ny=1), periodic boundary conditions,
+                    double precision, manual scaling;
+    Calculation : dos;
+    Modification : magnetic field is off;
+"""
+
 import numpy as np
 import pybinding as pb
-
-from export_lattice import Configuration, Calculation, Modification, Disorder, StructuralDisorder, export_lattice
-
-# define lattice of monolayer graphene with 1[nm] interatomic distance and t=1/3[eV] hopping,
-# EnergyScale is the scaling factor of the hopping parameters, important for the rescaling of the spectral quantity.
-#  INFO: other examples are defined in define_lattice.py script
-energy_scale = 6.06
+import kite
 
 
-def graphene_initial(onsite=(0, 0)):
-    """Return the basic lattice specification for monolayer graphene with nearest neighbor"""
+def honeycomb_lattice(onsite=(0, 0)):
+    """Make a honeycomb lattice with nearest neighbor hopping"""
 
     theta = np.pi / 3
     a1 = np.array([1 + np.cos(theta), np.sin(theta)])
@@ -36,18 +39,8 @@ def graphene_initial(onsite=(0, 0)):
         ([0, 0], 'A', 'B', - 1),
         # between neighboring cells, between which atoms, and the value
         ([-1, 0], 'A', 'B', - 1),
-        ([-1, 1], 'A', 'B', - 1)
+        ([-1, 1], 'A', 'B', - 1),
     )
-
-    # Add disorder
-    # Each sublattice can have different disorder. If there are multiple orbitals at one sublattice, one needs to add
-    # disorder vector of the same size as the number of orbitals. Type of disorder available are Gaussian,
-    # Deterministic and Uniform. Each of the needs the have mean value, and standard deviation, where standard deviation
-    # of deterministic disorder should be 0.
-
-    disorder = Disorder(lat)
-    disorder.add_disorder('A', 'Gaussian', 0.5, 0.1)
-    disorder.add_disorder('B', 'Uniform', 0.2, 0.1)
 
     # Add bond disorder as an object of a class StructuralDisorder. In this manner we can add onsite and bond defects
     # with a specific concentration, which will be added to the simulated system. The procedure for adding is same
@@ -60,7 +53,7 @@ def graphene_initial(onsite=(0, 0)):
     node4 = [[+0, +1], 'A']
     node5 = [[-1, +1], 'B']
 
-    struc_disorder_one = StructuralDisorder(lat, concentration=0.05)
+    struc_disorder_one = kite.StructuralDisorder(lat, concentration=0.05)
     struc_disorder_one.add_structural_disorder(
         # add bond disorder in the form [from unit cell], 'sublattice_from', [to_unit_cell], 'sublattice_to', value:
         (*node0, *node1, 1),
@@ -70,46 +63,48 @@ def graphene_initial(onsite=(0, 0)):
         (*node4, *node5, 1),
         (*node5, *node0, 1),
         # in this way we can add onsite disorder in the form [unit cell], 'sublattice', value
-        ([+0, +0], 'B', 0.1)
+        ([+0, +0], 'B', 0.3)
     )
     # It is possible to add multiple different disorder type which should be forwarded to the export_lattice function
     # as a list.
-    struc_disorder_two = StructuralDisorder(lat, concentration=0.2)
+    struc_disorder_two = kite.StructuralDisorder(lat, concentration=0.2)
     struc_disorder_two.add_structural_disorder(
-        (*node0, *node1, 0.1),
-        (*node4, *node5, 0.1),
-        (*node5, *node0, 0.1),
-        ([+0, +0], 'B', 0.1)
+        (*node0, *node1, 0.4),
+        (*node4, *node5, 0.4),
+        (*node5, *node0, 0.4),
+        ([+0, +0], 'B', 0.4)
     )
     struc_disorder_two.add_vacancy('B')
 
-    struc_disorder_three = StructuralDisorder(lat, concentration=0.01)
+    struc_disorder_three = kite.StructuralDisorder(lat, concentration=0.01)
     struc_disorder_three.add_vacancy('A')
 
     # if there is disorder it should be returned separately from the lattice
-    return lat, disorder, [struc_disorder_one, struc_disorder_two, struc_disorder_three]
+    return lat, [struc_disorder_one, struc_disorder_two, struc_disorder_three]
 
 
-lattice, disorder, disorded_structural = graphene_initial()
+# load a honeycomb lattice and structural_disorder
+lattice, disorder_structural = honeycomb_lattice()
 # number of decomposition parts in each direction of matrix.
 # This divides the lattice into various sections, each of which is calculated in parallel
 nx = ny = 1
-
 # number of unit cells in each direction.
-lx = 256
-ly = 256
-
-configuration = Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
-                              is_complex=False, precision=1, energy_scale=energy_scale)
-
-calculation = Calculation(configuration)
+lx = ly = 512
+# make config object which caries info about
+# - the number of decomposition parts [nx, ny],
+# - lengths of structure [lx, ly]
+# - boundary conditions, setting True as periodic boundary conditions, and False elsewise,
+# - info if the exported hopping and onsite data should be complex,
+# - info of the precision of the exported hopping and onsite data, 0 - float, 1 - double, and 2 - long double.
+# - scaling, if None it's automatic, if present select spectrum_bound=[e_min, e_max]
+configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
+                                   is_complex=False, precision=1, spectrum_range=[-10, 10])
+# require the calculation of DOS
+calculation = kite.Calculation(configuration)
 calculation.dos(num_moments=1024, num_random=1, num_disorder=1, num_points=1000)
-
-modification = Modification(magnetic_field=False)
-
-export_lattice(lattice, configuration, calculation, modification, 'example6.h5',
-               disorder=disorder, disorded_structural=disorded_structural)
-
-# plotting the lattice
-lattice.plot()
-# plt.show()
+# make modification object which caries info about
+# - magnetic field can be set to True. Default case is False
+modification = kite.Modification(magnetic_field=False)
+# configure the *.h5 file
+kite.config_system(lattice, configuration, calculation, modification, 'structural_disorder.h5',
+                   disorder_structural=disorder_structural)

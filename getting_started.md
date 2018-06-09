@@ -7,7 +7,7 @@ Quantum Kite is a multi threaded C++ package for efficient evaluation of spectra
 The code is divided in three different layers. The starting point, which is the interface between the user and the C++ code, is based on a Python script. At this level,  the definition of a TB model uses  [Pybinding](http://docs.pybinding.site/en/stable/), a python package to study TB hamiltonians. In the next sections we will introduce basic functionalities of the Pybinding package, which will be used to build the model and the basic funcionalities of Kite. For more  advanced examples you can check https://quantum-kite.com/category/examples/.
 
 Quantum Kite is shipped as a source code that can be compiled following the instruction provided in the section [Installation](https://quantum-kite.com/installation/) . The package contains a the transport code and also a post-processing code.
-The interconnection between different parts of the package is done using the Hierarchical Data Format (HDF5 package). The model is built with a python script and it is exported, together with the calculation settings, to a *.h5 file, which is used later as a TB input to Quantum Kite. All the output data of the simulation is saved in the same *h5 file that is finally posprocessed by posprocessing tools that produce  different *.dat files for the calculated quantities.
+The interconnection between different parts of the package is done using the Hierarchical Data Format (HDF5 package). The model is built with a python script and it is exported, together with the calculation settings, to a *.h5 file, which is used later as a TB input to Quantum Kite. All the output data of the simulation is saved in the same *h5 file that is finally posprocessed by posprocessing tools that produce  different *.dat files for the calculated quantities. 
 
 In short, the code workflow is the following:
 
@@ -43,7 +43,7 @@ inside the script.
 
 ### Building the model
 
-The most important object for building a TB model is pb.Lattice, which carries the full information about the unit cell (position of lattice sites, sublattices, orbitals, lattice vectors and hopping parameters). These are the input parameters for the Lattice. Pybinding also provide additional features based on the real-space information, as for example, the reciprocal vectors and the Brillouin zone.
+The most important object for building a TB model is pb.Lattice, which carries the full information about the unit cell (position of lattice sites, sublattices, orbitals, lattice vectors and hopping parameters). These are the input parameters for the Lattice. Pybinding also provide additional features based on the real-space information, as for example, the reciprocal vectors and the Brillouin zone. 
 
 To ilustrate how the python script works, let us  make a simple square lattice with a single lattice site.
 
@@ -128,13 +128,13 @@ In this script, three different classes are defined:
 2. ```Calculation```
 3. ```Modification```
 
-These three classes provide all the information about the system that is used in the calculation and also the quantities we want to calculate.
+These three classes provide all the information about the system that is used in the calculation and also the quantities we want to calculate. 
 ### Configuration
 The objects of class ```Configuration``` carry the info about:
 
-* ```divisions``` - integer number that defines the number of decomposition parts in each direction. This divides the lattice into various sections that are computed in parallel.
+* ```divisions``` - integer number that defines the number of decomposition parts in each direction. This divides the lattice into various sections that are computed in parallel. 
 
-
+  
 
   ```python
   nx = ny = 2
@@ -142,11 +142,11 @@ The objects of class ```Configuration``` carry the info about:
 
   This decomposition allows a great speed up of the calculation that scales with the the number of decomposed parts. We recommend its usage. However, the product of the values of **nx** and **ny**  is the number of threads that the code uses. It cannot exceed the number of cores available in your computer. One must also notice that it is not efficient to decompose small systems with lateral sizes smaller than 128 unit cells of a normal lattice.
 
-
+  
 
 * ```length``` - integer number of unit cells along the direction of lattice vectors:
 
-
+  
 
   ```python
   lx = 256
@@ -161,7 +161,7 @@ The objects of class ```Configuration``` carry the info about:
 
 * ```precision``` - integer identifier of data type that the system uses. For optimisation purposes, **kite** also allows the user to define the precision of the calculation. Use  **0** for float, **1** for double, and **2** for long double.
 
-* Chebyshev expansions need renomalized hamiltonians where the energy spectrum is bounded [-1,1]. Our interface provides an automated scaling. However, if you want to define the bounds of your hamiltonian by hand, you can useIf you need more details about this point, refere to [*Resources*](http://quantum-kite.com/resources/) where we discuss the method in details.
+* Chebyshev expansions need renomalized hamiltonians where the energy spectrum is bounded [-1,1]. Our interface provides an automated scaling. However, if you want to define the bounds of your hamiltonian by hand, you can useIf you need more details about this point, refere to [*Resources*](http://quantum-kite.com/resources/) where we discuss the method in details. 
 
 As a result, a  ```Configuration``` object is structured in the following way:
 ```python
@@ -169,7 +169,7 @@ configuration = ex.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries
 ```
 ### Calculation
 
-Finally it is time to write the ```Calculation``` object that carries out the information about the quantities that are going to be calculated. For this part, we still need to include more paramenters, related to the Chebyshev expansion  (our examples already have optimized parameters for a normal desktop computer). All quantities need the following parameters:
+Finally it is time to write the ```Calculation``` object that carries out the information about the quantities that are going to be calculated. For this part, we still need to include more paramenters, related to the Chebyshev expansion  (our examples already have optimized parameters for a normal desktop computer). All quantities need the following parameters: 
 
 1. **num_moments** defines the number of moments of the Chebyshev expansion. This number can be varied, dependening on the energy resolution you expect. Tipically we use **num_moments>max(lx,ly) **,  so it should scales with the size of your system. However, the optimal number depends on the lattice. The user should also avoid an excessive number of moments that exceed the desired energy resolution. Otherwise the calculation will begin to converge to the discrete energy levels of the finite system. We professional usage, we suggest a convergence analysis in function of the number of polynomials used in the expansion.
 
@@ -177,14 +177,14 @@ Finally it is time to write the ```Calculation``` object that carries out the in
 
 3. **num_disorder** defines the number of disorder realisations, useful for disordered systems.
 
-
+   
 
 The other parameters that are specific for each quantity are explained after the function definitions
 
 Here we list features/functions that are available at the moment:
 
 * fname - name of the function that you want to evaluate, case insensitive:
-
+  
   * ```dos``` - density of states. Other parameter: ```num_points```  is the number of points the in energy axis that is going to be used by the post-processing tool to output the density of states.
   * ```conductivity_optical``` - optical conductivity linear response, parameters: ```direction```, ```temperature```, ```num_points```
   * ```conductivity_dc``` - zero frequency conductivity linear response, parameters: ```direction```, ```temperature```, ```num_points```
@@ -194,7 +194,7 @@ Here we list features/functions that are available at the moment:
   The following parameters are optional and are available for a function that supports them, for more info check previous definitions of function names:
 
 * ```direction``` - direction along which the conductivity is calculated (longitudinal: 'xx', 'yy', transversal: 'xy',  'yx')
-* ```temperature```  a temperature in Fermi Dirac distribution that is used for the calculation of optical and DC conductivities.
+* ```temperature```  a temperature in Fermi Dirac distribution that is used for the calculation of optical and DC conductivities. 
 * ```num_points```  is the number of points the in energy axis that is going to be used by the post-processing tool to output the density of states.
 * ```special``` - simplified form of nonlinear optical conductivity hBN example
 * ```energy``` - selected value of energy at which we want to calculate the singleshot_conductivity_dc
@@ -244,7 +244,7 @@ https://gist.github.com/quantum-kite/19472b95b0348a161b8987137ea7e063
 To run the  code and the postprocess it, use
 
 ```bash
-./KITEx test.h5
+./KITEx test.h5 
 ./postprocessing/tools/kitepos test.h5
 ```
 
@@ -252,7 +252,7 @@ To run the  code and the postprocess it, use
 
 # Visualizing the data
 
-After calculating the quantity of interest and post-processing the data, we can plot the resulting data with the following script:
+After calculating the quantity of interest and post-processing the data, we can plot the resulting data with the following script: 
 
 https://gist.github.com/quantum-kite/9a935269845eae3f8590f364be12cb49
 

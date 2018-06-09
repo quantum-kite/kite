@@ -593,7 +593,7 @@ class Calculation:
                  'num_moments': num_moments, 'num_random': num_random, 'num_disorder': num_disorder,
                  'temperature': temperature, 'special': special})
 
-    def singleshot_conductivity_dc(self, energy, direction, gamma, num_moments, num_random, num_disorder=1):
+    def singleshot_conductivity_dc(self, energy, direction, eta, num_moments, num_random, num_disorder=1):
         """Calculate the density of states as a function of energy
 
         Parameters
@@ -603,7 +603,7 @@ class Calculation:
         direction : string
             direction in xyz coordinates along which the conductivity is calculated.
             Supports 'xx', 'yy', 'zz'.
-        gamma : Float
+        eta : Float
             Parameter that affects the broadening of the kernel function.
         num_moments : int
             Number of polynomials in the Chebyshev expansion.
@@ -621,7 +621,7 @@ class Calculation:
             self._singleshot_conductivity_dc.append(
                 {'energy': (np.atleast_1d(energy)),
                  'direction': self._avail_dir_sngl[direction],
-                 'gamma': np.array(gamma), 'num_moments': num_moments,
+                 'eta': np.array(eta), 'num_moments': num_moments,
                  'num_random': num_random, 'num_disorder': num_disorder})
 
 
@@ -957,7 +957,7 @@ def estimate_bounds(lattice, disorder=None, disorder_structural=None):
     return -a + b, a + b
 
 
-def export_lattice(lattice, config, calculation, modification, filename, **kwargs):
+def config_system(lattice, config, calculation, modification=None, **kwargs):
     """Export the lattice and related parameters to the *.h5 file
 
     Parameters
@@ -970,12 +970,10 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
         in the calculation.
     calculation : Calculation
         Calculation object that defines the requested functions for the calculation.
-    modification : Modification
-        Modification object, has the magnetic field selection, either in terms of field, or in the number of flux
-        quantum through the selected system.
-    filename : string
-        Output filename.
-    **kwargs: Optional arguments like Disorder or Disorder_structural.
+    modification : Modification = None
+        If specified modification object, has the magnetic field selection, either in terms of field, or in the number
+        of flux quantum through the selected system.
+    **kwargs: Optional arguments like filename, Disorder or Disorder_structural.
 
     """
 
@@ -992,6 +990,10 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
         config._is_complex = 1
         config.set_type()
 
+    # set default value
+    if not modification:
+        modification = Modification(magnetic_field=False)
+
     # check if magnetic field is On
     if modification.magnetic_field or modification.flux and complx == 0:
         print('Magnetic field is added but is_complex identifier is 0. Automatically turning is_complex to 1!')
@@ -1001,15 +1003,16 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
     # hamiltonian is complex 1 or real 0
     complx = int(config.comp)
 
-    # get the lattice vectors and set the size of space (1D, 2D or 3D) as the total number of vectors.
+    filename = kwargs.get('filename', 'kite_config.h5')
+
     disorder = kwargs.get('disorder', None)
-    disorded_structural = kwargs.get('disorded_structural', None)
+    disorder_structural = kwargs.get('disorder_structural', None)
 
     # if bounds are not specified, find a rough estimate
     if not config.energy_scale:
         print('Automatic scaling is being done. If unexpected results are produced, consider selecting the bounds '
               'manually. \nEstimate of the spectrum bounds with a safety factor is: ')
-        e_min, e_max = estimate_bounds(lattice, disorder, disorded_structural)
+        e_min, e_max = estimate_bounds(lattice, disorder, disorder_structural)
         print('({:.2f}, {:.2f} eV)'.format(e_min, e_max))
         # add a safety factor for a scaling factor
         config._energy_scale = (e_max - e_min) / (2 * 0.9)
@@ -1185,7 +1188,11 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
                   multiply_bmin * magnetic_field_min))
 
         if modification.flux:
-            multiply_bmin = modification.flux
+            multiply_bmin = int(round(modification.flux * config.leng[0]))
+            if multiply_bmin == 0:
+                raise SystemExit('The system is to small for a desired field.')
+            print('Closest_field to the one you selected is {:.2f} T which in the terms of flux quantum is {:.2f}'.
+                  format(multiply_bmin * magnetic_field_min, multiply_bmin/config.leng[0]))
             print('Selected field is {:.2f} T'.format(multiply_bmin*magnetic_field_min))
         grp.create_dataset('MagneticField', data=int(multiply_bmin), dtype='u4')
 
@@ -1209,65 +1216,65 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
     grp_dis_vac = grp.create_group('Vacancy')
     idx_vacancy = 0
     grp_dis = grp.create_group('StructuralDisorder')
-    if disorded_structural:
+    if disorder_structural:
 
-        if isinstance(disorded_structural, list):
-            num_dis = len(disorded_structural)
+        if isinstance(disorder_structural, list):
+            num_dis = len(disorder_structural)
         else:
             num_dis = 1
-            disorded_structural = [disorded_structural]
+            disorder_structural = [disorder_structural]
 
         for idx in range(num_dis):
 
-            disorded_struct = disorded_structural[idx]
+            disorder_struct = disorder_structural[idx]
 
-            num_orb_vac = len(disorded_struct._orbital_vacancy)
+            num_orb_vac = len(disorder_struct._orbital_vacancy)
             if num_orb_vac > 0:
                 grp_dis_type = grp_dis_vac.create_group('Type{val}'.format(val=idx_vacancy))
-                grp_dis_type.create_dataset('Orbitals', data=np.asarray(disorded_struct._orbital_vacancy),
+                grp_dis_type.create_dataset('Orbitals', data=np.asarray(disorder_struct._orbital_vacancy),
                                             dtype=np.int32)
-                grp_dis_type.create_dataset('Concentration', data=disorded_struct._concentration,
+                grp_dis_type.create_dataset('Concentration', data=disorder_struct._concentration,
                                             dtype=np.float64)
                 grp_dis_type.create_dataset('NumOrbitals', data=num_orb_vac, dtype=np.int32)
                 idx_vacancy += 1
 
-            if disorded_struct._num_bond_disorder_per_type or disorded_struct._num_onsite_disorder_per_type:
+            if disorder_struct._num_bond_disorder_per_type or disorder_struct._num_onsite_disorder_per_type:
                 # Type idx
                 grp_dis_type = grp_dis.create_group('Type{val}'.format(val=idx))
                 # Concentration of this type
-                grp_dis_type.create_dataset('Concentration', data=np.asarray(disorded_struct._concentration),
+                grp_dis_type.create_dataset('Concentration', data=np.asarray(disorder_struct._concentration),
                                             dtype=np.float64)
                 # Number of bond disorder
                 grp_dis_type.create_dataset('NumBondDisorder',
-                                            data=2 * np.asarray(disorded_struct._num_bond_disorder_per_type),
+                                            data=2 * np.asarray(disorder_struct._num_bond_disorder_per_type),
                                             dtype=np.int32)
                 # Number of onsite disorder
                 grp_dis_type.create_dataset('NumOnsiteDisorder',
-                                            data=np.asarray(disorded_struct._num_onsite_disorder_per_type),
+                                            data=np.asarray(disorder_struct._num_onsite_disorder_per_type),
                                             dtype=np.int32)
 
                 # Node of the bond disorder from
-                grp_dis_type.create_dataset('NodeFrom', data=np.asarray(disorded_struct._nodes_from).flatten(),
+                grp_dis_type.create_dataset('NodeFrom', data=np.asarray(disorder_struct._nodes_from).flatten(),
                                             dtype=np.int32)
                 # Node of the bond disorder to
-                grp_dis_type.create_dataset('NodeTo', data=np.asarray(disorded_struct._nodes_to).flatten(),
+                grp_dis_type.create_dataset('NodeTo', data=np.asarray(disorder_struct._nodes_to).flatten(),
                                             dtype=np.int32)
                 # Node of the onsite disorder
-                grp_dis_type.create_dataset('NodeOnsite', data=np.asarray(disorded_struct._nodes_onsite),
+                grp_dis_type.create_dataset('NodeOnsite', data=np.asarray(disorder_struct._nodes_onsite),
                                             dtype=np.int32)
 
                 # Num nodes
-                grp_dis_type.create_dataset('NumNodes', data=disorded_struct._num_nodes, dtype=np.int32)
+                grp_dis_type.create_dataset('NumNodes', data=disorder_struct._num_nodes, dtype=np.int32)
                 # Orbital mapped for this node
-                grp_dis_type.create_dataset('NodePosition', data=np.asarray(disorded_struct._node_orbital),
+                grp_dis_type.create_dataset('NodePosition', data=np.asarray(disorder_struct._node_orbital),
                                             dtype=np.uint32)
 
                 # Onsite disorder energy
                 grp_dis_type.create_dataset('U0',
-                                            data=(np.asarray(disorded_struct._disorder_onsite).real.astype(
+                                            data=(np.asarray(disorder_struct._disorder_onsite).real.astype(
                                                 config.type)) / config.energy_scale)
                 # Bond disorder hopping
-                disorder_hopping = disorded_struct._disorder_hopping
+                disorder_hopping = disorder_struct._disorder_hopping
                 if complx:
                     # hoppings
                     grp_dis_type.create_dataset('Hopping',
@@ -1370,14 +1377,14 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
     if calculation.get_singleshot_conductivity_dc:
         grpc_p = grpc.create_group('singleshot_conductivity_dc')
 
-        moments, random, dis, energies, gamma, direction = [], [], [], [], [], []
+        moments, random, dis, energies, eta, direction = [], [], [], [], [], []
 
         for single_singlshot_cond in calculation.get_singleshot_conductivity_dc:
             moments.append(single_singlshot_cond['num_moments'])
             random.append(single_singlshot_cond['num_random'])
             dis.append(single_singlshot_cond['num_disorder'])
             energies.append(single_singlshot_cond['energy'])
-            gamma.append(single_singlshot_cond['gamma'])
+            eta.append(single_singlshot_cond['eta'])
             direction.append(single_singlshot_cond['direction'])
 
         if len(calculation.get_singleshot_conductivity_dc) > 1:
@@ -1388,7 +1395,7 @@ def export_lattice(lattice, config, calculation, modification, filename, **kwarg
         grpc_p.create_dataset('NumDisorder', data=np.asarray(dis), dtype=np.int32)
         grpc_p.create_dataset('Energy', data=(np.asarray(energies) - config.energy_shift) / config.energy_scale,
                               dtype=np.float64)
-        grpc_p.create_dataset('Gamma', data=np.asarray(gamma) / config.energy_scale, dtype=np.float64)
+        grpc_p.create_dataset('Gamma', data=np.asarray(eta) / config.energy_scale, dtype=np.float64)
         grpc_p.create_dataset('Direction', data=np.asarray(direction), dtype=np.int32)
 
     f.close()
