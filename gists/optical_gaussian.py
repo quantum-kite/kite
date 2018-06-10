@@ -1,25 +1,27 @@
-""" Onsite disorder
+""" Optical conductivity of disordered graphene lattice
 
     Lattice : Monolayer graphene;
-    Disorder : Disorder class Deterministic and Uniform at different sublattices,
+    Disorder : Disorder class Gaussian at different sublattices;
     Configuration : size of the system 512x512, without domain decomposition (nx=ny=1), periodic boundary conditions,
                     double precision, manual scaling;
     Calculation : dos;
     Modification : magnetic field is off;
+
 """
 
 import kite
+
 from pybinding.repository import graphene
 
 
-# load graphene lattice and structural_disorder
+# load a monolayer graphene lattice
 lattice = graphene.monolayer()
 # add Disorder
 disorder = kite.Disorder(lattice)
-disorder.add_disorder('B', 'Deterministic', -1.0)
-disorder.add_disorder('A', 'Uniform', +1.5, 1.0)
-# number of decomposition parts in each direction of matrix.
-# This divides the lattice into various sections, each of which is calculated in parallel
+disorder.add_disorder('B', 'Gaussian', 0.0, 0.6)
+disorder.add_disorder('A', 'Gaussian', 0.0, 0.6)
+# number of decomposition parts in each direction of matrix. This divides the lattice into various sections,
+# each of which is calculated in parallel
 nx = ny = 1
 # number of unit cells in each direction.
 lx = ly = 512
@@ -32,11 +34,9 @@ lx = ly = 512
 # - scaling, if None it's automatic, if present select spectrum_bound=[e_min, e_max]
 configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
                                    is_complex=False, precision=1)
-# require the calculation of DOS
+# require the calculation of DOS and conductivity_optical
 calculation = kite.Calculation(configuration)
-calculation.dos(num_points=5000, num_moments=512, num_random=1, num_disorder=1)
-# make modification object which caries info about
-# - magnetic field can be set to True. Default case is False
-modification = kite.Modification(magnetic_field=False)
+calculation.dos(num_points=4000, num_moments=512, num_random=10, num_disorder=1)
+calculation.conductivity_optical(num_points=1000, num_disorder=1, num_random=10, num_moments=512, direction='xx')
 # configure the *.h5 file
-kite.config_system(lattice, configuration, calculation, modification, filename='on_site_disorder.h5', disorder=disorder)
+kite.config_system(lattice, configuration, calculation, filename='opt_gaussian.h5', disorder=disorder)

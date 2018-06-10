@@ -977,6 +977,20 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
 
     """
 
+    print('##############################################################################')
+    print('#                        KITE | Pre-Release Beta 0.1                         #')
+    print('#                                                                            #')
+    print('#                        Kite home: quantum-kite.com                         #')
+    print('#                                                                            #')
+    print('#                                                                            #')
+    print('#                                                                            #')
+    print('#  Developed by: Simao M. Joao, Joao V. Lopes, Tatiana G. Rappoport,         #')
+    print('#                                                                            #')
+    print('#  Misa Andelkovic, Lucian Covaci, Aires Ferreira, 2018                      #')
+    print('#                                                                            #')
+    print('#                                                                            #')
+    print('##############################################################################')
+
     # hamiltonian is complex 1 or real 0
     complx = int(config.comp)
 
@@ -1007,16 +1021,22 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
 
     disorder = kwargs.get('disorder', None)
     disorder_structural = kwargs.get('disorder_structural', None)
-
+    print('\n##############################################################################\n')
+    print('SCALING:\n')
     # if bounds are not specified, find a rough estimate
     if not config.energy_scale:
-        print('Automatic scaling is being done. If unexpected results are produced, consider selecting the bounds '
-              'manually. \nEstimate of the spectrum bounds with a safety factor is: ')
+        print('\nAutomatic scaling is being done. If unexpected results are produced, consider '
+              '\nselecting the bounds manually. '
+              '\nEstimate of the spectrum bounds with a safety factor is: ')
         e_min, e_max = estimate_bounds(lattice, disorder, disorder_structural)
-        print('({:.2f}, {:.2f} eV)'.format(e_min, e_max))
+        print('({:.2f}, {:.2f} eV)\n'.format(e_min, e_max))
         # add a safety factor for a scaling factor
         config._energy_scale = (e_max - e_min) / (2 * 0.9)
         config._energy_shift = (e_max + e_min) / 2
+    else:
+        print('\nManual scaling is chosen. \n')
+    print('\n##############################################################################\n')
+    print('BOUNDARY CONDITIONS:\n')
 
     vectors = np.asarray(lattice.vectors)
     space_size = vectors.shape[0]
@@ -1131,15 +1151,20 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
     f.create_dataset('L', data=config.leng, dtype='u4')
     # periodic boundary conditions, 0 - no, 1 - yes.
     bound = config.bound
-    print('\nPeriodic boundary conditions are set along x and y direction respec. to', bool(bound[0]), 'and ',
-          bool(bound[1]), '\nAt the moment, no other boundary conditions are possible.')
+    print('\nPeriodic boundary conditions along the direction of lattice vectors \n'
+          'respectively are set to: ', bool(bound[0]), 'and ', bool(bound[1]), '\n')
     f.create_dataset('Boundaries', data=bound, dtype='u4')
+    print('\n##############################################################################\n')
+    print('DECOMPOSITION:\n')
+
     # number of divisions of the in each direction of hamiltonian. nx x ny = num_threads
-    print('\nChosen number of decomposition parts is:', config.div[0], 'x', config.div[1],
+    print('\nChosen number of decomposition parts is:', config.div[0], 'x', config.div[1], '.'
           '\nINFO: this product will correspond to the total number of threads. '
           '\nYou should choose at most the number of processor cores you have.'
-          '\nWARNING: System size need\'s to be an integer multiple of [STRIDE * ', config.div[0], ' and STRIDE * ',
-          config.div[1], '] \nwhere STRIDE is selected when compiling the C++ code. \n')
+          '\nWARNING: System size need\'s to be an integer multiple of \n'
+          '[STRIDE * ', config.div[0], ' and STRIDE * ', config.div[1], '] '
+          '\nwhere STRIDE is selected when compiling the C++ code. \n')
+
     f.create_dataset('Divisions', data=config.div, dtype='u4')
     # space dimension of the lattice 1D, 2D, 3D
     f.create_dataset('DIM', data=space_size, dtype='u4')
@@ -1169,6 +1194,9 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
 
     # magnetic field
     if modification.magnetic_field or modification.flux:
+        print('\n##############################################################################\n')
+        print('MAGNETIC FIELD:\n')
+
         # find the minimum commensurate magnetic field
         if not space_size == 2:
             raise SystemExit('Magnetic field is currently supported only in 2D!')
@@ -1195,6 +1223,7 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
                   format(multiply_bmin * magnetic_field_min, multiply_bmin/config.leng[0]))
             print('Selected field is {:.2f} T'.format(multiply_bmin*magnetic_field_min))
         grp.create_dataset('MagneticField', data=int(multiply_bmin), dtype='u4')
+        print('\n##############################################################################\n')
 
     grp_dis = grp.create_group('Disorder')
 
@@ -1398,4 +1427,8 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
         grpc_p.create_dataset('Gamma', data=np.asarray(eta) / config.energy_scale, dtype=np.float64)
         grpc_p.create_dataset('Direction', data=np.asarray(direction), dtype=np.int32)
 
+    print('\n##############################################################################\n')
+    print('OUTPUT:\n')
+    print('\nExporting of KITE configuration to {} finished.\n'.format(filename))
+    print('\n##############################################################################\n')
     f.close()

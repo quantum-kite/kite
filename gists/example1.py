@@ -1,23 +1,49 @@
-""" Onsite disorder
+""" Graphene DOS
 
-    Lattice : Monolayer graphene;
-    Disorder : Disorder class Deterministic and Uniform at different sublattices,
+    Lattice : Graphene lattice;
+    Disorder : None;
     Configuration : size of the system 512x512, without domain decomposition (nx=ny=1), periodic boundary conditions,
-                    double precision, manual scaling;
-    Calculation : dos;
+                    double precision, automatic scaling;
+    Calculation : DOS;
     Modification : magnetic field is off;
 """
-
+import numpy as np
+import pybinding as pb
 import kite
-from pybinding.repository import graphene
 
 
-# load graphene lattice and structural_disorder
-lattice = graphene.monolayer()
-# add Disorder
-disorder = kite.Disorder(lattice)
-disorder.add_disorder('B', 'Deterministic', -1.0)
-disorder.add_disorder('A', 'Uniform', +1.5, 1.0)
+def graphene(onsite=(0, 0)):
+    """Make a honeycomb lattice with nearest neighbor hopping
+
+    Parameters
+    ----------
+    onsite : tuple or list
+        Onsite energy at different sublattices.
+    """
+
+    theta = np.pi / 3
+    t = 2.8  # eV
+    a1 = np.array([1 + np.cos(theta), np.sin(theta)])
+    a2 = np.array([0, 2 * np.sin(theta)])
+    lat = pb.Lattice(
+        a1=a1, a2=a2
+    )
+    lat.add_sublattices(
+        # name, position, and onsite potential
+        ('A', [0, 0], onsite[0]),
+        ('B', [1, 0], onsite[1])
+    )
+    lat.add_hoppings(
+        ([0, 0], 'A', 'B', - t),
+        ([-1, 0], 'A', 'B', - t),
+        ([-1, 1], 'A', 'B', - t)
+    )
+
+    return lat
+
+
+# make a graphene lattice
+lattice = graphene_initial()
 # number of decomposition parts in each direction of matrix.
 # This divides the lattice into various sections, each of which is calculated in parallel
 nx = ny = 1
@@ -34,9 +60,6 @@ configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundari
                                    is_complex=False, precision=1)
 # require the calculation of DOS
 calculation = kite.Calculation(configuration)
-calculation.dos(num_points=5000, num_moments=512, num_random=1, num_disorder=1)
-# make modification object which caries info about
-# - magnetic field can be set to True. Default case is False
-modification = kite.Modification(magnetic_field=False)
+calculation.dos(num_points=1000, num_moments=512, num_random=1, num_disorder=1)
 # configure the *.h5 file
-kite.config_system(lattice, configuration, calculation, modification, filename='on_site_disorder.h5', disorder=disorder)
+kite.config_system(lattice, configuration, calculation, filename='example1.h5')

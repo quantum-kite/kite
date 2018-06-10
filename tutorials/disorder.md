@@ -17,9 +17,8 @@ Usually, disorder can be modeled either as a modification of onsite potentials a
 
 Beside the type of statistical distribution, we can select a sublattice type in which the disorder will appear, the mean value and the standard deviation of the selected distribution. To include onsite disorder following a given statistical distribution, we build the ```lattice``` and  use the following procedure:
 ```python
-from kite import Disorder # importing the Disorder class
 
-disorder = Disorder(lattice) # define an object based on the lattice
+disorder = kite.Disorder(lattice) # define an object based on the lattice
 disorder.add_disorder('A', 'Gaussian', 0.1, 0.1) # add Gaussian distributed disorder at all sites of a selected sublattice
 ```
 In a single object it is possible to select multiple sublattices, each of one with different disorder distributions following the rule `disorder.add_disorder('sublattice', 'type', mean, std)` :
@@ -34,7 +33,7 @@ In the case of deterministic disorder, the standard deviation is not set.
 After defining the desired disorder, it can be added to the configuration file as an additional parameter in the ```config_system``` function:
 
 ```python
-config_system(..., disorder=disorder)
+kite.config_system(..., disorder=disorder)
 ```
 A complete example that calculates the density of states of graphene with different on-site disorder distributions for each sublattice can be seen here:
 
@@ -49,10 +48,10 @@ with the resulting density of states:
 
 ## Vacancy disorder
 The vacant site distribution can be selected from a single sublattice with a concentration defined in a parent object:
-```python
-from kite import StructuralDisorder # importing the StructuralDisorder class
 
-struc_disorder = StructuralDisorder(lattice, concentration=0.2) # define an object based on the lattice with a certain concentration
+```python
+
+struc_disorder = kite.StructuralDisorder(lattice, concentration=0.2) # define an object based on the lattice with a certain concentration
 struc_disorder.add_vacancy('B') # add a vacancy to a selected sublattice with previously chosen concentration
 
 ```
@@ -62,7 +61,7 @@ struc_disorder.add_vacancy('B') # add a vacancy to a selected sublattice with pr
 Before discussing this class of disorder, it is important to mention that in the pre-release version, it is no possible to perform the automatic scale of the spectra for hopping disorder. In this case, it is necessary to add an extra parameter to the configuration class:
 
 ```python
-configuration = Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],is_complex=False, precision=1,spectrum_range=[-10, 10])
+configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],is_complex=False, precision=1,spectrum_range=[-10, 10])
 ```
 
 
@@ -79,10 +78,10 @@ node5 = [[-1, +1], 'B']
 ```
 
 After the definition of a parent ```StructuralDisorder``` object, we can select the desired pattern:
-```python
-from kite import StructuralDisorder # importing the StructuralDisorder class
 
-struc_disorder = StructuralDisorder(lattice, concentration=0.2) # define an object based on the lattice with a certain concentration
+```python
+
+struc_disorder = kite.StructuralDisorder(lattice, concentration=0.2) # define an object based on the lattice with a certain concentration
 
 struc_disorder.add_structural_disorder(
     # add bond disorder in the form [from unit cell], 'sublattice_from', [to_unit_cell], 'sublattice_to', value:
@@ -97,7 +96,7 @@ struc_disorder.add_structural_disorder(
 )
 # It is possible to add multiple different disorder types which should be forwarded to the config_system function
 # as a list.
-another_struc_disorder = StructuralDisorder(lat, concentration=0.6)
+another_struc_disorder = kite.StructuralDisorder(lat, concentration=0.6)
 another_struc_disorder.add_structural_disorder(
     (*node0, *node1, 0.05),
     (*node4, *node5, 0.4),
@@ -106,6 +105,7 @@ another_struc_disorder.add_structural_disorder(
 )
 ```
 Before exporting the settings to the hdf file, it is possible to define multiple disorder realizations which will be superimposed to the clean system.
+
 The following script has a a minimal example of how to configure the structural disorder 
 
 https://gist.github.com/quantum-kite/b2457db46dbff9ad02a56443255ace46

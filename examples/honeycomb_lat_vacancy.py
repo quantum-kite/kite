@@ -15,7 +15,13 @@ import pybinding as pb
 
 
 def honeycomb_lattice(onsite=(0, 0)):
-    """Make a honeycomb lattice with nearest neighbor hopping"""
+    """Make a honeycomb lattice with nearest neighbor hopping
+    
+    Parameters
+    ----------
+    onsite : tuple or list
+        Onsite energy at different sublattices.
+    """""
 
     # define lattice vectors
     theta = np.pi / 3
