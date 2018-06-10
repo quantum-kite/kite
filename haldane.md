@@ -60,12 +60,12 @@ calculation.conductivity_dc(num_points=1000, num_moments=256, num_random=50,
 This is a full spectral calculation where *KITEx* calculates the coefficients of the Chebyshev expansion and *KITEtools* uses that moments to calculate the transverse conductivity. Both `temperature` and `num_points` are parameters used by KITEtools and it is possible to modify them without running *KITEx* again. This type of calculation typically requires more RAM memory than DOS or single-shot DC conductivity, which imposes limitations to the sizes of the systems (that still can reach large scales with available memory). The relative errors of the stochastic trace evaluation (STE) scales with the inverse of the system size, which means that full spectrum conductivities typically require more random vectors to decrease the relative error of the STE. The relative error of the STE also depends on the Hamiltonian and the calculated quantities. Transverse conductivities have more fluctuations, at least in part of the spectrum outside the topological gap, and this tutorial illustrates this issue.
 
 Fig. 1 shows the density of states, the longitudinal and transverse conductivity for a small lattice of Haldane model in a calculation that took 3 minutes on a laptop. *KITEx* captures the anomalous quantum Hall plateau extremely well, with a relative error of less than 0.1%. But it is also clear that the transverse conductivity presents significantly more fluctuations outside the plateau than the longitudinal conductivity, and we already considered 50 random vectors.
-![image1](https://user-images.githubusercontent.com/39924384/41190863-0c297a9e-6bde-11e8-89e1-4428e17227b2.png)
+![image1](https://user-images.githubusercontent.com/39924384/41204808-bd373966-6cbf-11e8-87b6-93e911dd2604.png)
 
 We now focus on strategies to decrease the fluctuations. Depending on the computational resources, one possibility is increasing the system size. It is also possible to increase the number of random vectors.
 This is illustrated in Fig. 2.
 
-![image](https://user-images.githubusercontent.com/39924384/41190868-3e4f54e4-6bde-11e8-83e9-b79192dce25c.png)
+![image](https://user-images.githubusercontent.com/39924384/41204811-c811f8bc-6cbf-11e8-84e2-1da292bda502.png)
 
 Finally, there are other physical ways of damping them: temperature and disorder. The use of these last two resources depend on the goals of the numerical calculation. In the present case, where we wanted to see the quantum anomalous Hall plateau, we can simply consider Anderson disorder and work with intermediate temperatures. To get a handle of how *KITE* works, we suggest the user to get the [full script for this calculation](https://gist.github.com/quantum-kite/4bfad15826a0680fbfae0afa9d2dfb6e) and play with variations of system size, number of random vectors, disorder and temperature.
 
