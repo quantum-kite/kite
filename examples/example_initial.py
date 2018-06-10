@@ -43,7 +43,7 @@ def graphene(onsite=(0, 0)):
 
 
 # make a graphene lattice
-lattice = graphene_initial()
+lattice = graphene()
 # number of decomposition parts in each direction of matrix.
 # This divides the lattice into various sections, each of which is calculated in parallel
 nx = ny = 1
