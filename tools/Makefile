@@ -1,4 +1,9 @@
+OS := $(shell uname)
+ifeq ($(OS),Darwin)
+CC = g++-6 -DEIGEN_DONT_PARALLELIZE -fdiagnostics-color=always  -O2  #-ftree-vectorize  -ftree-vectorizer-verbose=7 -fopt-info-vec-missed
+else
 CC = g++
+endif
 CFLAGS =   -fopenmp -std=gnu++11 -march=native  -O3 -ffast-math -Wall -DEIGEN_DONT_PARALLELIZE 
 CINCLUDE = -I/opt/local/include -I/usr/local/include -ISrc 
 CINCLUDE+= -I/usr/local/hdf5/include -I/usr/include/hdf5/serial 
