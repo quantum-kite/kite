@@ -180,11 +180,11 @@ void conductivity_optical<U, DIM>::calculate(){
   frequencies = Eigen::Matrix<U, -1, 1>::LinSpaced(N_omegas, minFreq, maxFreq);
 
   // Print out some useful information
-  verbose_message("  All units are in the energy scale [-1,1]\n");
+  verbose_message("  Energy in rescaled units: [-1,1]\n");
   verbose_message("  Beta (1/kT): "); verbose_message(beta); verbose_message("\n");
   verbose_message("  Fermi energy: "); verbose_message(e_fermi); verbose_message("\n");
   verbose_message("  Using kernel for delta function: Jackson\n");
-  verbose_message("  Using broadening parameter for Green's function: ");
+  verbose_message("  Broadening parameter for Green's function: ");
     verbose_message(scat); verbose_message("\n");
   verbose_message("  Number of energies: "); verbose_message(NumPoints); verbose_message("\n");
   verbose_message("  Energy range: ["); verbose_message(-lim); verbose_message(",");

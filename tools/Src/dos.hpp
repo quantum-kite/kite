@@ -115,16 +115,16 @@ void dos<T, DIM>::read(){
 template <typename U, unsigned DIM>
 void dos<U, DIM>::calculate(){
   if(!isPossible){
-    std::cout << "Cannot calculate the density of states because there is not enough information. Exiting.\n";
+    std::cout << "Cannot retrieve DOS since there is not enough information. Exiting.\n";
     exit(0);
   }
 
   double Emax = 0.99;
   double Emin = -Emax;
   verbose_message("  Number of points: "); verbose_message(NumPoints); verbose_message("\n");
-  verbose_message("  Range of energies: ["); verbose_message(Emin); verbose_message(",");
+  verbose_message("  Energy range: ["); verbose_message(Emin); verbose_message(",");
       verbose_message(Emax); verbose_message("]\n");
-  verbose_message("  Using kernel: Lorentz\n");
+  verbose_message("  Using kernel: Jackson\n");
   verbose_message("  File name: dos.dat\n");
 
 

@@ -148,11 +148,11 @@ void conductivity_dc<U, DIM>::calculate(){
     //maxEnergy = 0.99;
 
 
-  verbose_message("  All units are in the range [-1,1]\n");
+  verbose_message("  Energy in rescaled units: [-1,1]\n");
   verbose_message("  Beta (1/kT): "); verbose_message(beta); verbose_message("\n");
   //verbose_message("  Fermi energi (in KPM units): "); verbose_message(e_fermi); verbose_message("\n");
   //verbose_message("  Using kernel for delta function: Jackson\n");
-  verbose_message("  Using broadening parameter for Green's function: ");
+  verbose_message("  Broadening parameter for Green's function: ");
     verbose_message(scat); verbose_message("\n");
   verbose_message("  Number of energies: "); verbose_message(NEnergies); verbose_message("\n");
   verbose_message("  Energy range: ["); verbose_message(minEnergy); verbose_message(",");

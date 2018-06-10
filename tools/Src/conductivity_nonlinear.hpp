@@ -246,9 +246,7 @@ void conductivity_nonlinear<U, DIM>::calculate(){
 
   
   U e_fermi = 0.0;
-  //U scat = 0.003388299;
   U scat = 0.003388299;
-  std::cout << "scattering: " << scat << "####\n";
 	
 	// Calculate the number of frequencies and energies needed to perform the calculation.
 	int N_energies = NumPoints;
@@ -264,13 +262,12 @@ void conductivity_nonlinear<U, DIM>::calculate(){
   frequencies = Eigen::Matrix<U, -1, 1>::LinSpaced(N_omegas, minFreq, maxFreq);
   frequencies2 = Eigen::Matrix<U, -1, 1>::Zero(1,1);
 
-  verbose_message("  All the units are in the range [-1,1]\n");
+  verbose_message("  Energy in rescaled units: [-1,1]\n");
   verbose_message("  Beta (1/kT): "); verbose_message(beta); verbose_message("\n");
   verbose_message("  Fermi energy: "); verbose_message(e_fermi); verbose_message("\n");
   verbose_message("  Using kernel for delta function: Jackson\n");
-  verbose_message("  Using broadening parameter for Green's function: ");
+  verbose_message("  Broadening parameter for Green's function: ");
     verbose_message(scat); verbose_message("\n");
-  verbose_message("  special: "); verbose_message(special); verbose_message("\n");
   verbose_message("  Number of energies: "); verbose_message(NumPoints); verbose_message("\n");
   verbose_message("  Energy range: ["); verbose_message(-lim); verbose_message(",");
     verbose_message(lim); verbose_message("]\n");
@@ -304,13 +301,13 @@ void conductivity_nonlinear<U, DIM>::calculate(){
 
   temp1 = contract2<U>(deltaF, 0, greenAscat<U>(scat), NumMoments, Gamma2, energies, -frequencies);
   temp2 = contract2<U>(deltaF, 1, greenRscat<U>(scat), NumMoments, Gamma2, energies, frequencies);
-  temp3 = contract2<U>(deltaF, 0, greenAscat<U>(scat), NumMoments, Gamma1, energies, -frequencies2);
-  temp4 = contract2<U>(deltaF, 1, greenRscat<U>(scat), NumMoments, Gamma1, energies, frequencies2);
+  temp3 = contract2<U>(deltaF, 0, greenAscat<U>(2*scat), NumMoments, Gamma1, energies, -frequencies2);
+  temp4 = contract2<U>(deltaF, 1, greenRscat<U>(2*scat), NumMoments, Gamma1, energies, frequencies2);
 
-  std::complex<U> freq;
+  U freq;
   for(int i = 0; i < N_omegas; i++){
-    freq = std::complex<U>(frequencies(i), scat);  
-    cond(i) += (/*temp1(i) + temp2(i) + */U(0.5)*(temp3(0,0) + temp4(0,0)))/freq/freq;
+    freq = frequencies(i);  
+    cond(i) += (temp1(i) + temp2(i) + U(0.5)*(temp3(0,0) + temp4(0,0)))/(freq*freq + scat*scat);
   }
   cond *= imaginary*U(systemInfo.num_orbitals*systemInfo.spin_degeneracy/systemInfo.unit_cell_area/systemInfo.energy_scale);
 
@@ -319,7 +316,6 @@ void conductivity_nonlinear<U, DIM>::calculate(){
   std::ofstream myfile;
   myfile.open ("nonlinear_cond.dat");
   for(int i=0; i < N_omegas; i++){
-    freq = std::complex<U>(frequencies(i), scat);  
     myfile   << frequencies.real()(i)*systemInfo.energy_scale << " " << cond.real()(i) << " " << cond.imag()(i) << "\n";
   }
   myfile.close();

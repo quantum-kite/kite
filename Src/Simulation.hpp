@@ -61,11 +61,9 @@ public:
 #pragma omp master
       {
         if(ESTIMATE_TIME == 1){
-          std::cout << "------ TIME ESTIMATE -------\n";
-          std::cout << "Estimating how long a KPM iteration will take. This is a rather rough ";
-          std::cout << "estimate because it only takes into account the KPM iteration time. ";
-          std::cout << "To disable this feature and this message set the flag ESTIMATE_TIME";
-          std::cout << " in the Makefile to 0.\nAveraging over 100 iterations...\n";
+          std::cout << "------------------- TIME ESTIMATE --------------------\n";
+          std::cout << "Estimate Chebyshev recursion time.\n";
+          std::cout << "To disable this feature set the flag ESTIMATE_TIME=0.\n";
         }
       }
 #pragma omp barrier
@@ -76,10 +74,6 @@ public:
 #pragma omp master 
       {
         if(ESTIMATE_TIME == 1){
-
-          std::cout << "On average, a KPM iteration takes ";
-          std::cout << Global.kpm_iteration_time;
-          std::cout << " seconds. \nEstimating how long the whole simulation will take...\n";
 
           double queue_time = 0;
           double ss_queue_time = 0;
@@ -95,14 +89,14 @@ public:
             queue_time += queue.at(i).time_length;
           }
 
-          std::cout << "The entire calculation will take around ";
+          std::cout << "Estimated run time: ";
           std::cout << print_time(queue_time + ss_queue_time);
-          std::cout << "\n----------------------------\n\n";
+          std::cout << "\n------------------------------------------------------\n\n";
         }
       }
 #pragma omp barrier
 
-      verbose_message("------- CALCULATIONS -------\n");
+      verbose_message("-------------------------- CALCULATIONS --------------------------\n");
       // execute the singleshot queue
       for(unsigned int i = 0; i < ss_queue.size(); i++){
         verbose_message("Calculating SingleShot. This will take around ");
@@ -120,7 +114,7 @@ public:
         verbose_message("\n");
         simul.Measure_Gamma(queue.at(i));			
       }
-      verbose_message("----------------------------\n\n");
+      verbose_message("----------------------------------------------------------------\n\n");
     }
     debug_message("Left global_simulation\n");
   };
