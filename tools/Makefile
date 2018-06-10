@@ -4,11 +4,11 @@ CC = g++-6 -DEIGEN_DONT_PARALLELIZE -fdiagnostics-color=always  -O2  #-ftree-vec
 else
 CC = g++
 endif
-CFLAGS =   -fopenmp -std=gnu++11 -march=native  -O3 -ffast-math -Wall -DEIGEN_DONT_PARALLELIZE 
-CINCLUDE = -I/opt/local/include -I/usr/local/include -ISrc 
-CINCLUDE+= -I/usr/local/hdf5/include -I/usr/include/hdf5/serial 
-CINCLUDE+= -I$(HOME)/include/eigen3 -I/opt/local/include/eigen3 
-CLIBS = -L/usr/local/hdf5/lib/ -L/usr/lib/x86_64-linux-gnu/hdf5/serial -lhdf5_hl_cpp -lhdf5_cpp -lhdf5_hl -lhdf5  
+CINCLUDE = -I/opt/local/lib/ 
+CINCLUDE += -ISrc -I/usr/local/hdf5/include -I/usr/local/Cellar/hdf5/1.10.1_2/include/ -I/usr/include/hdf5/serial #HDF5
+CINCLUDE += -I$(HOME)/include/eigen3 -I/opt/local/include/eigen3 -I/usr/include/eigen3/ -I/usr/local/include/eigen3 #EIGEN3 
+CLIBS = -L/usr/local/hdf5/lib/ -L/usr/lib/x86_64-linux-gnu/hdf5/serial -L/usr/local/Cellar/hdf5/1.10.1_2/lib/ 
+CLIBS += -lhdf5_hl_cpp -lhdf5_cpp -lhdf5_hl -lhdf5  
 VPATH = .
 OBJS = *.o
 DEBUG=0
