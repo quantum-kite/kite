@@ -1,25 +1,26 @@
 
 <img src=https://user-images.githubusercontent.com/39924384/41094707-9e4ead6e-6a25-11e8-9e16-070a3236c8da.png width="100">
+
 # Postprocessing
 
-*KITE* calculates and stores the Chebyshev moments of a given expansion in the hdf file. In general, it is  possible to calculate a quantity at different conditions with the same moments of an expansion, without the need to perform time consuming iterations. *KITE* post-processing tool, based on the hdf file, automatically identifies which quantities should be calculated. By default, when defining the settings with the python script, the user already pre-defines parameters for the postprocessing tools. This is the case, for example, in the number of energy points and temperature in the calculation of the DC conductivity, or the frequencies in the optical conductivity calculation.
+*KITE* calculates and stores the Chebyshev moments of a given expansion in the hdf file. In general, it is  possible to calculate a quantity at different conditions with the same moments of an expansion, without the need to perform time consuming iterations. *KITE* post-processing tool (*KITE-tools*), based on the hdf file, automatically identifies which quantities should be calculated. By default, when defining the settings with the python script, the user already pre-defines parameters for the postprocessing tools. This is the case, for example, in the number of energy points and temperature in the calculation of the DC conductivity, or the frequencies in the optical conductivity calculation.
 
-Before trying to use it, one needs to compile *KITEpos*
+Before trying to use it, one needs to compile *KITE-tools*
 
 ```bash
-cd /tools/postprocessing
+cd /tools/
 make
 ```
 
 It's usage is very simple:
 
 ```bash
-./tools/postprocessing/KITEpos archive.h5
+./tools//KITE-tools archive.h5
 ```
 
-where archive.h5 is the hdf files that stores the output of the calculation. If *KITEpos* does not find this output, it will return an error.
+where archive.h5 is the hdf files that stores the output of the calculation. If *KITE-tools* does not find this output, it will return an error.
 
-In the table below, we specify the name of the files that are created by *KITEpos* according to the calculated quantity and the format of the data file.
+In the table below, we specify the name of the files that are created by *KITE-tools* according to the calculated quantity and the format of the data file.
 
 |                           Quantity                           |        File        | Column 1     |    Column 2    |    Column 3    |
 | :----------------------------------------------------------: | :----------------: | ------------ | :------------: | :------------: |
