@@ -4,7 +4,7 @@
 
 ## Code workflow
 
-The code is divided in three different layers. The starting point, which is the interface between the user and the C++ code, is based on a Python script. At this level,  the definition of a TB model is based on [Pybinding](http://docs.pybinding.site/en/stable/), a python package to study TB Hamiltonians. In the next sections we will introduce basic functionalities of the Pybinding package, which will be used to build the model and the basic funcionalities of *KITE*. For more  advanced examples you can check https://quantum-kite.com/category/examples/.
+The code is divided in three different layers. The starting point, which is the interface between the user and the C++ code, is based on a Python script. At this level,  the definition of a TB model is based on [*Pybinding*](http://docs.pybinding.site/en/stable/), a python package to study TB Hamiltonians. In the next sections we will introduce basic functionalities of the *Pybinding* package, which will be used to build the model and the basic funcionalities of *KITE*. For more  advanced examples you can check https://quantum-kite.com/category/examples/.
 
 *KITE* is shipped as a source code that can be compiled following the instruction provided in the section [Installation](https://quantum-kite.com/installation/). It is divided, based on the functionalities into transport and post-processing code. The interconnection between different parts of the package is done using the Hierarchical Data Format (HDF5 package). The model is built and exported together with the calculation settings using a python script to a ```*.h5``` file, which is used later as a TB input to *KITE*. All the output data of the simulation is saved in the same ```*.h5``` file that is finally posprocessed by posprocessing tools that produce  different ```*.dat``` files for the calculated quantities.
 
@@ -15,13 +15,13 @@ In short, the code workflow is the following:
 * Run post-processing tools.
 * Visualise the data.
 
-## Building and exporting a TB model from Pybinding
+## Building and exporting a TB model from *Pybinding*
 
 Before going to the examples, let's see how to load *Pybinding*.
 
 ### Importing the package
 
-If all the installation requirements are fulfilled, Pybinding package can be imported in the python script. In all the scripts of this tutorial, the required packages will be included with the following aliases:
+If all the installation requirements are fulfilled, *Pybinding* package can be imported in the python script. In all the scripts of this tutorial, the required packages will be included with the following aliases:
 
 ```python
 import pybinding as pb
@@ -29,7 +29,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 ```
 
-If you want to use Pybinding predefined styles for visualization of the lattice, you can simply
+If you want to use *Pybinding* predefined styles for visualization of the lattice, you can simply
 write:
 
  ```python
@@ -40,7 +40,7 @@ inside the script.
 
 ### Building the model
 
-The most important object for building a TB model is pb.Lattice, which carries the full information about the unit cell (position of lattice sites, sublattices, orbitals, lattice vectors and hopping parameters). These are the input parameters to the Lattice. Pybinding also provides additional features based on the real-space information, as for example, the reciprocal vectors and the Brillouin zone.
+The most important object for building a TB model is pb.Lattice, which carries the full information about the unit cell (position of lattice sites, sublattices, orbitals, lattice vectors and hopping parameters). These are the input parameters to the Lattice. *Pybinding* also provides additional features based on the real-space information, as for example, the reciprocal vectors and the Brillouin zone.
 
 To illustrate how the python script works, let us  make a simple square lattice with a single lattice site.
 
@@ -102,7 +102,7 @@ plt.show()
 
 We can try to build  a slightly advanced example, like a [graphene lattice](https://gist.github.com/quantum-kite/4b7593e9aa082b1d242c5e6b2361c3f3).
 
-For more advanced examples and pre-defined lattices, please refer to Pybinding documentation.
+For more advanced examples and pre-defined lattices, please refer to *Pybinding* documentation.
 
 ## Incorporating disorder
 
@@ -210,11 +210,11 @@ calculation.conductivity_optical_nonlinear(num_points=1000, num_moments=256, num
 The last object of a class ```Modification``` defines special modifiers. At the moment, ```magnetic_field``` and ```flux``` are available as optional parameters. Both are adding the magnetic field to the model, either with a selection of magnetic field value or as a percentage of flux quantum. If ```magnetic_field``` is defined, the closest value that obeys a commensurability condition between the magnetic unit cell and the material unit cell is selected. On the other hand, ```flux``` serves for specifying the magnetic field in terms of multiples of flux quantum. For example, ```flux=0.1``` adds the magnetic field whose flux through the unit cell is 10 times smaller than the magnetic flux quantum. In both cases the commensurate field value is returned as a message in the user terminal.
 It can be defined as:
 ```python
-modification = ex.Modification(magnetic_field=1)
+modification = Modification(magnetic_field=1)
 ```
 or:
 ```python
-modification = ex.Modification(flux=0.1)
+modification = Modification(flux=0.1)
 ```
 Finally, it is time to export all the settings to a hdf file that is the input for *KITE*:
 
