@@ -1,11 +1,12 @@
 # Adding disorder
 
-The purpose of this section is to provide a simple overview of the different types of disorder that can be added to KITE tight-binding calculations. The general character of our disorder implementation is one of the main features of KITE.  To achieve this generality, the implementation follows a basic structure: the user specifies the disorder pattern to be included (that can be constricted to one unit cell or can connect neighboring unit cells)  and the disorder pattern is reproduced randomly inside the sample, according to a defined concentration and statistical distribution..
+The purpose of this section is to provide a simple overview of  different types of disorder that can be added to the *KITE* tight-binding calculations. The general character of our disorder implementation is one of the main features of *KITE*.  To achieve this generality, the implementation follows a basic structure: the user specifies the disorder pattern to be included (that can be constricted to one unit cell or can connect neighboring unit cells)  and the disorder pattern is reproduced randomly inside the sample, according to a defined concentration and statistical distribution..
 
 After defining a lattice with the procedure explained in [Getting Started](https://quantum-kite.com/category/getting-started/)), we can add disorder to our system.
-Usually, disorder can be modeled either as a modification of onsite potentials appearing on the lattice sites or as a combination of onsite potential and bond disorder. Hence, KITE allows the user to select between the two types of disorder by choosing between predefined classes in the python interface. The interface provides two different classes of disorder:
- * Disorder - onsite disorder with three possible statistical distributions
- * StructuralDisorder - generic structural disorder, the combination of onsite potential and bond disorder.
+Usually, disorder can be modelled either as a modification of onsite potentials appearing on the lattice sites or as a combination of onsite potential and bond disorder. Hence, *KITE* allows the user to select between the two types of disorder by choosing between predefined classes defined in the python interface script:
+
+ * ```Disorder``` - onsite disorder with three possible statistical distributions,
+ * ```StructuralDisorder``` - generic structural disorder, the combination of onsite potential and bond disorder.
 
 # Onsite disorder
 
@@ -22,16 +23,16 @@ from kite import Disorder # importing the Disorder class
 disorder = Disorder(lattice) # define an object based on the lattice
 disorder.add_disorder('A', 'Gaussian', 0.1, 0.1) # add Gaussian distributed disorder at all sites of a selected sublattice
 ```
-In a single object it is possible to select multiple sublattices, each of one with different disorder distributions following the rule `disorder.add_disorder('sublattice', 'type', mean, std)` :
+In a single object it is possible to select multiple sublattices, each one with different disorder distributions following the rule ```disorder.add_disorder('sublattice', 'type', mean, std)```:
 
 ```python
 disorder.add_disorder('A', 'Gaussian', 0.1, 0.1)
 disorder.add_disorder('B', 'Uniform', 0.2, 0.1)
 disorder.add_disorder('C', 'Deterministic', 0.1)
 ```
-In the case of deterministic disorder, the standard deviation is not set. 
+In the case of deterministic disorder, the standard deviation is not set.
 
-After defining the desired disorder, it can be added to the configuration file as an additional parameter in the ```config_system``` function:
+After defining the desired disorder, it can be added to the configuration file as an additional optional parameter in the ```config_system``` function:
 
 ```python
 config_system(..., disorder=disorder)
@@ -54,19 +55,17 @@ from kite import StructuralDisorder # importing the StructuralDisorder class
 
 struc_disorder = StructuralDisorder(lattice, concentration=0.2) # define an object based on the lattice with a certain concentration
 struc_disorder.add_vacancy('B') # add a vacancy to a selected sublattice with previously chosen concentration
-
 ```
 
 ## Structural disorder
 
-Before discussing this class of disorder, it is important to mention that in the pre-release version, it is no possible to perform the automatic scale of the spectra for hopping disorder. In this case, it is necessary to add an extra parameter to the configuration class:
+Before discussing this class of disorder, it is important to mention that in the pre-release version, it is not possible to perform the automatic scaling of the spectra when hopping disorder is present. In this case, it is necessary to add an extra parameter to the configuration class:
 
 ```python
-configuration = Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],is_complex=False, precision=1,spectrum_range=[-10, 10])
+configuration = Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],is_complex=False, precision=1, spectrum_range=[-10, 10])
 ```
 
-
-The following example shows a definition of our most general type of disorder, which includes both onsite disorder terms and bond modifications. This type of disorder can be added as an object of the class ```StructuralDisorder```. The procedure for adding the structural disorder is the same of adding a hopping term to the Pybinding lattice object, with a single difference that the bond disorder is not bounded to the hopping term starting from the [0, 0] unit cell, which is the case of the hopping term in pybinding.
+The following example shows a definition of our most general type of disorder, which includes both onsite disorder terms and bond modifications. This type of disorder can be added as an object of the class ```StructuralDisorder```. The procedure for adding the structural disorder is the same of adding a hopping term to the *Pybinding* lattice object, with a single difference that the bond disorder is not bounded to the hopping term starting from the ```[0, 0]``` unit cell, which is the case of the hopping term in *Pybinding*.
 
 For the sake of clarity, let us first define sublattices that will compose the disorder. In this case we are not restricted to a single unit cell:
 ```python
@@ -106,11 +105,10 @@ another_struc_disorder.add_structural_disorder(
 )
 ```
 Before exporting the settings to the hdf file, it is possible to define multiple disorder realizations which will be superimposed to the clean system.
-The following script has a a minimal example of how to configure the structural disorder 
+The following script shows a minimal example of how to configure the structural disorder:
 
 https://gist.github.com/quantum-kite/b2457db46dbff9ad02a56443255ace46
 
-with the resulting density of states 
+with the resulting density of states:
 
 ![image](https://user-images.githubusercontent.com/39924384/40953908-5582c346-6858-11e8-80ed-3e86cbf6f299.png)
-
