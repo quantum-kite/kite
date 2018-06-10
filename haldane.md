@@ -1,6 +1,7 @@
+<img src=https://user-images.githubusercontent.com/39924384/41094707-9e4ead6e-6a25-11e8-9e16-070a3236c8da.png width="100">
 # Disordered Haldane model and the transverse conductivity
 
-Haldane Hamiltonian is a single-orbital tight-binding model on a honeycomb lattice with a sublattice-staggered on-site potential (orbital mass) and complex hoppings between next-nearest-neighbor sites that produce a staggered magnetic field configuration with vanishing total flux through the unit cell [1].  This model  is a Chern insulator (or a quantum anomalous Hall insulator because it hosts integer quantum Hall effect in the absence of an external magnetic field. This characteristic makes Haldane model ideal for  illustrating another capability of *KITE*: the calculation of transverse conductivities.
+Haldane Hamiltonian is a single-orbital tight-binding model on a honeycomb lattice with a sublattice-staggered on-site potential (orbital mass) and complex hoppings between next-nearest-neighbor sites that produce a staggered magnetic field configuration with vanishing total flux through the unit cell [1].  This model  is a Chern insulator (or a quantum anomalous Hall insulator because it hosts integer quantum Hall effect in the absence of an external magnetic field). This characteristic makes Haldane model ideal for  illustrating another capability of *KITE*: the calculation of transverse conductivities.
 
 Let us begin with the definition of the Hamiltonian for the case of pure imaginary next-nearest-neighbor hoppings:
 
@@ -41,7 +42,7 @@ def haldane():
 
     return lat
 ```
-With the definition of our model, we can include different types of disorder, as documented [here](https://quantum-kite.com/category/capabilities/adding-disorder/). For simplicity, we consider  onsite disorder with a uniform distribution with of ```0.6 eV``` and zero average onsite energy (Anderson disorder):
+With the definition of our model, we can include different types of disorder, as documented [here](https://quantum-kite.com/category/capabilities/adding-disorder/). For simplicity, we consider onsite uniform disorder distribution with width of ```0.6 eV``` and zero average onsite energy (Anderson disorder):
 
 ```python
 disorder = kite.Disorder(lattice)
