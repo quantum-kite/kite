@@ -1,3 +1,9 @@
+/****************************************************************/
+/*                                                              */
+/*  Copyright (C) 2018, M. Andelkovic, L. Covaci, A. Ferreira,  */
+/*                    S. M. Joao, J. V. Lopes, T. G. Rappoport  */
+/*                                                              */
+/****************************************************************/
 
 template <typename T,unsigned D>
 struct Defect_Operator  {

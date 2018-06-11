@@ -1,3 +1,10 @@
+/****************************************************************/
+/*                                                              */
+/*  Copyright (C) 2018, M. Andelkovic, L. Covaci, A. Ferreira,  */
+/*                    S. M. Joao, J. V. Lopes, T. G. Rappoport  */
+/*                                                              */
+/****************************************************************/
+
 #ifndef _HAMILTONIAN_HPP
 #define _HAMILTONIAN_HPP
 

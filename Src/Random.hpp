@@ -1,3 +1,10 @@
+/****************************************************************/
+/*                                                              */
+/*  Copyright (C) 2018, M. Andelkovic, L. Covaci, A. Ferreira,  */
+/*                    S. M. Joao, J. V. Lopes, T. G. Rappoport  */
+/*                                                              */
+/****************************************************************/
+
 template <typename T> 
 class KPMRandom {
   std::mt19937 rng;

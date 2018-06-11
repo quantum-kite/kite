@@ -1,3 +1,10 @@
+/****************************************************************/
+/*                                                              */
+/*  Copyright (C) 2018, M. Andelkovic, L. Covaci, A. Ferreira,  */
+/*                    S. M. Joao, J. V. Lopes, T. G. Rappoport  */
+/*                                                              */
+/****************************************************************/
+
 #include <iomanip>
 template <typename T>
 class KPM_Vector <T, 2> : public KPM_VectorBasis <T,2> {

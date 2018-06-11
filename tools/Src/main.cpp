@@ -1,7 +1,9 @@
-/* Website:  quantum-kite.com
-*  Authors:  M. Andelkovic, L. Covaci, A. Ferreira, S. M. Joao, J. V. Lopes, T. G. Rappoport
-*  Licence:  GNU GPL version 3 or later
-*/
+/****************************************************************/
+/*                                                              */
+/*  Copyright (C) 2018, M. Andelkovic, L. Covaci, A. Ferreira,  */
+/*                    S. M. Joao, J. V. Lopes, T. G. Rappoport  */
+/*                                                              */
+/****************************************************************/
 
 #include "headers.hpp"
 #include "ComplexTraits.hpp"
@@ -127,7 +129,7 @@ int main(int argc, char *argv[]){
       "|            Chebyshev Polynomial Green's Function Approach              | \n"
       "|             to Real-Space Quantum Transport Simulations                | \n"    
       "|                                                                        | \n"                                              
-      "|                     KITE| Pre-Release Beta 0.1                         | \n"         
+      "|                     KITE | Pre-Release Beta 0.1                        | \n"         
       "|                     Kite home: quantum-kite.com                        | \n"
       "|                                                                        | \n"
       "|    Created by Simao M. Joao, Joao V. Lopes (Universidade do Porto),    | \n"

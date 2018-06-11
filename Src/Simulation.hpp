@@ -1,3 +1,10 @@
+/****************************************************************/
+/*                                                              */
+/*  Copyright (C) 2018, M. Andelkovic, L. Covaci, A. Ferreira,  */
+/*                    S. M. Joao, J. V. Lopes, T. G. Rappoport  */
+/*                                                              */
+/****************************************************************/
+
 #ifndef _SIMULATION_HPP
 #define _SIMULATION_HPP
 #include "queue.hpp"

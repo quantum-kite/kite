@@ -1,3 +1,10 @@
+/****************************************************************/
+/*                                                              */
+/*  Copyright (C) 2018, M. Andelkovic, L. Covaci, A. Ferreira,  */
+/*                    S. M. Joao, J. V. Lopes, T. G. Rappoport  */
+/*                                                              */
+/****************************************************************/
+
 #include <type_traits>
 /*
   Auxiliar code to define specialized methods in templated classes depending on the argument T is complex:
