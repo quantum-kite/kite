@@ -37,7 +37,7 @@
 #endif
 
 #ifndef STRIDE
-#define STRIDE 256
+#define STRIDE 64
 #endif
 
 #ifndef DEBUG
