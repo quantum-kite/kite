@@ -1,3 +1,6 @@
+
+<img src=https://user-images.githubusercontent.com/39924384/41094707-9e4ead6e-6a25-11e8-9e16-070a3236c8da.png width="100">
+
 # Adding disorder
 
 The purpose of this section is to provide a simple overview of the different types of disorder that can be added to KITE tight-binding calculations. The general character of our disorder implementation is one of the main features of KITE.  To achieve this generality, the implementation follows a basic structure: the user specifies the disorder pattern to be included (that can be constricted to one unit cell or can connect neighboring unit cells)  and the disorder pattern is reproduced randomly inside the sample, according to a defined concentration and statistical distribution..
@@ -50,10 +53,20 @@ with the resulting density of states:
 The vacant site distribution can be selected from a single sublattice with a concentration defined in a parent object:
 
 ```python
+struc_disorder = kite.StructuralDisorder(lattice, concentration=0.2) 
 
-struc_disorder = kite.StructuralDisorder(lattice, concentration=0.2) # define an object based on the lattice with a certain concentration
-struc_disorder.add_vacancy('B') # add a vacancy to a selected sublattice with previously chosen concentration
+struc_disorder.add_vacancy('B') # add a vacancy to a selected sublattice 
+```
 
+**IMPORTANT**: to distribute the vacancies in both sublattices, one needs to add the vacancies on each sublattice as a separate object 
+of the class `StructuralDisorder` (unless you one precisely the same pattern of disorder in both sublatices)
+
+```python
+struc_disorder_A = kite.StructuralDisorder(lattice, concentration=0.1)
+struc_disorder_A.add_vacancy('A')
+struc_disorder_B = kite.StructuralDisorder(lattice, concentration=0.1)
+struc_disorder_B.add_vacancy('B')
+disorder_structural = [struc_disorder_A, struc_disorder_B]
 ```
 
 ## Structural disorder
