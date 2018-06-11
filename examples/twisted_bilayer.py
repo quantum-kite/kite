@@ -1,3 +1,17 @@
+
+"""       
+        ##############################################################################      
+        #                        KITE | Pre-Release version 0.1                      #      
+        #                                                                            #      
+        #                        Kite home: quantum-kite.com                         #           
+        #                                                                            #      
+        #  Developed by: Simao M. Joao, Joao V. Lopes, Tatiana G. Rappoport,         #       
+        #  Misa Andelkovic, Lucian Covaci, Aires Ferreira, 2018                      #      
+        #                                                                            #      
+        ##############################################################################      
+"""
+
+
 """ Twisted bilayer graphene, loading a predefined lattice
 
     Lattice :  Twisted bilayer graphene;
@@ -5,7 +19,7 @@
     Configuration : size of the system flexible, with domain decomposition, periodic boundary conditions,
                     double precision, automatic scaling;
     Calculation : dos;
-    Modification : magnetic field is off;
+   
 
 """
 
