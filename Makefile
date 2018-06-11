@@ -15,7 +15,7 @@ CLIBS += -lhdf5_hl_cpp -lhdf5_cpp -lhdf5_hl -lhdf5
 VPATH = .
 OBJS = *.o
 
-compile_main=0
+compile_main=1
 verbose=1
 debug=0
 estimate_time=1
