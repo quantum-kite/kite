@@ -1,3 +1,15 @@
+
+        ##############################################################################      
+        #                        KITE | Pre-Release version 0.1                      #      
+        #                                                                            #      
+        #                        Kite home: quantum-kite.com                         #           
+        #                                                                            #      
+        #  Developed by: Simao M. Joao, Joao V. Lopes, Tatiana G. Rappoport,         #       
+        #  Misa Andelkovic, Lucian Covaci, Aires Ferreira, 2018                      #      
+        #                                                                            #      
+        ##############################################################################      
+
+
 OS := $(shell uname)
 
 ifeq ($(OS),Darwin)
@@ -5,6 +17,8 @@ CC = g++-6  -DEIGEN_DONT_PARALLELIZE -fdiagnostics-color=always  -O2  #-ftree-ve
 else
 CC = g++ -march=native  -O2 
 endif	
+# This makefile has reduntant paths so that is compiles the code in both ubuntu 16.04 and Mac OSX with homebrew. 
+#If you know what you are doing, feel free to edit and remove the unnecessary paths
 
 CFLAGS = -DEIGEN_DONT_PARALLELIZE -fopenmp -std=gnu++11 -Wall -ffast-math 
 CINCLUDE = -I/opt/local/lib/ 
