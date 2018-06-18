@@ -32,7 +32,7 @@ import kite
 # define the angle
 angle = 21.787
 # define the name of the pb.Lattice object
-name = 'lattice_tblg_{:.3f}'.format(angle)
+name = 'lattice_twisted_bilayer/lattice_tblg_{:.3f}'.format(angle)
 # number of decomposition parts in each direction of matrix. This divides the lattice into various sections,
 # each of which is calculated in parallel
 nx = 1
@@ -57,8 +57,6 @@ num_moments = 2000
 calculation = kite.Calculation(configuration)
 calculation.dos(num_moments=num_moments, num_random=1, num_disorder=1, num_points=1000)
 # make modification object which caries info about
-# - magnetic field can be set to True. Default case is False
-modification = kite.Modification(magnetic_field=False)
 
 # for a quick check, let's make a Pybinding model and check the DOS
 model = pb.Model(lattice, pb.rectangle(100, 100),
@@ -66,8 +64,8 @@ model = pb.Model(lattice, pb.rectangle(100, 100),
 # if you would like to specify Disorder, use other function that takes of converting KITE to Pybinding disorder objects
 # model = kite.make_pybinding_model(lattice)
 dos = pb.kpm(model).calc_dos(np.linspace(-4, 4, 2000), broadening=1e-2, num_random=1)
-dos.plot()
-plt.show()
+#dos.plot()
+#plt.show()
 
 # configure the *.h5 file
-kite.config_system(lattice, configuration, calculation, modification, 'tblg_{:.3f}.h5'.format(angle))
+kite.config_system(lattice, configuration, calculation, filename='tblg_{:.3f}.h5'.format(angle))
