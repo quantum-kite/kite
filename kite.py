@@ -432,22 +432,6 @@ class Disorder:
         self._orbital = orbital_from
 
 
-class Modification:
-    def __init__(self, **kwargs):
-        self._magnetic_field = kwargs.get('magnetic_field', None)
-        self._flux = kwargs.get('flux', None)
-
-    @property
-    def magnetic_field(self):  # magnetic_field:
-        """Returns true if magnetic field is on, else False."""
-        return self._magnetic_field
-
-    @property
-    def flux(self):  # flux:
-        """Returns the number of multiples of flux quantum."""
-        return self._flux
-
-
 class Calculation:
 
     @property
@@ -740,7 +724,7 @@ class Configuration:
 
 
 def make_pybinding_model(lattice, disorder=None, disorder_structural=None, **kwargs):
-    """Build a Pybinding model with disorder used in Kite. Bond disorder or magnetic field are not currently supported.
+    """Build a Pybinding model with disorder used in Kite. Bond disorder is not currently supported.
 
     Parameters
     ----------
@@ -970,7 +954,7 @@ def estimate_bounds(lattice, disorder=None, disorder_structural=None):
     return -a + b, a + b
 
 
-def config_system(lattice, config, calculation, modification=None, **kwargs):
+def config_system(lattice, config, calculation, **kwargs):
     """Export the lattice and related parameters to the *.h5 file
 
     Parameters
@@ -983,9 +967,6 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
         in the calculation.
     calculation : Calculation
         Calculation object that defines the requested functions for the calculation.
-    modification : Modification = None
-        If specified modification object, has the magnetic field selection, either in terms of field, or in the number
-        of flux quantum through the selected system.
     **kwargs: Optional arguments like filename, Disorder or Disorder_structural.
 
     """
@@ -1007,23 +988,13 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
     # hamiltonian is complex 1 or real 0
     complx = int(config.comp)
 
-    # check if there's complex hopping or magnetic field but identifier is_complex is 0
+    # check if there are complex hoppings but identifier is_complex is 0
     imag_part = 0
     # loop through all hoppings
     for name, hop in lattice.hoppings.items():
         imag_part += np.linalg.norm(np.asarray(hop.energy).imag)
     if imag_part > 0 and complx == 0:
         print('Complex hoppings are added but is_complex identifier is 0. Automatically turning is_complex to 1!')
-        config._is_complex = 1
-        config.set_type()
-
-    # set default value
-    if not modification:
-        modification = Modification(magnetic_field=False)
-
-    # check if magnetic field is On
-    if modification.magnetic_field or modification.flux and complx == 0:
-        print('Magnetic field is added but is_complex identifier is 0. Automatically turning is_complex to 1!')
         config._is_complex = 1
         config.set_type()
 
@@ -1204,39 +1175,6 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
     else:
         # hoppings
         grp.create_dataset('Hoppings', data=(t.real.astype(config.type)) / config.energy_scale)
-
-    # magnetic field
-    if modification.magnetic_field or modification.flux:
-        print('\n##############################################################################\n')
-        print('MAGNETIC FIELD:\n')
-
-        # find the minimum commensurate magnetic field
-        if not space_size == 2:
-            raise SystemExit('Magnetic field is currently supported only in 2D!')
-        hbar = 6.58211899 * 10 ** -16  #: [eV*s]
-        phi0 = 2 * np.pi * hbar  #: [V*s] flux quantum
-        unit_cell_area = np.linalg.norm(np.cross(vectors[0, :], vectors[1, :])) * 1e-18
-        magnetic_field_min = phi0 / (config.leng[0] * unit_cell_area)
-        print('For a selected system size, minimum field is: ', magnetic_field_min)
-
-        multiply_bmin = 0
-        if modification.magnetic_field:
-            multiply_bmin = int(round(modification.magnetic_field / magnetic_field_min))
-
-            if multiply_bmin == 0:
-                raise SystemExit('The system is to small for a desired field.')
-            print('Closest_field to the one you selected is {:.2f} T'.format(
-                  multiply_bmin * magnetic_field_min))
-
-        if modification.flux:
-            multiply_bmin = int(round(modification.flux * config.leng[0]))
-            if multiply_bmin == 0:
-                raise SystemExit('The system is to small for a desired field.')
-            print('Closest_field to the one you selected is {:.2f} T which in the terms of flux quantum is {:.2f}'.
-                  format(multiply_bmin * magnetic_field_min, multiply_bmin/config.leng[0]))
-            print('Selected field is {:.2f} T'.format(multiply_bmin*magnetic_field_min))
-        grp.create_dataset('MagneticField', data=int(multiply_bmin), dtype='u4')
-        print('\n##############################################################################\n')
 
     grp_dis = grp.create_group('Disorder')
 
