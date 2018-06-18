@@ -17,6 +17,9 @@ struct Vacancy_Operator {
   
   Vacancy_Operator(Simulation <T,D> & sim) : r(sim.r), simul(sim), position(sim.r.NStr)
   {
+
+
+    
   };
   
   
@@ -40,12 +43,41 @@ struct Vacancy_Operator {
 	      r.convertCoordinates(Latt,latt);                    // Get Domain coordinates
 	      position.at(latStr.index).push_back(Latt.index);    // store the position by stride 
 	    }
+
+    // Distribute Vacancies
+    for(unsigned k = 0; k < concentration.size(); k++)
+      {
+	std::size_t vacancies_number =  concentration[k]*r.N, count = 0;
+	while(count < vacancies_number)
+	  {
+	    std::size_t i = simul.rnd.get()*r.N;
+	    latt.set_coord(i + orbitals.at(k).at(0) * r.N );
+	    r.convertCoordinates(latStr,latt);                  // Get stride position
+	    r.convertCoordinates(Latt,latt);                    // Get Domain coordinates
+	    auto & pos = position.at(latStr.index);
+	    if(!any_of(pos.begin(), pos.end(), std::bind2nd(std::equal_to<std::size_t>(), Latt.index )))
+	      {
+		for(auto o = orbitals.at(k).begin(); o != orbitals.at(k).end(); o++)
+		  {
+		    latt.set_coord(i + std::size_t(*o) * r.N);
+		    r.convertCoordinates(Latt,latt);
+		    pos.push_back(Latt.index);
+		  }
+		count++;
+	      }
+	  }
+      }
+    
+    for(unsigned i = 0; i < r.NStr ; i++)
+      std::sort (position.at(i).begin(), position.at(i).end());
+    
   };
   
   void add_model(double p, std::vector <int> & orb)
   {
     orbitals.push_back(orb);
     concentration.push_back(p);
+    r.SizetVacancies += std::size_t(p * r.Nt * orb.size());    
   }
   
   void add_conflict_with_defect(std::size_t element, unsigned istride)

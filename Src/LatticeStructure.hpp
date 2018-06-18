@@ -97,7 +97,7 @@ public:
   std::size_t Sized; // Size of vector for each subdomain (with ghosts)
   std::size_t Size; // Size of vector for each subdomain (without ghosts)
   std::size_t Sizet; // Size of full Hilbert Space
-
+  std::size_t SizetVacancies;
   Eigen::Matrix<double, D, D> rLat;  // The vectors are organized by columns 
   Eigen::MatrixXd rOrb;              // The vectors of each orbital are organized by columns
   unsigned nd[D + 1]; // Number of domains in each dimension (the last dimension corresponding with Orbitals are not decomposed)
@@ -115,6 +115,7 @@ public:
   unsigned Orb; // Number of orbitals
   unsigned thread_id; // thread identification
   int MagneticField;
+
   
   Eigen::Matrix<double, D, D> vect_pot; // vector potential
   
@@ -190,6 +191,7 @@ public:
     Size = N * Orb;
     Sized = Nd * Orb;
     Sizet = Nt * Orb;
+    SizetVacancies = 0;
     thread_id = omp_get_thread_num();
   };
   

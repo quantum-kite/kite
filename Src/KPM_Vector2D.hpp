@@ -104,16 +104,12 @@ public:
   }
   
   void initiate_vector() {
-    std::size_t count = 0;
-    for(unsigned i = 0; i < r.NStr; i++)
-      count += h.hV.position.at(i).size();
-    
     index = 0;
     Coordinates<std::size_t, 3> x(r.Ld);
     for(std::size_t io = 0; io < r.Orb; io++)
       for(std::size_t i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1++)
 	for(std::size_t i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0++)
-	  v(x.set({i0,i1,io}).index, index) = simul.rnd.init()/value_type(sqrt(r.Sizet - count));
+	  v(x.set({i0,i1,io}).index, index) = simul.rnd.init()/sqrt(value_type(r.Sizet - r.SizetVacancies));
     
     for(unsigned i = 0; i < r.NStr; i++)
       {

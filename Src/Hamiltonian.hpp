@@ -86,6 +86,7 @@ public:
 
   void build_vacancies_disorder()
   {
+    r.SizetVacancies = 0;
 #pragma omp critical
     {
       H5::H5File *file = new H5::H5File(simul.name, H5F_ACC_RDONLY);
@@ -112,7 +113,6 @@ public:
 	    get_hdf5<int> ( orbit.data(), file, field );
 	    hV.add_model(p, orbit);
 	  }
-	
       }
       catch(H5::Exception& e) {
 	// Do nothing
