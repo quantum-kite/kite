@@ -33,18 +33,6 @@ struct Vacancy_Operator {
     vacancies_with_defects.clear();
     // Distribute Vacancies
     
-    for( std::size_t i = 0; i < r.N ; i++)
-      for(unsigned k = 0; k < concentration.size(); k++)
-	if(simul.rnd.get() < concentration[k])
-	  for(auto o = orbitals.at(k).begin(); o != orbitals.at(k).end(); o++)
-	    {
-	      latt.set_coord(i + std::size_t(*o) * r.N );         // Set Vacancy position inside the domain
-	      r.convertCoordinates(latStr,latt);                  // Get stride position
-	      r.convertCoordinates(Latt,latt);                    // Get Domain coordinates
-	      position.at(latStr.index).push_back(Latt.index);    // store the position by stride 
-	    }
-
-    // Distribute Vacancies
     for(unsigned k = 0; k < concentration.size(); k++)
       {
 	std::size_t vacancies_number =  concentration[k]*r.N, count = 0;
@@ -70,7 +58,7 @@ struct Vacancy_Operator {
     
     for(unsigned i = 0; i < r.NStr ; i++)
       std::sort (position.at(i).begin(), position.at(i).end());
-    
+
   };
   
   void add_model(double p, std::vector <int> & orb)
