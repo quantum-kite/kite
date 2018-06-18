@@ -109,7 +109,7 @@ public:
     for(std::size_t io = 0; io < r.Orb; io++)
       for(std::size_t i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1++)
 	for(std::size_t i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0++)
-	  v(x.set({i0,i1,io}).index, index) = simul.rnd.init()/sqrt(value_type(r.Sizet - r.SizetVacancies));
+	  v(x.set({i0,i1,io}).index, index) = simul.rnd.init()/static_cast<value_type>(sqrt(value_type(r.Sizet - r.SizetVacancies)));
     
     for(unsigned i = 0; i < r.NStr; i++)
       {
