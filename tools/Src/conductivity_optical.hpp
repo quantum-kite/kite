@@ -355,15 +355,6 @@ void conductivity_optical<U, DIM>::calculate_efficient(){
     Eigen::Matrix<std::complex<U>, -1, -1> GammaEM;
     GammaEM = DeltaMatrix*local_Gamma;
 
-#pragma omp critical
-    {
-      std::cout << "TN: " << thread_num << "local_Gamma: \n" <<
-        local_Gamma(0,0) << " " << local_Gamma(0,1) << "\n" << local_Gamma(1,0) << " " << local_Gamma(1,1) << "\n";
-      std::cout << "\n\n" << thread_num << "local_Gamma: \n" <<
-        local_Gamma(NumMoments-1,0) << " " << local_Gamma(NumMoments-1,local_NumMoments-1) << "\n"
-        << std::flush;
-    }
-    
     Eigen::Matrix<std::complex<U>,-1, 1> GammaEp;
     Eigen::Matrix<std::complex<U>,-1, 1> GammaEn;
     Eigen::Matrix<std::complex<U>,-1, 1> GammaE;
@@ -373,14 +364,12 @@ void conductivity_optical<U, DIM>::calculate_efficient(){
     GammaE  = Eigen::Matrix<std::complex<U>,-1, 1>::Zero(N_energies, 1);
     local_cond = Eigen::Matrix<std::complex<U>, -1, 1>::Zero(N_omegas, 1);
 
-    std::cout << " Loop over frequencies\n" << std::flush;
     // Loop over the frequencies
     U freq_p, freq_n;
     for(int w = 0; w < N_omegas; w++){
       freq_p =  frequencies(w);
       freq_n = -frequencies(w);
 
-      std::cout << "freq: " << freq_p << "\n" << std::flush;
       for(int e = 0; e < N_energies; e++){
         GammaEp(e) = 0;
         GammaEn(e) = 0;
