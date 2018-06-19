@@ -17,7 +17,7 @@ private:
   std::size_t   stride_ghosts[2];
   LatticeStructure<2u>       & r;
   Hamiltonian<T,2u>          & h;
-  T               ***mult_t1_mag;
+  T               ***mult_t1_ghost_cor;
   Coordinates<std::size_t,3>   x;
   T                        *phi0;
   T                       *phiM1;
@@ -38,12 +38,12 @@ public:
     Coordinates <std::size_t, 3>     z(r.Ld);
     Coordinates <int, 3> x(r.nd), dist(r.nd);
 
-    mult_t1_mag = new T**[r.Orb];
+    mult_t1_ghost_cor = new T**[r.Orb];
     for(unsigned io = 0; io < r.Orb; io++)
       {
-	mult_t1_mag[io] = new T*[h.hr.NHoppings(io)];
+	mult_t1_ghost_cor[io] = new T*[h.hr.NHoppings(io)];
 	for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
-	  mult_t1_mag[io][ib] = new T[STRIDE];
+	  mult_t1_ghost_cor[io][ib] = new T[STRIDE];
       }
 
     for(unsigned d = 0; d < 2; d++)
@@ -97,10 +97,10 @@ public:
     for(unsigned io = 0; io < r.Orb;io++)
       {	
 	for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
-	  delete mult_t1_mag[io][ib];
-	delete mult_t1_mag[io];
+	  delete mult_t1_ghost_cor[io][ib];
+	delete mult_t1_ghost_cor[io];
       }
-    delete mult_t1_mag;
+    delete mult_t1_ghost_cor;
   }
   
   void initiate_vector() {
@@ -149,8 +149,8 @@ public:
 	    for(std::size_t j = j0; j < j1; j += std )
 	      {
 		r.convertCoordinates(global, local1.set_coord(j));
-		value_type phase = vee(0)*global.coord[1]*r.vect_pot(0,1);
-		mult_t1_mag[io][ib][count] =  tt * h.peierls(phase);
+		value_type phase = vee(0)*global.coord[1]*r.ghost_pot(0,1);
+		mult_t1_ghost_cor[io][ib][count] =  tt * h.ghosts_correlation(phase);
 		count++;
 	      }
 	  }
@@ -210,7 +210,7 @@ public:
 	count = 0;
 	for(std::size_t j = j0; j < j1; j += std )
 	  {
-	    const T t1 = mult_t1_mag[io][ib][count++];
+	    const T t1 = mult_t1_ghost_cor[io][ib][count++];
 	    for(std::size_t i = j; i < j + STRIDE ; i++)
 	      phi0[i] += t1 * phiM1[i + d1];								
 	  }
@@ -264,7 +264,7 @@ public:
 	    std::size_t istr = (i1 - NGHOSTS) /STRIDE * r.lStr[0] + (i0 - NGHOSTS)/ STRIDE;
 	    if(h.cross_mozaic.at(istr))
 	      initiate_stride<MULT>(istr);
-	    // These four lines pertrain only to the magnetic field
+	    // These four lines pertrain only to the ghost_correlation field
 	    for(std::size_t io = 0; io < r.Orb; io++)
 	      {
 		const std::size_t ip = io * x.basis[2];
@@ -300,7 +300,7 @@ public:
     for(auto id = h.hd.begin(); id != h.hd.end(); id++)
       id->template multiply_broken_defect<MULT,VELOCITY>(phi0, phiM1,axis);
 	  
-    // These four lines pertrain only to the magnetic field
+    // These four lines pertrain only to the ghost_correlation field
     Exchange_Boundaries();
       }
     

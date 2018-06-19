@@ -104,21 +104,21 @@ std::string num2str2(int dir_num){
     case 0:
       dir = "xx"; break;
     case 1:
-      dir = "xy"; break;
-    case 2:
-      dir = "xz"; break;
-    case 3:
-      dir = "yx"; break;
-    case 4:
       dir = "yy"; break;
-    case 5:
-      dir = "yz"; break;
-    case 6:
-      dir = "zx"; break;
-    case 7:
-      dir = "zy"; break;
-    case 8:
+    case 2:
       dir = "zz"; break;
+    case 3:
+      dir = "xy"; break;
+    case 4:
+      dir = "xz"; break;
+    case 5:
+      dir = "yx"; break;
+    case 6:
+      dir = "yz"; break;
+    case 7:
+      dir = "zx"; break;
+    case 8:
+      dir = "zy"; break;
     default:
       std::cout << "Invalid direction for the optical conductivity.\n"; exit(1);
   }

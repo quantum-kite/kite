@@ -77,21 +77,21 @@ std::string num2str2(int dir_num){
     case 0:
       dir = "xx"; break;
     case 1:
-      dir = "xy"; break;
-    case 2:
-      dir = "xz"; break;
-    case 3:
-      dir = "yx"; break;
-    case 4:
       dir = "yy"; break;
-    case 5:
-      dir = "yz"; break;
-    case 6:
-      dir = "zx"; break;
-    case 7:
-      dir = "zy"; break;
-    case 8:
+    case 2:
       dir = "zz"; break;
+    case 3:
+      dir = "xy"; break;
+    case 4:
+      dir = "xz"; break;
+    case 5:
+      dir = "yx"; break;
+    case 6:
+      dir = "yx"; break;
+    case 7:
+      dir = "zx"; break;
+    case 8:
+      dir = "zy"; break;
     default:
       std::cout << "Invalid direction for the optical conductivity.\n"; exit(1);
   }
@@ -136,8 +136,8 @@ std::vector<measurement_queue> fill_queue(char *name){
 
     // Now we must check which functions are asked by the configuration file.
     // Checking for the density of states
+    H5::Exception::dontPrint();
     try{
-      //H5::Exception::dontPrint();
       int NMoments, NRandom, NDisorder;
        debug_message("DOS: checking if we need to calculate DOS.\n");
        get_hdf5<int>(&NMoments,  file, (char *)   "/Calculation/dos/NumMoments");
