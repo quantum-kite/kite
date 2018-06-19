@@ -160,7 +160,7 @@ public:
     
     // Set the vector potential
     vect_pot.setZero();
-		vect_pot(0,1) = MagneticField*1.0/Lt[0]*2.0*M_PI;
+    vect_pot(0,1) = MagneticField*1.0/Lt[1]*2.0*M_PI;
     
     
 
