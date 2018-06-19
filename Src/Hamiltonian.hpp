@@ -208,13 +208,13 @@ public:
 	}
   }
   template <typename U = T>
-  typename std::enable_if<is_tt<std::complex, U>::value, U>::type peierls(double phase) {
+  typename std::enable_if<is_tt<std::complex, U>::value, U>::type ghosts_correlation(double phase) {
     std::complex<double> im(0,phase);
     return U(exp(im));
   };
   
   template <typename U = T>
-  typename std::enable_if<!is_tt<std::complex, U>::value, U>::type peierls(double phase) {
+  typename std::enable_if<!is_tt<std::complex, U>::value, U>::type ghosts_correlation(double phase) {
     //std::cout << "Shouldn't be here..\n";
     return 1.0;
   };

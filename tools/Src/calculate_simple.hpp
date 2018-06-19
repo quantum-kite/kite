@@ -449,7 +449,7 @@ void calculate_conductivity_optical(system_info<U, DIM>& sysinfo){
   if(info.isRequired){
     verbose_message("Retrieving optical conductivity...\n");
     info.read();
-    info.calculate();
+    info.calculate_efficient();
   }
 };
 

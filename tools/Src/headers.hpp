@@ -14,13 +14,19 @@
 #include <Eigen/Dense>
 #include <complex>
 #include <string>
+#include <omp.h>
 
 #define outcol "\033[1;31m"
 #define outres "\033[0m"
 
+#ifndef DEBUG
 #define DEBUG 0
+#endif
 #define debug1 0
+
+#ifndef VERBOSE
 #define VERBOSE 1
+#endif
 
 // The first scale is 1/2pi and corresponds to the conductance quantum per spin e^2/h
 // The second scale is the universal conductivity of graphene e^2/4h_bar

@@ -39,7 +39,7 @@ public:
     // Regular quantities to calculate, such as DOS and CondXX
     H5::H5File * file         = new H5::H5File(name, H5F_ACC_RDONLY);
 
-    // Fetch the energy scale and the magnetic field, if it exists
+    // Fetch the energy scale
     get_hdf5<double>(&EnergyScale,  file, (char *)   "/EnergyScale");
     delete file;
 
@@ -121,7 +121,7 @@ public:
         verbose_message("\n");
         simul.Measure_Gamma(queue.at(i));			
       }
-      verbose_message("----------------------------------------------------------------\n\n");
+      verbose_message("------------------------------------------------------------------\n\n");
     }
     debug_message("Left global_simulation\n");
   };
