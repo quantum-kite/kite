@@ -590,7 +590,7 @@ class Calculation:
                  'num_moments': num_moments, 'num_random': num_random, 'num_disorder': num_disorder,
                  'temperature': temperature, 'special': special})
 
-    def singleshot_conductivity_dc(self, energy, direction, eta, num_moments, num_random, num_disorder=1):
+    def singleshot_conductivity_dc(self, energy, direction, eta, num_moments, num_random, num_disorder=1, **kwargs):
         """Calculate the density of states as a function of energy
 
         Parameters
@@ -608,8 +608,11 @@ class Calculation:
             Number of random vectors to use for the stochastic evaluation of trace.
         num_disorder : int
             Number of different disorder realisations.
+        **kwargs: Optional arguments preserve_disorder.
+
         """
 
+        preserve_disorder = kwargs.get('preserve_disorder', False)
         if direction not in self._avail_dir_sngl:
             print('The desired direction is not available. Choose from a following set: \n',
                   self._avail_dir_sngl.keys())
@@ -618,8 +621,9 @@ class Calculation:
             self._singleshot_conductivity_dc.append(
                 {'energy': (np.atleast_1d(energy)),
                  'direction': self._avail_dir_sngl[direction],
-                 'eta': np.array(eta), 'num_moments': num_moments,
-                 'num_random': num_random, 'num_disorder': num_disorder})
+                 'eta': np.atleast_1d(eta), 'num_moments': num_moments,
+                 'num_random': num_random, 'num_disorder': num_disorder,
+                 'preserve_disorder': np.atleast_1d(preserve_disorder)})
 
 
 class Configuration:
@@ -1357,15 +1361,48 @@ def config_system(lattice, config, calculation, **kwargs):
     if calculation.get_singleshot_conductivity_dc:
         grpc_p = grpc.create_group('singleshot_conductivity_dc')
 
-        moments, random, dis, energies, eta, direction = [], [], [], [], [], []
+        moments, random, dis, energies, eta, direction, preserve_disorder = [], [], [], [], [], [], []
 
         for single_singlshot_cond in calculation.get_singleshot_conductivity_dc:
+
+            energy_ = single_singlshot_cond['energy']
+            eta_ = single_singlshot_cond['eta']
+            preserve_disorder_ = single_singlshot_cond['preserve_disorder']
+
+            # get the lengts
+            len_en = energy_.size
+            len_eta = eta_.size
+            len_preserve_dis = preserve_disorder_.size
+
+            # find the max length
+            if len_en > len_eta:
+                length = len_en
+            else:
+                length = len_eta
+
+            # check if both have larger length then 1 and if their length is not equal
+            if len_en * len_eta != length and len_en * len_eta != length ** 2:
+                print('Number of different energies should either match number of broadening (eta) values,'
+                      'or you one of the two parameters should have a single realisation. \n')
+                raise SystemExit('Invalid parametrization!')
+            if len_preserve_dis > length:
+                raise SystemExit('Choose less disorder preserve_disorder parameters!')
+
+            # make two lists of equal length
+            if len_en == 1:
+                energy_ = np.repeat(energy_, length)
+            if len_eta == 1:
+                eta_ = np.repeat(eta_, length)
+            if len_preserve_dis == 1:
+                preserve_disorder_ = np.repeat(preserve_disorder_, length)
+
             moments.append(single_singlshot_cond['num_moments'])
             random.append(single_singlshot_cond['num_random'])
             dis.append(single_singlshot_cond['num_disorder'])
-            energies.append(single_singlshot_cond['energy'])
-            eta.append(single_singlshot_cond['eta'])
+            energies.append(energy_)
+            eta.append(eta_)
             direction.append(single_singlshot_cond['direction'])
+            preserve_disorder.append(preserve_disorder_)
 
         if len(calculation.get_singleshot_conductivity_dc) > 1:
             raise SystemExit('Only a single function request of each type is currently allowed. Please use another '
@@ -1377,6 +1414,7 @@ def config_system(lattice, config, calculation, **kwargs):
                               dtype=np.float64)
         grpc_p.create_dataset('Gamma', data=np.asarray(eta) / config.energy_scale, dtype=np.float64)
         grpc_p.create_dataset('Direction', data=np.asarray(direction), dtype=np.int32)
+        grpc_p.create_dataset('PreserveDisorder', data=np.asarray(preserve_disorder).astype(int), dtype=np.int32)
 
     print('\n##############################################################################\n')
     print('OUTPUT:\n')
