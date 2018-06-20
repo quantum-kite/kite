@@ -79,19 +79,19 @@ class StructuralDisorder:
         self._lattice = lattice
 
     def add_vacancy(self, *disorder):
-
-        num_vacancy_disorder = 0
-        for dis in disorder:
-            # check if it's just concentration or sublatt
-            if len(dis) == 1:
+        if len(disorder) == 1:
+            num_vacancy_disorder = 0
+            for dis in disorder:
+                # check if it's just concentration or sublatt
                 num_vacancy_disorder += 1
-                self.add_local_vacancy_disorder(*dis)
-            else:
-                raise SystemExit('Vacancy disorder should be added in a form:'
-                                 '\n sublattice name,'
-                                 '\n or in a form of disorder onsite energy:'
-                                 '\n ([rel. unit cell], sublattice_name, '
-                                 'onsite energy)')
+                self.add_local_vacancy_disorder(dis)
+
+        else:
+            raise SystemExit('Vacancy disorder should be added in a form:'
+                             '\n sublattice name,'
+                             '\n or in a form of disorder onsite energy:'
+                             '\n ([rel. unit cell], sublattice_name, '
+                             'onsite energy)')
 
     def add_structural_disorder(self, *disorder):
         self._nodes_map = dict()
