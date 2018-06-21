@@ -456,6 +456,11 @@ class Calculation:
         return self._dos
 
     @property
+    def get_special(self):
+        """Returns the requested special function, with predefined vectors."""
+        return self._special
+
+    @property
     def get_conductivity_dc(self):
         """Returns the requested DC conductivity functions."""
         return self._conductivity_dc
@@ -486,9 +491,10 @@ class Calculation:
         self._conductivity_dc = []
         self._conductivity_optical = []
         self._conductivity_optical_nonlinear = []
+        self._special = []
         self._singleshot_conductivity_dc = []
 
-        self._avail_dir_full = {'xx': 0, 'yy': 1, 'zz': 2, 'xy': 3, 'xz': 4, 'yx': 3, 'yz': 5, 'zx': 4, 'zy': 5}
+        self._avail_dir_full = {'xx': 0, 'yy': 1, 'zz': 2, 'xy': 3, 'xz': 4, 'yx': 5, 'yz': 6, 'zx': 7, 'zy': 8}
         self._avail_dir_nonl = {'xxx': 0, 'xxy': 1, 'xxz': 2, 'xyx': 3, 'xyy': 4, 'xyz': 5, 'xzx': 6, 'xzy': 7,
                                 'xzz': 8, 'yxx': 9, 'yxy': 10, 'yxz': 11, 'yyx': 12, 'yyy': 13, 'yyz': 14, 'yzx': 15,
                                 'yzy': 16, 'yzz': 17, 'zxx': 18, 'zxy': 19, 'zxz': 20, 'zyx': 21, 'zyy': 22, 'zyz': 23,
@@ -512,6 +518,41 @@ class Calculation:
 
         self._dos.append({'num_points': num_points, 'num_moments': num_moments, 'num_random': num_random,
                           'num_disorder': num_disorder})
+
+    def special(self, num_points, num_moments, num_random, bra, dimension_bra, starting_index_bra,
+                ket, dimension_ket, starting_index_ket, num_disorder=1):
+        """Calculate the density of states as a function of energy
+
+        Parameters
+        ----------
+        num_points : int
+            Number of energy point inside the spectrum at which the DOS will be calculated.
+        num_moments : int
+            Number of polynomials in the Chebyshev expansion.
+        num_random : int
+            Number of random vectors to use for the stochastic evaluation of trace.
+        ket : np.array
+            KET Part of the initial kpm vector.
+        dimension_ket : int
+            Number of unit cells along the direction 0 and 1 for KET vector.
+        starting_index_ket : tuple (int, int) of list
+            Index of the starting unit cell, bottom left corner for KET vector.
+        bra : np.array
+            BRA Part of the initial kpm vector.
+        starting_index_bra : tuple (int, int) of list
+            Index of the starting unit cell, bottom left corner for BRA vector.
+        dimension_bra : int
+            Number of unit cells along the direction 0 and 1 for BRA vector.
+
+        num_disorder : int
+            Number of different disorder realisations.
+        """
+
+        self._special.append(
+            {'num_points': num_points, 'num_moments': num_moments, 'num_random': num_random,
+             'bra': bra, 'starting_index_bra': starting_index_bra, 'dimension_bra': dimension_bra,
+             'ket': ket, 'starting_index_ket': starting_index_ket, 'dimension_ket': dimension_ket,
+             'num_disorder': num_disorder})
 
     def conductivity_dc(self, direction, num_points, num_moments, num_random, num_disorder=1, temperature=0):
         """Calculate the density of states as a function of energy
@@ -1351,6 +1392,37 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
         grpc_p.create_dataset('NumRandoms', data=random, dtype=np.int32)
         grpc_p.create_dataset('NumPoints', data=point, dtype=np.int32)
         grpc_p.create_dataset('NumDisorder', data=dis, dtype=np.int32)
+
+    if calculation.get_special:
+        grpc_p = grpc.create_group('special')
+
+        bra, ket, moments, random, point, dis, temp, direction = [], [], [], [], [], [], [], []
+        dimension_bra, starting_index_bra, dimension_ket, starting_index_ket = [], [], [], []
+        for single_special in calculation.get_special:
+            moments.append(single_special['num_moments'])
+            random.append(single_special['num_random'])
+            point.append(single_special['num_points'])
+            dis.append(single_special['num_disorder'])
+            bra.append(single_special['bra'])
+            ket.append(single_special['ket'])
+            dimension_bra.append(single_special['dimension_bra'])
+            dimension_ket.append(single_special['dimension_ket'])
+            starting_index_bra.append(single_special['starting_index_bra'])
+            starting_index_ket.append(single_special['starting_index_ket'])
+
+        if len(calculation.get_special) > 1:
+            raise SystemExit('Only a single function request of each type is currently allowed. Please use another '
+                             'configuration file for the same functionality.')
+        grpc_p.create_dataset('NumMoments', data=moments, dtype=np.int32)
+        grpc_p.create_dataset('NumRandoms', data=random, dtype=np.int32)
+        grpc_p.create_dataset('NumPoints', data=point, dtype=np.int32)
+        grpc_p.create_dataset('NumDisorder', data=dis, dtype=np.int32)
+        grpc_p.create_dataset('dimension_bra', data=dimension_bra, dtype=np.int32)
+        grpc_p.create_dataset('starting_index_bra', data=np.asarray(starting_index_bra), dtype=np.int32)
+        grpc_p.create_dataset('dimension_ket', data=dimension_ket, dtype=np.int32)
+        grpc_p.create_dataset('starting_index_ket', data=np.asarray(starting_index_ket), dtype=np.int32)
+        grpc_p.create_dataset('bra', data=np.array(bra).astype(config.type))
+        grpc_p.create_dataset('ket', data=np.array(ket).astype(config.type))
 
     if calculation.get_conductivity_dc:
         grpc_p = grpc.create_group('conductivity_dc')
