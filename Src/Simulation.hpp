@@ -873,8 +873,8 @@ public:
       store_data = Eigen::Array<double, -1, -1>::Zero(3, jobs.rows());
       
       for(int ener = 0; ener < N_energies; ener++){
-        store_data(0, ener) = jobs.real()(0,ener)*EScale;
-        store_data(1, ener) = jobs.real()(1,ener)*EScale;
+        store_data(0, ener) = jobs.real()(ener, 0)*EScale;
+        store_data(1, ener) = jobs.real()(ener, 1)*EScale;
         store_data(2, ener) = Global.singleshot_cond.real()(ener);
       }
       
