@@ -62,6 +62,7 @@
 #define NGHOSTS   2
 #define VVERBOSE 0
 #define NUM_GHOST_CORR 0
+#define SSPRINT 8
 
 // These are the verbose and debug messages
 #define outcol "\033[1;31m"

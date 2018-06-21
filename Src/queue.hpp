@@ -243,7 +243,9 @@ class singleshot_measurement_queue{
     int NDisorder;
     int NRandom;
     Eigen::Array<double, -1, 1> singleshot_energies;
-    double single_gamma;
+    Eigen::Array<double, -1, 1> singleshot_gammas;
+    Eigen::Array<double, -1, 1> singleshot_preserve_disorders;
+    Eigen::Array<double, -1, -1> singleshot_energiesgammas;
     std::string label;
     double time_length;
 
@@ -252,25 +254,64 @@ class singleshot_measurement_queue{
     };
 
     singleshot_measurement_queue(std::string dir_string, int moments, int disorder, 
-        int random, std::string name, Eigen::Array<double, -1, 1> energies, double gamma){
+        int random, std::string name, Eigen::Array<double, -1, 1> energies, 
+        Eigen::Array<double, -1, 1>  gammas, Eigen::Array<double, -1, 1> preserve_disorders){
+      debug_message("Entered singleshot_measurement_queue constructor\n");
       direction_string = dir_string;
       NMoments = moments;
       NDisorder = disorder;
       NRandom = random;
       label = name;
       singleshot_energies = energies;
-      single_gamma = gamma;
+      singleshot_gammas = gammas;
+      singleshot_preserve_disorders = preserve_disorders;
+
+      if(singleshot_energies.rows() == singleshot_gammas.rows() and 
+         singleshot_energies.rows() == singleshot_preserve_disorders.rows()){
+        singleshot_energiesgammas = Eigen::Array<double, -1, -1>::Zero(singleshot_energies.rows(), 3);
+
+        for(int i = 0; i < singleshot_energies.rows(); i++){
+          singleshot_energiesgammas(i,0) = singleshot_energies(i);
+          singleshot_energiesgammas(i,1) = singleshot_gammas(i);
+          singleshot_energiesgammas(i,2) = singleshot_preserve_disorders(i);
+        }
+      } else {
+        if(singleshot_energies.rows() == 1 and singleshot_gammas.rows() == singleshot_preserve_disorders.rows()){
+          for(int i = 0; i < singleshot_gammas.rows(); i++){
+            singleshot_energiesgammas(i,0) = singleshot_energies(0);
+            singleshot_energiesgammas(i,1) = singleshot_gammas(i);
+            singleshot_energiesgammas(i,2) = singleshot_preserve_disorders(i);
+          }
+        } else {
+          if(singleshot_gammas.rows() == 1 and singleshot_energies.rows() == singleshot_preserve_disorders.rows()){
+            for(int i = 0; i < singleshot_energies.rows(); i++){
+              singleshot_energiesgammas(i,0) = singleshot_energies(i);
+              singleshot_energiesgammas(i,1) = singleshot_gammas(0);
+              singleshot_energiesgammas(i,2) = singleshot_preserve_disorders(i);
+            }
+          } else {
+              std::cout << "SingleShot: Number of energies, gammas or preserve_disorders do not match. Exiting.\n";
+              exit(0);
+          }
+        }
+      }
+
+
+
+      debug_message("Left singleshot_measurement_queue constructor.\n");
     };
 
 };
 
 std::vector<singleshot_measurement_queue> fill_singleshot_queue(char *name){
+    debug_message("Entered fill_singleshot_queue\n");
     H5::H5File * file = new H5::H5File(name, H5F_ACC_RDONLY);
     
     Eigen::Array<double, -1, 1> energies;
+    Eigen::Array<double, -1, 1> gammas;
+    Eigen::Array<double, -1, 1> preserve_disorders;
     int NDisorder, NRandom, NMoments, direction;
     std::string direction_string;
-    double gamma;
     
     NDisorder = 1;
 
@@ -280,7 +321,6 @@ std::vector<singleshot_measurement_queue> fill_singleshot_queue(char *name){
        get_hdf5<int>(&direction, file, (char *)   "/Calculation/singleshot_conductivity_dc/Direction");
        get_hdf5<int>(&NMoments, file, (char *)  "/Calculation/singleshot_conductivity_dc/NumMoments");
        get_hdf5<int>(&NRandom, file, (char *)   "/Calculation/singleshot_conductivity_dc/NumRandoms");
-       get_hdf5<double>(&gamma, file, (char *)   "/Calculation/singleshot_conductivity_dc/Gamma");
        
        if(direction == 0)
          direction_string = "x,x";
@@ -299,18 +339,36 @@ std::vector<singleshot_measurement_queue> fill_singleshot_queue(char *name){
       energies = Eigen::Array<double, -1, 1>::Zero(dims_out[0]*dims_out[1], 1);	
       delete dataspace_energy;
       delete dataset_energy;
-      
       get_hdf5<double>(energies.data(),  	file, (char *)   "/Calculation/singleshot_conductivity_dc/Energy");
       
+      // We also need to determine the number of gammas that we need to calculate
+      H5::DataSet * dataset_gamma     	= new H5::DataSet(file->openDataSet("/Calculation/singleshot_conductivity_dc/Gamma"));
+      H5::DataSpace * dataspace_gamma 	= new H5::DataSpace(dataset_gamma->getSpace());
+      dataspace_gamma->getSimpleExtentDims(dims_out, NULL);	
+      gammas = Eigen::Array<double, -1, 1>::Zero(dims_out[0]*dims_out[1], 1);	
+      delete dataspace_gamma;
+      delete dataset_gamma;
+      get_hdf5<double>(gammas.data(),  	file, (char *)   "/Calculation/singleshot_conductivity_dc/Gamma");
+
+      // We also need to determine the number of gammas that we need to calculate
+      H5::DataSet * dataset_preserve_disorder     	= new H5::DataSet(file->openDataSet("/Calculation/singleshot_conductivity_dc/PreserveDisorder"));
+      H5::DataSpace * dataspace_preserve_disorder 	= new H5::DataSpace(dataset_preserve_disorder->getSpace());
+      dataspace_preserve_disorder->getSimpleExtentDims(dims_out, NULL);	
+      preserve_disorders = Eigen::Array<double, -1, 1>::Zero(dims_out[0]*dims_out[1], 1);	
+      delete dataspace_preserve_disorder;
+      delete dataset_preserve_disorder;
+      get_hdf5<double>(preserve_disorders.data(),  	file, (char *)   "/Calculation/singleshot_conductivity_dc/PreserveDisorder");
+
       queue.push_back(singleshot_measurement_queue(direction_string, NMoments,
             NDisorder, NRandom, "/Calculation/singleshot_conductivity_dc/SingleShot",
-            energies, gamma));
+            energies, gammas, preserve_disorders));
       
     } catch(H5::Exception& e) {debug_message("singleshot dc: no need to calculate it.\n");}
 
     delete file;
     
   return queue;
+  debug_message("Left fill_singleshot_queue\n");
 }
 
 std::string print_time(double duration){
