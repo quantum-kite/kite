@@ -678,7 +678,7 @@ class Calculation:
             self._singleshot_conductivity_dc.append(
                 {'energy': (np.atleast_1d(energy)),
                  'direction': self._avail_dir_sngl[direction],
-                 'eta': np.atleast_1d(eta), 'num_moments': num_moments,
+                 'eta': np.atleast_1d(eta), 'num_moments': np.atleast_1d(num_moments),
                  'num_random': num_random, 'num_disorder': num_disorder,
                  'preserve_disorder': np.atleast_1d(preserve_disorder)})
 
@@ -1217,11 +1217,12 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
 
     # number of divisions of the in each direction of hamiltonian. nx x ny = num_threads
     print('\nChosen number of decomposition parts is:', config.div[0], 'x', config.div[1], '.'
-          '\nINFO: this product will correspond to the total number of threads. '
-          '\nYou should choose at most the number of processor cores you have.'
-          '\nWARNING: System size need\'s to be an integer multiple of \n'
-          '[STRIDE * ', config.div[0], ' and STRIDE * ', config.div[1], '] '
-          '\nwhere STRIDE is selected when compiling the C++ code. \n')
+                                                                                           '\nINFO: this product will correspond to the total number of threads. '
+                                                                                           '\nYou should choose at most the number of processor cores you have.'
+                                                                                           '\nWARNING: System size need\'s to be an integer multiple of \n'
+                                                                                           '[STRIDE * ', config.div[0],
+          ' and STRIDE * ', config.div[1], '] '
+                                           '\nwhere STRIDE is selected when compiling the C++ code. \n')
 
     f.create_dataset('Divisions', data=config.div, dtype='u4')
     # space dimension of the lattice 1D, 2D, 3D
@@ -1502,39 +1503,41 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
             energy_ = single_singlshot_cond['energy']
             eta_ = single_singlshot_cond['eta']
             preserve_disorder_ = single_singlshot_cond['preserve_disorder']
+            moments_ = single_singlshot_cond['num_moments']
 
             # get the lengts
             len_en = energy_.size
             len_eta = eta_.size
             len_preserve_dis = preserve_disorder_.size
+            len_moments = moments_.size
+
+            lengths = np.array([len_en, len_eta, len_preserve_dis, len_moments])
 
             # find the max length
-            if len_en > len_eta:
-                length = len_en
-            else:
-                length = len_eta
+            max_length = np.max(lengths)
 
-            # check if both have larger length then 1 and if their length is not equal
-            if len_en * len_eta != length and len_en * len_eta != length ** 2:
-                print('Number of different energies should either match number of broadening (eta) values,'
-                      'or you one of the two parameters should have a single realisation. \n')
-                raise SystemExit('Invalid parametrization!')
-            if len_preserve_dis > length:
-                raise SystemExit('Choose less disorder preserve_disorder parameters!')
+            # check if lenghts are consistent
+            if (len_en != max_length and len_en != 1) or (len_eta != max_length and len_eta != 1) or \
+                    (len_preserve_dis != max_length and len_preserve_dis != 1) or \
+                    (len_moments != max_length and len_moments != 1):
+                raise SystemExit('Number of moments, eta, energy and preserve_disorder should either have the same '
+                                 'length or specified as a single value! Choose them accordingly.')
 
-            # make two lists of equal length
+            # make all lists equal in length
             if len_en == 1:
-                energy_ = np.repeat(energy_, length)
+                energy_ = np.repeat(energy_, max_length)
             if len_eta == 1:
-                eta_ = np.repeat(eta_, length)
+                eta_ = np.repeat(eta_, max_length)
             if len_preserve_dis == 1:
-                preserve_disorder_ = np.repeat(preserve_disorder_, length)
+                preserve_disorder_ = np.repeat(preserve_disorder_, max_length)
+            if len_moments == 1:
+                moments_ = np.repeat(moments_, max_length)
 
-            moments.append(single_singlshot_cond['num_moments'])
-            random.append(single_singlshot_cond['num_random'])
-            dis.append(single_singlshot_cond['num_disorder'])
+            moments.append(moments_)
             energies.append(energy_)
             eta.append(eta_)
+            random.append(single_singlshot_cond['num_random'])
+            dis.append(single_singlshot_cond['num_disorder'])
             direction.append(single_singlshot_cond['direction'])
             preserve_disorder.append(preserve_disorder_)
 
