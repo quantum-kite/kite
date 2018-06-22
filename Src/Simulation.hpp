@@ -742,11 +742,10 @@ public:
     // Obtain the relevant quantities from the queue
     int NRandomV = queue.NRandom;
     int NDisorder = queue.NDisorder;
-    int N_cheb_moments = queue.NMoments;
     Eigen::Array<double, -1, -1> jobs = queue.singleshot_energiesgammas;
     std::string indices_string = queue.direction_string;
     std::string name_dataset = queue.label;
-    int N_energies = jobs.rows(); //one of them is one. 
+    int N_energies = jobs.rows();
     
     // process the string with indices and verify if the demanded
     // calculation is meaningful. For that to be true, this has to be a 
@@ -792,6 +791,7 @@ public:
 #endif
     long average = 0;
     double job_energy, job_gamma, job_preserve_disorder;
+    int job_NMoments;
     for(int disorder = 0; disorder < NDisorder; disorder++){
       h.generate_disorder();
       h.build_velocity(indices.at(0),0u);
@@ -802,6 +802,7 @@ public:
         job_energy = jobs(job_index, 0);
         job_gamma = jobs(job_index, 1);
         job_preserve_disorder = jobs(job_index, 2);
+        job_NMoments = int(jobs(job_index,3));
         std::complex<double> energy(job_energy, job_gamma);
         
         if(job_preserve_disorder == 0.0){
@@ -829,7 +830,7 @@ public:
           generalized_velocity(&phi, &phi0, indices, 0);      // |phi> = v |phi_0>
 
 
-          for(int n = 0; n < N_cheb_moments; n++){		
+          for(int n = 0; n < job_NMoments; n++){		
             if(n!=0) cheb_iteration(&phi, n-1);
 
             phi1.v.col(0) += phi.v.col(phi.get_index())
@@ -849,7 +850,7 @@ public:
           phi.v.col(0) = phi0.v.col(0);
           phi0.v.col(0).setZero(); 
 
-          for(int n = 0; n < N_cheb_moments; n++){		
+          for(int n = 0; n < job_NMoments; n++){		
             if(n!=0) cheb_iteration(&phi, n-1);
             
             phi0.v.col(0) += phi.v.col(phi.get_index())
@@ -879,7 +880,7 @@ public:
 
           for(int nn = 0; nn < SSPRINT; nn++){
 
-            for(int n = nn*N_cheb_moments/SSPRINT; n < N_cheb_moments/SSPRINT*(nn+1); n++){	
+            for(int n = nn*job_NMoments/SSPRINT; n < job_NMoments/SSPRINT*(nn+1); n++){	
               if(n!=0) cheb_iteration(&phir1, n-1);
 
               phi1.v.col(0) += phir1.v.col(phir1.get_index())
@@ -895,7 +896,7 @@ public:
             phi2.empty_ghosts(0);
           
             
-            for(int n = nn*N_cheb_moments/SSPRINT; n < N_cheb_moments/SSPRINT*(nn+1); n++){		
+            for(int n = nn*job_NMoments/SSPRINT; n < job_NMoments/SSPRINT*(nn+1); n++){		
               if(n!=0) cheb_iteration(&phir2, n-1);
 
               phi0.v.col(0) += phir2.v.col(phir2.get_index())
@@ -917,7 +918,7 @@ public:
 #pragma omp master
             {
             std::cout << "   energy: " << energy << " moments: "; 
-            std::cout << N_cheb_moments/SSPRINT*(nn+1) << " SS_Cond: " << temp*factor << "\n" << std::flush;
+            std::cout << job_NMoments/SSPRINT*(nn+1) << " SS_Cond: " << temp*factor << "\n" << std::flush;
             if(nn == SSPRINT-1)
               std::cout << "\n";
             }
@@ -965,12 +966,13 @@ public:
       
       // Create array to store the data
       Eigen::Array<double, -1, -1> store_data;
-      store_data = Eigen::Array<double, -1, -1>::Zero(3, jobs.rows());
+      store_data = Eigen::Array<double, -1, -1>::Zero(4, jobs.rows());
       
       for(int ener = 0; ener < N_energies; ener++){
         store_data(0, ener) = jobs.real()(ener, 0)*EScale;
         store_data(1, ener) = jobs.real()(ener, 1)*EScale;
-        store_data(2, ener) = Global.singleshot_cond.real()(ener);
+        store_data(2, ener) = jobs(ener, 3);
+        store_data(3, ener) = Global.singleshot_cond.real()(ener);
       }
       
       

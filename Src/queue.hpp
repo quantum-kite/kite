@@ -5,6 +5,7 @@
 /*                                                              */
 /****************************************************************/
 
+#include <algorithm>
 
 std::string num2str3(int dir_num){
   std::string dir;
@@ -152,8 +153,6 @@ std::vector<measurement_queue> fill_queue(char *name){
        get_hdf5<int>(&NMoments, file, (char *)  "/Calculation/conductivity_optical/NumMoments");
        get_hdf5<int>(&NRandom, file, (char *)   "/Calculation/conductivity_optical/NumRandoms");
        get_hdf5<int>(&NDisorder, file, (char *)   "/Calculation/conductivity_optical/NumDisorder");
-       //NDisorder = 1;
-       //conductivity_optical = true;
       
        // convert the numerical value for the direction into the string that represents it
        std::string dir(num2str2(direction));
@@ -173,7 +172,6 @@ std::vector<measurement_queue> fill_queue(char *name){
        get_hdf5<int>(&NMoments, file, (char *)  "/Calculation/conductivity_dc/NumMoments");
        get_hdf5<int>(&NRandom, file, (char *)   "/Calculation/conductivity_dc/NumRandoms");
        get_hdf5<int>(&NDisorder, file, (char *) "/Calculation/conductivity_dc/NumDisorder");
-       //NDisorder = 1;
        //conductivity_dc = true;
 
        // convert the numerical value for the direction into the string that represents it
@@ -235,21 +233,24 @@ std::vector<measurement_queue> fill_queue(char *name){
 class singleshot_measurement_queue{
   public:
     std::string direction_string;
-    int NMoments;
     int NDisorder;
     int NRandom;
     Eigen::Array<double, -1, 1> singleshot_energies;
     Eigen::Array<double, -1, 1> singleshot_gammas;
     Eigen::Array<double, -1, 1> singleshot_preserve_disorders;
+    Eigen::Array<int, -1, 1> NMoments;
     Eigen::Array<double, -1, -1> singleshot_energiesgammas;
     std::string label;
     double time_length;
 
     void embed_time(double avg_duration){
-      time_length = NMoments*avg_duration*2*NDisorder*NRandom*singleshot_energies.rows();
+      time_length = 0;
+      for(int i = 0; i < NMoments.rows(); i++){
+        time_length =+ NMoments(i)*avg_duration*2*NDisorder*NRandom;
+      }
     };
 
-    singleshot_measurement_queue(std::string dir_string, int moments, int disorder, 
+    singleshot_measurement_queue(std::string dir_string, Eigen::Array<int, -1, 1> moments, int disorder, 
         int random, std::string name, Eigen::Array<double, -1, 1> energies, 
         Eigen::Array<double, -1, 1>  gammas, Eigen::Array<double, -1, 1> preserve_disorders){
       debug_message("Entered singleshot_measurement_queue constructor\n");
@@ -262,37 +263,30 @@ class singleshot_measurement_queue{
       singleshot_gammas = gammas;
       singleshot_preserve_disorders = preserve_disorders;
 
-      if(singleshot_energies.rows() == singleshot_gammas.rows() and 
-         singleshot_energies.rows() == singleshot_preserve_disorders.rows()){
-        singleshot_energiesgammas = Eigen::Array<double, -1, -1>::Zero(singleshot_energies.rows(), 3);
-
-        for(int i = 0; i < singleshot_energies.rows(); i++){
-          singleshot_energiesgammas(i,0) = singleshot_energies(i);
-          singleshot_energiesgammas(i,1) = singleshot_gammas(i);
-          singleshot_energiesgammas(i,2) = singleshot_preserve_disorders(i);
-        }
-      } else {
-        if(singleshot_energies.rows() == 1 and singleshot_gammas.rows() == singleshot_preserve_disorders.rows()){
-          for(int i = 0; i < singleshot_gammas.rows(); i++){
-            singleshot_energiesgammas(i,0) = singleshot_energies(0);
-            singleshot_energiesgammas(i,1) = singleshot_gammas(i);
-            singleshot_energiesgammas(i,2) = singleshot_preserve_disorders(i);
-          }
-        } else {
-          if(singleshot_gammas.rows() == 1 and singleshot_energies.rows() == singleshot_preserve_disorders.rows()){
-            for(int i = 0; i < singleshot_energies.rows(); i++){
-              singleshot_energiesgammas(i,0) = singleshot_energies(i);
-              singleshot_energiesgammas(i,1) = singleshot_gammas(0);
-              singleshot_energiesgammas(i,2) = singleshot_preserve_disorders(i);
-            }
-          } else {
-              std::cout << "SingleShot: Number of energies, gammas or preserve_disorders do not match. Exiting.\n";
-              exit(0);
-          }
-        }
+      // determine the number of rows in each of the quantities that characterize each job
+      // and find out how many jobs there are (max_rows)
+      int rows[] = {NMoments.rows(), singleshot_energies.rows(), 
+        singleshot_gammas.rows(), singleshot_preserve_disorders.rows()};
+      int num_jobs = *std::max_element(rows, rows+4);
+      
+      // Check if the lists all have the same number of elements
+      if(singleshot_preserve_disorders.rows() != num_jobs or
+         singleshot_gammas.rows() != num_jobs or
+         singleshot_energies.rows() != num_jobs or
+         NMoments.rows() != num_jobs){
+        std::cout << "Singleshot: The lists with gammas, energies, moments and preserve_disorder must"
+          " all have the same number of elements. Exiting.\n";
+        exit(1);
       }
 
-
+      // Fill the array of jobs
+      singleshot_energiesgammas = Eigen::Array<double, -1, -1>::Zero(num_jobs, 4);
+      for(int i = 0; i < num_jobs; i++){
+        singleshot_energiesgammas(i,0) = singleshot_energies(i);
+        singleshot_energiesgammas(i,1) = singleshot_gammas(i);
+        singleshot_energiesgammas(i,2) = singleshot_preserve_disorders(i);
+        singleshot_energiesgammas(i,3) = NMoments(i);
+      }
 
       debug_message("Left singleshot_measurement_queue constructor.\n");
     };
@@ -306,7 +300,8 @@ std::vector<singleshot_measurement_queue> fill_singleshot_queue(char *name){
     Eigen::Array<double, -1, 1> energies;
     Eigen::Array<double, -1, 1> gammas;
     Eigen::Array<double, -1, 1> preserve_disorders;
-    int NDisorder, NRandom, NMoments, direction;
+    Eigen::Array<int, -1, 1> moments;
+    int NDisorder, NRandom, direction;
     std::string direction_string;
     
     NDisorder = 1;
@@ -315,7 +310,6 @@ std::vector<singleshot_measurement_queue> fill_singleshot_queue(char *name){
     try{
        debug_message("single_shot dc checking if we need to calculate it.\n");
        get_hdf5<int>(&direction, file, (char *)   "/Calculation/singleshot_conductivity_dc/Direction");
-       get_hdf5<int>(&NMoments, file, (char *)  "/Calculation/singleshot_conductivity_dc/NumMoments");
        get_hdf5<int>(&NRandom, file, (char *)   "/Calculation/singleshot_conductivity_dc/NumRandoms");
        
        if(direction == 0)
@@ -346,7 +340,7 @@ std::vector<singleshot_measurement_queue> fill_singleshot_queue(char *name){
       delete dataset_gamma;
       get_hdf5<double>(gammas.data(),  	file, (char *)   "/Calculation/singleshot_conductivity_dc/Gamma");
 
-      // We also need to determine the number of gammas that we need to calculate
+      // We also need to determine the number of preserve disorders that we need to calculate
       H5::DataSet * dataset_preserve_disorder     	= new H5::DataSet(file->openDataSet("/Calculation/singleshot_conductivity_dc/PreserveDisorder"));
       H5::DataSpace * dataspace_preserve_disorder 	= new H5::DataSpace(dataset_preserve_disorder->getSpace());
       dataspace_preserve_disorder->getSimpleExtentDims(dims_out, NULL);	
@@ -355,7 +349,16 @@ std::vector<singleshot_measurement_queue> fill_singleshot_queue(char *name){
       delete dataset_preserve_disorder;
       get_hdf5<double>(preserve_disorders.data(),  	file, (char *)   "/Calculation/singleshot_conductivity_dc/PreserveDisorder");
 
-      queue.push_back(singleshot_measurement_queue(direction_string, NMoments,
+      // We also need to determine the number of moments that we need to calculate
+      H5::DataSet * dataset_moments     	= new H5::DataSet(file->openDataSet("/Calculation/singleshot_conductivity_dc/NumMoments"));
+      H5::DataSpace * dataspace_moments 	= new H5::DataSpace(dataset_moments->getSpace());
+      dataspace_moments->getSimpleExtentDims(dims_out, NULL);	
+      moments = Eigen::Array<int, -1, 1>::Zero(dims_out[0]*dims_out[1], 1);	
+      delete dataspace_moments;
+      delete dataset_moments;
+      get_hdf5<int>(moments.data(),  	file, (char *)   "/Calculation/singleshot_conductivity_dc/NumMoments");
+
+      queue.push_back(singleshot_measurement_queue(direction_string, moments,
             NDisorder, NRandom, "/Calculation/singleshot_conductivity_dc/SingleShot",
             energies, gammas, preserve_disorders));
       
