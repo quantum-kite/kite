@@ -53,7 +53,7 @@ lattice = pb.load(name)
 configuration = kite.Configuration(divisions=[nx, ny], length=[l1, l2], boundaries=[True, True],
                                    is_complex=False, precision=1, spectrum_range=[-10, 10])
 # require the calculation of DOS
-num_moments = 2000
+num_moments = 1000
 calculation = kite.Calculation(configuration)
 calculation.dos(num_moments=num_moments, num_random=1, num_disorder=1, num_points=1000)
 # make modification object which caries info about
@@ -63,9 +63,9 @@ model = pb.Model(lattice, pb.rectangle(100, 100),
                  pb.translational_symmetry(a1=50, a2=50))
 # if you would like to specify Disorder, use other function that takes of converting KITE to Pybinding disorder objects
 # model = kite.make_pybinding_model(lattice)
-dos = pb.kpm(model).calc_dos(np.linspace(-4, 4, 2000), broadening=1e-2, num_random=1)
-#dos.plot()
-#plt.show()
+# dos = pb.kpm(model).calc_dos(np.linspace(-4, 4, 2000), broadening=1e-2, num_random=1)
+# dos.plot()
+# plt.show()
 
 # configure the *.h5 file
 kite.config_system(lattice, configuration, calculation, filename='tblg_{:.3f}.h5'.format(angle))
