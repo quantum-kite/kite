@@ -265,7 +265,7 @@ class singleshot_measurement_queue{
 
       // determine the number of rows in each of the quantities that characterize each job
       // and find out how many jobs there are (max_rows)
-      int rows[] = {NMoments.rows(), singleshot_energies.rows(), 
+      long int rows[] = {NMoments.rows(), singleshot_energies.rows(), 
         singleshot_gammas.rows(), singleshot_preserve_disorders.rows()};
       int num_jobs = *std::max_element(rows, rows+4);
       
