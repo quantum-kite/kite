@@ -750,6 +750,15 @@ public:
     std::string name_dataset = queue.label;
     int N_energies = jobs.rows();
     
+    // Fixing the factor
+    double unit_cell_area = fabs(r.rLat.determinant());
+    unsigned int number_of_orbitals = r.Orb; 	// This is necessary because the normalization factor inside the random 
+                                              // vectors is not the number of lattice sites N but the number of states, 
+                                              // which is N*number_of_orbitals
+    unsigned int spin_degeneracy = 1;
+    
+    double factor = -2.0*spin_degeneracy*number_of_orbitals/unit_cell_area;	// This is in units of sigma_0, hence the 4
+    
     // process the string with indices and verify if the demanded
     // calculation is meaningful. For that to be true, this has to be a 
     // longitudinal conductivity
@@ -788,7 +797,8 @@ public:
 #if (SSPRINT != 0)
 #pragma omp master
           {
-          std::cout << "Study of the convergence.\n";
+          std::cout << "Study of the convergence. To disable these messages"
+            " set the flag SSPRINT to 0 in the main.cpp file\n";
           }
 #pragma omp barrier 
 #endif
@@ -818,8 +828,7 @@ public:
         long average_R = average;
         // iteration over disorder and the number of random vectors
         for(int randV = 0; randV < NRandomV; randV++){
-
-          
+                   
 #if (SSPRINT == 0)
           debug_message("Started SingleShot calculation for SSPRINT=0\n");
           // initialize the random vector
@@ -866,6 +875,11 @@ public:
               cond_array(job_index))/value_type(average_R+1);						
           debug_message("Concluded SingleShot calculation for SSPRINT=0\n");
 #elif (SSPRINT != 0)
+#pragma omp master
+          {
+            std::cout << "   Random vector " << randV << "\n";
+          }
+#pragma omp barrier
           debug_message("Started SingleShot calculation for SSPRINT!=0\n");
           // initialize the random vector
           phi0.initiate_vector();					
@@ -910,18 +924,18 @@ public:
             // if you want to add it to the average conductivity, you have yo wait
             // until all the moments have been summed. otherwise the result would be wrong
             T temp;
-            temp = (T(phi2.v.col(0).adjoint()*phi0.v.col(0)) - 
-                  cond_array(job_index))/value_type(average_R+1);
-            T factor = -2.0*1*r.Orb/fabs(r.rLat.determinant())*omp_get_num_threads();
+            temp = T(phi2.v.col(0).adjoint()*phi0.v.col(0));
 
 
-            if(nn == SSPRINT-1)
-              cond_array(job_index) += temp; 						
+            if(nn == SSPRINT-1){
+              cond_array(job_index) += (temp - cond_array(job_index))/value_type(average_R+1);
+            }
             
 #pragma omp master
             {
-            std::cout << "   energy: " << energy << " moments: "; 
-            std::cout << job_NMoments/SSPRINT*(nn+1) << " SS_Cond: " << temp*factor << "\n" << std::flush;
+            std::cout << "   energy: " << (energy*EScale).real() << " broadening: "
+              << (energy*EScale).imag() << " moments: "; 
+            std::cout << job_NMoments/SSPRINT*(nn+1) << " SS_Cond: " << temp*factor*(1.0*omp_get_num_threads()) << "\n" << std::flush;
             if(nn == SSPRINT-1)
               std::cout << "\n";
             }
@@ -931,6 +945,13 @@ public:
             average_R++;
             debug_message("Concluded SingleShot calculation for SSPRINT!=0\n");
         }
+#if (SSPRINT!=0)
+#pragma omp master
+        {
+          std::cout << "Average over " << NRandomV << " random vectors: " << cond_array(job_index)*factor*(1.0*omp_get_num_threads()) << "\n\n";
+        }
+#pragma omp barrier
+#endif
       }
       average += NRandomV;
     }
@@ -957,14 +978,6 @@ public:
 #pragma omp master
     {
 			
-      // Fixing the factor
-      double unit_cell_area = fabs(r.rLat.determinant());
-      unsigned int number_of_orbitals = r.Orb; 	// This is necessary because the normalization factor inside the random 
-                                                // vectors is not the number of lattice sites N but the number of states, 
-                                                // which is N*number_of_orbitals
-      unsigned int spin_degeneracy = 1;
-      
-      double factor = -2.0*spin_degeneracy*number_of_orbitals/unit_cell_area;	// This is in units of sigma_0, hence the 4
       Global.singleshot_cond *= factor;
       
       // Create array to store the data
