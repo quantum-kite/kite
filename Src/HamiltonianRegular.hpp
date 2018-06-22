@@ -58,7 +58,7 @@ struct Periodic_Operator {
     Eigen::Matrix<double, D, 1> dr; 
     Eigen::Matrix<double, D, 1> dr_a; //difference vector in coordinates of the lattice
     
-    // These quantities will be needed to calculate the phase due to the magnetic field
+    // These quantities will be needed to calculate the phase due to the ghost_correlation
     Eigen::Matrix<double, D, 1> orbital_difference_R; //vectors in real space
     Eigen::Matrix<double, D, 1> lattice_difference_R;
     Eigen::Matrix<double, D, 1> orbital_difference_a; //vectors in coordinates of the lattice
@@ -95,11 +95,9 @@ struct Periodic_Operator {
           dr_a = orbital_difference_a + lattice_difference_a;
           
           
-          // periodic part of the Peierls phase. 
-          // If the kpm vector is not complex, peierls1(phase) will return 1.0, so it is effectively harmless.
-          //double phase = ((0.5*dr_a.transpose() + (r.rLat.inverse()*r.rOrb.col(io)).transpose())*r.vect_pot*dr_a - lattice_difference_a.transpose()*r.vect_pot*r.rLat.inverse()*r.rOrb.col(b3.coord[D] + io))(0,0);
-          double phase = ((-0.5*dr_a.transpose() + (r.rLat.inverse()*r.rOrb.col(b3.coord[D] + io)).transpose())*r.vect_pot*(-dr_a) + lattice_difference_a.transpose()*r.vect_pot*r.rLat.inverse()*r.rOrb.col(io))(0,0);
-          hopping(i,io) *= peierls1(phase);    
+          // periodic part of the ghosts_correlation. 
+          double phase = ((-0.5*dr_a.transpose() + (r.rLat.inverse()*r.rOrb.col(b3.coord[D] + io)).transpose())*r.ghost_pot*(-dr_a) + lattice_difference_a.transpose()*r.ghost_pot*r.rLat.inverse()*r.rOrb.col(io))(0,0);
+          hopping(i,io) *= ghosts_correlation1(phase);    
         }
     debug_message("Left Convert_Build.\n");
   };
@@ -141,13 +139,13 @@ struct Periodic_Operator {
   }	  
 	
   template <typename U = T>
-  typename std::enable_if<is_tt<std::complex, U>::value, U>::type peierls1(double phase) {
+  typename std::enable_if<is_tt<std::complex, U>::value, U>::type ghosts_correlation1(double phase) {
 	std::complex<double> im(0,1.0);
     return U(exp(im*phase));
   };
   
   template <typename U = T>
-  typename std::enable_if<!is_tt<std::complex, U>::value, U>::type peierls1(double phase) {
+  typename std::enable_if<!is_tt<std::complex, U>::value, U>::type ghosts_correlation1(double phase) {
     return 1.0;
   };
 };

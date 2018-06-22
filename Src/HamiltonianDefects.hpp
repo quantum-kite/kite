@@ -112,7 +112,7 @@ struct Defect_Operator  {
     Coordinates<std::ptrdiff_t, D + 1> Lda(r.Ld), Ldb(r.Ld),  Lta(r.Lt);
     Eigen::Map<Eigen::Matrix<std::ptrdiff_t,D, 1>> va(Lda.coord), vb(Ldb.coord), Vta(Lta.coord) ; // Column vector
     Eigen::Matrix<double, D, 1> dif_R, dif_O, sum_O, ra;
-    Eigen::Matrix<double, D, D> matA = r.rLat.inverse().transpose() * r.vect_pot * r.rLat.inverse();
+    Eigen::Matrix<double, D, D> matA = r.rLat.inverse().transpose() * r.ghost_pot * r.rLat.inverse();
     new_hopping = Eigen::Matrix<T, Eigen::Dynamic,Eigen::Dynamic>::Zero(hopping.size(), r.Ld[D - 1]);
     
     
@@ -133,9 +133,9 @@ struct Defect_Operator  {
 	    phase1 =  0.5 * (dif_R + sum_O).transpose() * (matA * (dif_R + dif_O)).matrix();
 	    phase2 =  - dif_R.transpose() * (matA * r.rOrb.col(Lda.coord[D])).matrix();
 	    phase3 =  - dif_R.transpose() * (matA * ra).matrix();	   
-	    new_hopping(ih, iv) = hopping.at(ih) * simul.h.peierls(phase1 + phase2 + phase3);
+	    new_hopping(ih, iv) = hopping.at(ih) * simul.h.ghosts_correlation(phase1 + phase2 + phase3);
 	  }
-	hopping.at(ih) *= simul.h.peierls(phase1 + phase2);
+	hopping.at(ih) *= simul.h.ghosts_correlation(phase1 + phase2);
       }
     
     debug_message("Left Defect_Operator constructor.\n");
@@ -385,16 +385,16 @@ struct Defect_Operator  {
 	std::size_t i1 = border_element1[i];
 	std::size_t i2 = border_element2[i];
 	
-	// These four lines pertrain only to the magnetic field
+	// These four lines pertrain only to the ghost_correlation
 	r.convertCoordinates(global1, local1.set_coord(i1));
 	r.convertCoordinates(global2, local1.set_coord(i2));
 	temp_vect  = (v_global2 - v_global1).template cast<double>().matrix().transpose();
-	phase = temp_vect(0)*r.vect_pot(0,1)*v_global1(1); //.template cast<double>().matrix();
+	phase = temp_vect(0)*r.ghost_pot(0,1)*v_global1(1); //.template cast<double>().matrix();
 	
 	if(VELOCITY)
-	  phi0[i1] += value_type(MULT + 1) * border_v.at(axis).at(i) * border_hopping[i] * phiM1[i2] * simul.h.peierls(phase);
+	  phi0[i1] += value_type(MULT + 1) * border_v.at(axis).at(i) * border_hopping[i] * phiM1[i2] * simul.h.ghosts_correlation(phase);
 	else
-	phi0[i1] += value_type(MULT + 1) * border_hopping[i] * phiM1[i2] * simul.h.peierls(phase);
+	phi0[i1] += value_type(MULT + 1) * border_hopping[i] * phiM1[i2] * simul.h.ghosts_correlation(phase);
       }
     
     if(!VELOCITY)

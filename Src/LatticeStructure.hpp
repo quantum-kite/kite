@@ -117,7 +117,7 @@ public:
   int MagneticField;
 
   
-  Eigen::Matrix<double, D, D> vect_pot; // vector potential
+  Eigen::Matrix<double, D, D> ghost_pot; // ghosts_correlation potential
   
   LatticeStructure(char *name ) {
 #pragma omp critical
@@ -144,26 +144,13 @@ public:
         exit(1);
       }
 
-
-
-      MagneticField = 0;
-      try {
-        H5::Exception::dontPrint();
-        get_hdf5<int>(&MagneticField,  file, (char *)   "/Hamiltonian/MagneticField");
-      }
-      catch (H5::Exception& e){}
-	        
       file->close();
     }
 
-
+    // Set the ghost_correlation potential and normalize it to the size of the system
+    ghost_pot.setZero();
+		ghost_pot(0,1) = NUM_GHOST_CORR/Lt[1]*2.0*M_PI;
     
-    // Set the vector potential
-    vect_pot.setZero();
-    vect_pot(0,1) = MagneticField*1.0/Lt[1]*2.0*M_PI;
-    
-    
-
     Nd = 1;
     N = 1;
     Nt = 1;

@@ -2,7 +2,7 @@ OS := $(shell uname)
 ifeq ($(OS),Darwin)
 CC = g++-6 -DEIGEN_DONT_PARALLELIZE -fdiagnostics-color=always  -O2  #-ftree-vectorize  -ftree-vectorizer-verbose=7 -fopt-info-vec-missed
 else
-CC = g++
+CC = g++ -fopenmp -std=c++11
 endif
 CINCLUDE = -I/opt/local/lib/ 
 CINCLUDE += -ISrc -I/usr/local/hdf5/include -I/usr/local/Cellar/hdf5/1.10.1_2/include/ -I/usr/include/hdf5/serial #HDF5
@@ -11,7 +11,7 @@ CLIBS = -L/usr/local/hdf5/lib/ -L/usr/lib/x86_64-linux-gnu/hdf5/serial -L/usr/lo
 CLIBS += -lhdf5_hl_cpp -lhdf5_cpp -lhdf5_hl -lhdf5  
 VPATH = .
 OBJS = *.o
-DEBUG=0
+DEBUG=1
 VERBOSE=1
 
 all:    clean

@@ -70,9 +70,9 @@ public:
   void empty_ghosts(int){}; 
   
   template <typename U = T>
-  typename std::enable_if<is_tt<std::complex, U>::value, U>::type peierls2(double phase){return 1;};
+  typename std::enable_if<is_tt<std::complex, U>::value, U>::type ghosts_correlation2(double phase){return 1;};
   template <typename U = T>
-  typename std::enable_if<!is_tt<std::complex, U>::value, U>::type peierls2(double phase){return 1;};
+  typename std::enable_if<!is_tt<std::complex, U>::value, U>::type ghosts_correlation2(double phase){return 1;};
 };
 
 

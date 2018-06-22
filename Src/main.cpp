@@ -61,6 +61,8 @@
 #define PATTERNS  4
 #define NGHOSTS   2
 #define VVERBOSE 0
+#define NUM_GHOST_CORR 0
+#define SSPRINT 8
 
 // These are the verbose and debug messages
 #define outcol "\033[1;31m"
@@ -182,21 +184,6 @@ int main(int argc, char *argv[]){
   get_hdf5(&precision,  file, (char *) "/PRECISION");
   get_hdf5(&dim,        file, (char *) "/DIM");
   
-  int MagneticField = 0;
-  try {
-		H5::Exception::dontPrint();
-		get_hdf5<int>(&MagneticField,  file, (char *)   "/Hamiltonian/MagneticField");
-	}
-	catch (H5::Exception& e){}
-  
-  // Magnetic field requires complex-valued functions. Make sure the user knows about this
-	if(MagneticField != 0 and !is_complex){
-		std::cout << "If you want to include a magnetic field, please use complex-valued functions. ";
-		std::cout << "This may be done by setting the 'complex' flag to True in the lattice_building python script ";
-    std::cout << "or manually by directly setting the 'complex' flag to 1 in the .h5 file. Exiting.\n";
-		exit(1);		
-  }
-	
   
   file->close();
   
@@ -329,7 +316,7 @@ int main(int argc, char *argv[]){
   }
   
   debug_message("Program ended with success!\n");
-  verbose_message("Done.");
+  verbose_message("Done.\n");
   return 0;
 }
 

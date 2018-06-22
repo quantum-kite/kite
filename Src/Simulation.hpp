@@ -39,7 +39,7 @@ public:
     // Regular quantities to calculate, such as DOS and CondXX
     H5::H5File * file         = new H5::H5File(name, H5F_ACC_RDONLY);
 
-    // Fetch the energy scale and the magnetic field, if it exists
+    // Fetch the energy scale
     get_hdf5<double>(&EnergyScale,  file, (char *)   "/EnergyScale");
     delete file;
 
@@ -121,7 +121,7 @@ public:
         verbose_message("\n");
         simul.Measure_Gamma(queue.at(i));			
       }
-      verbose_message("----------------------------------------------------------------\n\n");
+      verbose_message("------------------------------------------------------------------\n\n");
     }
     debug_message("Left global_simulation\n");
   };
@@ -642,16 +642,16 @@ public:
   void Single_Shot(double EScale, singleshot_measurement_queue queue) {
     // Calculate the longitudinal dc conductivity for a single value of the energy
     
+    debug_message("Entered Single_Shot\n");
     
     // Obtain the relevant quantities from the queue
     int NRandomV = queue.NRandom;
     int NDisorder = queue.NDisorder;
     int N_cheb_moments = queue.NMoments;
-    Eigen::Array<double, -1, 1> energy_array = queue.singleshot_energies;
-    double finite_gamma = queue.single_gamma;
+    Eigen::Array<double, -1, -1> jobs = queue.singleshot_energiesgammas;
     std::string indices_string = queue.direction_string;
     std::string name_dataset = queue.label;
-    int N_energies = energy_array.cols()*energy_array.rows(); //one of them is one. 
+    int N_energies = jobs.rows(); //one of them is one. 
     
     // process the string with indices and verify if the demanded
     // calculation is meaningful. For that to be true, this has to be a 
@@ -662,41 +662,77 @@ public:
       std::cout << "Please use directions 'x,x' or 'y,y'. Exiting.\n";
       exit(1);
     }
-
+    
 
 		// initialize the kpm vectors necessary for this calculation
     typedef typename extract_value_type<T>::value_type value_type;
+
+    // if the SSPRINT flag is true, we need one kpm vector for the right vector
+    // and one for the left vector. Otherwise, we can just recycle it
+#if (SSPRINT == 0)
     KPM_Vector<T,D> phi (2, *this);
+#elif (SSPRINT != 0)
+    KPM_Vector<T,D> phir1 (2, *this);
+    KPM_Vector<T,D> phir2 (2, *this);
+#endif
+
+    // right and left vectors
     KPM_Vector<T,D> phi0(1, *this);
     KPM_Vector<T,D> phi1(1, *this);
+    
+    // if SSPRINT is true, we need a temporary vector to store v|phi>
+#if (SSPRINT != 0)
+    KPM_Vector<T,D> phi2(1, *this);
+#endif
 	
     // initialize the conductivity array
     Eigen::Array<T, -1, -1> cond_array;
     cond_array = Eigen::Array<T, -1, -1>::Zero(1, N_energies);
+#if (SSPRINT != 0)
+#pragma omp master
+          {
+          std::cout << "Study of the convergence.\n";
+          }
+#pragma omp barrier 
+#endif
+    long average = 0;
+    double job_energy, job_gamma, job_preserve_disorder;
+    for(int disorder = 0; disorder < NDisorder; disorder++){
+      h.generate_disorder();
+      h.build_velocity(indices.at(0),0u);
+      h.build_velocity(indices.at(1),1u);
+      
+      // iteration over each energy and gammma
+      for(int job_index = 0; job_index < N_energies; job_index++){
+        job_energy = jobs(job_index, 0);
+        job_gamma = jobs(job_index, 1);
+        job_preserve_disorder = jobs(job_index, 2);
+        std::complex<double> energy(job_energy, job_gamma);
+        
+        if(job_preserve_disorder == 0.0){
+          h.generate_disorder();
+          h.build_velocity(indices.at(0),0u);
+          h.build_velocity(indices.at(1),1u);
+        }
 
 
-
-    // iteration over each energy
-    for(int ener = 0; ener < N_energies; ener++){
-      std::complex<double> energy(energy_array(ener), finite_gamma);
-
-      // iteration over disorder and the number of random vectors
-      long average = 0;
-      for(int disorder = 0; disorder < NDisorder; disorder++){
-	      h.generate_disorder();
-    	  h.build_velocity(indices.at(0),0u);
-    	  h.build_velocity(indices.at(1),1u);
-
+        long average_R = average;
+        // iteration over disorder and the number of random vectors
         for(int randV = 0; randV < NRandomV; randV++){
 
+          
+#if (SSPRINT == 0)
+          debug_message("Started SingleShot calculation for SSPRINT=0\n");
           // initialize the random vector
           phi0.initiate_vector();					
           phi0.Exchange_Boundaries(); 	
-            
-          // calculate the left KPM vector
-          phi.set_index(0);				
           phi1.v.col(0).setZero();
+
+          // initialize the kpm vectors that will be used in the kpm recursion
+          // the left vector is multiplied by the velocity
+          phi.set_index(0);				
           generalized_velocity(&phi, &phi0, indices, 0);      // |phi> = v |phi_0>
+
 
           for(int n = 0; n < N_cheb_moments; n++){		
             if(n!=0) cheb_iteration(&phi, n-1);
@@ -712,9 +748,7 @@ public:
           phi.Exchange_Boundaries();
           generalized_velocity(&phi1, &phi, indices, 1);
           phi1.empty_ghosts(0);
-        
           
-
           // calculate the right KPM vector. Now we may reuse phi0
           phi.set_index(0);			
           phi.v.col(0) = phi0.v.col(0);
@@ -722,18 +756,84 @@ public:
 
           for(int n = 0; n < N_cheb_moments; n++){		
             if(n!=0) cheb_iteration(&phi, n-1);
-
+            
             phi0.v.col(0) += phi.v.col(phi.get_index())
               *green(n, 1, energy).imag()/(1.0 + int(n==0));
           }
           
           
           // finally, the dot product of phi1 and phi0 yields the conductivity
-          cond_array(ener) += (T(phi1.v.col(0).adjoint()*phi0.v.col(0)) - 
-              cond_array(ener))/value_type(average+1);						
-          average++;
+          cond_array(job_index) += (T(phi1.v.col(0).adjoint()*phi0.v.col(0)) - 
+              cond_array(job_index))/value_type(average_R+1);						
+          debug_message("Concluded SingleShot calculation for SSPRINT=0\n");
+#elif (SSPRINT != 0)
+          debug_message("Started SingleShot calculation for SSPRINT!=0\n");
+          // initialize the random vector
+          phi0.initiate_vector();					
+          phi0.Exchange_Boundaries(); 	
+          phi1.v.col(0).setZero();
+
+          // chebyshev recursion vectors
+          phir1.set_index(0);				
+          phir2.set_index(0);				
+
+          phir2.v.col(0) = phi0.v.col(0);
+          generalized_velocity(&phir1, &phi0, indices, 0);      // |phi> = v |phi_0>
+          // from here on, phi0 is free to be used elsewhere, it is no longer needed
+          phi0.v.col(0).setZero();
+
+          for(int nn = 0; nn < SSPRINT; nn++){
+
+            for(int n = nn*N_cheb_moments/SSPRINT; n < N_cheb_moments/SSPRINT*(nn+1); n++){	
+              if(n!=0) cheb_iteration(&phir1, n-1);
+
+              phi1.v.col(0) += phir1.v.col(phir1.get_index())
+                *green(n, 1, energy).imag()/(1.0 + int(n==0));
+            }
+            
+            // multiply phi1 by the velocity operator again. 
+            // We need a temporary vector to mediate the operation, which will be |phi>
+            // If the SSPRINT flag is set to true, we are going to need the phi1 vector again
+            // so the product of phi1 by the velocity is stored in phi2 instead
+            phi2.set_index(0);
+            generalized_velocity(&phi2, &phi1, indices, 1);
+            phi2.empty_ghosts(0);
+          
+            
+            for(int n = nn*N_cheb_moments/SSPRINT; n < N_cheb_moments/SSPRINT*(nn+1); n++){		
+              if(n!=0) cheb_iteration(&phir2, n-1);
+
+              phi0.v.col(0) += phir2.v.col(phir2.get_index())
+                *green(n, 1, energy).imag()/(1.0 + int(n==0));
+            }
+           
+            // This is the conductivity for a smaller number of chebyshev moments
+            // if you want to add it to the average conductivity, you have yo wait
+            // until all the moments have been summed. otherwise the result would be wrong
+            T temp;
+            temp = (T(phi2.v.col(0).adjoint()*phi0.v.col(0)) - 
+                  cond_array(job_index))/value_type(average_R+1);
+            T factor = -2.0*1*r.Orb/fabs(r.rLat.determinant())*omp_get_num_threads();
+
+
+            if(nn == SSPRINT-1)
+              cond_array(job_index) += temp; 						
+            
+#pragma omp master
+            {
+            std::cout << "   energy: " << energy << " moments: "; 
+            std::cout << N_cheb_moments/SSPRINT*(nn+1) << " SS_Cond: " << temp*factor << "\n" << std::flush;
+            if(nn == SSPRINT-1)
+              std::cout << "\n";
+            }
+#pragma omp barrier
+          }
+#endif
+            average_R++;
+            debug_message("Concluded SingleShot calculation for SSPRINT!=0\n");
         }
       }
+      average += NRandomV;
     }
     // finished calculating the longitudinal DC conductivity for all the energies
     // Now let's store the gamma matrix. Now we're going to use the 
@@ -749,7 +849,9 @@ public:
     //std::cout << "IMPORTANT ! ! !:\n V is not hermitian. Make sure you take this into account\n";
     // in this case there's no problem. both V are anti-hermitic, so the minus signs cancel
 #pragma omp critical
+    {
     Global.singleshot_cond += cond_array;			
+    }
 #pragma omp barrier
     
     
@@ -768,11 +870,12 @@ public:
       
       // Create array to store the data
       Eigen::Array<double, -1, -1> store_data;
-      store_data = Eigen::Array<double, -1, -1>::Zero(2, Global.singleshot_cond.cols());
+      store_data = Eigen::Array<double, -1, -1>::Zero(3, jobs.rows());
       
       for(int ener = 0; ener < N_energies; ener++){
-        store_data(0, ener) = energy_array.real()(ener)*EScale;
-        store_data(1, ener) = Global.singleshot_cond.real()(ener);
+        store_data(0, ener) = jobs.real()(ener, 0)*EScale;
+        store_data(1, ener) = jobs.real()(ener, 1)*EScale;
+        store_data(2, ener) = Global.singleshot_cond.real()(ener);
       }
       
       
