@@ -243,7 +243,11 @@ public:
       }
       Gamma2D(NRandomV, NDisorder, N_moments, indices, name_dataset);
     } else {
-      GammaGeneral(NRandomV, NDisorder, N_moments, indices, name_dataset);
+      if(dim == 3){
+        Gamma3D(NRandomV, NDisorder, N_moments, indices, name_dataset);
+      } else {
+        GammaGeneral(NRandomV, NDisorder, N_moments, indices, name_dataset);
+      }
     }
 
 
@@ -344,6 +348,102 @@ public:
                 gamma.matrix().block(0,(n+i)*N_moments.at(0) + m + j, 1, 1) +=
                   (flatten - gamma.matrix().block(0,(n+i)*N_moments.at(0) + m + j,1,1))/value_type(average + 1);			
               }
+          }
+        }
+        average++;
+      }
+    } 
+    store_gamma(&gamma, N_moments, indices, name_dataset);
+  };
+
+
+  void Gamma3D(int NRandomV, int NDisorder, std::vector<int> N_moments, 
+      std::vector<std::vector<unsigned>> indices, std::string name_dataset){
+    // This function calculates all the kinds of one-dimensional Gamma matrices
+    // such as Tr[Tn]    Tr[v^xx Tn]     etc
+
+    typedef typename extract_value_type<T>::value_type value_type;
+
+    //  --------- INITIALIZATIONS --------------
+    
+    KPM_Vector<T,D> kpm0(1, *this);           // initial random vector
+    KPM_Vector<T,D> kpm_Vn(2, *this);          // left vector that will be Chebyshev-iterated on
+		KPM_Vector<T,D> kpm_VnV(MEMORY, *this);    // kpmL multiplied by the velocity
+    KPM_Vector<T,D> kpm_p(2, *this);          // right-most vector that will be Chebyshev-iterated on
+    KPM_Vector<T,D> kpm_pVm(MEMORY, *this);         // middle vector that will be Chebyshev-iterated on
+
+    // initialize the local gamma matrix and set it to 0
+    int size_gamma = 1;
+    for(int i = 0; i < 3; i++){
+      if(N_moments.at(i) % 2 != 0){
+        std::cout << "The number of moments must be an even number, due to limitations of the program. Aborting\n";
+        exit(1);
+      }
+      size_gamma *= N_moments.at(i);
+    }
+    Eigen::Array<T, -1, -1> gamma = Eigen::Array<T, -1, -1 >::Zero(1, size_gamma);
+ 
+    // finished initializations
+    
+    // start the kpm iteration
+    long average = 0;
+    for(int disorder = 0; disorder < NDisorder; disorder++){
+
+      // Distribute the disorder and update the velocity matrices
+      h.generate_disorder();
+      for(unsigned it = 0; it < indices.size(); it++)
+        h.build_velocity(indices.at(it), it);
+
+      for(int randV = 0; randV < NRandomV; randV++){
+        
+
+        kpm0.initiate_vector();			// original random vector. This sets the index to zero
+        kpm0.Exchange_Boundaries();
+	      kpm_Vn.set_index(0);
+
+        generalized_velocity(&kpm_Vn, &kpm0, indices, 0);
+        
+        for(int n = 0; n < N_moments.at(0); n+=MEMORY){
+
+          // Calculation of the left kpm vector
+          for(int ni = n; ni < n + MEMORY; ni++){
+            if(ni!=0) cheb_iteration(&kpm_Vn, ni-1);
+           
+            kpm_VnV.set_index(ni%MEMORY);
+            generalized_velocity(&kpm_VnV, &kpm_Vn, indices, 0);
+            kpm_VnV.empty_ghosts(ni%MEMORY);
+          }
+          
+          // Calculation of the right kpm vector
+          kpm_p.set_index(0);
+          kpm_p.v.col(0) = kpm0.v.col(0);
+          for(int p = 0; p < N_moments.at(2); p++){
+            if(p!=0) cheb_iteration(&kpm_p, p-1);
+            
+            kpm_pVm.set_index(0);
+            generalized_velocity(&kpm_pVm, &kpm_p, indices, 2);
+            for(int m = 0; m < N_moments.at(1); m += MEMORY){
+              for(int mi = m; mi < m + MEMORY; mi++)
+                if(mi != 0) cheb_iteration(&kpm_pVm, mi-1);
+
+              
+              Eigen::Matrix<T, -1, -1> kpm_product;
+              kpm_product = Eigen::Matrix<T, -1, -1>::Zero(MEMORY, MEMORY); // this line is not necessary
+              kpm_product = kpm_VnV.v.adjoint() * kpm_pVm.v; 
+
+              long int index;
+              for(int i = 0; i < MEMORY; i++)
+                for(int j = 0; j < MEMORY; j++){
+                  index = p*N_moments.at(1)*N_moments.at(0) + (m+j)*N_moments.at(0) + n+i;
+                  gamma(index) += (kpm_product(i, j) - gamma(index))/value_type(average + 1);
+#pragma omp master
+                  {
+                    std::cout << "thread: "<< omp_get_thread_num();
+                  std::cout << "p:"<< p << " m:" << m+j << " n:"  << n+i << " gamma:" <<gamma(index) << "\n";
+                  }
+#pragma omp barrier
+                }
+            }
           }
         }
         average++;
@@ -559,46 +659,41 @@ public:
 		
     //std::cout << "gamma: " << *gamma << "\n";
     
-    switch(dim)
-      {
-      case 2: {
-	//std::cout << "gamma_matrix dimension: " << dim << "\n" << std::flush;
-	Eigen::Array<T,-1,-1> general_gamma = Eigen::Map<Eigen::Array<T,-1,-1>>(gamma->data(), N_moments.at(0), N_moments.at(1));
-	//std::cout << "after map?\n" << std::flush;
+    switch(dim){
+      case 2:{
+        Eigen::Array<T,-1,-1> general_gamma = Eigen::Map<Eigen::Array<T,-1,-1>>(gamma->data(), N_moments.at(0), N_moments.at(1));
 #pragma omp master
-	Global.general_gamma = Eigen::Array<T, -1, -1 > :: Zero(N_moments.at(0), N_moments.at(1));
+        Global.general_gamma = Eigen::Array<T, -1, -1 > :: Zero(N_moments.at(0), N_moments.at(1));
 #pragma omp barrier
-	// Gather the data from all the threads, one by one.
-	// There are some additional symmetry operations that we can take advantage of.
-	// In the case of two indices: Gamma{x,y}(n,m) = Gamma{x,y}(n,m)*, that is, it's self-adjoint.
-	// The factor is -1 when the matrix is anti-hermitian and 1 when hermitian
 #pragma omp critical
-	Global.general_gamma.matrix() += (general_gamma.matrix() + factor*general_gamma.matrix().adjoint())/2.0;
+        Global.general_gamma.matrix() += (general_gamma.matrix() + factor*general_gamma.matrix().adjoint())/2.0;
 #pragma omp barrier
-	break;
+        break;
       }
-      case 1: {
-	Eigen::Array<T,-1,-1> general_gamma = Eigen::Map<Eigen::Array<T,-1,-1>>(gamma->data(), 1, size_gamma);
-	
+      case 1:{
+        Eigen::Array<T,-1,-1> general_gamma = Eigen::Map<Eigen::Array<T,-1,-1>>(gamma->data(), 1, size_gamma);
 #pragma omp master
-	Global.general_gamma = Eigen::Array<T, -1, -1 > :: Zero(1, size_gamma);
+        Global.general_gamma = Eigen::Array<T, -1, -1 > :: Zero(1, size_gamma);
 #pragma omp barrier
-	// Gather the data from all the threads, one by one.
-	
 #pragma omp critical
-	Global.general_gamma += general_gamma;
+        Global.general_gamma += general_gamma;
 #pragma omp barrier
-	break;
+        break;
       }
-	/*
-	  case 3: 
-	  break;
-	*/
+      case 3:{
+        Eigen::Array<T,-1,-1> general_gamma = Eigen::Map<Eigen::Array<T,-1,-1>>(gamma->data(), N_moments.at(2), N_moments.at(1)*N_moments.at(2));
+#pragma omp master
+        Global.general_gamma = Eigen::Array<T, -1, -1 > :: Zero(N_moments.at(2), N_moments.at(1)*N_moments.at(2));
+#pragma omp barrier
+#pragma omp critical
+        Global.general_gamma += general_gamma;
+#pragma omp barrier
+
+        break;
+      }
       default:
-	{
-	  std::cout << "You're trying to store a matrix that is not expected by the program. Exiting.\n";
-	  exit(1);
-	}
+          std::cout << "You're trying to store a matrix that is not expected by the program. Exiting.\n";
+          exit(1);
       }
     
 
