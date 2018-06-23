@@ -520,7 +520,7 @@ class Calculation:
                           'num_disorder': num_disorder})
 
     def special(self, num_points, num_moments, num_random, bra, dimension_bra, starting_index_bra,
-                ket, dimension_ket, starting_index_ket, num_disorder=1):
+                ket, dimension_ket, starting_index_ket, timesteps, num_disorder=1):
         """Calculate the density of states as a function of energy
 
         Parameters
@@ -543,7 +543,8 @@ class Calculation:
             Index of the starting unit cell, bottom left corner for BRA vector.
         dimension_bra : int
             Number of unit cells along the direction 0 and 1 for BRA vector.
-
+        timesteps : list
+            List of timesteps for calculation of time evolution.
         num_disorder : int
             Number of different disorder realisations.
         """
@@ -552,7 +553,7 @@ class Calculation:
             {'num_points': num_points, 'num_moments': num_moments, 'num_random': num_random,
              'bra': bra, 'starting_index_bra': starting_index_bra, 'dimension_bra': dimension_bra,
              'ket': ket, 'starting_index_ket': starting_index_ket, 'dimension_ket': dimension_ket,
-             'num_disorder': num_disorder})
+             'timesteps':timesteps, 'num_disorder': num_disorder})
 
     def conductivity_dc(self, direction, num_points, num_moments, num_random, num_disorder=1, temperature=0):
         """Calculate the density of states as a function of energy
@@ -1398,7 +1399,7 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
         grpc_p = grpc.create_group('special')
 
         bra, ket, moments, random, point, dis, temp, direction = [], [], [], [], [], [], [], []
-        dimension_bra, starting_index_bra, dimension_ket, starting_index_ket = [], [], [], []
+        dimension_bra, starting_index_bra, dimension_ket, starting_index_ket, timesteps = [], [], [], [], []
         for single_special in calculation.get_special:
             moments.append(single_special['num_moments'])
             random.append(single_special['num_random'])
@@ -1410,6 +1411,7 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
             dimension_ket.append(single_special['dimension_ket'])
             starting_index_bra.append(single_special['starting_index_bra'])
             starting_index_ket.append(single_special['starting_index_ket'])
+            timesteps.append(single_special['timesteps'])
 
         if len(calculation.get_special) > 1:
             raise SystemExit('Only a single function request of each type is currently allowed. Please use another '
@@ -1424,6 +1426,7 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
         grpc_p.create_dataset('starting_index_ket', data=np.asarray(starting_index_ket), dtype=np.int32)
         grpc_p.create_dataset('bra', data=np.array(bra).astype(config.type))
         grpc_p.create_dataset('ket', data=np.array(ket).astype(config.type))
+        grpc_p.create_dataset('timesteps', data=np.asarray(timesteps), dtype=np.float32)
 
     if calculation.get_conductivity_dc:
         grpc_p = grpc.create_group('conductivity_dc')
