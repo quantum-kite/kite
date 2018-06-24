@@ -120,6 +120,44 @@ public:
     
   };
   
+  void initiate_from_data(int & size, int *pos,  std::vector<T> & data) {
+    Coordinates <std::size_t, 2 + 1> corner(r.ld);
+    Coordinates <std::size_t, 2 + 1> cornerRT(r.Lt), cornerLB(r.Lt);
+    Coordinates <std::size_t, 2 + 1> cornerRTLd(r.Ld),  cornerLBLd(r.Ld), x(r.Ld);
+    std::size_t a0min, a0max, a1min, a1max; 
+    std::size_t zero = 0;
+    index = 0;
+    corner.set({zero,zero,zero});
+    r.convertCoordinates(cornerLB,corner);
+    
+    corner.set({std::size_t(r.ld[0]),std::size_t(r.ld[1]),zero});
+    r.convertCoordinates(cornerRT,corner);    
+    
+    // Set intersection between domains 
+    a0min = ( std::size_t(pos[0]) > cornerLB.coord[0] ? pos[0] : cornerLB.coord[0]);
+    a0max = ( std::size_t(pos[0] + size) < cornerRT.coord[0] ? pos[0] + size: cornerRT.coord[0]);
+    a1min = ( std::size_t(pos[1]) > cornerLB.coord[1] ? pos[1] : cornerLB.coord[1]);
+    a1max = ( std::size_t(pos[1] + size) < cornerRT.coord[1] ? pos[1] + size: cornerRT.coord[1]);
+
+    cornerLB.set({a0min,a1min,0Lu});
+    r.convertCoordinates(cornerLBLd,cornerLB);
+ 
+    cornerRT.set({a0max,a1max,0Lu});
+    r.convertCoordinates(cornerRTLd,cornerRT);
+    v.setZero();
+    
+    // Copy data  to the initial vector
+    // The data is a vector size * size * Orb
+    for(std::size_t io = 0; io < r.Orb; io++ )
+      for(std::size_t i1 = cornerLBLd.coord[1]; i1 < cornerRTLd.coord[1]; i1++)
+	for(std::size_t i0 = cornerLBLd.coord[0]; i0 < cornerRTLd.coord[0]; i0++)
+	  {
+	    // Global positions
+	    std::size_t j0 = a0min - pos[0] + i0 - cornerLBLd.coord[1];
+	    std::size_t j1 = a1min - pos[1] + i1 - cornerLBLd.coord[1];
+	    v(x.set({i0,i1,io}).index, index) = data.at( j0 + j1*size + io*size*size );
+	  }
+  };
   template < unsigned MULT,bool VELOCITY> 
   void build_regular_phases(int i1, unsigned axis)
   {

@@ -56,6 +56,7 @@ public:
     
   
   void initiate_vector() {};
+  void initiate_from_data(int &, int *,  std::vector<T> &) {};
   template <unsigned MULT>
   void Multiply(){};
   template <unsigned MULT>
