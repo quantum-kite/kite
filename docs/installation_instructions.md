@@ -10,9 +10,9 @@ For currently available functionalities and to-do-list please refer to the READM
 
 # Download KITE
 
-You can download a zip file with our code **[here][2]**
+You can download a zip file with our code **[here][2]**.
 
-Or you can get the code from our **[repository][3]**
+Or you can get the code from our **[repository][3]**.
 
 # Install KITE
 
@@ -43,45 +43,56 @@ In order to compile our source code, the compiler must be up to date (e.g. GCC 4
 * [Pybinding][1]
 
 Eigen (Eigen3) features various linear algebra tools. To install it, run:
-
+``` bash
 sudo apt-get install libeigen3-dev
+```
 Hierarchical Data Format (HDF5) is used to store the inputs/outputs of the program. To install HDF5, run:
-
+``` bash
 sudo apt-get install h5utils
 sudo apt-get install libhdf5-dev
+```
 Calculations on KITE are configured using a python script which interfaces with Pybinding. To install Pybinding, you will need **CMake** and **pip**:
-
+``` bash
 sudo apt-get install cmake
 sudo apt-get install pip3
+```
 Pybinding also requires the SciPy packages but pip will resolve all the SciPy dependencies automatically:
-
+``` bash
 pip3 install pybinding
+```
 Alternativelly, you might prefer to follow the instructions on [Pybinding][1] webpages.
 
 **IMPORTANT**: the last version of matlibplot is having issues with pybinding. Until this is resolved, use:
-
+``` bash
 pip3 install matplotlib==2.1.1
+```
 **After successfully installing these libraries, you will be ready to compile KITE.**
 
 Fetch the source code from the Git Hub [repository][3]
-
+``` bash
 git clone https://github.com/quantum-kite/kite.git
+```
 Execute the Makefile inside the KITE folder to compile the code
-
+``` bash
 make
+```
 That’s it! To compile the post-processing program run
-
+``` bash
 cd tools/KITE
 make
+```
 To generate the input file, try one of our examples. In the KITE folder, run
-
+``` bash
 python example_initial.py
-It creates a file names example.h5 that is used as an input for KITE:
-
+```
+It creates a file names example_initial.h5 that is used as an input for KITE:
+``` bash
 ./KITEx example_initial.h5
+```
 This first example calculates the density of states of pure graphene. To obtain the data file, you need to postprocess the output:
-
+``` bash
 ./tools/KITE/KITEx-tools example_initial.h5
+```
 For more details refer to the KITE [Documentation][11].
 
 ### Compiling Libraries From Source Code
@@ -96,22 +107,26 @@ In order to compile our source code, the compiler must be up to date (e.g. GCC 4
 * [Pybinding][1]
 
 The detailed installation steps are described on the respective websites. The GCC (g++) compiler must support C++11 features and OpenMP parallelization (version 4.8.1 or newer). To check the version installed on your computer you can use:
-
+``` bash
 g++ --version
+```
 You can retrieve the latest stable release of Eigen3 from [eigen.tuxfamily.org][12]. Unzip the file and copy the Eigen folder to /usr/include/. We suggest the installation of [Pybinding][13] using Miniconda.
 
 ## Mac OS X:
 
 
 In order to install KITE on a MAC OS X system, you will need Xcode command-line tools from Apple Developer. You can download Xcode from the Apple Store. Alternatively, you can install the command tools directly from the terminal:
-
+``` bash
 xcode-select --install
+```
 You will also need an open-source software package management system. Here, we provide detailed instructions using [Homebrew][14]. To install Homebrew run the following command on the terminal:
-
+``` bash
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+```
 Follow the instructions provided. Next, install the C++ compiler:
-
+``` bash
 brew install gcc@6
+```
 KITE has the following dependencies:
 
 * [Eigen3][10]
@@ -121,42 +136,53 @@ KITE has the following dependencies:
 * [Pybinding][1]
 
 Eigen (Eigen3) features various linear algebra tools. To install it, run:
-
+``` bash
 brew install eigen
+```
 Hierarchical Data Format (HDF5) is used to store the inputs/outputs of the program. To install HDF5, run:
-
+``` bash
 brew install hdf5 --cc=gcc-6
+```
 Calculations on KITE are configured using a python script which interfaces with Pybinding. To install the Pybinding package, we suggest using Homebrew. (Alternatively, you can proceed with the [installation suggested by Pybinding][13], with the use of Miniconda.)
-
+``` bash
 brew install cmake
 brew install python
+```
 Last, install Pybinding with pip:
-
+``` bash
 pip3 install pybinding
+```
 **After successfully installing these libraries, you are now ready to compile KITE.**
 
-**IMPORTANT**: the last version of matlibplot is having issues with pybinding. Until this is resolved, use:
-
+**IMPORTANT**: the last version of matplotlib is having issues with Pybinding. Until this is resolved, use:
+``` bash
 pip3 install matplotlib==2.1.1
+```
 Fetch the source code from the Git Hub repository
-
+``` bash
  git clone https://github.com/quantum-kite/kite.git
+ ```
 Execute the Makefile inside the KITE folder to compile the code
-
+``` bash
 make
+```
 That’s it! To compile the post-processing program run
-
+``` bash
 cd tools/KITE/
 make
+```
 To generate the input file, try one of our examples. In the KITE folder, run
-
+``` bash
 python example_initial.py
-It creates a file names example.h5 that is used as an input for KITE:
-
+```
+It creates a file names example_initial.h5 that is used as an input for KITE:
+``` bash
 ./KITEx example_initial.h5
+```
 This first example calculates the density of states of pure graphene. To obtain the data file, you need to postprocess the output:
-
+``` bash
 ./tools/KITE/KITE-tools example_initial.h5
+```
 For more details refer to the KITE [Documentation][11].
 
 [1]: http://docs.pybinding.site/en/stable/

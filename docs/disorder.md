@@ -13,23 +13,25 @@ After defining a lattice with the procedure explained in [Getting Started][1]), 
 * Deterministic.
 
 Beside the type of statistical distribution, we can select a sublattice type in which the disorder will appear, the mean value and the standard deviation of the selected distribution. To include onsite disorder following a given statistical distribution, we build the `lattice` and use the following procedure:
-
-<br />disorder = kite.Disorder(lattice) # define an object based on the lattice
+``` python
+disorder = kite.Disorder(lattice) # define an object based on the lattice
 disorder.add_disorder('A', 'Gaussian', 0.1, 0.1) # add Gaussian distributed disorder at all sites of a selected sublattice
+```
 In a single object it is possible to select multiple sublattices, each of one with different disorder distributions following the rule `disorder.add_disorder('sublattice', 'type', mean, std)` :
-
+``` python
 disorder.add_disorder('A', 'Gaussian', 0.1, 0.1)
 disorder.add_disorder('B', 'Uniform', 0.2, 0.1)
 disorder.add_disorder('C', 'Deterministic', 0.1)
+```
 In the case of deterministic disorder, the standard deviation is not set.
 
 After defining the desired disorder, it can be added to the configuration file as an additional parameter in the `config_system` function:
-
+``` python
 kite.config_system(..., disorder=disorder)
+```
 A complete example that calculates the density of states of graphene with different on-site disorder distributions for each sublattice can be seen here:
 
- 
-
+https://gist.github.com/quantum-kite/3218dab366b30bbe3040726cfecdd018
  
 with the resulting density of states:
 
@@ -42,35 +44,38 @@ with the resulting density of states:
 ## Vacancy disorder
 
 The vacant site distribution can be selected from a single sublattice with a concentration defined in a parent object:
-
-struc_disorder = kite.StructuralDisorder(lattice, concentration=0.2) 
-
-struc_disorder.add_vacancy('B') # add a vacancy to a selected sublattice 
+``` python
+struc_disorder = kite.StructuralDisorder(lattice, concentration=0.2)
+struc_disorder.add_vacancy('B') # add a vacancy to a selected sublattice
+```
 **IMPORTANT**: to distribute the vacancies in both sublattices, one needs to add the vacancies on each sublattice as a separate object of the class `StructuralDisorder` (unless you one precisely the same pattern of disorder in both sublatices)
-
+``` python
 struc_disorder_A = kite.StructuralDisorder(lattice, concentration=0.1)
 struc_disorder_A.add_vacancy('A')
 struc_disorder_B = kite.StructuralDisorder(lattice, concentration=0.1)
 struc_disorder_B.add_vacancy('B')
 disorder_structural = [struc_disorder_A, struc_disorder_B]
+```
 ## Structural disorder
 
 Before discussing this class of disorder, it is important to mention that in the pre-release version, it is no possible to perform the automatic scale of the spectra for hopping disorder. In this case, it is necessary to add an extra parameter to the configuration class:
-
+``` python
 configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],is_complex=False, precision=1,spectrum_range=[-10, 10])
-The following example shows a definition of our most general type of disorder, which includes both onsite disorder terms and bond modifications. This type of disorder can be added as an object of the class `StructuralDisorder`. The procedure for adding the structural disorder is the same of adding a hopping term to the Pybinding lattice object, with a single difference that the bond disorder is not bounded to the hopping term starting from the [0, 0] unit cell, which is the case of the hopping term in pybinding.
+```
+The following example shows a definition of our most general type of disorder, which includes both onsite disorder terms and bond modifications. This type of disorder can be added as an object of the class `StructuralDisorder`. The procedure for adding the structural disorder is the same of adding a hopping term to the Pybinding lattice object, with a single difference that the bond disorder is not bounded to the hopping term starting from the [0, 0] unit cell, which is the case of the hopping term in Pybinding.
 
 For the sake of clarity, let us first define sublattices that will compose the disorder. In this case we are not restricted to a single unit cell:
-
+``` python
 node0 = [[+0, +0], 'A'] # define a node in a unit cell [i, j] selecting a single sublattice
 node1 = [[+0, +0], 'B']
 node2 = [[+1, +0], 'A']
 node3 = [[+0, +1], 'B']
 node4 = [[+0, +1], 'A']
 node5 = [[-1, +1], 'B']
+```
 After the definition of a parent `StructuralDisorder` object, we can select the desired pattern:
-
-<br />struc_disorder = kite.StructuralDisorder(lattice, concentration=0.2) # define an object based on the lattice with a certain concentration
+``` python
+struc_disorder = kite.StructuralDisorder(lattice, concentration=0.2) # define an object based on the lattice with a certain concentration
 
 struc_disorder.add_structural_disorder(
     # add bond disorder in the form [from unit cell], 'sublattice_from', [to_unit_cell], 'sublattice_to', value:
@@ -92,12 +97,12 @@ another_struc_disorder.add_structural_disorder(
     (*node5, *node0, 0.02),
     ([+0, +0], 'A', 0.3)
 )
+```
 Before exporting the settings to the hdf file, it is possible to define multiple disorder realizations which will be superimposed to the clean system.
 
 The following script has a a minimal example of how to configure the structural disorder
 
- 
-
+https://gist.github.com/quantum-kite/b2457db46dbff9ad02a56443255ace46
  
 with the resulting density of states
 

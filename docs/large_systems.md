@@ -1,3 +1,5 @@
+# Large Systems
+
 Up to this point, the idea of the tutorial was to show simple examples that could be reproduced on a desktop computer or a small work-station. But the purpose behind developing KITE was in building a flexible software for systems exceeding billion of atoms. Hence, in the following tutorial we will tackle the simulation of two different systems with their size being in the micrometer range.
 
 # Graphene lattice with vacancy disorder
@@ -22,13 +24,15 @@ Subplots `a)` and `b)` are showing the DOS for rotation angles of `2.005` (low) 
 ![TBLG clean][2]
 
 Below, you can find a script used to configure the KITE model for twisted bilayer. The lattice of twisted bilayer graphene (especially at low rotation angles) has a much more complex unit cell compared to simple AB stacked bilayer, where for an arbitrary twisting one does not have the access to all the neighbors using simple neighboring distance vectors. More advanced search is needed for finding the unit cell connections. The search and the hopping calculation is done separately, because of our desire not to make this script too complex. Instead, we use an already defined lattice object that is loaded with a simple command:
-
+``` python
 # define the angle
 angle = 21.787 # or 13.174, 7.341, 2.005
 # define the name of the pb.Lattice object
 name = 'lattice_tblg_{:.3f}'.format(angle)
 #load the lattice
 lattice = pb.load(name)
+```
+
 Now, you can continue with specifying the other configuration settings as explained in [Getting Started][3].
 
 The full script can be downloaded from [here][4].

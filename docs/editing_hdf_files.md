@@ -1,3 +1,5 @@
+# Editing the HDF file
+
 ### What is an HDF file?
 
 Some extracts from the HDF group [tutorial][1]:
@@ -16,7 +18,8 @@ For that purpose, we provide a simple python script that rewrites specific parts
 
 When modifying a paramenter like temperature, we need to locate in the .h5 file the quantity that is going to be calculated and modify its temperature. The script describes how to list the parameters associated to each quantity and how to edit one parameter.
 
-<br />file_name = 'archive.h5'
+``` python
+file_name = 'archive.h5'
 f = h5py.File(file_name, 'r+')     # open the file
 
 # List all groups
@@ -52,6 +55,7 @@ f.close()  # close the file
 
 f1 = h5py.File(file_name, 'r')
 print(np.allclose(f1['Calculation/conductivity_dc/Temperature'].value, new_value))
+```
 
 [1]: https://support.hdfgroup.org/HDF5/Tutor/HDF5Intro.pdf
 [2]: https://quantum-kite.com/post-processing-tool/
