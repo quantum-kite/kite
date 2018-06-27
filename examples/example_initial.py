@@ -72,4 +72,4 @@ configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundari
 calculation = kite.Calculation(configuration)
 calculation.dos(num_points=1000, num_moments=512, num_random=5, num_disorder=1)
 # configure the *.h5 file
-kite.config_system(lattice, configuration, calculation, filename='example1.h5')
+kite.config_system(lattice, configuration, calculation, filename='example_initial.h5')
