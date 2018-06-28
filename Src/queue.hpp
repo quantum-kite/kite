@@ -197,9 +197,9 @@ std::vector<measurement_queue> fill_queue(char *name){
 
        // convert the numerical value for the direction into the string that represents it
        std::string dir(num2str3(direction));                                                // xxx Gamma0
-       std::string dirc1 = dir.substr(0,1) + "," + dir.substr(1,3);                         // x,xx Gamma1
-       std::string dirc2 = dir.substr(0,2) + "," + dir.substr(2,3);                         // xx,x Gamma2
-       std::string dirc3 = dir.substr(0,1) + "," + dir.substr(1,2) + "," + dir.substr(2,3); // x,x,x Gamma3
+       std::string dirc1 = dir.substr(0,1) + "," + dir.substr(1,2);                         // x,xx Gamma1
+       std::string dirc2 = dir.substr(0,2) + "," + dir.substr(2,1);                         // xx,x Gamma2
+       std::string dirc3 = dir.substr(0,1) + "," + dir.substr(1,1) + "," + dir.substr(2,1); // x,x,x Gamma3
 
        std::string directory = "/Calculation/conductivity_optical_nonlinear/";
        
