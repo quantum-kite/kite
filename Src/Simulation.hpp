@@ -222,8 +222,6 @@ public:
  
     debug_message("Indices: "); debug_message(indices_string); debug_message(".\n");
 		
-    std::cout << "MEASURE GAMMA indices: " << indices_string << "\n\n";
-
 
     // First of all, we need to process the indices_string into something the program can use
     // Each element of this vector is a list of the indices of a generalized velocity operator
@@ -485,15 +483,11 @@ public:
               kpm_product = Eigen::Matrix<T, -1, -1>::Zero(MEMORY, MEMORY); // this line is not necessary
               kpm_product = kpm_VnV.v.adjoint() * kpm_pVm.v; 
 
-              std::cout << "product:\n\n" << kpm_VnV.v.adjoint() * kpm_pVm.v << "\n\n";
-
               long int index;
               for(int i = 0; i < MEMORY; i++)
                 for(int j = 0; j < MEMORY; j++){
                   index = p*N_moments.at(1)*N_moments.at(0) + (m+j)*N_moments.at(0) + n+i;
                   gamma(index) += (kpm_product(i, j) - gamma(index))/value_type(average + 1);
-
-                  std::cout << "p:" << p << " m:" << m+j << " n:" << n+i << " gamma:" << gamma(index) << "\n";
                 }
             }
           }
@@ -749,19 +743,19 @@ public:
           for(int n = 0; n < N0; n++){
             for(int m = 0; m < N1; m++){
               for(int p = 0; p < N2; p++){
-                Global.general_gamma(n + N0*m,p) += general_gamma(n + N0*m,p)/6.0;
-                Global.general_gamma(n + N0*m,p) += general_gamma(m + N0*p,n)/6.0;
-                Global.general_gamma(n + N0*m,p) += general_gamma(p + N0*n,m)/6.0;
+                Global.general_gamma(n + N0*m,p) += general_gamma(n + N0*m,p)/T(6.0);
+                Global.general_gamma(n + N0*m,p) += general_gamma(m + N0*p,n)/T(6.0);
+                Global.general_gamma(n + N0*m,p) += general_gamma(p + N0*n,m)/T(6.0);
 
                 // Check if it's complex
                 if(std::is_same<T, std::complex<value_type>>::value){
-                  Global.general_gamma(n + N0*m,p) += std::conj(general_gamma(p + N0*m,n))/6.0;
-                  Global.general_gamma(n + N0*m,p) += std::conj(general_gamma(n + N0*p,m))/6.0;
-                  Global.general_gamma(n + N0*m,p) += std::conj(general_gamma(m + N0*n,p))/6.0;
+                  Global.general_gamma(n + N0*m,p) += T(factor/6.0)*std::conj(general_gamma(p + N0*m,n));
+                  Global.general_gamma(n + N0*m,p) += T(factor/6.0)*std::conj(general_gamma(n + N0*p,m));
+                  Global.general_gamma(n + N0*m,p) += T(factor/6.0)*std::conj(general_gamma(m + N0*n,p));
                 } else {
-                  Global.general_gamma(n + N0*m,p) += general_gamma(p + N0*m,n)/6.0;
-                  Global.general_gamma(n + N0*m,p) += general_gamma(n + N0*p,m)/6.0;
-                  Global.general_gamma(n + N0*m,p) += general_gamma(m + N0*n,p)/6.0;
+                  Global.general_gamma(n + N0*m,p) += T(factor/6.0)*general_gamma(p + N0*m,n);
+                  Global.general_gamma(n + N0*m,p) += T(factor/6.0)*general_gamma(n + N0*p,m);
+                  Global.general_gamma(n + N0*m,p) += T(factor/6.0)*general_gamma(m + N0*n,p);
                 }
               }
             }
@@ -772,17 +766,16 @@ public:
         // Now check if any two directions are the same
         // Check if the two first directions are the same but different from the third
         if(indices.at(0) == indices.at(1) and indices.at(0) != indices.at(2) and N1 == N2){
-          std::cout << "first two equal\n";
           for(int n = 0; n < N0; n++){
             for(int m = 0; m < N1; m++){
               for(int p = 0; p < N2; p++){
-                Global.general_gamma(n + N0*m,p) += general_gamma(n + N0*m,p)/2.0;
+                Global.general_gamma(n + N0*m,p) += general_gamma(n + N0*m,p)/T(2.0);
 
                 // Check if it's complex
                 if(std::is_same<T, std::complex<value_type>>::value)
-                  Global.general_gamma(n + N0*m,p) += factor*1.0*std::conj(general_gamma(n + N0*p,m))/2.0;
+                  Global.general_gamma(n + N0*m,p) += T(factor/2.0)*std::conj(general_gamma(n + N0*p,m));
                 else
-                  Global.general_gamma(n + N0*m,p) += factor*1.0*general_gamma(n + N0*p,m)/2.0;
+                  Global.general_gamma(n + N0*m,p) += T(factor/2.0)*general_gamma(n + N0*p,m);
               }
             }
           }
@@ -790,17 +783,16 @@ public:
 
         // Check if the first and last directions are the same but different from the second
         if(indices.at(0) == indices.at(2) and indices.at(0) != indices.at(1) and N0 == N2){
-          std::cout << "first and last equal\n";
           for(int n = 0; n < N0; n++){
             for(int m = 0; m < N1; m++){
               for(int p = 0; p < N2; p++){
-                Global.general_gamma(n + N0*m,p) += general_gamma(n + N0*m,p)/2.0;
+                Global.general_gamma(n + N0*m,p) += general_gamma(n + N0*m,p)/T(2.0);
 
                 // Check if it's complex
                 if(std::is_same<T, std::complex<value_type>>::value)
-                  Global.general_gamma(n + N0*m,p) += factor*1.0*std::conj(general_gamma(m + N0*n,p))/2.0;
+                  Global.general_gamma(n + N0*m,p) += T(factor/2.0)*std::conj(general_gamma(m + N0*n,p));
                 else
-                  Global.general_gamma(n + N0*m,p) += factor*1.0*general_gamma(m + N0*n,p)/2.0;
+                  Global.general_gamma(n + N0*m,p) += T(factor/2.0)*general_gamma(m + N0*n,p);
               }
             }
           }
@@ -808,17 +800,16 @@ public:
 
         // Check if the last two directions are the same but different from the first
         if(indices.at(2) == indices.at(1) and indices.at(0) != indices.at(2) and N0 == N1){
-          std::cout << "last two equal\n";
           for(int n = 0; n < N0; n++){
             for(int m = 0; m < N1; m++){
               for(int p = 0; p < N2; p++){
-                Global.general_gamma(n + N0*m,p) += general_gamma(n + N0*m,p)/2.0;
+                Global.general_gamma(n + N0*m,p) += general_gamma(n + N0*m,p)/T(2.0);
 
                 // Check if it's complex
                 if(std::is_same<T, std::complex<value_type>>::value)
-                  Global.general_gamma(n + N0*m,p) += factor*1.0*std::conj(general_gamma(p + N0*m, n))/2.0;
+                  Global.general_gamma(n + N0*m,p) += T(factor/2.0)*std::conj(general_gamma(p + N0*m, n));
                 else
-                  Global.general_gamma(n + N0*m,p) += factor*1.0*general_gamma(p + N0*m, n)/2.0;
+                  Global.general_gamma(n + N0*m,p) += T(factor/2.0)*general_gamma(p + N0*m, n);
               }
             }
           }
@@ -844,9 +835,6 @@ public:
     
 #pragma omp master
     {
-      std::cout << "cols:" << Global.general_gamma.cols() << "\n";
-      std::cout << "rows:" << Global.general_gamma.rows() << "\n";
-      std::cout << "Gamma:\n\n" << Global.general_gamma << "\n\n\n";
       H5::H5File * file = new H5::H5File(name, H5F_ACC_RDWR);
       write_hdf5(Global.general_gamma, file, name_dataset);
       delete file;
