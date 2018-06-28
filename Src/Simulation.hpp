@@ -222,6 +222,7 @@ public:
  
     debug_message("Indices: "); debug_message(indices_string); debug_message(".\n");
 		
+    std::cout << "MEASURE GAMMA indices: " << indices_string << "\n\n";
 
 
     // First of all, we need to process the indices_string into something the program can use
@@ -259,10 +260,32 @@ public:
 	
   void Gamma2D(int NRandomV, int NDisorder, std::vector<int> N_moments, 
       std::vector<std::vector<unsigned>> indices, std::string name_dataset){
-    // This function calculates all the kinds of one-dimensional Gamma matrices
-    // such as Tr[Tn]    Tr[v^xx Tn]     etc
+    // This function calculates all kinds of two-dimensional gamma matrices such
+    // as Tr[V^a Tn v^b Tm] = G_nm
+    //
+    // The matrices are stored as
+    //
+    // | G_00   G_01   G_02   ...   G_0M | 
+    // | G_10   G_11   G_12   ...   G_1M | 
+    // | G_20   G_21   G_22   ...   G_2M | 
+    // | ...    ...    ...    ...   ...  |
+    // | G_N0   G_N1   G_N2   ...   G_NM | 
+    //
+    // For example, a 3x3 matrix would be represented as
+    //
+    // | G_00   G_01   G_02 | 
+    // | G_10   G_11   G_12 | 
+    // | G_20   G_21   G_22 | 
+    //
+    //
+    //
 
     typedef typename extract_value_type<T>::value_type value_type;
+
+    int num_velocities = 0;
+    for(int i = 0; i < int(indices.size()); i++)
+      num_velocities += indices.at(i).size();
+    int factor = 1 - (num_velocities % 2)*2;
 
     //  --------- INITIALIZATIONS --------------
     
@@ -281,7 +304,6 @@ public:
       size_gamma *= N_moments.at(i);
     }
 
-    //std::cout << "############ size gamma: " << size_gamma << "\n";
     Eigen::Array<T, -1, -1> gamma = Eigen::Array<T, -1, -1 >::Zero(1, size_gamma);
  
     // finished initializations
@@ -310,18 +332,13 @@ public:
           // Iterate MEMORY times. The first time this occurs, we must exclude the zeroth
           // case, because it is already calculated, it's the identity
           for(int i = n; i < n + MEMORY; i++){
-            //std::cout << "left i:" << i << " n:" << n << "\n";
             if(i!=0){
-              //std::cout << "inside left\n";
               cheb_iteration(&kpm1, i-1);
-              //std::cout << "index: " << kpm1.get_index() << "\n";
             }
 
             kpm3.set_index(i%MEMORY);
             generalized_velocity(&kpm3, &kpm1, indices, 1);
             kpm3.empty_ghosts(i%MEMORY);
-            
-            //std::cout << "index3: " << kpm3.get_index() << "\n";
           }
           
           // copy the |0> vector to |kpm2>
@@ -331,39 +348,73 @@ public:
 
             // iterate MEMORY times, just like before. No need to multiply by v here
             for(int i = m; i < m + MEMORY; i++){
-              //std::cout << "right i:" << i << " m:" << m << "\n";
               if(i!=0){
-                //std::cout << "inside right\n";
                 cheb_iteration(&kpm2, i-1);
-              //std::cout << "index2: " << kpm2.get_index() << "\n";
               }
             }
             
             // Finally, do the matrix product and store the result in the Gamma matrix
             Eigen::Matrix<T, -1, -1> kpm_product;
-            kpm_product = Eigen::Matrix<T, -1, -1>::Zero(MEMORY, MEMORY); // this line is not necessary
             kpm_product = kpm3.v.adjoint() * kpm2.v; 
-            Eigen::Matrix<T, -1, -1> flatten;
-            flatten = Eigen::Matrix<T,-1,-1>::Zero(1, 1);
-            for(int i = 0; i < MEMORY; i++)
-              for(int j = 0; j < MEMORY; j++){
-                flatten(0) = kpm_product(i,j);
-                gamma.matrix().block(0,(n+i)*N_moments.at(0) + m + j, 1, 1) +=
-                  (flatten - gamma.matrix().block(0,(n+i)*N_moments.at(0) + m + j,1,1))/value_type(average + 1);			
+            T flatten;
+            long int ind;
+            for(int j = 0; j < MEMORY; j++)
+              for(int i = 0; i < MEMORY; i++){
+                flatten = kpm_product(i,j);
+                ind = (m+j)*N_moments.at(0) + n+i;
+                gamma(ind) += (flatten - gamma(ind))/value_type(average + 1);			
               }
           }
         }
         average++;
       }
     } 
+    gamma = gamma*factor;
+
     store_gamma(&gamma, N_moments, indices, name_dataset);
   };
 
 
   void Gamma3D(int NRandomV, int NDisorder, std::vector<int> N_moments, 
       std::vector<std::vector<unsigned>> indices, std::string name_dataset){
-    // This function calculates all the kinds of one-dimensional Gamma matrices
-    // such as Tr[Tn]    Tr[v^xx Tn]     etc
+    // This calculates all the kinds of three-dimensional gamma matrices
+    // such as Tr[v^a Tn v^b Tm v^c Tp] = G_nmp. The output is a 2D matrix 
+    // organized as follows:
+    // 
+    //    p=0     p=1     p=2    ...    p=P
+    // 
+    // | G_000   G_001   G_002   ...   G_00P | 
+    // | G_100   G_101   G_102   ...   G_10P |  
+    // | G_200   G_201   G_202   ...   G_20P |   m=0
+    // |  ...     ...     ...    ...    ...  |  
+    // | G_N00   G_N01   G_N02   ...   G_N1P |_____
+    // | G_010   G_011   G_012   ...   G_01P | 
+    // | G_110   G_111   G_112   ...   G_11P |  
+    // | G_210   G_211   G_212   ...   G_21P |   m=1
+    // |  ...     ...     ...    ...    ...  |  
+    // | G_N10   G_N11   G_N12   ...   G_N0P |_____ 
+    // |  ...     ...     ...    ...    ...  |
+    // |  ...     ...     ...    ...    ...  |
+    // |  ...     ...     ...    ...    ...  |_____
+    // | G_0M0   G_0M1   G_0M2   ...   G_0MP | 
+    // | G_1M0   G_1M1   G_1M2   ...   G_1MP |  
+    // | G_2M0   G_2M1   G_2M2   ...   G_2MP |   m=M
+    // |  ...     ...     ...    ...    ...  |  
+    // | G_NM0   G_NM1   G_NM2   ...   G_NMP |_____ 
+    //
+    // To exemplify, in the case of a 3x3x3 matrix, 
+    //
+    // | G_000   G_001   G_002 |
+    // | G_100   G_101   G_102 |
+    // | G_200   G_201   G_202 |
+    // | G_010   G_011   G_012 |
+    // | G_110   G_111   G_112 |
+    // | G_210   G_211   G_212 |
+    // | G_020   G_021   G_022 |
+    // | G_120   G_121   G_122 |
+    // | G_220   G_221   G_222 |
+    //
+    //
 
     typedef typename extract_value_type<T>::value_type value_type;
 
@@ -413,7 +464,7 @@ public:
             if(ni!=0) cheb_iteration(&kpm_Vn, ni-1);
            
             kpm_VnV.set_index(ni%MEMORY);
-            generalized_velocity(&kpm_VnV, &kpm_Vn, indices, 0);
+            generalized_velocity(&kpm_VnV, &kpm_Vn, indices, 1);
             kpm_VnV.empty_ghosts(ni%MEMORY);
           }
           
@@ -434,17 +485,15 @@ public:
               kpm_product = Eigen::Matrix<T, -1, -1>::Zero(MEMORY, MEMORY); // this line is not necessary
               kpm_product = kpm_VnV.v.adjoint() * kpm_pVm.v; 
 
+              std::cout << "product:\n\n" << kpm_VnV.v.adjoint() * kpm_pVm.v << "\n\n";
+
               long int index;
               for(int i = 0; i < MEMORY; i++)
                 for(int j = 0; j < MEMORY; j++){
                   index = p*N_moments.at(1)*N_moments.at(0) + (m+j)*N_moments.at(0) + n+i;
                   gamma(index) += (kpm_product(i, j) - gamma(index))/value_type(average + 1);
-#pragma omp master
-                  {
-                    std::cout << "thread: "<< omp_get_thread_num();
-                  std::cout << "p:"<< p << " m:" << m+j << " n:"  << n+i << " gamma:" <<gamma(index) << "\n";
-                  }
-#pragma omp barrier
+
+                  std::cout << "p:" << p << " m:" << m+j << " n:" << n+i << " gamma:" << gamma(index) << "\n";
                 }
             }
           }
@@ -636,14 +685,12 @@ public:
     return indices;
   }
 
-  void store_gamma(Eigen::Array<T, -1, -1> *gamma, std::vector<int> N_moments, std::vector<std::vector<unsigned>> indices, std::string name_dataset){
+  void store_gamma(Eigen::Array<T, -1, -1> *gamma, std::vector<int> N_moments, 
+      std::vector<std::vector<unsigned>> indices, std::string name_dataset){
     debug_message("Entered store_gamma\n");
-    /* Depending on the type of Gamma matrix we're calculating, there may be some symmetries
-     * among the matrix entries that could be taken into account.
-     * 
-     * */
-
-
+    // The whole purpose of this function is to take the Gamma matrix calculated by
+    // Gamma2D, Gamma3D or Gamma_general, check if there are any symmetries among the 
+    // matrix elements and then store the matrix in an HDF file.
 
     long int size_gamma = gamma->cols();
     int dim = indices.size();
@@ -657,11 +704,10 @@ public:
     int num_velocities = 0;
     for(int i = 0; i < int(indices.size()); i++)
       num_velocities += indices.at(i).size();
-		
     int factor = 1 - (num_velocities % 2)*2;
+
+    typedef typename extract_value_type<T>::value_type value_type;
 		
-    //std::cout << "gamma: " << *gamma << "\n";
-    
     switch(dim){
       case 2:{
         Eigen::Array<T,-1,-1> general_gamma = Eigen::Map<Eigen::Array<T,-1,-1>>(gamma->data(), N_moments.at(0), N_moments.at(1));
@@ -684,12 +730,107 @@ public:
         break;
       }
       case 3:{
-        Eigen::Array<T,-1,-1> general_gamma = Eigen::Map<Eigen::Array<T,-1,-1>>(gamma->data(), N_moments.at(2), N_moments.at(1)*N_moments.at(2));
+        int N0 = N_moments.at(0);
+        int N1 = N_moments.at(1);
+        int N2 = N_moments.at(2);
+
+        Eigen::Array<T,-1,-1> general_gamma = Eigen::Map<Eigen::Array<T,-1,-1>>(gamma->data(), N0*N1, N2);
 #pragma omp master
-        Global.general_gamma = Eigen::Array<T, -1, -1 > :: Zero(N_moments.at(2), N_moments.at(1)*N_moments.at(2));
+        Global.general_gamma = Eigen::Array<T, -1, -1 > :: Zero(N0*N1, N2);
 #pragma omp barrier
+
 #pragma omp critical
-        Global.general_gamma += general_gamma;
+        {
+        // Check if all the directions are the same. In this case, there are 
+        // six symmetries that may be taken advantage of ('*' denotes complex conjugation)
+        // G_nmp  = G_mpn = G_pnm 
+        // G_nmp* = G_pmn = G_mnp = G_npm 
+        if(indices.at(0) == indices.at(1) and indices.at(0) == indices.at(2)){
+          for(int n = 0; n < N0; n++){
+            for(int m = 0; m < N1; m++){
+              for(int p = 0; p < N2; p++){
+                Global.general_gamma(n + N0*m,p) += general_gamma(n + N0*m,p)/6.0;
+                Global.general_gamma(n + N0*m,p) += general_gamma(m + N0*p,n)/6.0;
+                Global.general_gamma(n + N0*m,p) += general_gamma(p + N0*n,m)/6.0;
+
+                // Check if it's complex
+                if(std::is_same<T, std::complex<value_type>>::value){
+                  Global.general_gamma(n + N0*m,p) += std::conj(general_gamma(p + N0*m,n))/6.0;
+                  Global.general_gamma(n + N0*m,p) += std::conj(general_gamma(n + N0*p,m))/6.0;
+                  Global.general_gamma(n + N0*m,p) += std::conj(general_gamma(m + N0*n,p))/6.0;
+                } else {
+                  Global.general_gamma(n + N0*m,p) += general_gamma(p + N0*m,n)/6.0;
+                  Global.general_gamma(n + N0*m,p) += general_gamma(n + N0*p,m)/6.0;
+                  Global.general_gamma(n + N0*m,p) += general_gamma(m + N0*n,p)/6.0;
+                }
+              }
+            }
+          }
+          
+        } 
+        
+        // Now check if any two directions are the same
+        // Check if the two first directions are the same but different from the third
+        if(indices.at(0) == indices.at(1) and indices.at(0) != indices.at(2) and N1 == N2){
+          std::cout << "first two equal\n";
+          for(int n = 0; n < N0; n++){
+            for(int m = 0; m < N1; m++){
+              for(int p = 0; p < N2; p++){
+                Global.general_gamma(n + N0*m,p) += general_gamma(n + N0*m,p)/2.0;
+
+                // Check if it's complex
+                if(std::is_same<T, std::complex<value_type>>::value)
+                  Global.general_gamma(n + N0*m,p) += factor*1.0*std::conj(general_gamma(n + N0*p,m))/2.0;
+                else
+                  Global.general_gamma(n + N0*m,p) += factor*1.0*general_gamma(n + N0*p,m)/2.0;
+              }
+            }
+          }
+        }
+
+        // Check if the first and last directions are the same but different from the second
+        if(indices.at(0) == indices.at(2) and indices.at(0) != indices.at(1) and N0 == N2){
+          std::cout << "first and last equal\n";
+          for(int n = 0; n < N0; n++){
+            for(int m = 0; m < N1; m++){
+              for(int p = 0; p < N2; p++){
+                Global.general_gamma(n + N0*m,p) += general_gamma(n + N0*m,p)/2.0;
+
+                // Check if it's complex
+                if(std::is_same<T, std::complex<value_type>>::value)
+                  Global.general_gamma(n + N0*m,p) += factor*1.0*std::conj(general_gamma(m + N0*n,p))/2.0;
+                else
+                  Global.general_gamma(n + N0*m,p) += factor*1.0*general_gamma(m + N0*n,p)/2.0;
+              }
+            }
+          }
+        }
+
+        // Check if the last two directions are the same but different from the first
+        if(indices.at(2) == indices.at(1) and indices.at(0) != indices.at(2) and N0 == N1){
+          std::cout << "last two equal\n";
+          for(int n = 0; n < N0; n++){
+            for(int m = 0; m < N1; m++){
+              for(int p = 0; p < N2; p++){
+                Global.general_gamma(n + N0*m,p) += general_gamma(n + N0*m,p)/2.0;
+
+                // Check if it's complex
+                if(std::is_same<T, std::complex<value_type>>::value)
+                  Global.general_gamma(n + N0*m,p) += factor*1.0*std::conj(general_gamma(p + N0*m, n))/2.0;
+                else
+                  Global.general_gamma(n + N0*m,p) += factor*1.0*general_gamma(p + N0*m, n)/2.0;
+              }
+            }
+          }
+        }
+
+        // Check if all the directions are different
+        if(indices.at(0) != indices.at(1) and indices.at(0) != indices.at(2) and indices.at(1) != indices.at(2)){
+          Global.general_gamma += general_gamma;
+        }
+
+
+        }
 #pragma omp barrier
 
         break;
@@ -703,6 +844,9 @@ public:
     
 #pragma omp master
     {
+      std::cout << "cols:" << Global.general_gamma.cols() << "\n";
+      std::cout << "rows:" << Global.general_gamma.rows() << "\n";
+      std::cout << "Gamma:\n\n" << Global.general_gamma << "\n\n\n";
       H5::H5File * file = new H5::H5File(name, H5F_ACC_RDWR);
       write_hdf5(Global.general_gamma, file, name_dataset);
       delete file;
