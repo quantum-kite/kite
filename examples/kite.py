@@ -519,8 +519,8 @@ class Calculation:
         self._dos.append({'num_points': num_points, 'num_moments': num_moments, 'num_random': num_random,
                           'num_disorder': num_disorder})
 
-    def special(self, num_points, num_moments, num_random, bra, dimension_bra, starting_index_bra,
-                ket, dimension_ket, starting_index_ket, timesteps, num_disorder=1):
+    def special(self, num_points, num_moments, bra, dimension_bra, starting_index_bra,
+                ket, dimension_ket, starting_index_ket, timestep, num_disorder=1):
         """Calculate the density of states as a function of energy
 
         Parameters
@@ -529,8 +529,6 @@ class Calculation:
             Number of energy point inside the spectrum at which the DOS will be calculated.
         num_moments : int
             Number of polynomials in the Chebyshev expansion.
-        num_random : int
-            Number of random vectors to use for the stochastic evaluation of trace.
         ket : np.array
             KET Part of the initial kpm vector.
         dimension_ket : int
@@ -543,17 +541,17 @@ class Calculation:
             Index of the starting unit cell, bottom left corner for BRA vector.
         dimension_bra : int
             Number of unit cells along the direction 0 and 1 for BRA vector.
-        timesteps : list
-            List of timesteps for calculation of time evolution.
+        timestep : float
+            Timestep for calculation of time evolution.
         num_disorder : int
             Number of different disorder realisations.
         """
 
         self._special.append(
-            {'num_points': num_points, 'num_moments': num_moments, 'num_random': num_random,
+            {'num_points': num_points, 'num_moments': num_moments,
              'bra': bra, 'starting_index_bra': starting_index_bra, 'dimension_bra': dimension_bra,
              'ket': ket, 'starting_index_ket': starting_index_ket, 'dimension_ket': dimension_ket,
-             'timesteps':timesteps, 'num_disorder': num_disorder})
+             'timestep':timestep, 'num_disorder': num_disorder})
 
     def conductivity_dc(self, direction, num_points, num_moments, num_random, num_disorder=1, temperature=0):
         """Calculate the density of states as a function of energy
@@ -1398,11 +1396,10 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
     if calculation.get_special:
         grpc_p = grpc.create_group('special')
 
-        bra, ket, moments, random, point, dis, temp, direction = [], [], [], [], [], [], [], []
-        dimension_bra, starting_index_bra, dimension_ket, starting_index_ket, timesteps = [], [], [], [], []
+        bra, ket, moments, point, dis, temp, direction = [], [], [], [], [], [], []
+        dimension_bra, starting_index_bra, dimension_ket, starting_index_ket, timestep = [], [], [], [], []
         for single_special in calculation.get_special:
             moments.append(single_special['num_moments'])
-            random.append(single_special['num_random'])
             point.append(single_special['num_points'])
             dis.append(single_special['num_disorder'])
             bra.append(single_special['bra'])
@@ -1411,13 +1408,12 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
             dimension_ket.append(single_special['dimension_ket'])
             starting_index_bra.append(single_special['starting_index_bra'])
             starting_index_ket.append(single_special['starting_index_ket'])
-            timesteps.append(single_special['timesteps'])
+            timestep.append(single_special['timestep'])
 
         if len(calculation.get_special) > 1:
             raise SystemExit('Only a single function request of each type is currently allowed. Please use another '
                              'configuration file for the same functionality.')
         grpc_p.create_dataset('NumMoments', data=moments, dtype=np.int32)
-        grpc_p.create_dataset('NumRandoms', data=random, dtype=np.int32)
         grpc_p.create_dataset('NumPoints', data=point, dtype=np.int32)
         grpc_p.create_dataset('NumDisorder', data=dis, dtype=np.int32)
         grpc_p.create_dataset('dimension_bra', data=dimension_bra, dtype=np.int32)
@@ -1426,7 +1422,7 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
         grpc_p.create_dataset('starting_index_ket', data=np.asarray(starting_index_ket), dtype=np.int32)
         grpc_p.create_dataset('bra', data=np.array(bra).astype(config.type))
         grpc_p.create_dataset('ket', data=np.array(ket).astype(config.type))
-        grpc_p.create_dataset('timesteps', data=np.asarray(timesteps), dtype=np.float32)
+        grpc_p.create_dataset('timestep', data=timestep, dtype=np.float32)
 
     if calculation.get_conductivity_dc:
         grpc_p = grpc.create_group('conductivity_dc')
