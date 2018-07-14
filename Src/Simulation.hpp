@@ -697,7 +697,6 @@ public:
       num_velocities += indices.at(i).size();
     int factor = 1 - (num_velocities % 2)*2;
 
-    typedef typename extract_value_type<T>::value_type value_type;
 		
     switch(dim){
       case 2:{
@@ -744,16 +743,10 @@ public:
                 Global.general_gamma(n + N0*m,p) += general_gamma(m + N0*p,n)/T(6.0);
                 Global.general_gamma(n + N0*m,p) += general_gamma(p + N0*n,m)/T(6.0);
 
-                // Check if it's complex
-                if(std::is_same<T, std::complex<value_type>>::value){
-                  Global.general_gamma(n + N0*m,p) += T(factor/6.0)*std::conj(general_gamma(p + N0*m,n));
-                  Global.general_gamma(n + N0*m,p) += T(factor/6.0)*std::conj(general_gamma(n + N0*p,m));
-                  Global.general_gamma(n + N0*m,p) += T(factor/6.0)*std::conj(general_gamma(m + N0*n,p));
-                } else {
-                  Global.general_gamma(n + N0*m,p) += T(factor/6.0)*general_gamma(p + N0*m,n);
-                  Global.general_gamma(n + N0*m,p) += T(factor/6.0)*general_gamma(n + N0*p,m);
-                  Global.general_gamma(n + N0*m,p) += T(factor/6.0)*general_gamma(m + N0*n,p);
-                }
+		Global.general_gamma(n + N0*m,p) += T(factor/6.0)*myconj(general_gamma(p + N0*m,n));
+		Global.general_gamma(n + N0*m,p) += T(factor/6.0)*myconj(general_gamma(n + N0*p,m));
+		Global.general_gamma(n + N0*m,p) += T(factor/6.0)*myconj(general_gamma(m + N0*n,p));
+		
               }
             }
           }
@@ -767,14 +760,9 @@ public:
             for(int m = 0; m < N1; m++){
               for(int p = 0; p < N2; p++){
                 Global.general_gamma(n + N0*m,p) += general_gamma(n + N0*m,p)/T(2.0);
-
-                // Check if it's complex
-                if(std::is_same<T, std::complex<value_type>>::value)
-                  Global.general_gamma(n + N0*m,p) += T(factor/2.0)*std::conj(general_gamma(n + N0*p,m));
-                else
-                  Global.general_gamma(n + N0*m,p) += T(factor/2.0)*general_gamma(n + N0*p,m);
-              }
-            }
+		Global.general_gamma(n + N0*m,p) += T(factor/2.0)*myconj(general_gamma(n + N0*p,m));
+	      }	
+	    }
           }
         }
 
@@ -784,12 +772,7 @@ public:
             for(int m = 0; m < N1; m++){
               for(int p = 0; p < N2; p++){
                 Global.general_gamma(n + N0*m,p) += general_gamma(n + N0*m,p)/T(2.0);
-
-                // Check if it's complex
-                if(std::is_same<T, std::complex<value_type>>::value)
-                  Global.general_gamma(n + N0*m,p) += T(factor/2.0)*std::conj(general_gamma(m + N0*n,p));
-                else
-                  Global.general_gamma(n + N0*m,p) += T(factor/2.0)*general_gamma(m + N0*n,p);
+		Global.general_gamma(n + N0*m,p) += T(factor/2.0)*myconj(general_gamma(m + N0*n,p));
               }
             }
           }
@@ -801,12 +784,8 @@ public:
             for(int m = 0; m < N1; m++){
               for(int p = 0; p < N2; p++){
                 Global.general_gamma(n + N0*m,p) += general_gamma(n + N0*m,p)/T(2.0);
+		Global.general_gamma(n + N0*m,p) += T(factor/2.0)*myconj(general_gamma(p + N0*m, n));
 
-                // Check if it's complex
-                if(std::is_same<T, std::complex<value_type>>::value)
-                  Global.general_gamma(n + N0*m,p) += T(factor/2.0)*std::conj(general_gamma(p + N0*m, n));
-                else
-                  Global.general_gamma(n + N0*m,p) += T(factor/2.0)*general_gamma(p + N0*m, n);
               }
             }
           }

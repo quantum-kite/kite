@@ -44,6 +44,7 @@ struct extract_value_type<X<T, Args...>>   //specialization
   typedef T value_type;
 };
 
+/****** assign *************/
 template <typename T>
 typename std::enable_if<!is_tt<std::complex, T>::value, T>::type assign_value(double x, double y) {
   return T(x);
@@ -53,4 +54,15 @@ template <typename T>
 typename std::enable_if<is_tt<std::complex, T>::value, T>::type assign_value(double x, double y) {
   typedef typename extract_value_type<T>::value_type value_type;
   return T(value_type(x),value_type(y));
+};
+
+/****** myconj *************/
+template <typename T>
+typename std::enable_if<!is_tt<std::complex, T>::value, T>::type myconj(T & x) {
+  return x;
+};
+
+template <typename T>
+typename std::enable_if<is_tt<std::complex, T>::value, T>::type myconj(T & x) {
+  return std::conj(x);
 };
