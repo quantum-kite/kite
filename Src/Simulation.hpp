@@ -255,6 +255,7 @@ public:
 	
   void Gamma2D(int NRandomV, int NDisorder, std::vector<int> N_moments, 
       std::vector<std::vector<unsigned>> indices, std::string name_dataset){
+    Eigen::Matrix<T, MEMORY, MEMORY> tmp;
     // This function calculates all kinds of two-dimensional gamma matrices such
     // as Tr[V^a Tn v^b Tm] = G_nm
     //
@@ -349,13 +350,19 @@ public:
             }
             
             // Finally, do the matrix product and store the result in the Gamma matrix
-            Eigen::Matrix<T, -1, -1> kpm_product;
-            kpm_product = kpm3.v.adjoint() * kpm2.v; 
+            // Eigen::Matrix<T, -1, -1> kpm_product;
+            // kpm_product = kpm3.v.adjoint() * kpm2.v; 
+	    
+	    tmp.setZero();
+	    for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
+	      tmp += kpm3.v.block(ii,0, r.Ld[0], MEMORY).adjoint() * kpm2.v.block(ii, 0, r.Ld[0], MEMORY);
+	    
+	    
             T flatten;
             long int ind;
             for(int j = 0; j < MEMORY; j++)
               for(int i = 0; i < MEMORY; i++){
-                flatten = kpm_product(i,j);
+                flatten = tmp(i,j);
                 ind = (m+j)*N_moments.at(0) + n+i;
                 gamma(ind) += (flatten - gamma(ind))/value_type(average + 1);			
               }
@@ -372,6 +379,7 @@ public:
 
   void Gamma3D(int NRandomV, int NDisorder, std::vector<int> N_moments, 
       std::vector<std::vector<unsigned>> indices, std::string name_dataset){
+    Eigen::Matrix<T, MEMORY, MEMORY> tmp;
     // This calculates all the kinds of three-dimensional gamma matrices
     // such as Tr[v^a Tn v^b Tm v^c Tp] = G_nmp. The output is a 2D matrix 
     // organized as follows:
@@ -476,15 +484,20 @@ public:
                 if(mi != 0) cheb_iteration(&kpm_pVm, mi-1);
 
               
-              Eigen::Matrix<T, -1, -1> kpm_product;
-              kpm_product = Eigen::Matrix<T, -1, -1>::Zero(MEMORY, MEMORY); // this line is not necessary
-              kpm_product = kpm_VnV.v.adjoint() * kpm_pVm.v; 
-
+	    
+	      tmp.setZero();
+	      for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
+		tmp += kpm_VnV.v.block(ii,0, r.Ld[0], MEMORY).adjoint() * kpm_pVm.v.block(ii, 0, r.Ld[0], MEMORY);
+              //Eigen::Matrix<T, -1, -1> kpm_product;
+	      
+	      // kpm_product = Eigen::Matrix<T, -1, -1>::Zero(MEMORY, MEMORY); // this line is not necessary
+              //kpm_product = kpm_VnV.v.adjoint() * kpm_pVm.v; 
+	      
               long int index;
               for(int i = 0; i < MEMORY; i++)
                 for(int j = 0; j < MEMORY; j++){
                   index = p*N_moments.at(1)*N_moments.at(0) + (m+j)*N_moments.at(0) + n+i;
-                  gamma(index) += (kpm_product(i, j) - gamma(index))/value_type(average + 1);
+                  gamma(index) += (tmp(i, j) - gamma(index))/value_type(average + 1);
                 }
             }
           }
@@ -570,7 +583,7 @@ public:
       std::vector<std::vector<unsigned>> indices, std::vector<KPM_Vector<T,D>*> *kpm_vector, Eigen::Array<T, -1, -1> *gamma){
     debug_message("Entered recursive_KPM\n");
     typedef typename extract_value_type<T>::value_type value_type;
-		
+    Eigen::Matrix < T, 1, 2> tmp =  Eigen::Matrix < T, 1, 2> ::Zero();		
 		
     if(depth != max_depth){
       KPM_Vector<T,D> *kpm1 = kpm_vector->at(depth);
@@ -607,14 +620,24 @@ public:
       KPM_Vector<T,D> *kpm0 = kpm_vector->at(0);
       KPM_Vector<T,D> *kpm1 = kpm_vector->at(depth);
 			
-      kpm1->template Multiply<0>();		
-      gamma->matrix().block(0,*index_gamma,1,2) += (kpm0->v.adjoint() * kpm1->v - gamma->matrix().block(0,*index_gamma,1,2))/value_type(*average + 1);			
+      kpm1->template Multiply<0>();
+
+      tmp.setZero();
+      for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
+	tmp += kpm0->v.block(ii,0, r.Ld[0], 1).adjoint() * kpm1->v.block(ii, 0, r.Ld[0], 2);
+      
+      gamma->matrix().block(0,*index_gamma,1,2) += (tmp - gamma->matrix().block(0,*index_gamma,1,2))/value_type(*average + 1);			
       *index_gamma += 2;
 	
       for(int m = 2; m < N_moments.at(depth - 1); m += 2){
         kpm1->template Multiply<1>();
         kpm1->template Multiply<1>();
-        gamma->matrix().block(0, *index_gamma,1,2) += (kpm0->v.adjoint() * kpm1->v - gamma->matrix().block(0,*index_gamma,1,2))/value_type(*average + 1);
+	
+	tmp.setZero();
+	for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
+	  tmp += kpm0->v.block(ii,0, r.Ld[0], 1).adjoint() * kpm1->v.block(ii, 0, r.Ld[0], 2);
+	
+        gamma->matrix().block(0, *index_gamma,1,2) += (tmp - gamma->matrix().block(0,*index_gamma,1,2))/value_type(*average + 1);
             
         *index_gamma += 2;
       }
