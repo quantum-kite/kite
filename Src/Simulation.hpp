@@ -1010,7 +1010,7 @@ public:
 	      // finally, the dot product of phi1 and phi0 yields the conductivity
 	      tmp *= 0.;
 	      for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
-		tmp += phi1.v.col(0).segment(ii,r.Ld[0]).adjoint() * phi0.v.col(0).segment(ii,r.Ld[0]);
+		tmp += T(phi1.v.col(0).segment(ii,r.Ld[0]).adjoint() * phi0.v.col(0).segment(ii,r.Ld[0]));
 	      cond_array(job_index) += (tmp - cond_array(job_index))/value_type(average_R+1);						
 	      debug_message("Concluded SingleShot calculation for SSPRINT=0\n");
 #elif (SSPRINT != 0)
