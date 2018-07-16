@@ -258,6 +258,7 @@ public:
 	
   void Gamma2D(int NRandomV, int NDisorder, std::vector<int> N_moments, 
       std::vector<std::vector<unsigned>> indices, std::string name_dataset){
+    Eigen::Matrix<T, MEMORY, MEMORY> tmp;
     // This function calculates all kinds of two-dimensional gamma matrices such
     // as Tr[V^a Tn v^b Tm] = G_nm
     //
@@ -352,13 +353,14 @@ public:
             }
             
             // Finally, do the matrix product and store the result in the Gamma matrix
-            Eigen::Matrix<T, -1, -1> kpm_product;
-            kpm_product = kpm3.v.adjoint() * kpm2.v; 
+	    tmp.setZero();
+	    for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
+	      tmp += kpm3.v.block(ii,0, r.Ld[0], MEMORY).adjoint() * kpm2.v.block(ii, 0, r.Ld[0], MEMORY);
             T flatten;
             long int ind;
             for(int j = 0; j < MEMORY; j++)
               for(int i = 0; i < MEMORY; i++){
-                flatten = kpm_product(i,j);
+                flatten = tmp(i,j);
                 ind = (m+j)*N_moments.at(0) + n+i;
                 gamma(ind) += (flatten - gamma(ind))/value_type(average + 1);			
               }
@@ -375,6 +377,7 @@ public:
 
   void Gamma3D(int NRandomV, int NDisorder, std::vector<int> N_moments, 
       std::vector<std::vector<unsigned>> indices, std::string name_dataset){
+    Eigen::Matrix<T, MEMORY, MEMORY> tmp;
     // This calculates all the kinds of three-dimensional gamma matrices
     // such as Tr[v^a Tn v^b Tm v^c Tp] = G_nmp. The output is a 2D matrix 
     // organized as follows:
@@ -479,15 +482,15 @@ public:
                 if(mi != 0) cheb_iteration(&kpm_pVm, mi-1);
 
               
-              Eigen::Matrix<T, -1, -1> kpm_product;
-              kpm_product = Eigen::Matrix<T, -1, -1>::Zero(MEMORY, MEMORY); // this line is not necessary
-              kpm_product = kpm_VnV.v.adjoint() * kpm_pVm.v; 
+	      tmp.setZero();
+	      for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
+		tmp += kpm_VnV.v.block(ii,0, r.Ld[0], MEMORY).adjoint() * kpm_pVm.v.block(ii, 0, r.Ld[0], MEMORY);
 
               long int index;
               for(int i = 0; i < MEMORY; i++)
                 for(int j = 0; j < MEMORY; j++){
                   index = p*N_moments.at(1)*N_moments.at(0) + (m+j)*N_moments.at(0) + n+i;
-                  gamma(index) += (kpm_product(i, j) - gamma(index))/value_type(average + 1);
+                  gamma(index) += (tmp(i, j) - gamma(index))/value_type(average + 1);
                 }
             }
           }
@@ -574,6 +577,7 @@ public:
     debug_message("Entered recursive_KPM\n");
     typedef typename extract_value_type<T>::value_type value_type;
 		
+    Eigen::Matrix < T, 1, 2> tmp =  Eigen::Matrix < T, 1, 2> ::Zero();		
 		
     if(depth != max_depth){
       KPM_Vector<T,D> *kpm1 = kpm_vector->at(depth);
@@ -611,13 +615,21 @@ public:
       KPM_Vector<T,D> *kpm1 = kpm_vector->at(depth);
 			
       kpm1->template Multiply<0>();		
-      gamma->matrix().block(0,*index_gamma,1,2) += (kpm0->v.adjoint() * kpm1->v - gamma->matrix().block(0,*index_gamma,1,2))/value_type(*average + 1);			
+      tmp.setZero();
+      for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
+	tmp += kpm0->v.block(ii,0, r.Ld[0], 1).adjoint() * kpm1->v.block(ii, 0, r.Ld[0], 2);
+      
+      gamma->matrix().block(0,*index_gamma,1,2) += (tmp - gamma->matrix().block(0,*index_gamma,1,2))/value_type(*average + 1);			
       *index_gamma += 2;
 	
       for(int m = 2; m < N_moments.at(depth - 1); m += 2){
         kpm1->template Multiply<1>();
         kpm1->template Multiply<1>();
-        gamma->matrix().block(0, *index_gamma,1,2) += (kpm0->v.adjoint() * kpm1->v - gamma->matrix().block(0,*index_gamma,1,2))/value_type(*average + 1);
+	tmp.setZero();
+	for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
+	  tmp += kpm0->v.block(ii,0, r.Ld[0], 1).adjoint() * kpm1->v.block(ii, 0, r.Ld[0], 2);
+	
+        gamma->matrix().block(0, *index_gamma,1,2) += (tmp - gamma->matrix().block(0,*index_gamma,1,2))/value_type(*average + 1);
             
         *index_gamma += 2;
       }
@@ -747,16 +759,9 @@ public:
                 Global.general_gamma(n + N0*m,p) += general_gamma(m + N0*p,n)/T(6.0);
                 Global.general_gamma(n + N0*m,p) += general_gamma(p + N0*n,m)/T(6.0);
 
-                // Check if it's complex
-                if(std::is_same<T, std::complex<value_type>>::value){
-                  Global.general_gamma(n + N0*m,p) += T(factor/6.0)*std::conj(general_gamma(p + N0*m,n));
-                  Global.general_gamma(n + N0*m,p) += T(factor/6.0)*std::conj(general_gamma(n + N0*p,m));
-                  Global.general_gamma(n + N0*m,p) += T(factor/6.0)*std::conj(general_gamma(m + N0*n,p));
-                } else {
-                  Global.general_gamma(n + N0*m,p) += T(factor/6.0)*general_gamma(p + N0*m,n);
-                  Global.general_gamma(n + N0*m,p) += T(factor/6.0)*general_gamma(n + N0*p,m);
-                  Global.general_gamma(n + N0*m,p) += T(factor/6.0)*general_gamma(m + N0*n,p);
-                }
+		Global.general_gamma(n + N0*m,p) += T(factor/6.0)*myconj(general_gamma(p + N0*m,n));
+		Global.general_gamma(n + N0*m,p) += T(factor/6.0)*myconj(general_gamma(n + N0*p,m));
+		Global.general_gamma(n + N0*m,p) += T(factor/6.0)*myconj(general_gamma(m + N0*n,p));
               }
             }
           }
@@ -772,10 +777,7 @@ public:
                 Global.general_gamma(n + N0*m,p) += general_gamma(n + N0*m,p)/T(2.0);
 
                 // Check if it's complex
-                if(std::is_same<T, std::complex<value_type>>::value)
-                  Global.general_gamma(n + N0*m,p) += T(factor/2.0)*std::conj(general_gamma(n + N0*p,m));
-                else
-                  Global.general_gamma(n + N0*m,p) += T(factor/2.0)*general_gamma(n + N0*p,m);
+		Global.general_gamma(n + N0*m,p) += T(factor/2.0)*myconj(general_gamma(n + N0*p,m));
               }
             }
           }
@@ -789,10 +791,7 @@ public:
                 Global.general_gamma(n + N0*m,p) += general_gamma(n + N0*m,p)/T(2.0);
 
                 // Check if it's complex
-                if(std::is_same<T, std::complex<value_type>>::value)
-                  Global.general_gamma(n + N0*m,p) += T(factor/2.0)*std::conj(general_gamma(m + N0*n,p));
-                else
-                  Global.general_gamma(n + N0*m,p) += T(factor/2.0)*general_gamma(m + N0*n,p);
+		Global.general_gamma(n + N0*m,p) += T(factor/2.0)*myconj(general_gamma(m + N0*n,p));
               }
             }
           }
@@ -804,12 +803,8 @@ public:
             for(int m = 0; m < N1; m++){
               for(int p = 0; p < N2; p++){
                 Global.general_gamma(n + N0*m,p) += general_gamma(n + N0*m,p)/T(2.0);
+		Global.general_gamma(n + N0*m,p) += T(factor/2.0)*myconj(general_gamma(p + N0*m, n));
 
-                // Check if it's complex
-                if(std::is_same<T, std::complex<value_type>>::value)
-                  Global.general_gamma(n + N0*m,p) += T(factor/2.0)*std::conj(general_gamma(p + N0*m, n));
-                else
-                  Global.general_gamma(n + N0*m,p) += T(factor/2.0)*general_gamma(p + N0*m, n);
               }
             }
           }
@@ -869,9 +864,11 @@ public:
 #pragma omp barrier
   }
 
-  void Single_Shot(double EScale, singleshot_measurement_queue queue) {
+  void Single_Shot(double EScale, singleshot_measurement_queue queue)
+  {
     // Calculate the longitudinal dc conductivity for a single value of the energy
     
+    T tmp;
     debug_message("Entered Single_Shot\n");
     
     // Obtain the relevant quantities from the queue
@@ -895,7 +892,8 @@ public:
     // calculation is meaningful. For that to be true, this has to be a 
     // longitudinal conductivity
     std::vector<std::vector<unsigned>> indices = process_string(indices_string);
-    if(indices.at(0).at(0) != indices.at(1).at(0)){
+    if(indices.at(0).at(0) != indices.at(1).at(0))
+      {
       std::cout << "SingleShot is only meaningful for the longitudinal conductivity.";
       std::cout << "Please use directions 'x,x' or 'y,y'. Exiting.\n";
       exit(1);
@@ -937,20 +935,23 @@ public:
     long average = 0;
     double job_energy, job_gamma, job_preserve_disorder;
     int job_NMoments;
-    for(int disorder = 0; disorder < NDisorder; disorder++){
+    for(int disorder = 0; disorder < NDisorder; disorder++)
+      {
       h.generate_disorder();
       h.build_velocity(indices.at(0),0u);
       h.build_velocity(indices.at(1),1u);
       
       // iteration over each energy and gammma
-      for(int job_index = 0; job_index < N_energies; job_index++){
+	for(int job_index = 0; job_index < N_energies; job_index++)
+	  {
         job_energy = jobs(job_index, 0);
         job_gamma = jobs(job_index, 1);
         job_preserve_disorder = jobs(job_index, 2);
         job_NMoments = int(jobs(job_index,3));
         std::complex<double> energy(job_energy, job_gamma);
         
-        if(job_preserve_disorder == 0.0){
+	    if(job_preserve_disorder == 0.0)
+	      {
           h.generate_disorder();
           h.build_velocity(indices.at(0),0u);
           h.build_velocity(indices.at(1),1u);
@@ -974,7 +975,8 @@ public:
           generalized_velocity(&phi, &phi0, indices, 0);      // |phi> = v |phi_0>
 
 
-          for(int n = 0; n < job_NMoments; n++){		
+	      for(int n = 0; n < job_NMoments; n++)
+		{		
             if(n!=0) cheb_iteration(&phi, n-1);
 
             phi1.v.col(0) += phi.v.col(phi.get_index())
@@ -994,7 +996,8 @@ public:
           phi.v.col(0) = phi0.v.col(0);
           phi0.v.col(0).setZero(); 
 
-          for(int n = 0; n < job_NMoments; n++){		
+	      for(int n = 0; n < job_NMoments; n++)
+		{		
             if(n!=0) cheb_iteration(&phi, n-1);
             
             phi0.v.col(0) += phi.v.col(phi.get_index())
@@ -1003,8 +1006,10 @@ public:
           
           
           // finally, the dot product of phi1 and phi0 yields the conductivity
-          cond_array(job_index) += (T(phi1.v.col(0).adjoint()*phi0.v.col(0)) - 
-              cond_array(job_index))/value_type(average_R+1);						
+	      tmp *= 0.;
+	      for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
+		tmp += T(phi1.v.col(0).segment(ii,r.Ld[0]).adjoint() * phi0.v.col(0).segment(ii,r.Ld[0]));
+	      cond_array(job_index) += (tmp - cond_array(job_index))/value_type(average_R+1);						
           debug_message("Concluded SingleShot calculation for SSPRINT=0\n");
 #elif (SSPRINT != 0)
 #pragma omp master
@@ -1027,9 +1032,10 @@ public:
           // from here on, phi0 is free to be used elsewhere, it is no longer needed
           phi0.v.col(0).setZero();
 
-          for(int nn = 0; nn < SSPRINT; nn++){
-
-            for(int n = nn*job_NMoments/SSPRINT; n < job_NMoments/SSPRINT*(nn+1); n++){	
+	      for(int nn = 0; nn < SSPRINT; nn++)
+		{
+		  for(int n = nn*job_NMoments/SSPRINT; n < job_NMoments/SSPRINT*(nn+1); n++)
+		    {	
               if(n!=0) cheb_iteration(&phir1, n-1);
 
               phi1.v.col(0) += phir1.v.col(phir1.get_index())
@@ -1045,7 +1051,8 @@ public:
             phi2.empty_ghosts(0);
           
             
-            for(int n = nn*job_NMoments/SSPRINT; n < job_NMoments/SSPRINT*(nn+1); n++){		
+		  for(int n = nn*job_NMoments/SSPRINT; n < job_NMoments/SSPRINT*(nn+1); n++)
+		    {		
               if(n!=0) cheb_iteration(&phir2, n-1);
 
               phi0.v.col(0) += phir2.v.col(phir2.get_index())
@@ -1059,8 +1066,13 @@ public:
             temp = T(phi2.v.col(0).adjoint()*phi0.v.col(0));
 
 
-            if(nn == SSPRINT-1){
-              cond_array(job_index) += (temp - cond_array(job_index))/value_type(average_R+1);
+		  if(nn == SSPRINT-1)
+		    {
+		      T tmp ;
+		      tmp *= 0.;
+		      for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
+			tmp += phi2.v.col(0).segment(ii,r.Ld[0]).adjoint() * phi0.v.col(0).segment(ii,r.Ld[0]);
+		      cond_array(job_index) += (tmp - cond_array(job_index))/value_type(average_R + 1);
             }
             
 #pragma omp master
@@ -1116,7 +1128,8 @@ public:
       Eigen::Array<double, -1, -1> store_data;
       store_data = Eigen::Array<double, -1, -1>::Zero(4, jobs.rows());
       
-      for(int ener = 0; ener < N_energies; ener++){
+      for(int ener = 0; ener < N_energies; ener++)
+	{
         store_data(0, ener) = jobs.real()(ener, 0)*EScale;
         store_data(1, ener) = jobs.real()(ener, 1)*EScale;
         store_data(2, ener) = jobs(ener, 3);

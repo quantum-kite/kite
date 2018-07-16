@@ -54,3 +54,14 @@ typename std::enable_if<is_tt<std::complex, T>::value, T>::type assign_value(dou
   typedef typename extract_value_type<T>::value_type value_type;
   return T(value_type(x),value_type(y));
 };
+
+/****** myconj *************/
+template <typename T>
+typename std::enable_if<!is_tt<std::complex, T>::value, T>::type myconj(T & x) {
+  return x;
+};
+
+template <typename T>
+typename std::enable_if<is_tt<std::complex, T>::value, T>::type myconj(T & x) {
+  return std::conj(x);
+};
