@@ -700,7 +700,6 @@ public:
 
     long int size_gamma = gamma->cols();
     int dim = indices.size();
-
 		
     // Number of commutators inside the Gamma matrix. 
     // V^{x}  = [x,H]		-> one commutator
@@ -711,8 +710,6 @@ public:
     for(int i = 0; i < int(indices.size()); i++)
       num_velocities += indices.at(i).size();
     int factor = 1 - (num_velocities % 2)*2;
-
-    typedef typename extract_value_type<T>::value_type value_type;
 		
     switch(dim){
       case 2:{
@@ -1153,11 +1150,16 @@ public:
   {
     KPM_Vector<T,D> phi (2, *this), sum_bra(1u,*this), sum_ket(1u,*this);    
     int NumDisorder, NumMoments, NumPoints, bra_size, bra_initial[D], ket_size, ket_initial[D];
-    T II = assign_value<T>(double(0), -double(1)), zero = 0, one = 1;
+    T II = assign_value<T>(value_type(0), -value_type(1)), zero = 0, one = 1;
     std::vector<double> times;
     std::vector<T> data_ket, data_bra;
     Eigen::Array<T,-1,-1> avg_x, avg_y, avg_z;
     Eigen::Matrix<T, 2, 2> spin_x, spin_y, spin_z;
+    // The data is organized by columns and the first orbitals are sz = 1 and the last sz = -1
+    Eigen::Map<Eigen::Matrix<T,-1,-1>> vket(sum_ket.v.data(), r.Sized/2, 2);
+    Eigen::Map<Eigen::Matrix<T,-1,-1>> vtmp(phi.v.col(0).data(), r.Sized/2, 2);
+    Eigen::Map<Eigen::Matrix<T,-1,-1>> vtmp1(vtmp.data(), r.Sized, 1);
+    float timestep, time;
     spin_x << zero, one,
       one, zero;
     
@@ -1182,102 +1184,86 @@ public:
       get_hdf5<int>(ket_initial,  file, (char *) "/Calculation/special/starting_index_ket");
       data_ket.resize(pow(ket_size,D) * r.Orb );
       get_hdf5<T>(data_ket.data(),   file, (char *) "/Calculation/special/ket");
-      H5::DataSet * dataset_energy     	= new H5::DataSet(file->openDataSet("/Calculation/special/timesteps"));
-      H5::DataSpace * dataspace_energy 	= new H5::DataSpace(dataset_energy->getSpace());
-      int nt = dataspace_energy->getSimpleExtentNpoints();	
-      times.resize(nt);
+      get_hdf5<float>(&timestep,   file, (char *) "/Calculation/special/timestep");
       
-      avg_x = Eigen::Matrix<T,-1,-1>(nt,1);
-      avg_y = Eigen::Matrix<T,-1,-1>(nt,1);
-      avg_z = Eigen::Matrix<T,-1,-1>(nt,1);
+      avg_x = Eigen::Matrix<T,-1,-1>(NumPoints,1);
+      avg_y = Eigen::Matrix<T,-1,-1>(NumPoints,1);
+      avg_z = Eigen::Matrix<T,-1,-1>(NumPoints,1);
 #pragma omp master
       {
-	Global.avg_x = Eigen::Matrix<T,-1,1>(nt,1);
-	Global.avg_y = Eigen::Matrix<T,-1,1>(nt,1);
-	Global.avg_z = Eigen::Matrix<T,-1,1>(nt,1);
+	Global.avg_x = Eigen::Matrix<T,-1,1>(NumPoints,1);
+	Global.avg_y = Eigen::Matrix<T,-1,1>(NumPoints,1);
+	Global.avg_z = Eigen::Matrix<T,-1,1>(NumPoints,1);
       }
-      delete dataspace_energy;
-      delete dataset_energy;
-      get_hdf5<double>(times.data(),   file, (char *) "/Calculation/special/timesteps");
+      
       file->close();
       delete file;
     }
 #pragma omp barrier
     NumMoments = (NumMoments/2)*2;
-    for(unsigned t = 0; t < times.size(); t++)
-      for(int id = 0; id < NumDisorder; id++)
-	{
-	  h.generate_disorder();
-	  phi.v.setZero();
-	  phi.initiate_from_data(bra_size, bra_initial, data_bra);    
-	  phi.Exchange_Boundaries();
-	  cheb_iteration(&phi, 0);
-	  
-	  sum_bra.v.col(0) = value_type(boost::math::cyl_bessel_j(0, times.at(t) )) * phi.v.col(0);
-	  sum_bra.v.col(0) += value_type(2*boost::math::cyl_bessel_j(1, times.at(t) )) * II * phi.v.col(1);
-	  for(int n = 2; n < NumMoments; n +=2)
-	    {
-	      Eigen::Matrix<T,2,1> m;
-	      m << value_type(2*boost::math::cyl_bessel_j(n - 1, times.at(t) )) * pow(II,n - 1),
-		value_type(2*boost::math::cyl_bessel_j(n, times.at(t) )) * pow(II,n);
-	      cheb_iteration(&phi, n - 1);
-	      cheb_iteration(&phi, n);
-	      sum_bra.v.col(0) += phi.v * m;
-	    }
-	  
-	  phi.v.setZero();      
-	  phi.initiate_from_data(ket_size, ket_initial, data_ket);    
-	  phi.Exchange_Boundaries();
-	  cheb_iteration(&phi, 0);
-	  
-	  sum_ket.v.col(0) = value_type(boost::math::cyl_bessel_j(0, times.at(t) )) * phi.v.col(0);
-	  sum_ket.v.col(0) += value_type(2*boost::math::cyl_bessel_j(1, times.at(t) )) * II * phi.v.col(1);
-	  for(int n = 2; n < NumMoments; n +=2)
-	    {
-	      Eigen::Matrix<T,2,1> m;
-	      m << value_type(2*boost::math::cyl_bessel_j(n - 1, times.at(t) )) * pow(II,n - 1),
-		value_type(2*boost::math::cyl_bessel_j(n, times.at(t) )) * pow(II,n);
-	      cheb_iteration(&phi, n - 1);
-	      cheb_iteration(&phi, n);
-	      sum_ket.v.col(0) += phi.v * m;
-	    }
-	  
-	  sum_bra.empty_ghosts(sum_bra.get_index());
-	  sum_ket.empty_ghosts(sum_ket.get_index());
-	  // The data is organized by columns and the first orbitals are sz = 1 and the last sz = -1
-	  Eigen::Map<Eigen::Matrix<T,-1,-1>> vket(sum_ket.v.data(), r.Sized/2, 2);
-	  Eigen::Map<Eigen::Matrix<T,-1,-1>> vtmp(phi.v.col(0).data(), r.Sized/2, 2);
-	  Eigen::Map<Eigen::Matrix<T,-1,-1>> vtmp1(vtmp.data(), r.Sized, 1);
-	  // In the multiplication of a matrix the number of columns of the first should be equal to
-	  // the number of rows of the second, because the spin is organized by columns we have:
-	  vtmp = vket * spin_x.transpose();
-	  auto x0 = sum_bra.v.adjoint() * vtmp1;
-	  if(x0.rows() != 1 || x0.cols() != 1)
-	    {
-	      std::cout << "Big Problem" << std::endl;
-	      exit(0);
-	    }
-	  avg_x(t) += (x0(0,0) - avg_x(t) ) /T(id + 1);
-	  
-	  vtmp = vket * spin_y.transpose();
-	  auto x1 = sum_bra.v.adjoint() * vtmp1;
-	  if(x1.rows() != 1 || x1.cols() != 1)
-	    {
-	      std::cout << "Big Problem" << std::endl;
-	      exit(0);
-	    }
-	  avg_y(t) += (x1(0,0) - avg_y(t) ) /T(id + 1);
-	  
-	  vtmp = vket * spin_z.transpose();
-	  auto x2 = sum_bra.v.adjoint() * vtmp1;
-	  if(x2.rows() != 1 || x2.cols() != 1)
-	    {
-	      std::cout << "Big Problem" << std::endl;
-	      exit(0);
-	    }
-	  avg_z(t) += (x2(0,0) - avg_z(t) ) /T(id + 1);
-	}
-    
+    for(int id = 0; id < NumDisorder; id++)
+      {
+	sum_bra.v.setZero();
+	sum_ket.v.setZero();
+	sum_bra.initiate_from_data(bra_size, bra_initial, data_bra);
+	sum_ket.initiate_from_data(ket_size, ket_initial, data_ket);
+	time = 0;
+       	for(unsigned t = 0; t < unsigned(NumPoints); t++)
+	  {
+	    Eigen::Matrix<T,-1,1> m(NumMoments);
+	    for(unsigned n = 0; n < unsigned(NumMoments); n++)
+	      m(n) = value_type((n == 0 ? 1 : 2 )*boost::math::cyl_bessel_j(n, time )) * T(pow(II,n));
+	    
+	    h.generate_disorder();
+	    phi.v.setZero();
+	    phi.set_index(0);
+	    phi.v.col(0) = sum_bra.v.col(0);
+	    phi.Exchange_Boundaries();
+	    cheb_iteration(&phi, 0);
+	    
+	    sum_bra.v.col(0) = phi.v * m.segment(0, 2);
+	    
+	    for(unsigned n = 2; n < (t == 0u ? 0u : unsigned(NumMoments)); n += 2)
+	      {
+		cheb_iteration(&phi, n - 1);
+		cheb_iteration(&phi, n);
+		sum_bra.v.col(0) += phi.v * m.segment(n,2);
+	      }	    
+	    
+	    phi.v.setZero();
+	    phi.set_index(0);
+	    phi.v.col(0) = sum_ket.v.col(0);
+	    phi.Exchange_Boundaries();
+	    cheb_iteration(&phi, 0);
+	    
+	    sum_ket.v.col(0) = phi.v * m.segment(0, 2);
+	    for(unsigned n = 2; n < (t == 0u ? 0u : unsigned(NumMoments)); n += 2)
+	      {
+		cheb_iteration(&phi, n - 1);
+		cheb_iteration(&phi, n);
+		sum_ket.v.col(0) += phi.v * m.segment(n,2);
+	      }
+	    
+	    sum_bra.empty_ghosts(sum_bra.get_index());
+	    sum_ket.empty_ghosts(sum_ket.get_index());
+	    // In the multiplication of a matrix the number of columns of the first should be equal to
+	    // the number of rows of the second, because the spin is organized by columns we have:
+	    
+	    vtmp = vket * spin_x.transpose();
+	    auto x0 = sum_bra.v.adjoint() * vtmp1;
+	    avg_x(t) += (x0(0,0) - avg_x(t) ) /T(id + 1);
+	    
+	    vtmp = vket * spin_y.transpose();
+	    auto x1 = sum_bra.v.adjoint() * vtmp1;
+	    avg_y(t) += (x1(0,0) - avg_y(t) ) /T(id + 1);
+	    
+	    vtmp = vket * spin_z.transpose();
+	    auto x2 = sum_bra.v.adjoint() * vtmp1;
+	    avg_z(t) += (x2(0,0) - avg_z(t) ) /T(id + 1);
+	    time += timestep;
+	  }
+	
+      }	
 #pragma omp critical
     {
       Global.avg_x += avg_x;
