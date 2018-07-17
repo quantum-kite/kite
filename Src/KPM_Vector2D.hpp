@@ -130,7 +130,7 @@ public:
     corner.set({zero,zero,zero});
     r.convertCoordinates(cornerLB,corner);
     
-    corner.set({std::size_t(r.ld[0]),std::size_t(r.ld[1]),zero});
+    corner.set({std::size_t(r.ld[0]), std::size_t(r.ld[1]),zero});
     r.convertCoordinates(cornerRT,corner);    
     
     // Set intersection between domains 
@@ -148,16 +148,18 @@ public:
     
     // Copy data  to the initial vector
     // The data is a vector size * size * Orb
+    
     for(std::size_t io = 0; io < r.Orb; io++ )
       for(std::size_t i1 = cornerLBLd.coord[1]; i1 < cornerRTLd.coord[1]; i1++)
 	for(std::size_t i0 = cornerLBLd.coord[0]; i0 < cornerRTLd.coord[0]; i0++)
 	  {
 	    // Global positions
-	    std::size_t j0 = a0min - pos[0] + i0 - cornerLBLd.coord[1];
+	    std::size_t j0 = a0min - pos[0] + i0 - cornerLBLd.coord[0];
 	    std::size_t j1 = a1min - pos[1] + i1 - cornerLBLd.coord[1];
 	    v(x.set({i0,i1,io}).index, index) = data.at( j0 + j1*size + io*size*size );
 	  }
   };
+  
   template < unsigned MULT,bool VELOCITY> 
   void build_regular_phases(int i1, unsigned axis)
   {
@@ -337,15 +339,50 @@ public:
     */
     for(auto id = h.hd.begin(); id != h.hd.end(); id++)
       id->template multiply_broken_defect<MULT,VELOCITY>(phi0, phiM1,axis);
-	  
+    
     // These four lines pertrain only to the ghost_correlation field
     Exchange_Boundaries();
-      }
-    
-	  // Periodic component of the Hamiltonian + Anderson disorder
-	  
+  };
   
-
+  void measure_wave_packet(T * bra, T * ket, T * results)  
+  {
+    Coordinates<std::size_t,3> ad(r.Ld), at(r.Lt);
+    ad.set({std::size_t(NGHOSTS), std::size_t(NGHOSTS), std::size_t(0)});
+    r.convertCoordinates(at,ad);
+    for(unsigned i = 0; i < 4; i++)
+      results[i] *= 0.;
+    
+    for(unsigned io = 0; io < r.Orb; io++)
+      {
+	value_type deltax = r.rOrb(0,io), deltay = r.rOrb(1,io); 
+	for(unsigned i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1++)
+	  {
+	    
+	    std::size_t ind = ad.set({std::size_t(NGHOSTS),std::size_t(i1), std::size_t(io)}).index + NGHOSTS;
+	    value_type z1 = at.coord[1] + i1 - NGHOSTS;
+	    value_type x = at.coord[0]*r.rLat(0,0) + z1 * r.rLat(0,1) + deltax;
+	    value_type y = at.coord[0]*r.rLat(1,0) + z1 * r.rLat(1,1) + deltay;	    
+	    T xl1 = assign_value<T>(0.,0.),  xl2=assign_value<T>(0., 0.), yl1=assign_value<T>(0.,0.), yl2=assign_value<T>(0.,0);
+	    for(unsigned i0 = 0; i0 < r.Ld[0] - 2*NGHOSTS; i0++)
+	      {
+		x += i0 * r.rLat(0,0);
+		y += i0 * r.rLat(1,0);
+		T p = myconj(*(bra + ind + i0)) * (*(ket + ind + i0));
+		xl1 += p * x;
+		xl2 += p * x * x;
+		yl1 += p * y;
+		yl2 += p * y * y;
+	      }	    
+	    results[0] += xl1;
+	    results[1] += xl2;
+	    results[2] += yl1;
+	    results[3] += yl2;
+	  }
+      }
+  };
+  
+  
+  // Periodic component of the Hamiltonian + Anderson disorder
   void Exchange_Boundaries() {
     /*
       I have four boundaries to exchange with the other threads.

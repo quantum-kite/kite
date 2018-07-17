@@ -1159,7 +1159,9 @@ public:
     Eigen::Map<Eigen::Matrix<T,-1,-1>> vket(sum_ket.v.data(), r.Sized/2, 2);
     Eigen::Map<Eigen::Matrix<T,-1,-1>> vtmp(phi.v.col(0).data(), r.Sized/2, 2);
     Eigen::Map<Eigen::Matrix<T,-1,-1>> vtmp1(vtmp.data(), r.Sized, 1);
-    float timestep, time;
+    float timestep;
+    Eigen::Array<T, -1, -1> avg_results;
+    Eigen::Array<T, -1, -1> results(2*D, 1);
     spin_x << zero, one,
       one, zero;
     
@@ -1168,7 +1170,7 @@ public:
     
     spin_z << one, zero,
       zero, -one;
-    
+
     //Load bra and ket
 #pragma omp critical
     {
@@ -1186,43 +1188,48 @@ public:
       get_hdf5<T>(data_ket.data(),   file, (char *) "/Calculation/special/ket");
       get_hdf5<float>(&timestep,   file, (char *) "/Calculation/special/timestep");
       
-      avg_x = Eigen::Matrix<T,-1,-1>(NumPoints,1);
-      avg_y = Eigen::Matrix<T,-1,-1>(NumPoints,1);
-      avg_z = Eigen::Matrix<T,-1,-1>(NumPoints,1);
+      avg_x = Eigen::Matrix<T,-1,-1>::Zero(NumPoints,1);
+      avg_y = Eigen::Matrix<T,-1,-1>::Zero(NumPoints,1);
+      avg_z = Eigen::Matrix<T,-1,-1>::Zero(NumPoints,1);
+      avg_results = Eigen::Array<T, -1,-1>::Zero(2*D, NumPoints);
+      
 #pragma omp master
       {
-	Global.avg_x = Eigen::Matrix<T,-1,1>(NumPoints,1);
-	Global.avg_y = Eigen::Matrix<T,-1,1>(NumPoints,1);
-	Global.avg_z = Eigen::Matrix<T,-1,1>(NumPoints,1);
+	Global.avg_x = Eigen::Matrix<T,-1,1>::Zero(NumPoints,1);
+	Global.avg_y = Eigen::Matrix<T,-1,1>::Zero(NumPoints,1);
+	Global.avg_z = Eigen::Matrix<T,-1,1>::Zero(NumPoints,1);
+	Global.avg_results = Eigen::Array<T,-1,-1>::Zero(2*D,NumPoints);
       }
       
       file->close();
       delete file;
     }
 #pragma omp barrier
+    
     NumMoments = (NumMoments/2)*2;
+    Eigen::Matrix<T,-1,1> m(NumMoments);
+    for(unsigned n = 0; n < unsigned(NumMoments); n++)
+      m(n) = value_type((n == 0 ? 1 : 2 )*boost::math::cyl_bessel_j(n, timestep )) * T(pow(II,n));
+    
     for(int id = 0; id < NumDisorder; id++)
       {
 	sum_bra.v.setZero();
 	sum_ket.v.setZero();
+	
+	
 	sum_bra.initiate_from_data(bra_size, bra_initial, data_bra);
 	sum_ket.initiate_from_data(ket_size, ket_initial, data_ket);
-	time = 0;
+	h.generate_disorder();
+	
        	for(unsigned t = 0; t < unsigned(NumPoints); t++)
 	  {
-	    Eigen::Matrix<T,-1,1> m(NumMoments);
-	    for(unsigned n = 0; n < unsigned(NumMoments); n++)
-	      m(n) = value_type((n == 0 ? 1 : 2 )*boost::math::cyl_bessel_j(n, time )) * T(pow(II,n));
-	    
-	    h.generate_disorder();
 	    phi.v.setZero();
 	    phi.set_index(0);
 	    phi.v.col(0) = sum_bra.v.col(0);
 	    phi.Exchange_Boundaries();
 	    cheb_iteration(&phi, 0);
-	    
 	    sum_bra.v.col(0) = phi.v * m.segment(0, 2);
-	    
+
 	    for(unsigned n = 2; n < (t == 0u ? 0u : unsigned(NumMoments)); n += 2)
 	      {
 		cheb_iteration(&phi, n - 1);
@@ -1246,6 +1253,7 @@ public:
 	    
 	    sum_bra.empty_ghosts(sum_bra.get_index());
 	    sum_ket.empty_ghosts(sum_ket.get_index());
+	    
 	    // In the multiplication of a matrix the number of columns of the first should be equal to
 	    // the number of rows of the second, because the spin is organized by columns we have:
 	    
@@ -1259,25 +1267,46 @@ public:
 	    
 	    vtmp = vket * spin_z.transpose();
 	    auto x2 = sum_bra.v.adjoint() * vtmp1;
+
 	    avg_z(t) += (x2(0,0) - avg_z(t) ) /T(id + 1);
-	    time += timestep;
+#pragma omp critical	    
+	    phi.measure_wave_packet(sum_bra.v.data(), sum_ket.v.data(), results.data());
+	    avg_results.col(t) += (results - avg_results.col(t) ) /T(id + 1); 
 	  }
 	
-      }	
+      }
+
 #pragma omp critical
-    {
+    {      
       Global.avg_x += avg_x;
       Global.avg_y += avg_y;
       Global.avg_z += avg_z;
+      Global.avg_results += avg_results;
     }
-#pragma omp barrier    
+#pragma omp barrier
+
+
+    
 #pragma omp master
     {
-      H5::H5File * file         = new H5::H5File(name, H5F_ACC_RDWR);
+      H5::H5File * file = new H5::H5File(name, H5F_ACC_RDWR);
       write_hdf5(Global.avg_x, file, (char *) "/Calculation/special/Sx");
       write_hdf5(Global.avg_y, file, (char *) "/Calculation/special/Sy");
       write_hdf5(Global.avg_z, file, (char *) "/Calculation/special/Sz");
-      file->close();
+      
+      for(unsigned i = 0; i < D; i++)
+	{
+	  std::string orient = "xyz";
+	  char name[200];
+	  avg_z.col(0) = (Global.avg_results.row(2*i + 1)
+			  - 2.*Global.avg_results.row(0) * Global.avg_results.row(2*i)
+			  + Global.avg_results.row(0).square()).transpose();
+	  sprintf(name,"/Calculation/special/Var%c", orient.at(i));
+	    
+	  write_hdf5(avg_x, file, name);
+	}
+      
+      file->close();      
       delete file;
     }
 #pragma omp barrier

@@ -62,6 +62,7 @@ public:
   template <unsigned MULT>
   void Multiply2(){};
   void test_boundaries_system() {};
+  void measure_wave_packet(T * , T * , T * ){};
   void Exchange_Boundaries() {};
   inline void  HaIteration() { Multiply<0>(); };
   inline void  ChIteration() { Multiply<1>(); };
