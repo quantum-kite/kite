@@ -136,8 +136,18 @@ public:
     // Set intersection between domains 
     a0min = ( std::size_t(pos[0]) > cornerLB.coord[0] ? pos[0] : cornerLB.coord[0]);
     a0max = ( std::size_t(pos[0] + size) < cornerRT.coord[0] ? pos[0] + size: cornerRT.coord[0]);
+    
     a1min = ( std::size_t(pos[1]) > cornerLB.coord[1] ? pos[1] : cornerLB.coord[1]);
     a1max = ( std::size_t(pos[1] + size) < cornerRT.coord[1] ? pos[1] + size: cornerRT.coord[1]);
+    
+    if(a0min > a0max || a1min > a1max)
+      {
+	//  there is no overlap
+	a0min = cornerLB.coord[0];
+	a0max = cornerLB.coord[0];
+	a1min = cornerLB.coord[1];
+	a1max = cornerLB.coord[1];
+      }
 
     cornerLB.set({a0min,a1min,0Lu});
     r.convertCoordinates(cornerLBLd,cornerLB);
@@ -147,7 +157,7 @@ public:
     v.setZero();
     
     // Copy data  to the initial vector
-    // The data is a vector size * size * Orb
+    // The data is a vector size * size * Orb    
     
     for(std::size_t io = 0; io < r.Orb; io++ )
       for(std::size_t i1 = cornerLBLd.coord[1]; i1 < cornerRTLd.coord[1]; i1++)
