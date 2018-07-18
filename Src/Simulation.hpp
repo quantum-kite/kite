@@ -148,13 +148,17 @@ public:
   
   
 
-  void cheb_iteration(KPM_Vector<T,D>* kpm, long int current_iteration){
+  void cheb_iteration(KPM_Vector<T,D>* kpm, long int current_iteration)
+  {
     // Performs a chebyshev iteration
-    if(current_iteration == 0){
-      kpm->template Multiply<0>(); 
-    } else {
-      kpm->template Multiply<1>(); 
-    }
+    if(current_iteration == 0)
+      {
+	kpm->template Multiply<0>(); 
+      }
+    else
+      {
+	kpm->template Multiply<1>(); 
+      }
   };
   
 
@@ -1210,7 +1214,7 @@ public:
     Eigen::Matrix<T,-1,1> m(NumMoments);
     for(unsigned n = 0; n < unsigned(NumMoments); n++)
       m(n) = value_type((n == 0 ? 1 : 2 )*boost::math::cyl_bessel_j(n, timestep )) * T(pow(II,n));
-    
+
     for(int id = 0; id < NumDisorder; id++)
       {
 	sum_bra.v.setZero();
@@ -1220,37 +1224,41 @@ public:
 	sum_bra.initiate_from_data(bra_size, bra_initial, data_bra);
 	sum_ket.initiate_from_data(ket_size, ket_initial, data_ket);
 	h.generate_disorder();
+	sum_bra.empty_ghosts(sum_bra.get_index());
+	sum_ket.empty_ghosts(sum_ket.get_index());
 	
        	for(unsigned t = 0; t < unsigned(NumPoints); t++)
 	  {
-	    phi.v.setZero();
-	    phi.set_index(0);
-	    phi.v.col(0) = sum_bra.v.col(0);
-	    phi.Exchange_Boundaries();
-	    cheb_iteration(&phi, 0);
-	    sum_bra.v.col(0) = phi.v * m.segment(0, 2);
-
-	    for(unsigned n = 2; n < (t == 0u ? 0u : unsigned(NumMoments)); n += 2)
+	    if(t > 0)
 	      {
-		cheb_iteration(&phi, n - 1);
-		cheb_iteration(&phi, n);
-		sum_bra.v.col(0) += phi.v * m.segment(n,2);
-	      }	    
-	    
-	    phi.v.setZero();
-	    phi.set_index(0);
-	    phi.v.col(0) = sum_ket.v.col(0);
-	    phi.Exchange_Boundaries();
-	    cheb_iteration(&phi, 0);
-	    
-	    sum_ket.v.col(0) = phi.v * m.segment(0, 2);
-	    for(unsigned n = 2; n < (t == 0u ? 0u : unsigned(NumMoments)); n += 2)
-	      {
-		cheb_iteration(&phi, n - 1);
-		cheb_iteration(&phi, n);
-		sum_ket.v.col(0) += phi.v * m.segment(n,2);
+		phi.v.setZero();
+		phi.set_index(0);
+		phi.v.col(0) = sum_bra.v.col(0);
+		phi.Exchange_Boundaries();
+		cheb_iteration(&phi, 0); // multiply by H
+		sum_bra.v.col(0) = phi.v * m.segment(0, 2);
+		
+		for(unsigned n = 2; n < unsigned(NumMoments); n += 2)
+		  {
+		    cheb_iteration(&phi, n - 1);
+		    cheb_iteration(&phi, n);
+		    sum_bra.v.col(0) += phi.v * m.segment(n,2);
+		  }	    
+		
+		phi.v.setZero();
+		phi.set_index(0);
+		phi.v.col(0) = sum_ket.v.col(0);
+		phi.Exchange_Boundaries();
+		cheb_iteration(&phi, 0);
+		
+		sum_ket.v.col(0) = phi.v * m.segment(0, 2);
+		for(unsigned n = 2; n < unsigned(NumMoments); n += 2)
+		  {
+		    cheb_iteration(&phi, n - 1);
+		    cheb_iteration(&phi, n);
+		    sum_ket.v.col(0) += phi.v * m.segment(n,2);
+		  }
 	      }
-	    
 	    sum_bra.empty_ghosts(sum_bra.get_index());
 	    sum_ket.empty_ghosts(sum_ket.get_index());
 	    
