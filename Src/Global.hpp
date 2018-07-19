@@ -20,6 +20,7 @@ struct GLOBAL_VARIABLES {
   Eigen::Array <T, Eigen::Dynamic, Eigen::Dynamic> lambda;
   Eigen::Array <T, Eigen::Dynamic, Eigen::Dynamic> singleshot_cond;
   Eigen::Array <T, Eigen::Dynamic, Eigen::Dynamic> general_gamma;
+  Eigen::Array <T, Eigen::Dynamic, Eigen::Dynamic> smaller_gamma;
   double kpm_iteration_time;
   GLOBAL_VARIABLES() { };
   void addbond( std::size_t  ele1, std::ptrdiff_t ele2, T hop ) {
