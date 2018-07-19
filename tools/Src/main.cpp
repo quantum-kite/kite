@@ -13,7 +13,7 @@
 #include "systemInfo.hpp"
 #include "conductivity_dc.hpp"
 #include "conductivity_optical.hpp"
-#include "conductivity_nonlinear.hpp"
+#include "photocond/conductivity_nonlinear_complete.hpp"
 #include "dos.hpp"
 #include "calculate_simple.hpp"
 #include "parse_input.hpp"

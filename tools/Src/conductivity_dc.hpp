@@ -32,11 +32,22 @@ class conductivity_dc{
     double units = unit_scale;
 
 
+    T scat;
+    T beta;
+    T minEnergy, maxEnergy;
+    int NEnergies; 
+    Eigen::Matrix<T, -1, 1> energies;
+
+    int NFermiEnergies;
+    double minFermiEnergy;
+    double maxFermiEnergy;
+
     // information about the Hamiltonian
     system_info<T, DIM> systemInfo;
 
     // Objects required to successfully calculate the conductivity
-		Eigen::Array<std::complex<T>, -1, -1> Gamma;
+    //Eigen::Array<std::complex<T>, -1, -1, Eigen::RowMajor> Gamma;
+    Eigen::Array<std::complex<T>, -1, -1> Gamma;
 
 	  std::string dirName;
 
@@ -97,20 +108,43 @@ void conductivity_dc<T, DIM>::read(){
 
 
   
+  scat = 0.0032679;
+  beta = 1.0/8.6173303*pow(10,5)/temperature;
+  NEnergies = 200;
+  if(systemInfo.EnergyLimitsKnown){
+    minEnergy = systemInfo.minEnergy;
+    maxEnergy = systemInfo.maxEnergy;
+  }
+  else{
+    minEnergy = -0.99;
+    maxEnergy = 0.99;
+    verbose_message("  - Using default limits for the integration in the energies.\n");
+    verbose_message("  - For a more precise evaluation, calculate the density of states as well.\n");
+  }
+
+  NFermiEnergies = NumPoints;
+  NFermiEnergies = 100;
+  minFermiEnergy = -1.0;
+  maxFermiEnergy = 1.0;
+  //minEnergy = -0.99;
+  //maxEnergy = 0.99;
+
 
   // Retrieve the Gamma Matrix
   std::string MatrixName = dirName + "Gamma" + dirString;
   try{
 		debug_message("Filling the Gamma matrix.\n");
-		Gamma = Eigen::Array<std::complex<T>,-1,-1>::Zero(NumMoments, NumMoments);
+    //Gamma = Eigen::Array<std::complex<T>,-1,-1, Eigen::RowMajor>::Zero(NumMoments, NumMoments);
+    Gamma = Eigen::Array<std::complex<T>,-1,-1>::Zero(NumMoments, NumMoments);
 		
 		if(complex)
 			get_hdf5(Gamma.data(), &file, (char*)MatrixName.c_str());
 		
 		if(!complex){
 			Eigen::Array<T,-1,-1> GammaReal;
-			GammaReal = Eigen::Array<T,-1,-1>::Zero(NumMoments, NumMoments);
-			get_hdf5(GammaReal.data(), &file, (char*)MatrixName.c_str());
+      //GammaReal = Eigen::Array<T,-1,-1, Eigen::RowMajor>::Zero(NumMoments, NumMoments);
+      GammaReal = Eigen::Array<T,-1,-1>::Zero(NumMoments, NumMoments);
+      get_hdf5(GammaReal.data(), &file, (char*)MatrixName.c_str());
 			
 			Gamma = GammaReal.template cast<std::complex<T>>();
 		}				
@@ -132,28 +166,6 @@ void conductivity_dc<U, DIM>::calculate(){
     exit(0);
   }
 
-  U scat = 0.0032679;
-  U beta = 1.0/8.6173303*pow(10,5)/temperature;
-  U minEnergy, maxEnergy;
-  int NEnergies = 3000;
-  Eigen::Matrix<U, -1, 1> energies;
-  if(systemInfo.EnergyLimitsKnown){
-    minEnergy = systemInfo.minEnergy;
-    maxEnergy = systemInfo.maxEnergy;
-  }
-  else{
-    minEnergy = -0.99;
-    maxEnergy = 0.99;
-    verbose_message("  - Using default limits for the integration in the energies.\n");
-    verbose_message("  - For a more precise evaluation, calculate the density of states as well.\n");
-  }
-
-  int NFermiEnergies = NumPoints;
-  double minFermiEnergy = -1.0;
-  double maxFermiEnergy = 1.0;
-    //minEnergy = -0.99;
-    //maxEnergy = 0.99;
-
 
   verbose_message("  Energy in rescaled units: [-1,1]\n");
   verbose_message("  Beta (1/kT): "); verbose_message(beta); verbose_message("\n");
@@ -172,44 +184,83 @@ void conductivity_dc<U, DIM>::calculate(){
 
   // First perform the part of the product that only depends on the
   // chebyshev polynomial of the first kind
-  Eigen::Array<std::complex<U>, -1, -1> GammaEN;
-  GammaEN = Eigen::Array<std::complex<U>, -1, -1>::Zero(NEnergies, NumMoments);
 
+  Eigen::Matrix<std::complex<U>, -1, -1, Eigen::ColMajor> greenR;
+  greenR = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(NumMoments, NEnergies);
   U factor;
-  std::complex<U> complexEnergyP, complexEnergyN;
+  std::complex<U> complexEnergy;
   for(int i = 0; i < NEnergies; i++){
-    complexEnergyP = std::complex<U>(energies(i), scat);
-    for(int n = 0; n < NumMoments; n++){
-      for(int m = 0; m < NumMoments; m++){
-        //factor = 1.0/(1.0 + U(m==0));
-        factor = -1.0/(1.0 + U(m==0))/M_PI;
-        //GammaEN(i,n) += Gamma(n,m)*delta(m,energies(i))*kernel_jackson<U>(m, NumMoments)*factor;
-        GammaEN(i,n) += Gamma(n,m)*green(m, 1, complexEnergyP).imag()*factor;
-      }
+    complexEnergy = std::complex<U>(energies(i), scat);
+    for(int m = 0; m < NumMoments; m++){
+      factor = -1.0/(1.0 + U(m==0))/M_PI;
+      greenR(m, i) = green(m, 1, complexEnergy).imag()*factor;
     }
   }
+  int N_threads;
 
-
-  // Now perform the part of the product that depends on both kinds of polynomials
   Eigen::Array<std::complex<U>, -1, -1> GammaE;
   GammaE = Eigen::Array<std::complex<U>, -1, -1>::Zero(NEnergies, 1);
-
-  U energy;
-  U den = systemInfo.num_orbitals*systemInfo.spin_degeneracy/systemInfo.unit_cell_area/units; 
-  for(int i = 0; i < NEnergies; i++){
-    complexEnergyP = std::complex<U>(energies(i), scat);
-    complexEnergyN = std::complex<U>(energies(i), -scat);
-    for(int n = 0; n < NumMoments; n++){
-      factor = 1.0/(1.0 + U(n==0));
-      GammaE(i) += (GammaEN(i,n)*dgreen<U>(n, 1, complexEnergyP) - std::conj(GammaEN(i,n))*dgreen<U>(n, -1, complexEnergyN))*factor*den;
-      //GammaE(i) += GammaEN(i,n)*green(n, 1, energies(i))*factor*den;
+  omp_set_num_threads(systemInfo.NumThreads);
+#pragma omp parallel shared(N_threads) firstprivate(greenR)
+  {
+#pragma omp master
+    {
+      N_threads = omp_get_num_threads();
     }
-  }
+#pragma omp barrier
 
+#pragma omp for schedule(static, 1) nowait
+    for(int thread = 0; thread < N_threads; thread++){
+      int localMoments = NumMoments/N_threads;
+
+      Eigen::Matrix<std::complex<U>, -1, -1, Eigen::RowMajor> LocalGamma;
+      LocalGamma = Gamma.matrix().block(thread*localMoments, 0, localMoments, NumMoments);
+
+      Eigen::Matrix<std::complex<U>, -1, -1, Eigen::ColMajor> GammaEN;
+      GammaEN = LocalGamma*greenR;
+
+      std::complex<U> complexEnergyP, complexEnergyN;
+
+
+
+      // Matrices of derivatives of Green's functions
+      Eigen::Matrix<std::complex<U>, -1, -1, Eigen::RowMajor> dgreenA, dgreenR;
+      dgreenA = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(NEnergies, localMoments);
+      dgreenR = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(NEnergies, localMoments);
+      for(int i = 0; i < NEnergies; i++){
+        complexEnergyP = std::complex<U>(energies(i), scat);
+        complexEnergyN = std::complex<U>(energies(i), -scat);
+        for(int m = 0; m < localMoments; m++){
+          factor = 1.0/(1.0 + U((m + thread*localMoments)==0));
+          dgreenR(i, m) = dgreen<U>(m + thread*localMoments,  1, complexEnergyP)*factor;
+          dgreenA(i, m) = dgreen<U>(m + thread*localMoments, -1, complexEnergyN)*factor;
+        }
+      }
+
+
+      // Now perform the part of the product that depends on both kinds of polynomials
+      Eigen::Array<std::complex<U>, -1, -1> LocalGammaE;
+      LocalGammaE = Eigen::Array<std::complex<U>, -1, -1>::Zero(NEnergies, 1);
+
+      U den = systemInfo.num_orbitals*systemInfo.spin_degeneracy/systemInfo.unit_cell_area/units; 
+      for(int i = 0; i < NEnergies; i++){
+        LocalGammaE(i) += std::complex<U>(dgreenR.row(i)*GammaEN.col(i))*den;
+        LocalGammaE(i) += -std::complex<U>(dgreenA.row(i)*GammaEN.col(i).conjugate())*den;
+      }
+
+
+#pragma omp critical
+      {
+        GammaE += LocalGammaE;
+      }
+    }
+#pragma omp barrier
+  }
 
   Eigen::Matrix<std::complex<U>, -1, 1> condDC;
   condDC = Eigen::Matrix<std::complex<U>, -1, 1>::Zero(NFermiEnergies, 1);
 
+  U energy;
   Eigen::Matrix<U, -1, 1> fermiEnergies;
   fermiEnergies = Eigen::Matrix<U, -1, 1>::LinSpaced(NFermiEnergies, minFermiEnergy, maxFermiEnergy);
 

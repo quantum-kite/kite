@@ -5,7 +5,7 @@
 /*                                                              */
 /****************************************************************/
 
-#include "headers.hpp"
+#include "../headers.hpp"
 
 using std::cout;
 using namespace H5;
@@ -21,8 +21,7 @@ class conductivity_nonlinear{
     bool isPossible = false; // do we have all we need to calculate the conductivity?
 
 
-		// Functions to calculate. They will require the objects present in
-    // the configuration file
+    // Parameters
     int direction;
     int NumDisorder;
     int NumMoments;
@@ -30,6 +29,22 @@ class conductivity_nonlinear{
     int NumRandoms;
     double temperature = -1;
     int special = 0;
+
+    // 1/kT, where k is the Boltzmann constant in eV/K
+    T beta;
+    T e_fermi;
+    T scat;
+    
+    // Energy parameters needed to run the simulation
+    int N_energies;
+    double lim;
+    Eigen::Matrix<T, -1, 1> energies;
+
+    // Frequency parameters needed to run the simulation
+    int N_omegas;
+    double minFreq;
+    double maxFreq;
+    Eigen::Matrix<T, -1, 1> frequencies;
 
     // information about the Hamiltonian
     system_info<T, DIM> systemInfo;
@@ -43,23 +58,31 @@ class conductivity_nonlinear{
 	  std::string dirName;
 
 
+	  std::complex<T> imaginary;
     conductivity_nonlinear(system_info<T, DIM>&);
 		void read();
     void calculate();
+
+    Eigen::Matrix<std::complex<T>, -1, -1> Gamma0contract();
+    Eigen::Matrix<std::complex<T>, -1, -1> Gamma3Contract_RRandAA();
+    Eigen::Matrix<std::complex<T>, -1, -1> Gamma3Contract_RRandAAblocks();
+    Eigen::Matrix<std::complex<T>, -1, -1> Gamma3Contract_RA();
+    Eigen::Matrix<std::complex<T>, -1, -1> Gamma1contractAandR();
+    Eigen::Matrix<std::complex<T>, -1, -1> Gamma2contractAandR();
 	
 };
 
 template <typename T, unsigned DIM>
 conductivity_nonlinear<T, DIM>::conductivity_nonlinear(system_info<T, DIM>& info){
-  std::string name = info.filename;
+  // Constructor of the conductivity_nonlinear class. This function simply checks
+  // whether the conductivity needs to be calculated or not
+
+  std::string name = info.filename;                           // name of the hdf5 file
 	file = H5::H5File(name.c_str(), H5F_ACC_RDONLY);
+  systemInfo = info;                                          // retrieve the information about the Hamiltonian
+  dirName = "/Calculation/conductivity_optical_nonlinear/";   // location of the information about the conductivity
 
-  // retrieve the information about the Hamiltonian
-  systemInfo = info;
 
-  // location of the information about the conductivity
-  dirName = "/Calculation/conductivity_optical_nonlinear/";
-  
   // check whether the conductivity_nonlinear was asked for
   try{
     H5::Exception::dontPrint();
@@ -74,16 +97,20 @@ conductivity_nonlinear<T, DIM>::conductivity_nonlinear(system_info<T, DIM>& info
 template <typename T, unsigned DIM>
 void conductivity_nonlinear<T, DIM>::read(){
 	debug_message("Entered conductivity_nonlinear::read.\n");
-	//This function reads all the data from the hdf5 file that's needed to 
-  //calculate the nonlinear conductivity
+  // This function reads all the relevant
+  // information from the hdf5 configuration file and uses it to evaluate the parameters
+  // needed to calculate the nonlinear conductivity
 	 
 
-  // Check if the data for the nonlinear conductivity exists
+  // This function should not run if the conductivity is not needed. If, for some reason
+  // it is run anyway, the user should be notified that there is not enough data to
+  // calculate the conductivity.
   if(!isRequired){
     std::cout << "Data for nonlinear conductivity does not exist. Exiting.\n";
     exit(1);
   }
 
+	imaginary = std::complex<T>(0.0, 1.0);
   
   // Fetch the direction of the conductivity and convert it to a string
   get_hdf5(&direction, &file, (char*)(dirName+"Direction").c_str());									
@@ -95,6 +122,22 @@ void conductivity_nonlinear<T, DIM>::read(){
 	get_hdf5(&NumPoints, &file, (char*)(dirName+"NumPoints").c_str());	
 	get_hdf5(&special, &file, (char*)(dirName+"Special").c_str());	
 
+  // 1/kT, where k is the Boltzmann constant in eV/K
+  beta = 1.0/8.6173303*pow(10,5)/temperature;
+  e_fermi = 0.0/systemInfo.energy_scale;
+  scat = 0.0166/systemInfo.energy_scale;
+	
+  // Energy parameters needed to run the simulation
+	N_energies = NumPoints;
+	N_energies = 512;
+  lim = 0.995;
+  energies  = Eigen::Matrix<T, -1, 1>::LinSpaced(N_energies, -lim, lim);
+
+  // Frequency parameters needed to run the simulation
+	N_omegas = 500;
+  minFreq = -2;
+  maxFreq = 2.0;
+  frequencies = Eigen::Matrix<T, -1, 1>::LinSpaced(N_omegas, minFreq, maxFreq);
 
   // Check whether the matrices we're going to retrieve are complex or not
   int complex = systemInfo.isComplex;
@@ -108,7 +151,9 @@ void conductivity_nonlinear<T, DIM>::read(){
 
   debug_message("special:" ); debug_message(special); debug_message("\n");
   debug_message("dirstring: "); debug_message(dirString); debug_message("\n");
-  // Retrieve the Gamma0 Matrix. This matrix is not needed for the special case
+  
+  // Retrieve the Gamma0 Matrix. This is the 1D Gamma matrix defined as
+  // Gamma0 = Tr[v^abc T_n]. This matrix is not needed for the special case
   std::string MatrixName = dirName + "Gamma0" + dirString;
   if(special == 0){
     try{
@@ -122,7 +167,6 @@ void conductivity_nonlinear<T, DIM>::read(){
         Eigen::Array<T,-1,-1> Gamma0Real;
         Gamma0Real = Eigen::Array<T,-1,-1>::Zero(1, NumMoments);
         get_hdf5(Gamma0Real.data(), &file, (char*)MatrixName.c_str());
-        
         Gamma0 = Gamma0Real.template cast<std::complex<T>>();
       }				
 
@@ -136,7 +180,8 @@ void conductivity_nonlinear<T, DIM>::read(){
 
 
 
-  // Retrieve the Gamma1 Matrix
+  // Retrieve the Gamma1 Matrix. This is the 2D Gamma matrix defined as
+  // Gamma1 = Tr[v^a Tn v^bc Tm]
   MatrixName = dirName + "Gamma1" + dirString;
   try{
 		debug_message("Filling the Gamma1 matrix.\n");
@@ -241,34 +286,8 @@ void conductivity_nonlinear<U, DIM>::calculate(){
   // default values for the fermi energy, broadening and frequencies
   // ########################################################
 
-  // 1/kT, where k is the Boltzmann constant in eV/K
-  
-  if(special != 1){
-    std::cout << "The general second order case has not yet been implemented. Please set special=1 to calculate for HBN\n";
-    exit(1);
-  }
-  
-  //temperature = 300.0/systemInfo.energy_scale;
-  U beta = 1.0/8.6173303*pow(10,5)/temperature;
 
-  
-  U e_fermi = 0.0;
-  U scat = 0.003388299;
-	
-	// Calculate the number of frequencies and energies needed to perform the calculation.
-	int N_energies = NumPoints;
-  double lim = 0.995;
-  Eigen::Matrix<U, -1, 1> energies;
-  energies  = Eigen::Matrix<U, -1, 1>::LinSpaced(N_energies, -lim, lim);
-
-	int N_omegas = 1001;
-  double minFreq = 0;
-  double maxFreq = 2.0;
-  Eigen::Matrix<U, -1, 1> frequencies;
-  Eigen::Matrix<U, -1, 1> frequencies2;
-  frequencies = Eigen::Matrix<U, -1, 1>::LinSpaced(N_omegas, minFreq, maxFreq);
-  frequencies2 = Eigen::Matrix<U, -1, 1>::Zero(1,1);
-
+  // Print out some useful information
   verbose_message("  Energy in rescaled units: [-1,1]\n");
   verbose_message("  Beta (1/kT): "); verbose_message(beta); verbose_message("\n");
   verbose_message("  Fermi energy: "); verbose_message(e_fermi); verbose_message("\n");
@@ -281,53 +300,86 @@ void conductivity_nonlinear<U, DIM>::calculate(){
   verbose_message("  Number of frequencies: "); verbose_message(N_omegas); verbose_message("\n");
   verbose_message("  Frequency range: ["); verbose_message(minFreq); verbose_message(",");
     verbose_message(maxFreq); verbose_message("]\n");
-  verbose_message("  File name: nonlinear_cond.dat\n");
-
-
-	std::complex<U> imaginary(0.0, 1.0);
+  verbose_message("  File name: optical_cond.dat\n");
 
   
-  // Functions that are going to be used by the contractor
-  int NumMoments1 = NumMoments;
-  std::function<U(int, U)> deltaF = [beta, e_fermi, NumMoments1](int n, U energy)->U{
-    return delta(n, energy)*U(1.0/(1.0 + U(n==0)))*fermi_function(energy, e_fermi, beta)*kernel_jackson<U>(n, NumMoments1);
-  };
+  Eigen::Matrix<std::complex<U>, -1, -1> omega_energies0, omega_energies1, omega_energies2, omega_energies3, omega_energies4;
+  omega_energies0 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
+  omega_energies1 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
+  omega_energies2 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
+  omega_energies3 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
+  omega_energies4 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
 
 
-  Eigen::Matrix<std::complex<U>, -1, 1> temp1; 
-  Eigen::Matrix<std::complex<U>, -1, 1> temp2; 
-  Eigen::Matrix<std::complex<U>, -1, 1> temp3; 
-  Eigen::Matrix<std::complex<U>, -1, 1> temp4; 
-  Eigen::Matrix<std::complex<U>, -1, 1> cond; 
+  Eigen::Matrix<std::complex<U>,1,-1> cond0, cond1, cond2, cond3, cond4, cond;
+  cond0 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
+  cond1 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
+  cond2 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
+  cond3 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
+  cond4 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
+  cond  = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
 
-  temp1 = Eigen::Matrix<std::complex<U>, -1, 1>::Zero(N_omegas, 1);
-  temp2 = Eigen::Matrix<std::complex<U>, -1, 1>::Zero(N_omegas, 1);
-  temp3 = Eigen::Matrix<std::complex<U>, -1, 1>::Zero(1, 1);
-  temp4 = Eigen::Matrix<std::complex<U>, -1, 1>::Zero(1, 1);
-  cond  = Eigen::Matrix<std::complex<U>, -1, 1>::Zero(N_omegas, 1);
-
-  temp1 = contract2<U>(deltaF, 0, greenAscat<U>(scat), NumMoments, Gamma2, energies, -frequencies);
-  temp2 = contract2<U>(deltaF, 1, greenRscat<U>(scat), NumMoments, Gamma2, energies, frequencies);
-  temp3 = contract2<U>(deltaF, 0, greenAscat<U>(2*scat), NumMoments, Gamma1, energies, -frequencies2);
-  temp4 = contract2<U>(deltaF, 1, greenRscat<U>(2*scat), NumMoments, Gamma1, energies, frequencies2);
-
-  U freq;
-  for(int i = 0; i < N_omegas; i++){
-    freq = frequencies(i);  
-    cond(i) += (temp1(i) + temp2(i) + U(0.5)*(temp3(0,0) + temp4(0,0)))/(freq*freq + scat*scat);
+  // Contraction of the Gamma matrices with the delta functions and Green's functions
+  omega_energies0 += Gamma0contract();
+  omega_energies1 += 0.5*Gamma1contractAandR(); 
+  omega_energies2 += Gamma2contractAandR(); 
+  //special = 1;
+  if(special != 1){
+    omega_energies3 -= Gamma3Contract_RRandAAblocks();
+    omega_energies4 -= Gamma3Contract_RA(); 
   }
-  cond *= imaginary*U(systemInfo.num_orbitals*systemInfo.spin_degeneracy/systemInfo.unit_cell_area/systemInfo.energy_scale);
-
   
-  //Output to a file
-  std::ofstream myfile;
+  U freq;
+  for(int w = 0; w < N_omegas; w++){
+    freq = frequencies(w);  
+    cond0(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies0.col(w)));
+    cond1(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies1.col(w)));
+    cond2(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies2.col(w)));
+    cond3(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies3.col(w)));
+    cond4(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies4.col(w)));
+    cond0(w) /= freq*freq + scat*scat;
+    cond1(w) /= freq*freq + scat*scat;
+    cond2(w) /= freq*freq + scat*scat;
+    cond3(w) /= freq*freq + scat*scat;
+    cond4(w) /= freq*freq + scat*scat;
+  }
+
+  std::complex<U> factor = imaginary*U(systemInfo.num_orbitals*
+      systemInfo.spin_degeneracy/systemInfo.unit_cell_area/systemInfo.energy_scale);
+  cond0 *= factor;
+  cond1 *= factor;
+  cond2 *= factor;
+  cond3 *= factor;
+  cond4 *= factor;
+  cond =/* cond0 +*/ cond1 + cond2 + cond3 + cond4;
+
+  std::ofstream myfile0, myfile1, myfile2, myfile3, myfile4, myfile;
   myfile.open ("nonlinear_cond.dat");
+  myfile0.open ("nonlinear_cond0.dat");
+  myfile1.open ("nonlinear_cond1.dat");
+  myfile2.open ("nonlinear_cond2.dat");
+  myfile3.open ("nonlinear_cond3.dat");
+  myfile4.open ("nonlinear_cond4.dat");
+
   for(int i=0; i < N_omegas; i++){
-    myfile   << frequencies.real()(i)*systemInfo.energy_scale << " " << cond.real()(i) << " " << cond.imag()(i) << "\n";
+    freq = std::real(frequencies(i))*systemInfo.energy_scale;
+    myfile  << freq << " " << cond.real()(i) << " " << cond.imag()(i) << "\n";
+    myfile0 << freq << " " << cond0.real()(i) << " " << cond0.imag()(i) << "\n";
+    myfile1 << freq << " " << cond1.real()(i) << " " << cond1.imag()(i) << "\n";
+    myfile2 << freq << " " << cond2.real()(i) << " " << cond2.imag()(i) << "\n";
+    myfile3 << freq << " " << cond3.real()(i) << " " << cond3.imag()(i) << "\n";
+    myfile4 << freq << " " << cond4.real()(i) << " " << cond4.imag()(i) << "\n";
   }
   myfile.close();
+  myfile0.close();
+  myfile1.close();
+  myfile2.close();
+  myfile3.close();
+  myfile4.close();
   debug_message("Left calc_nonlinear_cond.\n");
-
-
-
 };
+
+#include "Gamma0.hpp"
+#include "Gamma1.hpp"
+#include "Gamma2.hpp"
+#include "Gamma3.hpp"

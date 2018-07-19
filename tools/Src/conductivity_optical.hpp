@@ -156,97 +156,6 @@ void conductivity_optical<T, DIM>::read(){
 	debug_message("Left conductivity_optical::read.\n");
 }
 
-template <typename U, unsigned DIM>
-void conductivity_optical<U, DIM>::calculate(){
-	debug_message("Entered calc_optical_cond.\n");
-	//Calculates the optical conductivity for a set of frequencies in the range [-sigma, sigma].
-	//These frequencies are in the KPM scale, that is, the scale where the energy is in the range ]-1,1[.
-	//the temperature is already in the KPM scale, but not the broadening or the Fermi Energy
-
-  // ########################################################
-  // default values for the fermi energy, broadening and frequencies
-  // ########################################################
-
-  // 1/kT, where k is the Boltzmann constant in eV/K
-  U beta = 1.0/8.6173303*pow(10,5)/temperature;
-  U e_fermi = 0.2/systemInfo.energy_scale;
-  U scat = 0.0166/systemInfo.energy_scale;
-	
-	// Calculate the number of frequencies and energies needed to perform the calculation.
-	int N_energies = NumPoints;
-  double lim = 0.99;
-  Eigen::Matrix<U, -1, 1> energies;
-  energies  = Eigen::Matrix<U, -1, 1>::LinSpaced(N_energies, -lim, lim);
-
-	int N_omegas = 60;
-  double minFreq = 0.01;
-  double maxFreq = 1.5;
-  Eigen::Matrix<U, -1, 1> frequencies;
-  frequencies = Eigen::Matrix<U, -1, 1>::LinSpaced(N_omegas, minFreq, maxFreq);
-
-  // Print out some useful information
-  verbose_message("  Energy in rescaled units: [-1,1]\n");
-  verbose_message("  Beta (1/kT): "); verbose_message(beta); verbose_message("\n");
-  verbose_message("  Fermi energy: "); verbose_message(e_fermi); verbose_message("\n");
-  verbose_message("  Using kernel for delta function: Jackson\n");
-  verbose_message("  Broadening parameter for Green's function: ");
-    verbose_message(scat); verbose_message("\n");
-  verbose_message("  Number of energies: "); verbose_message(NumPoints); verbose_message("\n");
-  verbose_message("  Energy range: ["); verbose_message(-lim); verbose_message(",");
-    verbose_message(lim); verbose_message("]\n");
-  verbose_message("  Number of frequencies: "); verbose_message(N_omegas); verbose_message("\n");
-  verbose_message("  Frequency range: ["); verbose_message(minFreq); verbose_message(",");
-    verbose_message(maxFreq); verbose_message("]\n");
-  verbose_message("  File name: optical_cond.dat\n");
-
-
-
-	std::complex<U> imaginary(0.0, 1.0);
-
-  
-  // Functions that are going to be used by the contractor
-  int NumMoments1 = NumMoments;
-  std::function<U(int, U)> deltaF = [beta, e_fermi, NumMoments1](int n, U energy)->U{
-    return delta(n, energy)*U(1.0/(1.0 + U(n==0)))*fermi_function(energy, e_fermi, beta)*kernel_jackson<U>(n, NumMoments1);
-  };
-
-
-  Eigen::Matrix<std::complex<U>, -1, 1> temp1; 
-  Eigen::Matrix<std::complex<U>, -1, 1> temp2; 
-  Eigen::Matrix<std::complex<U>, -1, 1> cond; 
-  std::complex<U> temp3 = 0; 
-
-  temp1 = Eigen::Matrix<std::complex<U>, -1, 1>::Zero(N_omegas, 1);
-  temp2 = Eigen::Matrix<std::complex<U>, -1, 1>::Zero(N_omegas, 1);
-  cond  = Eigen::Matrix<std::complex<U>, -1, 1>::Zero(N_omegas, 1);
-
-
-  temp1 = contract2<U>(deltaF, 0, greenAscat<U>(scat), NumMoments, Gamma, energies, -frequencies);
-  temp2 = contract2<U>(deltaF, 1, greenRscat<U>(scat), NumMoments, Gamma, energies, frequencies);
-  temp3 = contract1<U>(deltaF, NumMoments, Lambda, energies);
-
-  std::complex<U> freq;
-  for(int i = 0; i < N_omegas; i++){
-    freq = std::complex<U>(frequencies(i), scat);  
-    cond(i) += (temp1(i) + temp2(i) + temp3)/freq;
-  }
-  cond *= imaginary*U(systemInfo.num_orbitals*systemInfo.spin_degeneracy/systemInfo.unit_cell_area/units);
-
-	
-  
-  //Output to a file
-  std::ofstream myfile;
-  myfile.open ("optical_cond.dat");
-  for(int i=0; i < N_omegas; i++){
-    freq = std::complex<U>(frequencies(i), scat);  
-    myfile << frequencies.real()(i)*systemInfo.energy_scale << " " << cond.real()(i) << " " << cond.imag()(i) << "\n";
-  }
-  myfile.close();
-  debug_message("Left calc_optical_cond.\n");
-
-
-
-};
 
 template <typename U, unsigned DIM>
 void conductivity_optical<U, DIM>::calculate_efficient(){
@@ -325,6 +234,7 @@ void conductivity_optical<U, DIM>::calculate_efficient(){
   int N_threads;
   int thread_num;
   int local_NumMoments;
+  omp_set_num_threads(systemInfo.NumThreads);
 #pragma omp parallel shared(N_threads) private(thread_num)
 {
 #pragma omp master
