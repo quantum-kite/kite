@@ -30,6 +30,7 @@ class conductivity_dc{
     int NumRandoms;
     double temperature = -1;
     double units = unit_scale;
+    std::string filename = "condDC.dat";
 
 
     T scat;
@@ -173,6 +174,7 @@ void conductivity_dc<U, DIM>::override_parameters(){
     if(variables.CondDC_FermiMin != -8888)  minFermiEnergy  = variables.CondDC_FermiMin/systemInfo.energy_scale;
     if(variables.CondDC_FermiMax != -8888)  maxFermiEnergy  = variables.CondDC_FermiMax/systemInfo.energy_scale;
     if(variables.CondDC_NumFermi != -1)     NFermiEnergies  = variables.CondDC_NumFermi;
+    if(variables.CondDC_Name != "")         filename        = variables.CondDC_Name;
     
     beta = 1.0/8.6173303*pow(10,5)/temperature;
 };
@@ -297,7 +299,7 @@ void conductivity_dc<U, DIM>::calculate(){
 
 
   std::ofstream myfile;
-  myfile.open("condDC.dat");
+  myfile.open(filename);
   for(int i=0; i < NFermiEnergies; i++)
     myfile  << fermiEnergies(i)*systemInfo.energy_scale << " " << condDC.real()(i) << " " << condDC.imag()(i) << "\n";
   

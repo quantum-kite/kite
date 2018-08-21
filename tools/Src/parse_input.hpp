@@ -21,6 +21,7 @@ class shell_input{
         double CondDC_FermiMin; 
         double CondDC_FermiMax; 
         int CondDC_NumFermi; 
+        std::string CondDC_Name;
 
         // Optical Conductivity
         double CondOpt_Temp; 
@@ -30,10 +31,12 @@ class shell_input{
         double CondOpt_FreqMin; 
         double CondOpt_FreqMax; 
         int CondOpt_NumFreq; 
+        std::string CondOpt_Name;
 
 
         // Density of states
         int DOS_NumEnergies;
+        std::string DOS_Name;
 
 
         // 2nd order optical conductivity
@@ -44,6 +47,7 @@ class shell_input{
         double CondOpt2_FreqMin; 
         double CondOpt2_FreqMax; 
         int CondOpt2_NumFreq; 
+        std::string CondOpt2_Name;
 
         // Help menu
         bool help;
@@ -59,21 +63,25 @@ class shell_input{
             std::cout << "--CondOpt    Optical conductivity\n";
             std::cout << "--CondOpt2   Second-order optical conductivity (photoconductivity)\n\n";
             std::cout << "After each of these keywords, the program will be expecting the subparameters associated with that word (always separated by spaces):\n\n";
-            std::cout << "--DOS      -E              Number of energy points\n\n";
+            std::cout << "--DOS      -E              Number of energy points\n";
+            std::cout << "           -N              Name of the output file\n\n";
             std::cout << "--CondDC   -E              Number of energy points used in the integration\n";
             std::cout << "           -T              Temperature\n";
             std::cout << "           -S              Broadening parameter of the Green's functions\n";
-            std::cout << "           -F min max num  Fermi energies. min and max may be ommited.\n\n";
+            std::cout << "           -F min max num  Fermi energies. min and max may be ommited.\n";
+            std::cout << "           -N              Name of the output file\n\n";
             std::cout << "--CondOpt  -E              Number of energy points used in the integration\n";
             std::cout << "           -T              Temperature\n";
             std::cout << "           -S              Broadening parameter of the Green's functions\n";
             std::cout << "           -O min max num  Frequencies\n";
-            std::cout << "           -F              Fermi energy\n\n";
+            std::cout << "           -F              Fermi energy\n";
+            std::cout << "           -N              Name of the output file\n\n";
             std::cout << "--CondOpt2 -E              Number of energy points used in the integration\n";
             std::cout << "           -T              Temperature\n";
             std::cout << "           -S              Broadening parameter of the Green's functions\n";
             std::cout << "           -O min max num  Frequencies\n";
-            std::cout << "           -F              Fermi energy\n\n";
+            std::cout << "           -F              Fermi energy\n";
+            std::cout << "           -N              Name of the output file\n\n";
             std::cout << "All the quantities are in the same units as the ones in the python configuration script. All quantities are double-precision numbers except for the ones representing integers, such as the numbers of points.\n\n";
             std::cout << "Examples:\n\n";
             std::cout << "Example 1\n";
@@ -98,41 +106,45 @@ class shell_input{
 
             // DC Conductivity
             std::cout << "Printing parameters for the DC conductivity obtained from the shell:\n";
-            if(CondDC_Temp != -1)           std::cout << "    temperature: " << CondDC_Temp << "\n";
-            if(CondDC_NumEnergies != -1)    std::cout << "    number of energy points: " << CondDC_NumEnergies << "\n";
-            if(CondDC_Scat != -8888)        std::cout << "    scattering parameter: " << CondDC_Scat << "\n";
-            if(CondDC_FermiMin != -8888)    std::cout << "    minimum Fermi energy: " << CondDC_FermiMin << "\n";
-            if(CondDC_FermiMax != -8888)    std::cout << "    maximum Fermi energy: " << CondDC_FermiMax << "\n";
-            if(CondDC_NumFermi != -1)       std::cout << "    number of Fermi energies: " << CondDC_NumFermi << "\n";
+            if(CondDC_Temp != -1)           std::cout << "    temperature: "                << CondDC_Temp << "\n";
+            if(CondDC_NumEnergies != -1)    std::cout << "    number of energy points: "    << CondDC_NumEnergies << "\n";
+            if(CondDC_Scat != -8888)        std::cout << "    scattering parameter: "       << CondDC_Scat << "\n";
+            if(CondDC_FermiMin != -8888)    std::cout << "    minimum Fermi energy: "       << CondDC_FermiMin << "\n";
+            if(CondDC_FermiMax != -8888)    std::cout << "    maximum Fermi energy: "       << CondDC_FermiMax << "\n";
+            if(CondDC_NumFermi != -1)       std::cout << "    number of Fermi energies: "   << CondDC_NumFermi << "\n";
+            if(CondDC_Name != "")           std::cout << "    name of the output file: "    << CondDC_Name << "\n";
             std::cout << "\n";
         };
         void printOpt(){
             std::cout << "Printing parameters for the Optical Conductivity obtained from the shell:\n";
-            if(CondOpt_Temp != -8888)       std::cout << "    temperature: " << CondOpt_Temp << "\n";
-            if(CondOpt_NumEnergies != -1)   std::cout << "    number of energy points: " << CondOpt_NumEnergies << "\n";
-            if(CondOpt_Scat != -8888)       std::cout << "    scattering parameter: " << CondOpt_Scat << "\n";
-            if(CondOpt_FreqMin != -8888)    std::cout << "    minimum frequency: " << CondOpt_FreqMin << "\n";
-            if(CondOpt_FreqMax != -8888)    std::cout << "    maximum frequency: " << CondOpt_FreqMax << "\n";
-            if(CondOpt_NumFreq != -1)       std::cout << "    number of frequencies: " << CondOpt_NumFreq << "\n";
-            if(CondOpt_Fermi != -8888)      std::cout << "    number of Fermi energies: " << CondOpt_Fermi << "\n";
+            if(CondOpt_Temp != -8888)       std::cout << "    temperature: "                << CondOpt_Temp << "\n";
+            if(CondOpt_NumEnergies != -1)   std::cout << "    number of energy points: "    << CondOpt_NumEnergies << "\n";
+            if(CondOpt_Scat != -8888)       std::cout << "    scattering parameter: "       << CondOpt_Scat << "\n";
+            if(CondOpt_FreqMin != -8888)    std::cout << "    minimum frequency: "          << CondOpt_FreqMin << "\n";
+            if(CondOpt_FreqMax != -8888)    std::cout << "    maximum frequency: "          << CondOpt_FreqMax << "\n";
+            if(CondOpt_NumFreq != -1)       std::cout << "    number of frequencies: "      << CondOpt_NumFreq << "\n";
+            if(CondOpt_Fermi != -8888)      std::cout << "    number of Fermi energies: "   << CondOpt_Fermi << "\n";
+            if(CondOpt_Name != "")          std::cout << "    name of the output file: "    << CondOpt_Name << "\n";
             std::cout << "\n";
         };
 
         void printOpt2(){
             std::cout << "Printing parameters for the Second-Order Optical conductivity obtained from the shell:\n";
-            if(CondOpt2_Temp != -8888)      std::cout << "    temperature: " << CondOpt2_Temp << "\n";
-            if(CondOpt2_NumEnergies != -1)  std::cout << "    number of energy points: " << CondOpt2_NumEnergies << "\n";
-            if(CondOpt2_Scat != -8888)      std::cout << "    scattering parameter: " << CondOpt2_Scat << "\n";
-            if(CondOpt2_FreqMin != -8888)   std::cout << "    minimum frequency: " << CondOpt2_FreqMin << "\n";
-            if(CondOpt2_FreqMax != -8888)   std::cout << "    maximum frequency: " << CondOpt2_FreqMax << "\n";
-            if(CondOpt2_NumFreq != -1)      std::cout << "    number of frequencies: " << CondOpt2_NumFreq << "\n";
-            if(CondOpt2_Fermi != -8888)     std::cout << "    number of Fermi energies: " << CondOpt2_Fermi << "\n";
+            if(CondOpt2_Temp != -8888)      std::cout << "    temperature: "                << CondOpt2_Temp << "\n";
+            if(CondOpt2_NumEnergies != -1)  std::cout << "    number of energy points: "    << CondOpt2_NumEnergies << "\n";
+            if(CondOpt2_Scat != -8888)      std::cout << "    scattering parameter: "       << CondOpt2_Scat << "\n";
+            if(CondOpt2_FreqMin != -8888)   std::cout << "    minimum frequency: "          << CondOpt2_FreqMin << "\n";
+            if(CondOpt2_FreqMax != -8888)   std::cout << "    maximum frequency: "          << CondOpt2_FreqMax << "\n";
+            if(CondOpt2_NumFreq != -1)      std::cout << "    number of frequencies: "      << CondOpt2_NumFreq << "\n";
+            if(CondOpt2_Fermi != -8888)     std::cout << "    number of Fermi energies: "   << CondOpt2_Fermi << "\n";
+            if(CondOpt2_Name != "")         std::cout << "    name of the output file: "    << CondOpt2_Name << "\n";
             std::cout << "\n";
         };
 
         void printDOS(){
             std::cout << "Printing parameters for the Density of States obtained from the shell:\n";
-            if(DOS_NumEnergies != -1 )      std::cout << "    number of energy points: " << DOS_NumEnergies << "\n";
+            if(DOS_NumEnergies != -1 )      std::cout << "    number of energy points: "    << DOS_NumEnergies << "\n";
+            if(DOS_Name != "")              std::cout << "    name of the output file: "    << DOS_Name << "\n";
             std::cout << "\n";
         };
 };
@@ -196,10 +208,11 @@ void parse_CondDC(int argc, char *argv[], std::vector<int> & keys_pos, std::vect
     
     double CondDC_Temp = -1;
     int CondDC_NumEnergies = -1;
-    double CondDC_FermiMin = -8888; // Some stupid values that I hope no-one will every pick
+    double CondDC_FermiMin = -8888; // Some stupid values that I hope no-one will ever pick
     double CondDC_FermiMax = -8888;
     int CondDC_NumFermi = -1;
     double CondDC_Scat = -8888;
+    std::string CondDC_Name = "";
     // Process CondDC
     int j = 2;
     int pos = keys_pos.at(j);
@@ -208,12 +221,14 @@ void parse_CondDC(int argc, char *argv[], std::vector<int> & keys_pos, std::vect
             std::string name = argv[k + pos];
             std::string n1 = argv[k + pos + 1];
 
-            if(name == "-t")
+            if(name == "-T")
                 CondDC_Temp = atof(n1.c_str());
             if(name == "-E")
                 CondDC_NumEnergies = atoi(n1.c_str());
             if(name == "-S")
                 CondDC_Scat = atof(n1.c_str());
+            if(name == "-N")
+                CondDC_Name = n1;
             if(name == "-F"){
                 if(k == keys_len.at(j) - 2){
                     CondDC_NumFermi = atoi(n1.c_str());
@@ -241,6 +256,7 @@ void parse_CondDC(int argc, char *argv[], std::vector<int> & keys_pos, std::vect
     variables.CondDC_FermiMin = CondDC_FermiMin; 
     variables.CondDC_FermiMax = CondDC_FermiMax; 
     variables.CondDC_NumFermi = CondDC_NumFermi; 
+    variables.CondDC_Name = CondDC_Name;
 };
 
 void parse_CondOpt(int argc, char *argv[], std::vector<int> & keys_pos, std::vector<int> & keys_len, shell_input & variables){
@@ -255,6 +271,7 @@ void parse_CondOpt(int argc, char *argv[], std::vector<int> & keys_pos, std::vec
     int CondOpt_NumFreq = -1;
     double CondOpt_Fermi = -8888;
     double CondOpt_Scat = -8888;
+    std::string CondOpt_Name = "";
     // Process CondOpt
     int j = 1;
     int pos = keys_pos.at(j);
@@ -263,12 +280,14 @@ void parse_CondOpt(int argc, char *argv[], std::vector<int> & keys_pos, std::vec
             std::string name = argv[k + pos];
             std::string n1 = argv[k + pos + 1];
 
-            if(name == "-t")
+            if(name == "-T")
                 CondOpt_Temp = atof(n1.c_str());
             if(name == "-E")
                 CondOpt_NumEnergies = atoi(n1.c_str());
             if(name == "-S")
                 CondOpt_Scat = atof(n1.c_str());
+            if(name == "-N")
+                CondOpt_Name = n1;
             if(name == "-F")
                 CondOpt_Fermi = atof(n1.c_str());
             if(name == "-O"){
@@ -290,6 +309,7 @@ void parse_CondOpt(int argc, char *argv[], std::vector<int> & keys_pos, std::vec
     variables.CondOpt_FreqMin = CondOpt_FreqMin; 
     variables.CondOpt_FreqMax = CondOpt_FreqMax; 
     variables.CondOpt_NumFreq = CondOpt_NumFreq; 
+    variables.CondOpt_Name = CondOpt_Name; 
 };
 
 void parse_CondOpt2(int argc, char *argv[], std::vector<int> & keys_pos, std::vector<int> & keys_len, shell_input & variables){
@@ -304,6 +324,7 @@ void parse_CondOpt2(int argc, char *argv[], std::vector<int> & keys_pos, std::ve
     int CondOpt2_NumFreq = -1;
     int CondOpt2_Fermi = -8888;
     double CondOpt2_Scat = -8888;
+    std::string CondOpt2_Name = "";
     // Process CondOpt2
     int j = 3;
     int pos = keys_pos.at(j);
@@ -312,7 +333,7 @@ void parse_CondOpt2(int argc, char *argv[], std::vector<int> & keys_pos, std::ve
             std::string name = argv[k + pos];
             std::string n1 = argv[k + pos + 1];
 
-            if(name == "-t")
+            if(name == "-T")
                 CondOpt2_Temp = atof(n1.c_str());
             if(name == "-E")
                 CondOpt2_NumEnergies = atoi(n1.c_str());
@@ -320,6 +341,8 @@ void parse_CondOpt2(int argc, char *argv[], std::vector<int> & keys_pos, std::ve
                 CondOpt2_Scat = atof(n1.c_str());
             if(name == "-F")
                 CondOpt2_Fermi = atof(n1.c_str());
+            if(name == "-N")
+                CondOpt2_Name = n1;
             if(name == "-O"){
                 std::string n2 = argv[k + pos + 2];
                 std::string n3 = argv[k + pos + 3];
@@ -339,6 +362,7 @@ void parse_CondOpt2(int argc, char *argv[], std::vector<int> & keys_pos, std::ve
     variables.CondOpt2_FreqMin = CondOpt2_FreqMin; 
     variables.CondOpt2_FreqMax = CondOpt2_FreqMax; 
     variables.CondOpt2_NumFreq = CondOpt2_NumFreq; 
+    variables.CondOpt2_Name = CondOpt2_Name; 
 };
 
 void parse_DOS(int argc, char *argv[], std::vector<int> & keys_pos, std::vector<int> & keys_len, shell_input & variables){
@@ -347,6 +371,7 @@ void parse_DOS(int argc, char *argv[], std::vector<int> & keys_pos, std::vector<
     // scattering parameter "S" and Fermi energy min, max and num "F"
     
     int DOS_NumEnergies = -1;
+    std::string DOS_Name = "";
     int pos = keys_pos.at(0);
     if(pos != -1){
         for(int k = 1; k < keys_len.at(0); k++){
@@ -354,7 +379,10 @@ void parse_DOS(int argc, char *argv[], std::vector<int> & keys_pos, std::vector<
             std::string n1 = argv[k + pos + 1];
             if(name == "-E")
                 DOS_NumEnergies = atoi(n1.c_str());
+            if(name == "-N")
+                DOS_Name = n1;
         }
     }
     variables.DOS_NumEnergies = DOS_NumEnergies; 
+    variables.DOS_Name = DOS_Name;
 };

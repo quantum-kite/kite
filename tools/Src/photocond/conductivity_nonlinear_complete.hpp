@@ -29,6 +29,8 @@ class conductivity_nonlinear{
     int NumRandoms;
     double temperature = -1;
     int special = 0;
+    std::string filename = "nonlinear_cond.dat";
+
 
     // 1/kT, where k is the Boltzmann constant in eV/K
     T beta;
@@ -107,6 +109,7 @@ void conductivity_nonlinear<T, DIM>::override_parameters(){
     if(variables.CondOpt2_NumFreq != -1)     N_omegas    = variables.CondOpt2_NumFreq;
     if(variables.CondOpt2_Fermi != -8888)    e_fermi     = variables.CondOpt2_Fermi/systemInfo.energy_scale;
     if(variables.CondOpt2_Scat != -8888)     scat        = variables.CondOpt2_Scat/systemInfo.energy_scale;
+    if(variables.CondOpt2_Name != "")        filename    = variables.CondOpt2_Name;
     beta = 1.0/8.6173303*pow(10,5)/temperature;
 };
 
@@ -368,7 +371,7 @@ void conductivity_nonlinear<U, DIM>::calculate(){
   cond =/* cond0 +*/ cond1 + cond2 + cond3 + cond4;
 
   std::ofstream myfile0, myfile1, myfile2, myfile3, myfile4, myfile;
-  myfile.open ("nonlinear_cond.dat");
+  myfile.open(filename);
   myfile0.open ("nonlinear_cond0.dat");
   myfile1.open ("nonlinear_cond1.dat");
   myfile2.open ("nonlinear_cond2.dat");

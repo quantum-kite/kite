@@ -30,6 +30,7 @@ class conductivity_optical{
     int NumRandoms;
     double temperature = -1;
     double units = unit_scale;
+    std::string filename = "optical_cond.dat";
 
     T beta;
     T e_fermi; 
@@ -194,6 +195,7 @@ void conductivity_optical<U, DIM>::override_parameters(){
     if(variables.CondOpt_NumFreq != -1)     N_omegas    = variables.CondOpt_NumFreq;
     if(variables.CondOpt_Fermi != -8888)    e_fermi     = variables.CondOpt_Fermi/systemInfo.energy_scale;
     if(variables.CondOpt_Scat != -8888)     scat        = variables.CondOpt_Scat/systemInfo.energy_scale;
+    if(variables.CondOpt_Name != "")        filename    = variables.CondOpt_Name;
     beta = 1.0/8.6173303*pow(10,5)/temperature;
 
 };
@@ -345,7 +347,7 @@ void conductivity_optical<U, DIM>::calculate_efficient(){
   
   //Output to a file
   std::ofstream myfile;
-  myfile.open ("optical_cond.dat");
+  myfile.open(filename);
   for(int i=0; i < N_omegas; i++){
     freq = std::complex<U>(frequencies(i), scat);  
     myfile << frequencies.real()(i)*systemInfo.energy_scale << " " << cond.real()(i) << " " << cond.imag()(i) << "\n";

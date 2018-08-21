@@ -28,6 +28,7 @@ class dos{
     // the configuration file
     int NumMoments;
     int NumPoints = -1;
+    std::string filename = "dos.dat";
 
     int NEnergies;
 
@@ -77,7 +78,8 @@ dos<T, DIM>::dos(system_info<T, DIM>& sysinfo, shell_input & vari){
 	
 template <typename T, unsigned DIM>
 void dos<T, DIM>::override_parameters(){
-    if(variables.DOS_NumEnergies != -1) NEnergies = variables.DOS_NumEnergies;
+    if(variables.DOS_NumEnergies != -1) NEnergies   = variables.DOS_NumEnergies;
+    if(variables.DOS_Name != "")        filename    = variables.DOS_Name;
 };
 
 template <typename T, unsigned DIM>
@@ -171,7 +173,7 @@ void dos<U, DIM>::calculate(){
   // Save the density of states to a file and find its maximum value
   U max = -1;
   std::ofstream myfile;
-  myfile.open("dos.dat");
+  myfile.open(filename);
   for(int i=0; i < NEnergies; i++){
     myfile  << energies(i)*systemInfo->energy_scale << " " << GammaE.real()(i) << " " << GammaE.imag()(i) << "\n";
     if(GammaE.real()(i) > max)
