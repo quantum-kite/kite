@@ -45,6 +45,9 @@ class conductivity_dc{
     // information about the Hamiltonian
     system_info<T, DIM> systemInfo;
 
+    // Input from the shell to override the configuration file
+    shell_input variables;
+
     // Objects required to successfully calculate the conductivity
     //Eigen::Array<std::complex<T>, -1, -1, Eigen::RowMajor> Gamma;
     Eigen::Array<std::complex<T>, -1, -1> Gamma;
@@ -52,19 +55,24 @@ class conductivity_dc{
 	  std::string dirName;
 
 
-    conductivity_dc(system_info<T, DIM>&);
-		void read();
+
+    conductivity_dc(system_info<T, DIM>&, shell_input &);
+	void fetch_parameters();
+	void override_parameters();
     void calculate();
 	
 };
 
 template <typename T, unsigned DIM>
-conductivity_dc<T, DIM>::conductivity_dc(system_info<T, DIM>& info){
+conductivity_dc<T, DIM>::conductivity_dc(system_info<T, DIM>& info, shell_input & vari){
   std::string name = info.filename;
 	file = H5::H5File(name.c_str(), H5F_ACC_RDONLY);
 
   // retrieve the information about the Hamiltonian
   systemInfo = info;
+
+  // retrieve the shell input
+  variables = vari;
 
   // location of the information about the conductivity
   dirName = "/Calculation/conductivity_dc/";
@@ -81,7 +89,7 @@ conductivity_dc<T, DIM>::conductivity_dc(system_info<T, DIM>& info){
 	
 
 template <typename T, unsigned DIM>
-void conductivity_dc<T, DIM>::read(){
+void conductivity_dc<T, DIM>::fetch_parameters(){
 	debug_message("Entered conductivit_dc::read.\n");
 	//This function reads all the data from the hdf5 file that's needed to 
   //calculate the dc conductivity
@@ -153,11 +161,21 @@ void conductivity_dc<T, DIM>::read(){
   } catch(H5::Exception& e) {debug_message("Conductivity DC: There is no Gamma matrix.\n");}
 	
 
-
-
 	file.close();
 	debug_message("Left conductivity_dc::read.\n");
 }
+
+template <typename U, unsigned DIM>
+void conductivity_dc<U, DIM>::override_parameters(){
+    if(variables.CondDC_Temp != -1)         temperature     = variables.CondDC_Temp/systemInfo.energy_scale;
+    if(variables.CondDC_NumEnergies != -1)  NEnergies       = variables.CondDC_NumEnergies;
+    if(variables.CondDC_Scat != -8888)      scat            = variables.CondDC_Scat/systemInfo.energy_scale;
+    if(variables.CondDC_FermiMin != -8888)  minFermiEnergy  = variables.CondDC_FermiMin/systemInfo.energy_scale;
+    if(variables.CondDC_FermiMax != -8888)  maxFermiEnergy  = variables.CondDC_FermiMax/systemInfo.energy_scale;
+    if(variables.CondDC_NumFermi != -1)     NFermiEnergies  = variables.CondDC_NumFermi;
+    
+    beta = 1.0/8.6173303*pow(10,5)/temperature;
+};
 
 template <typename U, unsigned DIM>
 void conductivity_dc<U, DIM>::calculate(){
@@ -273,8 +291,8 @@ void conductivity_dc<U, DIM>::calculate(){
     for(int j = 0; j < NEnergies; j++){
       energy = energies(j);
       integrand(j) = GammaE(j)*fermi_function(energy, fermi, beta);
-    condDC(i) = integrate(energies, integrand)*std::complex<U>(0.0,1.0);
     }
+    condDC(i) = integrate(energies, integrand)*std::complex<U>(0.0,1.0);
   }
 
 

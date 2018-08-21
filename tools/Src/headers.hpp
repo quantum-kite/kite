@@ -17,6 +17,7 @@
 #include <string>
 #include <omp.h>
 
+
 #define outcol "\033[1;31m"
 #define outres "\033[0m"
 

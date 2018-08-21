@@ -29,15 +29,19 @@ CLIBS += -lhdf5_hl_cpp -lhdf5_cpp -lhdf5_hl -lhdf5
 VPATH = .
 OBJS = *.o
 
+
+num_ghost_corr=0
+memory=16
 compile_main=1
 verbose=1
 debug=0
 estimate_time=1
+name_prog=KITEx
 
 all:    clean
-	cd Src; $(CC) $(CFLAGS) $(CINCLUDE) -DDEBUG=$(debug) -DCOMPILE_MAIN=$(compile_main) -DVERBOSE=$(verbose) -DESTIMATE_TIME=$(estimate_time)  -c *.cpp  
+	cd Src; $(CC) $(CFLAGS) $(CINCLUDE) -DMEMORY=$(memory) -DNUM_GHOSTS_CORR=$(num_ghost_corr) -DDEBUG=$(debug) -DCOMPILE_MAIN=$(compile_main) -DVERBOSE=$(verbose) -DESTIMATE_TIME=$(estimate_time)  -c *.cpp  
 	@echo "linking..."
-	cd Src; $(CC) $(OBJS) $(CLIBS) $(CFLAGS) -o ../KITEx
+	cd Src; $(CC) $(OBJS) $(CLIBS) $(CFLAGS) -o ../$(name_prog)
 	rm -f Src/*.o
 	cd ..
 

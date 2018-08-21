@@ -31,9 +31,21 @@ class conductivity_optical{
     double temperature = -1;
     double units = unit_scale;
 
+    T beta;
+    T e_fermi; 
+    T scat; 
+	int N_energies; 
+	int N_omegas; 
+    double minFreq; 
+    double maxFreq; 
+    T lim;
+
 
     // information about the Hamiltonian
     system_info<T, DIM> systemInfo;
+    //
+    // Input from the shell to override the configuration file
+    shell_input variables;
 
     // Objects required to successfully calculate the conductivity
 		Eigen::Array<std::complex<T>, -1, -1> Gamma;
@@ -42,20 +54,24 @@ class conductivity_optical{
 	  std::string dirName;
 
 
-    conductivity_optical(system_info<T, DIM>&);
-		void read();
+    conductivity_optical(system_info<T, DIM>&, shell_input &);
+	void fetch_parameters();
+    void override_parameters();
     void calculate();
     void calculate_efficient();
 	
 };
 
 template <typename T, unsigned DIM>
-conductivity_optical<T, DIM>::conductivity_optical(system_info<T, DIM>& info){
+conductivity_optical<T, DIM>::conductivity_optical(system_info<T, DIM>& info, shell_input & vari){
   std::string name = info.filename;
 	file = H5::H5File(name.c_str(), H5F_ACC_RDONLY);
 
   // retrieve the information about the Hamiltonian
   systemInfo = info;
+
+  // retrieve the shell input
+  variables = vari;
 
   // location of the information about the conductivity
   dirName = "/Calculation/conductivity_optical/";
@@ -72,11 +88,12 @@ conductivity_optical<T, DIM>::conductivity_optical(system_info<T, DIM>& info){
 	
 
 template <typename T, unsigned DIM>
-void conductivity_optical<T, DIM>::read(){
+void conductivity_optical<T, DIM>::fetch_parameters(){
 	debug_message("Entered conductivity_optical::read.\n");
 	//This function reads all the data from the hdf5 file that's needed to 
   //calculate the optical conductivity
 	 
+
 
   // Check if the data for the optical conductivity exists
   if(!isRequired){
@@ -148,14 +165,38 @@ void conductivity_optical<T, DIM>::read(){
     isPossible = false;
   }
 
+  // 1/kT, where k is the Boltzmann constant in eV/K
+  temperature = 0.001/systemInfo.energy_scale;
+  beta = 1.0/8.6173303*pow(10,5)/temperature;
+  e_fermi = 0.2/systemInfo.energy_scale;
+  scat = 0.0166/systemInfo.energy_scale;
 	
+	// Calculate the number of frequencies and energies needed to perform the calculation.
+  N_energies = 512;
 
+  N_omegas = NumPoints;
+  minFreq = 0.001;
+  maxFreq = 1.5;
 
+  lim = 0.99;
 
 	file.close();
 	debug_message("Left conductivity_optical::read.\n");
 }
 
+
+template <typename U, unsigned DIM>
+void conductivity_optical<U, DIM>::override_parameters(){
+    if(variables.CondOpt_Temp != -8888)     temperature = variables.CondOpt_Temp/systemInfo.energy_scale;
+    if(variables.CondOpt_NumEnergies != -1) N_energies  = variables.CondOpt_NumEnergies;
+    if(variables.CondOpt_FreqMax != -8888)  maxFreq     = variables.CondOpt_FreqMax/systemInfo.energy_scale;
+    if(variables.CondOpt_FreqMin != -8888)  minFreq     = variables.CondOpt_FreqMin/systemInfo.energy_scale;
+    if(variables.CondOpt_NumFreq != -1)     N_omegas    = variables.CondOpt_NumFreq;
+    if(variables.CondOpt_Fermi != -8888)    e_fermi     = variables.CondOpt_Fermi/systemInfo.energy_scale;
+    if(variables.CondOpt_Scat != -8888)     scat        = variables.CondOpt_Scat/systemInfo.energy_scale;
+    beta = 1.0/8.6173303*pow(10,5)/temperature;
+
+};
 
 template <typename U, unsigned DIM>
 void conductivity_optical<U, DIM>::calculate_efficient(){
@@ -171,26 +212,6 @@ void conductivity_optical<U, DIM>::calculate_efficient(){
     exit(0);
   }
 
-  // ########################################################
-  // default values for the fermi energy, broadening and frequencies
-  // ########################################################
-
-  // 1/kT, where k is the Boltzmann constant in eV/K
-  U beta = 1.0/8.6173303*pow(10,5)/temperature;
-  U e_fermi = 0.2/systemInfo.energy_scale;
-  U scat = 0.0166/systemInfo.energy_scale;
-	
-	// Calculate the number of frequencies and energies needed to perform the calculation.
-	int N_energies = NumPoints;
-  double lim = 0.99;
-  Eigen::Matrix<U, -1, 1> energies;
-  energies  = Eigen::Matrix<U, -1, 1>::LinSpaced(N_energies, -lim, lim);
-
-	int N_omegas = 60;
-  double minFreq = 0.01;
-  double maxFreq = 1.5;
-  Eigen::Matrix<U, -1, 1> frequencies;
-  frequencies = Eigen::Matrix<U, -1, 1>::LinSpaced(N_omegas, minFreq, maxFreq);
 
   // Print out some useful information
   verbose_message("  Energy in rescaled units: [-1,1]\n");
@@ -199,7 +220,7 @@ void conductivity_optical<U, DIM>::calculate_efficient(){
   verbose_message("  Using kernel for delta function: Jackson\n");
   verbose_message("  Broadening parameter for Green's function: ");
     verbose_message(scat); verbose_message("\n");
-  verbose_message("  Number of energies: "); verbose_message(NumPoints); verbose_message("\n");
+  verbose_message("  Number of energies: "); verbose_message(N_energies); verbose_message("\n");
   verbose_message("  Energy range: ["); verbose_message(-lim); verbose_message(",");
     verbose_message(lim); verbose_message("]\n");
   verbose_message("  Number of frequencies: "); verbose_message(N_omegas); verbose_message("\n");
@@ -208,6 +229,10 @@ void conductivity_optical<U, DIM>::calculate_efficient(){
   verbose_message("  File name: optical_cond.dat\n");
 
 
+  Eigen::Matrix<U, -1, 1> energies;
+  energies  = Eigen::Matrix<U, -1, 1>::LinSpaced(N_energies, -lim, lim);
+  Eigen::Matrix<U, -1, 1> frequencies;
+  frequencies = Eigen::Matrix<U, -1, 1>::LinSpaced(N_omegas, minFreq, maxFreq);
 
 	std::complex<U> imaginary(0.0, 1.0);
 
@@ -215,8 +240,10 @@ void conductivity_optical<U, DIM>::calculate_efficient(){
   
   // Functions that are going to be used by the contractor
   int NumMoments1 = NumMoments;
-  std::function<U(int, U)> deltaF = [beta, e_fermi, NumMoments1](int n, U energy)->U{
-    return delta(n, energy)*U(1.0/(1.0 + U(n==0)))*fermi_function(energy, e_fermi, beta)*kernel_jackson<U>(n, NumMoments1);
+  U beta1 = beta;
+  U e_fermi1 = e_fermi;
+  std::function<U(int, U)> deltaF = [beta1, e_fermi1, NumMoments1](int n, U energy)->U{
+    return delta(n, energy)*U(1.0/(1.0 + U(n==0)))*fermi_function(energy, e_fermi1, beta1)*kernel_jackson<U>(n, NumMoments1);
   };
 
 

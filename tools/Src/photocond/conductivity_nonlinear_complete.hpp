@@ -49,6 +49,9 @@ class conductivity_nonlinear{
     // information about the Hamiltonian
     system_info<T, DIM> systemInfo;
 
+    // Input from the shell to override the configuration file
+    shell_input variables;
+
     // Objects required to successfully calculate the conductivity
 		Eigen::Array<std::complex<T>, -1, -1> Gamma0;
 		Eigen::Array<std::complex<T>, -1, -1> Gamma1;
@@ -59,8 +62,9 @@ class conductivity_nonlinear{
 
 
 	  std::complex<T> imaginary;
-    conductivity_nonlinear(system_info<T, DIM>&);
-		void read();
+    conductivity_nonlinear(system_info<T, DIM>&, shell_input &);
+	void fetch_parameters();
+	void override_parameters();
     void calculate();
 
     Eigen::Matrix<std::complex<T>, -1, -1> Gamma0contract();
@@ -73,13 +77,14 @@ class conductivity_nonlinear{
 };
 
 template <typename T, unsigned DIM>
-conductivity_nonlinear<T, DIM>::conductivity_nonlinear(system_info<T, DIM>& info){
+conductivity_nonlinear<T, DIM>::conductivity_nonlinear(system_info<T, DIM>& info, shell_input & vari){
   // Constructor of the conductivity_nonlinear class. This function simply checks
   // whether the conductivity needs to be calculated or not
 
   std::string name = info.filename;                           // name of the hdf5 file
 	file = H5::H5File(name.c_str(), H5F_ACC_RDONLY);
   systemInfo = info;                                          // retrieve the information about the Hamiltonian
+  variables = vari;                                           // retrieve the shell input
   dirName = "/Calculation/conductivity_optical_nonlinear/";   // location of the information about the conductivity
 
 
@@ -93,14 +98,26 @@ conductivity_nonlinear<T, DIM>::conductivity_nonlinear(system_info<T, DIM>& info
 
 }
 	
+template <typename T, unsigned DIM>
+void conductivity_nonlinear<T, DIM>::override_parameters(){
+    if(variables.CondOpt2_Temp != -8888)     temperature = variables.CondOpt2_Temp/systemInfo.energy_scale;
+    if(variables.CondOpt2_NumEnergies != -1) N_energies  = variables.CondOpt2_NumEnergies;
+    if(variables.CondOpt2_FreqMax != -8888)  maxFreq     = variables.CondOpt2_FreqMax/systemInfo.energy_scale;
+    if(variables.CondOpt2_FreqMin != -8888)  minFreq     = variables.CondOpt2_FreqMin/systemInfo.energy_scale;
+    if(variables.CondOpt2_NumFreq != -1)     N_omegas    = variables.CondOpt2_NumFreq;
+    if(variables.CondOpt2_Fermi != -8888)    e_fermi     = variables.CondOpt2_Fermi/systemInfo.energy_scale;
+    if(variables.CondOpt2_Scat != -8888)     scat        = variables.CondOpt2_Scat/systemInfo.energy_scale;
+    beta = 1.0/8.6173303*pow(10,5)/temperature;
+};
 
 template <typename T, unsigned DIM>
-void conductivity_nonlinear<T, DIM>::read(){
+void conductivity_nonlinear<T, DIM>::fetch_parameters(){
 	debug_message("Entered conductivity_nonlinear::read.\n");
   // This function reads all the relevant
   // information from the hdf5 configuration file and uses it to evaluate the parameters
   // needed to calculate the nonlinear conductivity
 	 
+    variables.printOpt2();
 
   // This function should not run if the conductivity is not needed. If, for some reason
   // it is run anyway, the user should be notified that there is not enough data to
@@ -113,11 +130,11 @@ void conductivity_nonlinear<T, DIM>::read(){
 	imaginary = std::complex<T>(0.0, 1.0);
   
   // Fetch the direction of the conductivity and convert it to a string
-  get_hdf5(&direction, &file, (char*)(dirName+"Direction").c_str());									
+  get_hdf5(&direction, &file, (char*)(dirName+"Direction").c_str());
   std::string dirString = num2str3(direction);
 
   // Fetch the number of Chebyshev Moments, temperature and number of points
-	get_hdf5(&NumMoments, &file, (char*)(dirName+"NumMoments").c_str());	
+    get_hdf5(&NumMoments, &file, (char*)(dirName+"NumMoments").c_str());	
 	get_hdf5(&temperature, &file, (char*)(dirName+"Temperature").c_str());	
 	get_hdf5(&NumPoints, &file, (char*)(dirName+"NumPoints").c_str());	
 	get_hdf5(&special, &file, (char*)(dirName+"Special").c_str());	
@@ -128,14 +145,13 @@ void conductivity_nonlinear<T, DIM>::read(){
   scat = 0.0166/systemInfo.energy_scale;
 	
   // Energy parameters needed to run the simulation
-	N_energies = NumPoints;
-	N_energies = 512;
+  N_energies = 1024;
   lim = 0.995;
   energies  = Eigen::Matrix<T, -1, 1>::LinSpaced(N_energies, -lim, lim);
 
   // Frequency parameters needed to run the simulation
-	N_omegas = 500;
-  minFreq = -2;
+	N_omegas = NumPoints;
+  minFreq = 0;
   maxFreq = 2.0;
   frequencies = Eigen::Matrix<T, -1, 1>::LinSpaced(N_omegas, minFreq, maxFreq);
 
@@ -267,8 +283,6 @@ void conductivity_nonlinear<T, DIM>::read(){
       }
     }
   }
-
-
 
 
 	file.close();

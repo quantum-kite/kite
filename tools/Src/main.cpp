@@ -6,6 +6,7 @@
 /****************************************************************/
 
 #include "headers.hpp"
+#include "parse_input.hpp"
 #include "ComplexTraits.hpp"
 #include "H5Cpp.h"
 #include "tensor.hpp"
@@ -16,9 +17,9 @@
 #include "photocond/conductivity_nonlinear_complete.hpp"
 #include "dos.hpp"
 #include "calculate_simple.hpp"
-#include "parse_input.hpp"
 
-void choose_simulation_type(char *name){
+
+void choose_simulation_type(char *name, shell_input & variables){
 	debug_message("Entered choose_simulation.\n");
 	/* The type of data used for the simulation is not known beforehand. It may be 
 	 * float, double or long double. Each of those may or may not be complex. To simplify
@@ -58,57 +59,57 @@ void choose_simulation_type(char *name){
 		case 0:
 		{
 			debug_message("The program is using data type: float.\nDimension: 1.\n");
-			calculate_simple<float, 1u>(name);
+			calculate_simple<float, 1u>(name, variables);
 			break;
 		}
 		case 1:
 		{
 			debug_message("The program is using data type: float.\nDimension: 2.\n");
-			calculate_simple<float, 2u>(name);
+			calculate_simple<float, 2u>(name, variables);
 			break;
 		}
 		case 2:
 		{
 			debug_message("The program is using data type: float.\nDimension: 3.\n");
-			calculate_simple<float, 3u>(name);
+			calculate_simple<float, 3u>(name, variables);
 			break;			
 		}
 		case 3:
 		{
 			debug_message("The program is using data type: double.\nDimension: 1.\n");
-			calculate_simple<double, 1u>(name);
+			calculate_simple<double, 1u>(name, variables);
 			break;
 		}
 #endif
 		case 4:
 		{
 			debug_message("The program is using data type: double.\nDimension: 2.\n");
-			calculate_simple<double, 2u>(name);
+			calculate_simple<double, 2u>(name, variables);
 			break;
 		}
 		case 5:
 		{
 			debug_message("The program is using data type: double.\nDimension: 3.\n");
-			calculate_simple<double, 3u>(name);
+			calculate_simple<double, 3u>(name, variables);
 			break;
 		}
 #ifdef debug1
 		case 6:
 		{
 			debug_message("The program is using data type: long double.\nDimension: 1.\n");
-			calculate_simple<long double, 1u>(name);
+			calculate_simple<long double, 1u>(name, variables);
 			break;
 		}
 		case 7:
 		{
 			debug_message("The program is using data type: long double.\nDimension: 2.\n");
-			calculate_simple<long double, 2u>(name);
+			calculate_simple<long double, 2u>(name, variables);
 			break;
 		}
 		case 8:
 		{
 			debug_message("The program is using data type: long double.\nDimension: 3.\n");
-			calculate_simple<long double, 3u>(name);
+			calculate_simple<long double, 3u>(name, variables);
 			break;
 		}
 #endif
@@ -124,6 +125,7 @@ void choose_simulation_type(char *name){
 
 
 int main(int argc, char *argv[]){
+    shell_input variables = parser(argc, argv);
   verbose_message(
       "\n+------------------------------------------------------------------------+\n"
       "|            Chebyshev Polynomial Green's Function Approach              | \n"
@@ -171,8 +173,8 @@ int main(int argc, char *argv[]){
   verbose_message("\nStarting program...\n\n");
 
 
-	//parser(argc, argv);
-	choose_simulation_type(argv[1]);
-	return 0;
+
+	choose_simulation_type(argv[1], variables);
   verbose_message("Done.\n");
+	return 0;
 }
