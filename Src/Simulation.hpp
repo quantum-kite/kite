@@ -1311,7 +1311,7 @@ public:
 			  + Global.avg_results.row(0).square()).transpose();
 	  sprintf(name,"/Calculation/special/Var%c", orient.at(i));
 	    
-	  write_hdf5(avg_x, file, name);
+	  write_hdf5(avg_z, file, name);
 	}
       
       file->close();      
