@@ -22,6 +22,8 @@ class shell_input{
         double CondDC_FermiMax; 
         int CondDC_NumFermi; 
         std::string CondDC_Name;
+        bool CondDC_Exclusive;
+        bool CondDC_is_required;
 
         // Optical Conductivity
         double CondOpt_Temp; 
@@ -32,11 +34,15 @@ class shell_input{
         double CondOpt_FreqMax; 
         int CondOpt_NumFreq; 
         std::string CondOpt_Name;
+        bool CondOpt_Exclusive;
+        bool CondOpt_is_required;
 
 
         // Density of states
         int DOS_NumEnergies;
         std::string DOS_Name;
+        bool DOS_Exclusive;
+        bool DOS_is_required;
 
 
         // 2nd order optical conductivity
@@ -48,6 +54,8 @@ class shell_input{
         double CondOpt2_FreqMax; 
         int CondOpt2_NumFreq; 
         std::string CondOpt2_Name;
+        bool CondOpt2_Exclusive;
+        bool CondOpt2_is_required;
 
         // Help menu
         bool help;
@@ -64,24 +72,28 @@ class shell_input{
             std::cout << "--CondOpt2   Second-order optical conductivity (photoconductivity)\n\n";
             std::cout << "After each of these keywords, the program will be expecting the subparameters associated with that word (always separated by spaces):\n\n";
             std::cout << "--DOS      -E              Number of energy points\n";
-            std::cout << "           -N              Name of the output file\n\n";
+            std::cout << "           -N              Name of the output file\n";
+            std::cout << "           -X              Exclusive. Only calculate this quantity\n\n";
             std::cout << "--CondDC   -E              Number of energy points used in the integration\n";
             std::cout << "           -T              Temperature\n";
             std::cout << "           -S              Broadening parameter of the Green's functions\n";
             std::cout << "           -F min max num  Fermi energies. min and max may be ommited.\n";
-            std::cout << "           -N              Name of the output file\n\n";
+            std::cout << "           -N              Name of the output file\n";
+            std::cout << "           -X              Exclusive. Only calculate this quantity\n\n";
             std::cout << "--CondOpt  -E              Number of energy points used in the integration\n";
             std::cout << "           -T              Temperature\n";
             std::cout << "           -S              Broadening parameter of the Green's functions\n";
             std::cout << "           -O min max num  Frequencies\n";
             std::cout << "           -F              Fermi energy\n";
-            std::cout << "           -N              Name of the output file\n\n";
+            std::cout << "           -N              Name of the output file\n";
+            std::cout << "           -X              Exclusive. Only calculate this quantity\n\n";
             std::cout << "--CondOpt2 -E              Number of energy points used in the integration\n";
             std::cout << "           -T              Temperature\n";
             std::cout << "           -S              Broadening parameter of the Green's functions\n";
             std::cout << "           -O min max num  Frequencies\n";
             std::cout << "           -F              Fermi energy\n";
-            std::cout << "           -N              Name of the output file\n\n";
+            std::cout << "           -N              Name of the output file\n";
+            std::cout << "           -X              Exclusive. Only calculate this quantity\n\n";
             std::cout << "All the quantities are in the same units as the ones in the python configuration script. All quantities are double-precision numbers except for the ones representing integers, such as the numbers of points.\n\n";
             std::cout << "Examples:\n\n";
             std::cout << "Example 1\n";
@@ -113,6 +125,7 @@ class shell_input{
             if(CondDC_FermiMax != -8888)    std::cout << "    maximum Fermi energy: "       << CondDC_FermiMax << "\n";
             if(CondDC_NumFermi != -1)       std::cout << "    number of Fermi energies: "   << CondDC_NumFermi << "\n";
             if(CondDC_Name != "")           std::cout << "    name of the output file: "    << CondDC_Name << "\n";
+            if(CondDC_Exclusive == true)    std::cout << "    Exclusive.\n";
             std::cout << "\n";
         };
         void printOpt(){
@@ -125,6 +138,7 @@ class shell_input{
             if(CondOpt_NumFreq != -1)       std::cout << "    number of frequencies: "      << CondOpt_NumFreq << "\n";
             if(CondOpt_Fermi != -8888)      std::cout << "    number of Fermi energies: "   << CondOpt_Fermi << "\n";
             if(CondOpt_Name != "")          std::cout << "    name of the output file: "    << CondOpt_Name << "\n";
+            if(CondOpt_Exclusive == true)   std::cout << "    Exclusive.\n";
             std::cout << "\n";
         };
 
@@ -138,6 +152,7 @@ class shell_input{
             if(CondOpt2_NumFreq != -1)      std::cout << "    number of frequencies: "      << CondOpt2_NumFreq << "\n";
             if(CondOpt2_Fermi != -8888)     std::cout << "    number of Fermi energies: "   << CondOpt2_Fermi << "\n";
             if(CondOpt2_Name != "")         std::cout << "    name of the output file: "    << CondOpt2_Name << "\n";
+            if(CondOpt2_Exclusive == true)  std::cout << "    Exclusive.\n";
             std::cout << "\n";
         };
 
@@ -145,6 +160,7 @@ class shell_input{
             std::cout << "Printing parameters for the Density of States obtained from the shell:\n";
             if(DOS_NumEnergies != -1 )      std::cout << "    number of energy points: "    << DOS_NumEnergies << "\n";
             if(DOS_Name != "")              std::cout << "    name of the output file: "    << DOS_Name << "\n";
+            if(DOS_Exclusive == true)       std::cout << "    Exclusive.\n";
             std::cout << "\n";
         };
 };
@@ -153,7 +169,7 @@ void parse_CondDC(int argc, char *argv[], std::vector<int> & keys_pos, std::vect
 void parse_CondOpt(int argc, char *argv[], std::vector<int> & keys_pos, std::vector<int> & keys_len, shell_input & variables);
 void parse_CondOpt2(int argc, char *argv[], std::vector<int> & keys_pos, std::vector<int> & keys_len, shell_input & variables);
 void parse_DOS(int argc, char *argv[], std::vector<int> & keys_pos, std::vector<int> & keys_len, shell_input & variables);
-
+int get_num_exclusives(shell_input & variables);
 
 
 
@@ -165,7 +181,7 @@ shell_input parser(int argc, char *argv[]){
 
 
     // First, find the position of each of the following functions:
-    std::vector<std::string> valid_keys {"--DOS","--CondOpt","--CondDC", "--PhotoCond"};
+    std::vector<std::string> valid_keys {"--DOS","--CondOpt","--CondDC", "--CondOpt2"};
     int len = 4;
     std::vector<int> keys_pos (len, -1);
     std::vector<int> keys_len (len, -1);
@@ -197,8 +213,45 @@ shell_input parser(int argc, char *argv[]){
     parse_CondOpt(argc, argv, keys_pos, keys_len, variables);
     parse_CondOpt2(argc, argv, keys_pos, keys_len, variables);
 
+    // Process the exclusive flag. If there are no exclusive functions, 
+    // all will be calculated. If there's only one, that's the only one
+    // that needs to be calculated. Furthermore, we need to check
+    // whether there is only one exclusive flag
+    variables.CondDC_is_required = false;
+    variables.CondOpt_is_required = false;
+    variables.CondOpt2_is_required = false;
+    variables.DOS_is_required = false;
+
+    int num_exclusives = get_num_exclusives(variables);
+    if(num_exclusives > 1){
+        std::cout << "There can be only one exclusive function. Exiting.\n";
+        exit(1);
+    } else {
+        if(num_exclusives == 1){
+            if(variables.CondDC_Exclusive) variables.CondDC_is_required = true;
+            if(variables.CondOpt_Exclusive) variables.CondOpt_is_required = true;
+            if(variables.CondOpt2_Exclusive) variables.CondOpt2_is_required = true;
+            if(variables.DOS_Exclusive) variables.DOS_is_required = true;
+
+        } else {
+            variables.CondDC_is_required = true;
+            variables.CondOpt_is_required = true;
+            variables.CondOpt2_is_required = true;
+            variables.DOS_is_required = true;
+            }
+    }
 
     return variables;
+};
+
+int get_num_exclusives(shell_input & variables){
+    int N_exclusives = 0;
+    if(variables.CondDC_Exclusive)      N_exclusives++;
+    if(variables.CondOpt_Exclusive)     N_exclusives++;
+    if(variables.CondOpt2_Exclusive)    N_exclusives++;
+    if(variables.DOS_Exclusive)         N_exclusives++;
+
+    return N_exclusives;
 };
 
 void parse_CondDC(int argc, char *argv[], std::vector<int> & keys_pos, std::vector<int> & keys_len, shell_input & variables){
@@ -213,6 +266,7 @@ void parse_CondDC(int argc, char *argv[], std::vector<int> & keys_pos, std::vect
     int CondDC_NumFermi = -1;
     double CondDC_Scat = -8888;
     std::string CondDC_Name = "";
+    bool CondDC_Exclusive = false;
     // Process CondDC
     int j = 2;
     int pos = keys_pos.at(j);
@@ -229,13 +283,15 @@ void parse_CondDC(int argc, char *argv[], std::vector<int> & keys_pos, std::vect
                 CondDC_Scat = atof(n1.c_str());
             if(name == "-N")
                 CondDC_Name = n1;
+            if(name == "-X" or n1 == "-X")
+                CondDC_Exclusive = true;
             if(name == "-F"){
-                if(k == keys_len.at(j) - 2){
+                if(k == keys_len.at(j) - 1){
                     CondDC_NumFermi = atoi(n1.c_str());
                     continue;
                 } else {
                     std::string n2 = argv[k + pos + 2];
-                    if(n2 == "-t" or n2 == "-E" or n2 == "-F" or n2 == "-S"){
+                    if(n2 == "-T" or n2 == "-E" or n2 == "-F" or n2 == "-S" or n2 == "-N" or n2 == "-X"){
                         CondDC_NumFermi = atoi(n1.c_str());
                     } else {
                         std::string n3 = argv[k + pos + 3];
@@ -250,13 +306,15 @@ void parse_CondDC(int argc, char *argv[], std::vector<int> & keys_pos, std::vect
 
 
 
-    variables.CondDC_Temp = CondDC_Temp; 
-    variables.CondDC_NumEnergies = CondDC_NumEnergies; 
-    variables.CondDC_Scat = CondDC_Scat; 
-    variables.CondDC_FermiMin = CondDC_FermiMin; 
-    variables.CondDC_FermiMax = CondDC_FermiMax; 
-    variables.CondDC_NumFermi = CondDC_NumFermi; 
-    variables.CondDC_Name = CondDC_Name;
+    variables.CondDC_Temp           = CondDC_Temp; 
+    variables.CondDC_NumEnergies    = CondDC_NumEnergies; 
+    variables.CondDC_Scat           = CondDC_Scat; 
+    variables.CondDC_FermiMin       = CondDC_FermiMin; 
+    variables.CondDC_FermiMax       = CondDC_FermiMax; 
+    variables.CondDC_NumFermi       = CondDC_NumFermi; 
+    variables.CondDC_Name           = CondDC_Name;
+    variables.CondDC_Exclusive      = CondDC_Exclusive;
+
 };
 
 void parse_CondOpt(int argc, char *argv[], std::vector<int> & keys_pos, std::vector<int> & keys_len, shell_input & variables){
@@ -271,6 +329,7 @@ void parse_CondOpt(int argc, char *argv[], std::vector<int> & keys_pos, std::vec
     int CondOpt_NumFreq = -1;
     double CondOpt_Fermi = -8888;
     double CondOpt_Scat = -8888;
+    bool CondOpt_Exclusive = false;
     std::string CondOpt_Name = "";
     // Process CondOpt
     int j = 1;
@@ -290,6 +349,8 @@ void parse_CondOpt(int argc, char *argv[], std::vector<int> & keys_pos, std::vec
                 CondOpt_Name = n1;
             if(name == "-F")
                 CondOpt_Fermi = atof(n1.c_str());
+            if(name == "-X" or n1 == "-X")
+                CondOpt_Exclusive = true;
             if(name == "-O"){
                 std::string n2 = argv[k + pos + 2];
                 std::string n3 = argv[k + pos + 3];
@@ -302,14 +363,15 @@ void parse_CondOpt(int argc, char *argv[], std::vector<int> & keys_pos, std::vec
 
 
 
-    variables.CondOpt_Temp = CondOpt_Temp; 
-    variables.CondOpt_NumEnergies = CondOpt_NumEnergies; 
-    variables.CondOpt_Scat = CondOpt_Scat; 
-    variables.CondOpt_Fermi = CondOpt_Fermi; 
-    variables.CondOpt_FreqMin = CondOpt_FreqMin; 
-    variables.CondOpt_FreqMax = CondOpt_FreqMax; 
-    variables.CondOpt_NumFreq = CondOpt_NumFreq; 
-    variables.CondOpt_Name = CondOpt_Name; 
+    variables.CondOpt_Temp          = CondOpt_Temp; 
+    variables.CondOpt_NumEnergies   = CondOpt_NumEnergies; 
+    variables.CondOpt_Scat          = CondOpt_Scat; 
+    variables.CondOpt_Fermi         = CondOpt_Fermi; 
+    variables.CondOpt_FreqMin       = CondOpt_FreqMin; 
+    variables.CondOpt_FreqMax       = CondOpt_FreqMax; 
+    variables.CondOpt_NumFreq       = CondOpt_NumFreq; 
+    variables.CondOpt_Name          = CondOpt_Name; 
+    variables.CondOpt_Exclusive     = CondOpt_Exclusive;
 };
 
 void parse_CondOpt2(int argc, char *argv[], std::vector<int> & keys_pos, std::vector<int> & keys_len, shell_input & variables){
@@ -324,6 +386,7 @@ void parse_CondOpt2(int argc, char *argv[], std::vector<int> & keys_pos, std::ve
     int CondOpt2_NumFreq = -1;
     int CondOpt2_Fermi = -8888;
     double CondOpt2_Scat = -8888;
+    bool CondOpt2_Exclusive = false;
     std::string CondOpt2_Name = "";
     // Process CondOpt2
     int j = 3;
@@ -343,6 +406,8 @@ void parse_CondOpt2(int argc, char *argv[], std::vector<int> & keys_pos, std::ve
                 CondOpt2_Fermi = atof(n1.c_str());
             if(name == "-N")
                 CondOpt2_Name = n1;
+            if(name == "-X" or n1 == "-X")
+                CondOpt2_Exclusive = true;
             if(name == "-O"){
                 std::string n2 = argv[k + pos + 2];
                 std::string n3 = argv[k + pos + 3];
@@ -355,14 +420,15 @@ void parse_CondOpt2(int argc, char *argv[], std::vector<int> & keys_pos, std::ve
 
 
 
-    variables.CondOpt2_Temp = CondOpt2_Temp; 
-    variables.CondOpt2_NumEnergies = CondOpt2_NumEnergies; 
-    variables.CondOpt2_Scat = CondOpt2_Scat; 
-    variables.CondOpt2_Fermi = CondOpt2_Fermi; 
-    variables.CondOpt2_FreqMin = CondOpt2_FreqMin; 
-    variables.CondOpt2_FreqMax = CondOpt2_FreqMax; 
-    variables.CondOpt2_NumFreq = CondOpt2_NumFreq; 
-    variables.CondOpt2_Name = CondOpt2_Name; 
+    variables.CondOpt2_Temp         = CondOpt2_Temp; 
+    variables.CondOpt2_NumEnergies  = CondOpt2_NumEnergies; 
+    variables.CondOpt2_Scat         = CondOpt2_Scat; 
+    variables.CondOpt2_Fermi        = CondOpt2_Fermi; 
+    variables.CondOpt2_FreqMin      = CondOpt2_FreqMin; 
+    variables.CondOpt2_FreqMax      = CondOpt2_FreqMax; 
+    variables.CondOpt2_NumFreq      = CondOpt2_NumFreq; 
+    variables.CondOpt2_Name         = CondOpt2_Name; 
+    variables.CondOpt2_Exclusive    = CondOpt2_Exclusive;
 };
 
 void parse_DOS(int argc, char *argv[], std::vector<int> & keys_pos, std::vector<int> & keys_len, shell_input & variables){
@@ -372,6 +438,7 @@ void parse_DOS(int argc, char *argv[], std::vector<int> & keys_pos, std::vector<
     
     int DOS_NumEnergies = -1;
     std::string DOS_Name = "";
+    bool DOS_Exclusive = false;
     int pos = keys_pos.at(0);
     if(pos != -1){
         for(int k = 1; k < keys_len.at(0); k++){
@@ -381,8 +448,11 @@ void parse_DOS(int argc, char *argv[], std::vector<int> & keys_pos, std::vector<
                 DOS_NumEnergies = atoi(n1.c_str());
             if(name == "-N")
                 DOS_Name = n1;
+            if(name == "-X" or n1 == "-X")
+                DOS_Exclusive = true;
         }
     }
     variables.DOS_NumEnergies = DOS_NumEnergies; 
     variables.DOS_Name = DOS_Name;
+    variables.DOS_Exclusive = DOS_Exclusive;
 };

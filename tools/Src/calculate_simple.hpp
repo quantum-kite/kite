@@ -12,10 +12,9 @@
 template <typename U, unsigned DIM>
 void calculate_conductivity_nonlinear(system_info<U, DIM>& sysinfo, shell_input & variables){
   conductivity_nonlinear<U, DIM> info(sysinfo, variables);
-  if(info.isRequired){
+  if(info.isRequired and variables.CondOpt2_is_required){
     verbose_message(
-        "Retrieving nonlinear conductivity... Currently, only "
-        "two body operator contributions are implemented.\n"
+        "Retrieving nonlinear conductivity...\n "
         );
     variables.printOpt2();
     info.fetch_parameters();
@@ -27,7 +26,7 @@ void calculate_conductivity_nonlinear(system_info<U, DIM>& sysinfo, shell_input 
 template <typename U, unsigned DIM>
 void calculate_conductivity_optical(system_info<U, DIM>& sysinfo, shell_input & variables){
   conductivity_optical<U, DIM> info(sysinfo, variables);
-  if(info.isRequired){
+  if(info.isRequired and variables.CondOpt_is_required){
     verbose_message("Retrieving optical conductivity...\n");
     variables.printOpt();
     info.fetch_parameters();
@@ -39,7 +38,7 @@ void calculate_conductivity_optical(system_info<U, DIM>& sysinfo, shell_input & 
 template <typename U, unsigned DIM>
 void calculate_conductivity_dc(system_info<U, DIM>& sysinfo, shell_input & variables){
   conductivity_dc<U, DIM> info(sysinfo, variables);
-  if(info.isRequired){
+  if(info.isRequired and variables.CondDC_is_required){
     verbose_message("Retrieving DC conductivity...\n");
     variables.printDC();
     info.fetch_parameters();
@@ -51,7 +50,7 @@ void calculate_conductivity_dc(system_info<U, DIM>& sysinfo, shell_input & varia
 template <typename U, unsigned DIM>
 void calculate_dos(system_info<U, DIM>& sysinfo, shell_input & variables){
   dos<U, DIM> info(sysinfo, variables); // The constructor checks whether this quantity is required
-  if(info.isRequired){
+  if(info.isRequired and variables.DOS_is_required){
     verbose_message("Retrieving DOS...\n");
     variables.printDOS();
     info.fetch_parameters();
