@@ -361,34 +361,44 @@ public:
     r.convertCoordinates(at,ad);
     for(unsigned i = 0; i < 4; i++)
       results[i] *= 0.;
-    
+
     for(unsigned io = 0; io < r.Orb; io++)
       {
-	value_type deltax = r.rOrb(0,io), deltay = r.rOrb(1,io); 
-	for(unsigned i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1++)
+	value_type deltax = r.rOrb(0,io);
+	value_type deltay = r.rOrb(1,io);
+	
+	for(unsigned i1 = 0; i1 < r.ld[1]; i1++)
 	  {
+	    std::size_t ind = ad.set({std::size_t(NGHOSTS),std::size_t(i1 + NGHOSTS), std::size_t(io)}).index;
+	    value_type z1 = at.coord[1] + i1;
+	    value_type x0 = at.coord[0]*r.rLat(0,0) + z1 * r.rLat(0,1) + deltax;
+	    value_type y0 = at.coord[0]*r.rLat(1,0) + z1 * r.rLat(1,1) + deltay;	    
+
+	    T xl1 = assign_value<T>(0., 0.);
+	    T xl2 = assign_value<T>(0., 0.);
+	    T yl1 = assign_value<T>(0., 0.);
+	    T yl2 = assign_value<T>(0., 0.);
 	    
-	    std::size_t ind = ad.set({std::size_t(NGHOSTS),std::size_t(i1), std::size_t(io)}).index + NGHOSTS;
-	    value_type z1 = at.coord[1] + i1 - NGHOSTS;
-	    value_type x = at.coord[0]*r.rLat(0,0) + z1 * r.rLat(0,1) + deltax;
-	    value_type y = at.coord[0]*r.rLat(1,0) + z1 * r.rLat(1,1) + deltay;	    
-	    T xl1 = assign_value<T>(0.,0.),  xl2=assign_value<T>(0., 0.), yl1=assign_value<T>(0.,0.), yl2=assign_value<T>(0.,0);
-	    for(unsigned i0 = 0; i0 < r.Ld[0] - 2*NGHOSTS; i0++)
+	    for(unsigned i0 = 0; i0 < r.ld[0]; i0++)
 	      {
-		x += i0 * r.rLat(0,0);
-		y += i0 * r.rLat(1,0);
-		T p = myconj(*(bra + ind + i0)) * (*(ket + ind + i0));
+		std::size_t j0 = ind + i0;
+		value_type x = x0 + i0 * r.rLat(0,0);
+		value_type y = y0 + i0 * r.rLat(1,0);
+		T p = myconj(*(bra + j0)) * (*(ket + j0));
 		xl1 += p * x;
 		xl2 += p * x * x;
 		yl1 += p * y;
 		yl2 += p * y * y;
-	      }	    
+
+	      }
+	    
 	    results[0] += xl1;
 	    results[1] += xl2;
 	    results[2] += yl1;
 	    results[3] += yl2;
 	  }
       }
+
   };
   
   

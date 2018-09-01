@@ -1277,7 +1277,6 @@ public:
 	    auto x2 = sum_bra.v.adjoint() * vtmp1;
 
 	    avg_z(t) += (x2(0,0) - avg_z(t) ) /T(id + 1);
-#pragma omp critical	    
 	    phi.measure_wave_packet(sum_bra.v.data(), sum_ket.v.data(), results.data());
 	    avg_results.col(t) += (results - avg_results.col(t) ) /T(id + 1); 
 	  }
@@ -1301,16 +1300,24 @@ public:
       write_hdf5(Global.avg_x, file, (char *) "/Calculation/special/Sx");
       write_hdf5(Global.avg_y, file, (char *) "/Calculation/special/Sy");
       write_hdf5(Global.avg_z, file, (char *) "/Calculation/special/Sz");
+
+
+      for(unsigned i = 0; i < D; i++)
+	{
+	  std::string orient = "xyz";
+	  char name[200];
+	  avg_z.col(0) = Global.avg_results.row(2*i) ;
+	  sprintf(name,"/Calculation/special/mean_value%c", orient.at(i));
+	  write_hdf5(avg_z, file, name);
+	}
       
       for(unsigned i = 0; i < D; i++)
 	{
 	  std::string orient = "xyz";
 	  char name[200];
-	  avg_z.col(0) = (Global.avg_results.row(2*i + 1)
-			  - 2.*Global.avg_results.row(0) * Global.avg_results.row(2*i)
-			  + Global.avg_results.row(0).square()).transpose();
+	  avg_z.col(0) = Global.avg_results.row(2*i + 1) - Global.avg_results.row(2*i)*Global.avg_results.row(2*i);
 	  sprintf(name,"/Calculation/special/Var%c", orient.at(i));
-	    
+			  
 	  write_hdf5(avg_z, file, name);
 	}
       
