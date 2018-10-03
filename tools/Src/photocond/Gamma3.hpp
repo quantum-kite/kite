@@ -54,6 +54,7 @@ Eigen::Matrix<std::complex<U>, -1, -1> conductivity_nonlinear<U, DIM>::Gamma3Con
           DeltaGreenAMatrix(e, p*N0 + n) = deltaF(n, energies(e))*greenAscat<U>(2*scat)(p + block*N2/N_blocks, energies(e)); 
         }
 
+    omp_set_num_threads(2);
     omp_set_num_threads(systemInfo.NumThreads);
 #pragma omp parallel shared(N_threads, global_omega_energies) firstprivate(DeltaGreenAMatrix, DeltaGreenRMatrix, omega_energies)
   {
@@ -155,9 +156,10 @@ Eigen::Matrix<std::complex<U>, -1, -1> conductivity_nonlinear<U, DIM>::Gamma3Con
   Eigen::Matrix<std::complex<U>, -1, -1> global_omega_energies;
   Eigen::Matrix<std::complex<U>, -1, -1> omega_energies;
   global_omega_energies = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
+
   omega_energies = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
   
-  
+    omp_set_num_threads(2);
   // Start the parallelization. It is done in the direction p
 #pragma omp parallel shared(N_threads, global_omega_energies) firstprivate(omega_energies)
 {
@@ -202,20 +204,22 @@ Eigen::Matrix<std::complex<U>, -1, -1> conductivity_nonlinear<U, DIM>::Gamma3Con
     GreenR = Eigen::Matrix<std::complex<U>, -1, -1, Eigen::RowMajor>::Zero(N_energies, N0);
     GreenA = Eigen::Matrix<std::complex<U>, -1, -1, Eigen::RowMajor>::Zero(N_energies, local_NumMoments);
 
-    
+
+
     
     for(int w = 0; w < N_omegas; w++){
       
       // The scat term is the same in both cases because greenRscat and greenAscat already
       // take into account that the sign of scat is different in those cases
+      
       for(int n = 0; n < N0; n++)
         for(int e = 0; e < N_energies; e++)
           GreenR(e, n) = greenRscat<U>(scat)(n, energies(e) + frequencies(w)); 
-      
+
       for(int p = 0; p < local_NumMoments; p++)
         for(int e = 0; e < N_energies; e++)
           GreenA(e, p) = greenAscat<U>(scat)(i*local_NumMoments + p, energies(e) + frequencies(w)); 
-      
+
       Eigen::Matrix<std::complex<U>, -1, -1> temp;
       temp = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(1,1);
       for(int col = 0; col < N_energies; col++){
@@ -227,10 +231,11 @@ Eigen::Matrix<std::complex<U>, -1, -1> conductivity_nonlinear<U, DIM>::Gamma3Con
     }
   }
 #pragma omp critical
+{
+      
       global_omega_energies += omega_energies;
+}
 #pragma omp barrier
 }
-
   return global_omega_energies;
-
 }

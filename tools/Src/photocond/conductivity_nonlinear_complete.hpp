@@ -70,9 +70,14 @@ class conductivity_nonlinear{
     void calculate();
 
     Eigen::Matrix<std::complex<T>, -1, -1> Gamma0contract();
+
     Eigen::Matrix<std::complex<T>, -1, -1> Gamma3Contract_RRandAA();
     Eigen::Matrix<std::complex<T>, -1, -1> Gamma3Contract_RRandAAblocks();
     Eigen::Matrix<std::complex<T>, -1, -1> Gamma3Contract_RA();
+    Eigen::Matrix<std::complex<T>, -1, -1> Gamma3shgContract_RA();
+    Eigen::Matrix<std::complex<T>, -1, -1> Gamma3shgContract_RR();
+    Eigen::Matrix<std::complex<T>, -1, -1> Gamma3shgContract_AA();
+
     Eigen::Matrix<std::complex<T>, -1, -1> Gamma1contractAandR();
     Eigen::Matrix<std::complex<T>, -1, -1> Gamma2contractAandR();
 	
@@ -150,13 +155,11 @@ void conductivity_nonlinear<T, DIM>::fetch_parameters(){
   // Energy parameters needed to run the simulation
   N_energies = 1024;
   lim = 0.995;
-  energies  = Eigen::Matrix<T, -1, 1>::LinSpaced(N_energies, -lim, lim);
 
   // Frequency parameters needed to run the simulation
 	N_omegas = NumPoints;
   minFreq = 0;
   maxFreq = 2.0;
-  frequencies = Eigen::Matrix<T, -1, 1>::LinSpaced(N_omegas, minFreq, maxFreq);
 
   // Check whether the matrices we're going to retrieve are complex or not
   int complex = systemInfo.isComplex;
@@ -311,28 +314,38 @@ void conductivity_nonlinear<U, DIM>::calculate(){
   verbose_message("  Using kernel for delta function: Jackson\n");
   verbose_message("  Broadening parameter for Green's function: ");
     verbose_message(scat); verbose_message("\n");
-  verbose_message("  Number of energies: "); verbose_message(NumPoints); verbose_message("\n");
+  verbose_message("  Number of energies: "); verbose_message(N_energies); verbose_message("\n");
   verbose_message("  Energy range: ["); verbose_message(-lim); verbose_message(",");
     verbose_message(lim); verbose_message("]\n");
   verbose_message("  Number of frequencies: "); verbose_message(N_omegas); verbose_message("\n");
   verbose_message("  Frequency range: ["); verbose_message(minFreq); verbose_message(",");
     verbose_message(maxFreq); verbose_message("]\n");
-  verbose_message("  File name: optical_cond.dat\n");
+  verbose_message("  File name: ");verbose_message(filename); verbose_message("\n");
 
+  energies    = Eigen::Matrix<U, -1, 1>::LinSpaced(N_energies, -lim, lim);
+  frequencies = Eigen::Matrix<U, -1, 1>::LinSpaced(N_omegas, minFreq, maxFreq);
   
   Eigen::Matrix<std::complex<U>, -1, -1> omega_energies0, omega_energies1, omega_energies2, omega_energies3, omega_energies4;
+  Eigen::Matrix<std::complex<U>, -1, -1> omega_energies3shg1, omega_energies3shg2, omega_energies3shg3;
   omega_energies0 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
   omega_energies1 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
   omega_energies2 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
   omega_energies3 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
+  omega_energies3shg1 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
+  omega_energies3shg2 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
+  omega_energies3shg3 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
   omega_energies4 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
 
 
   Eigen::Matrix<std::complex<U>,1,-1> cond0, cond1, cond2, cond3, cond4, cond;
+  Eigen::Matrix<std::complex<U>,1,-1> cond3shg1, cond3shg2, cond3shg3;
   cond0 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
   cond1 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
   cond2 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
   cond3 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
+  cond3shg1 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
+  cond3shg2 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
+  cond3shg3 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
   cond4 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
   cond  = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
 
@@ -343,8 +356,13 @@ void conductivity_nonlinear<U, DIM>::calculate(){
   //special = 1;
   if(special != 1){
     omega_energies3 -= Gamma3Contract_RRandAAblocks();
+    omega_energies3shg1 -= Gamma3shgContract_RA();
+    omega_energies3shg2 -= Gamma3shgContract_RR();
+    omega_energies3shg3 -= Gamma3shgContract_AA();
     omega_energies4 -= Gamma3Contract_RA(); 
   }
+  std::cout << (omega_energies3shg1 - omega_energies4).norm() << "\n";
+  std::cout << (omega_energies3shg2 + omega_energies3shg3 - omega_energies3).norm() << "\n";
   
   U freq;
   for(int w = 0; w < N_omegas; w++){
@@ -353,11 +371,17 @@ void conductivity_nonlinear<U, DIM>::calculate(){
     cond1(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies1.col(w)));
     cond2(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies2.col(w)));
     cond3(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies3.col(w)));
+    cond3shg1(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies3shg1.col(w)));
+    cond3shg2(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies3shg2.col(w)));
+    cond3shg3(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies3shg3.col(w)));
     cond4(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies4.col(w)));
     cond0(w) /= freq*freq + scat*scat;
     cond1(w) /= freq*freq + scat*scat;
     cond2(w) /= freq*freq + scat*scat;
     cond3(w) /= freq*freq + scat*scat;
+    cond3shg1(w) /= freq*freq + scat*scat;
+    cond3shg2(w) /= freq*freq + scat*scat;
+    cond3shg3(w) /= freq*freq + scat*scat;
     cond4(w) /= freq*freq + scat*scat;
   }
 
@@ -367,15 +391,22 @@ void conductivity_nonlinear<U, DIM>::calculate(){
   cond1 *= factor;
   cond2 *= factor;
   cond3 *= factor;
+  cond3shg1 *= factor;
+  cond3shg2 *= factor;
+  cond3shg3 *= factor;
   cond4 *= factor;
   cond =/* cond0 +*/ cond1 + cond2 + cond3 + cond4;
 
   std::ofstream myfile0, myfile1, myfile2, myfile3, myfile4, myfile;
+  std::ofstream myfile3shg1, myfile3shg2, myfile3shg3;
   myfile.open(filename);
   myfile0.open ("nonlinear_cond0.dat");
   myfile1.open ("nonlinear_cond1.dat");
   myfile2.open ("nonlinear_cond2.dat");
   myfile3.open ("nonlinear_cond3.dat");
+  myfile3shg1.open ("nonlinear_cond3shg1.dat");
+  myfile3shg2.open ("nonlinear_cond3shg2.dat");
+  myfile3shg3.open ("nonlinear_cond3shg3.dat");
   myfile4.open ("nonlinear_cond4.dat");
 
   for(int i=0; i < N_omegas; i++){
@@ -385,6 +416,9 @@ void conductivity_nonlinear<U, DIM>::calculate(){
     myfile1 << freq << " " << cond1.real()(i) << " " << cond1.imag()(i) << "\n";
     myfile2 << freq << " " << cond2.real()(i) << " " << cond2.imag()(i) << "\n";
     myfile3 << freq << " " << cond3.real()(i) << " " << cond3.imag()(i) << "\n";
+    myfile3shg1 << freq << " " << cond3shg1.real()(i) << " " << cond3shg1.imag()(i) << "\n";
+    myfile3shg2 << freq << " " << cond3shg2.real()(i) << " " << cond3shg2.imag()(i) << "\n";
+    myfile3shg3 << freq << " " << cond3shg3.real()(i) << " " << cond3shg3.imag()(i) << "\n";
     myfile4 << freq << " " << cond4.real()(i) << " " << cond4.imag()(i) << "\n";
   }
   myfile.close();
@@ -392,6 +426,9 @@ void conductivity_nonlinear<U, DIM>::calculate(){
   myfile1.close();
   myfile2.close();
   myfile3.close();
+  myfile3shg1.close();
+  myfile3shg2.close();
+  myfile3shg3.close();
   myfile4.close();
   debug_message("Left calc_nonlinear_cond.\n");
 };
@@ -400,3 +437,4 @@ void conductivity_nonlinear<U, DIM>::calculate(){
 #include "Gamma1.hpp"
 #include "Gamma2.hpp"
 #include "Gamma3.hpp"
+#include "Gamma3shg.hpp"
