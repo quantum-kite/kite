@@ -75,8 +75,9 @@ public:
       }
 #pragma omp barrier
       
-      if(ESTIMATE_TIME == 1)
+      if(ESTIMATE_TIME == 1){
         Global.kpm_iteration_time = simul.time_kpm(100);
+      }
       
 #pragma omp master 
       {
@@ -890,6 +891,7 @@ public:
   }
   
   double time_kpm(int N_average){
+    debug_message("Entered time_kpm");
      //This function serves to provide an estimate of the time it takes for each kpm iteration
       
 #pragma omp barrier
@@ -911,6 +913,7 @@ public:
     return time_span.count()/N_average;
 		
 #pragma omp barrier
+    debug_message("Left time_kpm");
   }
 
   void Single_Shot(double EScale, singleshot_measurement_queue queue) {
