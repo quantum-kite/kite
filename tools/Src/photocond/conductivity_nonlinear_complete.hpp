@@ -362,7 +362,7 @@ void conductivity_nonlinear<U, DIM>::calculate(){
     omega_energies4 -= Gamma3Contract_RA(); 
   }
   std::cout << (omega_energies3shg1 - omega_energies4).norm() << "\n";
-  std::cout << (omega_energies3shg2 + omega_energies3shg3 - omega_energies3).norm() << "\n";
+  std::cout << (omega_energies3shg3 - omega_energies3).norm() << "\n";
   
   U freq;
   for(int w = 0; w < N_omegas; w++){

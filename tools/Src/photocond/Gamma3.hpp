@@ -115,8 +115,9 @@ Eigen::Matrix<std::complex<U>, -1, -1> conductivity_nonlinear<U, DIM>::Gamma3Con
         
         Eigen::Matrix<std::complex<U>, -1, -1> temp;
         for(int e = 0; e < N_energies; e++){
-          temp  = Gamma3NER.row(e)*GreenR.col(e); 
-          temp += Gamma3NEA.row(e)*GreenA.col(e); 
+          //temp  = Gamma3NER.row(e)*GreenR.col(e); 
+          //temp += Gamma3NEA.row(e)*GreenA.col(e); 
+          temp = Gamma3NEA.row(e)*GreenA.col(e); 
           omega_energies(e, w) = temp(0,0);
         }
       }
