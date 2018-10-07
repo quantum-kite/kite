@@ -6,7 +6,7 @@
 /****************************************************************/
 
 template <typename U, unsigned DIM>
-Eigen::Matrix<std::complex<U>, -1, -1> conductivity_nonlinear<U, DIM>::Gamma2contractAandR(){
+Eigen::Matrix<std::complex<U>, -1, -1> conductivity_nonlinear<U, DIM>::Gamma2shgcontractAandR(){
   int NumMoments1 = NumMoments; U beta1 = beta; U e_fermi1 = e_fermi;
   std::function<U(int, U)> deltaF = [beta1, e_fermi1, NumMoments1](int n, U energy)->U{
     return delta(n, energy)*U(1.0/(1.0 + U(n==0)))*fermi_function(energy, e_fermi1, beta1)*kernel_jackson<U>(n, NumMoments1);
@@ -60,21 +60,23 @@ Eigen::Matrix<std::complex<U>, -1, -1> conductivity_nonlinear<U, DIM>::Gamma2con
     local_cond = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
     
     // Loop over the frequencies
-    U freq;
+    //U w1, w2;
+    U w1, w2;
     std::complex<U> GammaEp, GammaEn, GammaE;
     for(int w = 0; w < N_omegas; w++){
-      freq = frequencies(w);
+      w1 = frequencies2(w,0);
+      w2 = frequencies2(w,1);
 
       for(int e = 0; e < N_energies; e++){
         GammaEp = 0;
         GammaEn = 0;
         for(int m = 0; m < local_NumMoments; m++){
-          GammaEp += GammaEM(e, m)*greenAscat<U>(scat)(local_NumMoments*thread_num + m, energies(e) + freq);      // contracting with the positive frequencies
-          GammaEn += GammaEM(e, m)*greenAscat<U>(scat)(local_NumMoments*thread_num + m, energies(e) - freq);      // contracting with the negative frequencies
+          GammaEp += GammaEM(e, m)*greenAscat<U>(scat)(local_NumMoments*thread_num + m, energies(e) - w2);      // contracting with the positive frequencies
+          GammaEn += GammaEM(e, m)*greenAscat<U>(scat)(local_NumMoments*thread_num + m, energies(e) + w2);      // contracting with the negative frequencies
 
         }
-        GammaE = std::conj(GammaEp) - GammaEn;     // This is equivalent to the two frequency-dependent terms in the formula
-        local_cond(e,w) = GammaE;
+        GammaE = GammaEn - std::conj(GammaEp);     // This is equivalent to the two frequency-dependent terms in the formula
+        local_cond(e,w) = -GammaE;
       }    
     }
 

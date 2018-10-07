@@ -82,18 +82,21 @@ Eigen::Matrix<std::complex<U>, -1, -1> conductivity_nonlinear<U, DIM>::Gamma3shg
 
     
     
+    U w1, w2;
     for(int w = 0; w < N_omegas; w++){
+      w1 = frequencies2(w,0);
+      w2 = frequencies2(w,1);
       
       // The scat term is the same in both cases because greenRscat and greenAscat already
       // take into account that the sign of scat is different in those cases
       for(int n = 0; n < N0; n++)
         for(int e = 0; e < N_energies; e++)
-          GreenR(e, n) = greenRscat<U>(scat)(n, energies(e) + frequencies(w)); 
+          GreenR(e, n) = greenRscat<U>(scat)(n, energies(e) + w1); 
       
       for(int p = 0; p < local_NumMoments; p++)
         for(int e = 0; e < N_energies; e++)
-          GreenA(e, p) = greenAscat<U>(scat)(i*local_NumMoments + p, energies(e) + frequencies(w)); 
-          //GreenA(e, p) = greenAscat<U>(scat)(i*local_NumMoments + p, energies(e) - frequencies(w)); 
+          //GreenA(e, p) = greenAscat<U>(scat)(i*local_NumMoments + p, energies(e) + frequencies(w)); 
+          GreenA(e, p) = greenAscat<U>(scat)(i*local_NumMoments + p, energies(e) - w2); 
       
       Eigen::Matrix<std::complex<U>, -1, -1> temp;
       temp = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(1,1);
@@ -192,19 +195,20 @@ Eigen::Matrix<std::complex<U>, -1, -1> conductivity_nonlinear<U, DIM>::Gamma3shg
 
     
     
+    U w1, w2;
     for(int w = 0; w < N_omegas; w++){
+      w1 = frequencies2(w,0);
+      w2 = frequencies2(w,1);
       
       // The scat term is the same in both cases because greenRscat and greenAscat already
       // take into account that the sign of scat is different in those cases
       for(int m = 0; m < N1; m++)
         for(int e = 0; e < N_energies; e++)
-          GreenR(e, m) = greenRscat<U>(scat)(m, energies(e) - frequencies(w)); 
-          //Green2R(e, m) = greenRscat<U>(2*scat)(m, energies(e) + 2*frequencies(w)); 
+          GreenR(e, m) = greenRscat<U>(scat)(m, energies(e) + w2); 
       
       for(int n = 0; n < local_NumMoments; n++)
         for(int e = 0; e < N_energies; e++)
-          Green2R(e, n) = greenRscat<U>(2*scat)(i*local_NumMoments + n, energies(e)); 
-          //GreenR(e, n) = greenRscat<U>(scat)(i*local_NumMoments + n, energies(e) + frequencies(w)); 
+          Green2R(e, n) = greenRscat<U>(2*scat)(i*local_NumMoments + n, energies(e) + w1 + w2); 
       
       Eigen::Matrix<std::complex<U>, -1, -1> temp;
       temp = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(1,1);
@@ -303,18 +307,21 @@ Eigen::Matrix<std::complex<U>, -1, -1> conductivity_nonlinear<U, DIM>::Gamma3shg
 
     
     
+    U w1, w2;
     for(int w = 0; w < N_omegas; w++){
+      w1 = frequencies2(w,0);
+      w2 = frequencies2(w,1);
       
       // The scat term is the same in both cases because greenRscat and greenAscat already
       // take into account that the sign of scat is different in those cases
       for(int p = 0; p < N2; p++)
         for(int e = 0; e < N_energies; e++)
-          Green2A(e, p) = greenAscat<U>(2*scat)(p, energies(e)); 
-          //Green2A(e, p) = greenAscat<U>(2*scat)(p, energies(e) - 2*frequencies(w)); 
+          //Green2A(e, p) = greenAscat<U>(2*scat)(p, energies(e)); 
+          Green2A(e, p) = greenAscat<U>(2*scat)(p, energies(e) - w1 - w2); 
       
       for(int m = 0; m < local_NumMoments; m++)
         for(int e = 0; e < N_energies; e++)
-          GreenA(e, m) = greenAscat<U>(scat)(i*local_NumMoments + m, energies(e) - frequencies(w)); 
+          GreenA(e, m) = greenAscat<U>(scat)(i*local_NumMoments + m, energies(e) - w1); 
       
       Eigen::Matrix<std::complex<U>, -1, -1> temp;
       temp = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(1,1);

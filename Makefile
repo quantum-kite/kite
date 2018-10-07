@@ -31,7 +31,7 @@ OBJS = *.o
 
 
 num_ghost_corr=0
-memory=16
+memory=64
 compile_main=1
 verbose=1
 debug=0
