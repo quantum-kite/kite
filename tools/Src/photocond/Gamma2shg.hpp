@@ -71,12 +71,12 @@ Eigen::Matrix<std::complex<U>, -1, -1> conductivity_nonlinear<U, DIM>::Gamma2shg
         GammaEp = 0;
         GammaEn = 0;
         for(int m = 0; m < local_NumMoments; m++){
-          GammaEp += GammaEM(e, m)*greenAscat<U>(scat)(local_NumMoments*thread_num + m, energies(e) - w2);      // contracting with the positive frequencies
-          GammaEn += GammaEM(e, m)*greenAscat<U>(scat)(local_NumMoments*thread_num + m, energies(e) + w2);      // contracting with the negative frequencies
+          GammaEp += GammaEM(e, m)*greenAscat<U>(scat)(local_NumMoments*thread_num + m, energies(e) + w2);      // contracting with the positive frequencies
+          GammaEn += GammaEM(e, m)*greenAscat<U>(scat)(local_NumMoments*thread_num + m, energies(e) - w2);      // contracting with the negative frequencies
 
         }
         GammaE = GammaEn - std::conj(GammaEp);     // This is equivalent to the two frequency-dependent terms in the formula
-        local_cond(e,w) = -GammaE;
+        local_cond(e,w) = GammaE;
       }    
     }
 

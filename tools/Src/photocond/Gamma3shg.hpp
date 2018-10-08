@@ -95,7 +95,6 @@ Eigen::Matrix<std::complex<U>, -1, -1> conductivity_nonlinear<U, DIM>::Gamma3shg
       
       for(int p = 0; p < local_NumMoments; p++)
         for(int e = 0; e < N_energies; e++)
-          //GreenA(e, p) = greenAscat<U>(scat)(i*local_NumMoments + p, energies(e) + frequencies(w)); 
           GreenA(e, p) = greenAscat<U>(scat)(i*local_NumMoments + p, energies(e) - w2); 
       
       Eigen::Matrix<std::complex<U>, -1, -1> temp;
@@ -316,12 +315,12 @@ Eigen::Matrix<std::complex<U>, -1, -1> conductivity_nonlinear<U, DIM>::Gamma3shg
       // take into account that the sign of scat is different in those cases
       for(int p = 0; p < N2; p++)
         for(int e = 0; e < N_energies; e++)
-          //Green2A(e, p) = greenAscat<U>(2*scat)(p, energies(e)); 
           Green2A(e, p) = greenAscat<U>(2*scat)(p, energies(e) - w1 - w2); 
       
       for(int m = 0; m < local_NumMoments; m++)
         for(int e = 0; e < N_energies; e++)
           GreenA(e, m) = greenAscat<U>(scat)(i*local_NumMoments + m, energies(e) - w1); 
+
       
       Eigen::Matrix<std::complex<U>, -1, -1> temp;
       temp = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(1,1);

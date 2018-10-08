@@ -73,7 +73,7 @@ Eigen::Matrix<std::complex<U>, -1, -1> conductivity_nonlinear<U, DIM>::Gamma1con
       for(int m = 0; m < local_NumMoments; m++)
         GammaEp += GammaEM(e, m)*greenAscat<U>(2*scat)(local_NumMoments*thread_num + m, energies(e) );      // contracting with the positive frequencies
     
-      GammaE = std::conj(GammaEp) - GammaEp;
+      GammaE = GammaEp - std::conj(GammaEp);
       for(int w = 0; w < N_omegas; w++)
         local_cond(e, w) = GammaE;
     }

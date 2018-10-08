@@ -369,12 +369,12 @@ void conductivity_nonlinear<U, DIM>::calculate(){
   cond  = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
 
   // Contraction of the Gamma matrices with the delta functions and Green's functions
-  omega_energies0 -= Gamma0contract();
-  omega_energies1 -= 0.5*Gamma1contractAandR(); 
-  omega_energies2 -= Gamma2contractAandR(); 
+  omega_energies0 += Gamma0contract();
+  omega_energies1 += 0.5*Gamma1contractAandR(); 
+  omega_energies2 += Gamma2contractAandR(); 
 
-  omega_energies1shg -= 0.5*Gamma1shgcontractAandR();
-  omega_energies2shg -= Gamma2shgcontractAandR();
+  omega_energies1shg += 0.5*Gamma1shgcontractAandR();
+  omega_energies2shg += Gamma2shgcontractAandR();
 
   //special = 1;
   if(special != 1){
@@ -384,22 +384,6 @@ void conductivity_nonlinear<U, DIM>::calculate(){
     omega_energies4 += Gamma3Contract_RA(); 
     omega_energies3 += Gamma3Contract_RRandAAblocks();
   }
-  std::cout << "Norms:\n";
-  std::cout << "shg1 norm: " << omega_energies3shg1.norm() << "\n";
-  std::cout << "shg2 norm: " << omega_energies3shg2.norm() << "\n";
-  std::cout << "shg3 norm: " << omega_energies3shg3.norm() << "\n";
-  std::cout << "3 norm: " << omega_energies3.norm() << "\n";
-  std::cout << "4 norm: " << omega_energies4.norm() << "\n";
-  std::cout << "shg1 - 4: " << (omega_energies3shg1 - omega_energies4).norm() << "\n";
-  std::cout << "3shg2+3 - 3: " << (omega_energies3shg3 + omega_energies3shg2 - omega_energies3).norm() << "\n";
-  std::cout << "3shg2 - 3RR: " << (omega_energies3shg2 - omega_energies3).norm() << "\n";
-  std::cout << "3shg3 - 3AA: " << (omega_energies3shg3 - omega_energies3).norm() << "\n";
-  std::cout << "\n";
-  
-  std::cout << "Norms with two velocities:\n";
-  std::cout << "1shg: " << (omega_energies1 - omega_energies1shg).norm() << "\n";
-  std::cout << "2shg: " << (omega_energies2 - omega_energies2shg).norm() << "\n";
-  std::cout << "\n";
 
   U freq;
   U w1, w2;

@@ -15,5 +15,5 @@ Eigen::Matrix<std::complex<U>, -1, -1> conductivity_nonlinear<U, DIM>::Gamma0con
   omega_energies = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
   temp = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(1,1);
 
-  return omega_energies;
+  return -omega_energies;
 }
