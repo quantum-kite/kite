@@ -14,9 +14,10 @@ OBJS = *.o
 DEBUG=0
 VERBOSE=1
 name_prog=KITE-tools
+RATIO=1
 
 all:    clean
-	cd Src; $(CC) $(CFLAGS) $(CINCLUDE) -c *.cpp -DDEBUG=${DEBUG} -DVERBOSE=${VERBOSE}
+	cd Src; $(CC) $(CFLAGS) $(CINCLUDE) -c *.cpp -DDEBUG=${DEBUG} -DVERBOSE=${VERBOSE} -DRATIO=${RATIO}
 	@echo "linking..."
 	cd Src; $(CC) $(OBJS) $(CLIBS) $(CFLAGS) -o ../$(name_prog)
 

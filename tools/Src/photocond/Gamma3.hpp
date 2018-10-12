@@ -54,7 +54,6 @@ Eigen::Matrix<std::complex<U>, -1, -1> conductivity_nonlinear<U, DIM>::Gamma3Con
           DeltaGreenAMatrix(e, p*N0 + n) = deltaF(n, energies(e))*greenAscat<U>(2*scat)(p + block*N2/N_blocks, energies(e)); 
         }
 
-    omp_set_num_threads(2);
     omp_set_num_threads(systemInfo.NumThreads);
 #pragma omp parallel shared(N_threads, global_omega_energies) firstprivate(DeltaGreenAMatrix, DeltaGreenRMatrix, omega_energies)
   {
@@ -159,8 +158,8 @@ Eigen::Matrix<std::complex<U>, -1, -1> conductivity_nonlinear<U, DIM>::Gamma3Con
 
   omega_energies = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
   
-    omp_set_num_threads(2);
   // Start the parallelization. It is done in the direction p
+  omp_set_num_threads(systemInfo.NumThreads);
 #pragma omp parallel shared(N_threads, global_omega_energies) firstprivate(omega_energies)
 {
   

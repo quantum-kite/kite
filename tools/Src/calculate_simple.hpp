@@ -17,6 +17,7 @@ void calculate_conductivity_nonlinear(system_info<U, DIM>& sysinfo, shell_input 
         "Retrieving nonlinear conductivity...\n "
         );
     variables.printOpt2();
+    info.set_default_parameters();
     info.fetch_parameters();
     info.override_parameters();
     info.calculate();

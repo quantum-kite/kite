@@ -34,8 +34,7 @@ Eigen::Matrix<std::complex<U>, -1, -1> conductivity_nonlinear<U, DIM>::Gamma3shg
   global_omega_energies = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
   omega_energies = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
   
-  omp_set_num_threads(2);
-  
+  omp_set_num_threads(systemInfo.NumThreads);
   // Start the parallelization. It is done in the direction p
 #pragma omp parallel shared(N_threads, global_omega_energies) firstprivate(omega_energies)
 {
@@ -146,8 +145,7 @@ Eigen::Matrix<std::complex<U>, -1, -1> conductivity_nonlinear<U, DIM>::Gamma3shg
   global_omega_energies = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
   omega_energies = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
   
-  omp_set_num_threads(2);
-  
+  omp_set_num_threads(systemInfo.NumThreads);
   // Start the parallelization. It is done in the direction p
 #pragma omp parallel shared(N_threads, global_omega_energies) firstprivate(omega_energies)
 {
@@ -195,9 +193,12 @@ Eigen::Matrix<std::complex<U>, -1, -1> conductivity_nonlinear<U, DIM>::Gamma3shg
     
     
     U w1, w2;
+    std::cout << "scat: " << scat << "\n";
     for(int w = 0; w < N_omegas; w++){
       w1 = frequencies2(w,0);
       w2 = frequencies2(w,1);
+      //std::cout << "w1: " << w1 << " w2: " << w2 << "\n";
+      
       
       // The scat term is the same in both cases because greenRscat and greenAscat already
       // take into account that the sign of scat is different in those cases
@@ -207,7 +208,7 @@ Eigen::Matrix<std::complex<U>, -1, -1> conductivity_nonlinear<U, DIM>::Gamma3shg
       
       for(int n = 0; n < local_NumMoments; n++)
         for(int e = 0; e < N_energies; e++)
-          Green2R(e, n) = greenRscat<U>(2*scat)(i*local_NumMoments + n, energies(e) + w1 + w2); 
+          Green2R(e, n) = greenRscat<U>(2.0*scat)(i*local_NumMoments + n, energies(e) + w1 + w2); 
       
       Eigen::Matrix<std::complex<U>, -1, -1> temp;
       temp = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(1,1);
@@ -258,8 +259,7 @@ Eigen::Matrix<std::complex<U>, -1, -1> conductivity_nonlinear<U, DIM>::Gamma3shg
   global_omega_energies = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
   omega_energies = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
   
-  omp_set_num_threads(2);
-  
+  omp_set_num_threads(systemInfo.NumThreads);
   // Start the parallelization. It is done in the direction p
 #pragma omp parallel shared(N_threads, global_omega_energies) firstprivate(omega_energies)
 {

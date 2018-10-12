@@ -6,6 +6,12 @@
 /****************************************************************/
 
 #include "../headers.hpp"
+#ifndef RATIO
+#define RATIO 1
+#endif
+#ifndef PRINTALL
+#define PRINTALL 1
+#endif
 
 using std::cout;
 using namespace H5;
@@ -13,26 +19,29 @@ using std::endl;
 
 template <typename T, unsigned DIM>
 class conductivity_nonlinear{
-	H5::H5File file;
-	public:
+    H5::H5File file;
+    public:
 
 
     bool isRequired = false; // was this quantity (conductivity_dc) asked for?
     bool isPossible = false; // do we have all we need to calculate the conductivity?
 
-
-    // Parameters
+    // KPM parameters
+    int complex;
     int direction;
     int NumDisorder;
     int NumMoments;
     int NumPoints = -1;
     int NumRandoms;
-    double temperature = -1;
     int special = 0;
-    std::string filename = "nonlinear_cond.dat";
+    std::string dirString; 
 
-
-    // 1/kT, where k is the Boltzmann constant in eV/K
+    // Post-processing parameters
+    int print_all_terms;
+    int photo, shg;
+    std::complex<T> imaginary;
+    std::string filename;
+    double temperature;
     T beta;
     T e_fermi;
     T scat;
@@ -49,34 +58,39 @@ class conductivity_nonlinear{
     Eigen::Matrix<T, -1, 1> frequencies;
     Eigen::Matrix<T, -1, 2> frequencies2;
 
-    // information about the Hamiltonian
-    system_info<T, DIM> systemInfo;
-
-    // Input from the shell to override the configuration file
-    shell_input variables;
+    system_info<T, DIM> systemInfo; // information about the Hamiltonian
+    shell_input variables;          // Input from the shell to override the configuration file
 
     // Objects required to successfully calculate the conductivity
-		Eigen::Array<std::complex<T>, -1, -1> Gamma0;
-		Eigen::Array<std::complex<T>, -1, -1> Gamma1;
-		Eigen::Array<std::complex<T>, -1, -1> Gamma2;
-		Eigen::Array<std::complex<T>, -1, -1> Gamma3;
+    Eigen::Array<std::complex<T>, -1, -1> Gamma0;
+    Eigen::Array<std::complex<T>, -1, -1> Gamma1;
+    Eigen::Array<std::complex<T>, -1, -1> Gamma2;
+    Eigen::Array<std::complex<T>, -1, -1> Gamma3;
 
-	  std::string dirName;
+    std::string dirName;
 
 
-	  std::complex<T> imaginary;
+
+    // Functions
     conductivity_nonlinear(system_info<T, DIM>&, shell_input &);
-	void fetch_parameters();
-	void override_parameters();
+    void print_parameters();
+    
+    int fetch_gamma0();
+    int fetch_gamma1();
+    int fetch_gamma2();
+    int fetch_gamma3();
+
+    void fetch_parameters();
+    void override_parameters();
+    void set_default_parameters();
     void calculate();
 
     Eigen::Matrix<std::complex<T>, -1, -1> Gamma0contract();
-
+    Eigen::Matrix<std::complex<T>, -1, -1> Gamma1contractAandR();
+    Eigen::Matrix<std::complex<T>, -1, -1> Gamma2contractAandR();
     Eigen::Matrix<std::complex<T>, -1, -1> Gamma3Contract_RRandAA();
     Eigen::Matrix<std::complex<T>, -1, -1> Gamma3Contract_RRandAAblocks();
     Eigen::Matrix<std::complex<T>, -1, -1> Gamma3Contract_RA();
-    Eigen::Matrix<std::complex<T>, -1, -1> Gamma1contractAandR();
-    Eigen::Matrix<std::complex<T>, -1, -1> Gamma2contractAandR();
 	
     Eigen::Matrix<std::complex<T>, -1, -1> Gamma1shgcontractAandR();
     Eigen::Matrix<std::complex<T>, -1, -1> Gamma2shgcontractAandR();
@@ -87,12 +101,130 @@ class conductivity_nonlinear{
 };
 
 template <typename T, unsigned DIM>
+int conductivity_nonlinear<T, DIM>::fetch_gamma0(){
+  // Retrieve the Gamma0 Matrix. This is the 1D Gamma matrix defined as
+  // Gamma0 = Tr[v^abc T_n]. This matrix is not needed for the special case
+
+  int hasGamma0 = 0;
+  std::string MatrixName = dirName + "Gamma0" + dirString;
+  try{
+    debug_message("Filling the Gamma0 matrix.\n");
+    Gamma0 = Eigen::Array<std::complex<T>,-1,-1>::Zero(1, NumMoments);
+      
+    if(complex)
+      get_hdf5(Gamma0.data(), &file, (char*)MatrixName.c_str());
+      
+    if(!complex){
+      Eigen::Array<T,-1,-1> Gamma0Real;
+      Gamma0Real = Eigen::Array<T,-1,-1>::Zero(1, NumMoments);
+      get_hdf5(Gamma0Real.data(), &file, (char*)MatrixName.c_str());
+      Gamma0 = Gamma0Real.template cast<std::complex<T>>();
+    }				
+
+    hasGamma0 = 1;
+  } catch(H5::Exception& e) {
+    debug_message("Conductivity nonlinear: There is no Gamma0 matrix.\n");
+  }
+  return hasGamma0;
+};
+
+
+
+template <typename T, unsigned DIM>
+int conductivity_nonlinear<T, DIM>::fetch_gamma1(){
+  // Retrieve the Gamma1 Matrix. This is the 2D Gamma matrix defined as
+  // Gamma1 = Tr[v^a Tn v^bc Tm]
+
+  int hasGamma1 = 0;
+  std::string MatrixName = dirName + "Gamma1" + dirString;
+  try{
+    debug_message("Filling the Gamma1 matrix.\n");
+    Gamma1 = Eigen::Array<std::complex<T>,-1,-1>::Zero(NumMoments, NumMoments);
+
+    if(complex)
+      get_hdf5(Gamma1.data(), &file, (char*)MatrixName.c_str());
+
+    if(!complex){
+      Eigen::Array<T,-1,-1> Gamma1Real;
+      Gamma1Real = Eigen::Array<T,-1,-1>::Zero(NumMoments, NumMoments);
+      get_hdf5(Gamma1Real.data(), &file, (char*)MatrixName.c_str());
+      Gamma1 = Gamma1Real.template cast<std::complex<T>>();
+    }				
+
+    hasGamma1 = 1;
+  } catch(H5::Exception& e) {
+    debug_message("Conductivity optical: There is no Gamma1 matrix.\n");
+  }
+
+  return hasGamma1;
+};
+
+
+template <typename T, unsigned DIM>
+int conductivity_nonlinear<T, DIM>::fetch_gamma2(){
+  // Retrieve the Gamma2 Matrix
+  int hasGamma2 = 0;
+  std::string MatrixName = dirName + "Gamma2" + dirString;
+  try{
+    debug_message("Filling the Gamma2 matrix.\n");
+    Gamma2 = Eigen::Array<std::complex<T>,-1,-1>::Zero(NumMoments, NumMoments);
+		
+    if(complex)
+      get_hdf5(Gamma2.data(), &file, (char*)MatrixName.c_str());
+		
+    if(!complex){
+      Eigen::Array<T,-1,-1> Gamma2Real;
+      Gamma2Real = Eigen::Array<T,-1,-1>::Zero(NumMoments, NumMoments);
+      get_hdf5(Gamma2Real.data(), &file, (char*)MatrixName.c_str());
+      Gamma2 = Gamma2Real.template cast<std::complex<T>>();
+    }				
+
+    hasGamma2 = 1;
+  } catch(H5::Exception& e) {
+    debug_message("Conductivity optical: There is no Gamma2 matrix.\n");
+  }
+
+  return hasGamma2;
+};
+
+  
+template <typename T, unsigned DIM>
+int conductivity_nonlinear<T, DIM>::fetch_gamma3(){
+  // Retrieve the Gamma3 Matrix. This is the biggest matrix and doesn't need to be
+  // calculated when we want hBN because it is identically zero.
+
+  int hasGamma3 = 0;
+  std::string MatrixName = dirName + "Gamma3" + dirString;
+  try{
+    debug_message("Filling the Gamma3 matrix.\n");
+    Gamma3 = Eigen::Array<std::complex<T>,-1,-1>::Zero(1, NumMoments*NumMoments*NumMoments);
+      
+    if(complex)
+      get_hdf5(Gamma3.data(), &file, (char*)MatrixName.c_str());
+     
+    if(!complex){
+      Eigen::Array<T,-1,-1> Gamma3Real;
+      Gamma3Real = Eigen::Array<T,-1,-1>::Zero(1, NumMoments*NumMoments*NumMoments);
+      get_hdf5(Gamma3Real.data(), &file, (char*)MatrixName.c_str());
+        
+      Gamma3 = Gamma3Real.template cast<std::complex<T>>();
+    }				
+
+    hasGamma3 = 1;
+  } catch(H5::Exception& e) {
+    debug_message("Conductivity DC: There is no Gamma3 matrix.\n");
+  }
+
+  return hasGamma3;
+};
+
+template <typename T, unsigned DIM>
 conductivity_nonlinear<T, DIM>::conductivity_nonlinear(system_info<T, DIM>& info, shell_input & vari){
   // Constructor of the conductivity_nonlinear class. This function simply checks
   // whether the conductivity needs to be calculated or not
 
   std::string name = info.filename;                           // name of the hdf5 file
-	file = H5::H5File(name.c_str(), H5F_ACC_RDONLY);
+  file = H5::H5File(name.c_str(), H5F_ACC_RDONLY);
   systemInfo = info;                                          // retrieve the information about the Hamiltonian
   variables = vari;                                           // retrieve the shell input
   dirName = "/Calculation/conductivity_optical_nonlinear/";   // location of the information about the conductivity
@@ -122,13 +254,27 @@ void conductivity_nonlinear<T, DIM>::override_parameters(){
 };
 
 template <typename T, unsigned DIM>
+void conductivity_nonlinear<T, DIM>::set_default_parameters(){
+    temperature = 0.01/systemInfo.energy_scale; 
+    N_energies  = 512; 
+    lim = 0.995;
+    maxFreq     = 7.0/systemInfo.energy_scale; 
+    minFreq     = 0.0/systemInfo.energy_scale;
+    N_omegas    = 512;
+    e_fermi     = 0.0/systemInfo.energy_scale;
+    scat        = 0.0166/systemInfo.energy_scale;
+    filename    = "nonlinear_cond.dat";  
+    beta        = 1.0/8.6173303*pow(10,5)/temperature;
+};
+
+template <typename T, unsigned DIM>
 void conductivity_nonlinear<T, DIM>::fetch_parameters(){
-	debug_message("Entered conductivity_nonlinear::read.\n");
+  debug_message("Entered conductivity_nonlinear::read.\n");
   // This function reads all the relevant
   // information from the hdf5 configuration file and uses it to evaluate the parameters
   // needed to calculate the nonlinear conductivity
 	 
-    variables.printOpt2();
+  variables.printOpt2();
 
   // This function should not run if the conductivity is not needed. If, for some reason
   // it is run anyway, the user should be notified that there is not enough data to
@@ -138,178 +284,47 @@ void conductivity_nonlinear<T, DIM>::fetch_parameters(){
     exit(1);
   }
 
-	imaginary = std::complex<T>(0.0, 1.0);
+  imaginary = std::complex<T>(0.0, 1.0);
   
   // Fetch the direction of the conductivity and convert it to a string
   get_hdf5(&direction, &file, (char*)(dirName+"Direction").c_str());
-  std::string dirString = num2str3(direction);
+  dirString = num2str3(direction);
 
   // Fetch the number of Chebyshev Moments, temperature and number of points
-    get_hdf5(&NumMoments, &file, (char*)(dirName+"NumMoments").c_str());	
-	get_hdf5(&temperature, &file, (char*)(dirName+"Temperature").c_str());	
-	get_hdf5(&NumPoints, &file, (char*)(dirName+"NumPoints").c_str());	
-	get_hdf5(&special, &file, (char*)(dirName+"Special").c_str());	
-
-  // 1/kT, where k is the Boltzmann constant in eV/K
-  beta = 1.0/8.6173303*pow(10,5)/temperature;
-  e_fermi = 0.0/systemInfo.energy_scale;
-  scat = 0.0166/systemInfo.energy_scale;
+  get_hdf5(&NumMoments, &file, (char*)(dirName+"NumMoments").c_str());	
+  get_hdf5(&temperature, &file, (char*)(dirName+"Temperature").c_str());	
+  get_hdf5(&NumPoints, &file, (char*)(dirName+"NumPoints").c_str());	
+  get_hdf5(&special, &file, (char*)(dirName+"Special").c_str());	
+  beta = 1.0/8.6173303*pow(10,5)/temperature;   // 1/kT, where k is the Boltzmann constant in eV/K
 	
-  // Energy parameters needed to run the simulation
-  N_energies = 1024;
-  lim = 0.995;
-
   // Frequency parameters needed to run the simulation
-	N_omegas = NumPoints;
-  minFreq = 0;
-  maxFreq = 2.0;
+  N_omegas = NumPoints;
 
   // Check whether the matrices we're going to retrieve are complex or not
-  int complex = systemInfo.isComplex;
+  complex = systemInfo.isComplex;
 
+  int hasGamma0 = 0;
+  int hasGamma1 = 0;
+  int hasGamma2 = 0;
+  int hasGamma3 = 0;
 
-  bool hasGamma0 = false; 
-  bool hasGamma1 = false;
-  bool hasGamma2 = false; 
-  bool hasGamma3 = false;
-
-
-  debug_message("special:" ); debug_message(special); debug_message("\n");
-  debug_message("dirstring: "); debug_message(dirString); debug_message("\n");
-  
-  // Retrieve the Gamma0 Matrix. This is the 1D Gamma matrix defined as
-  // Gamma0 = Tr[v^abc T_n]. This matrix is not needed for the special case
-  std::string MatrixName = dirName + "Gamma0" + dirString;
-  if(special == 0){
-    try{
-      debug_message("Filling the Gamma0 matrix.\n");
-      Gamma0 = Eigen::Array<std::complex<T>,-1,-1>::Zero(1, NumMoments);
-      
-      if(complex)
-        get_hdf5(Gamma0.data(), &file, (char*)MatrixName.c_str());
-      
-      if(!complex){
-        Eigen::Array<T,-1,-1> Gamma0Real;
-        Gamma0Real = Eigen::Array<T,-1,-1>::Zero(1, NumMoments);
-        get_hdf5(Gamma0Real.data(), &file, (char*)MatrixName.c_str());
-        Gamma0 = Gamma0Real.template cast<std::complex<T>>();
-      }				
-
-      hasGamma0 = true;
-    } catch(H5::Exception& e) {
-      debug_message("Conductivity nonlinear: There is no Gamma0 matrix.\n");
-    }
-  }
-
-
-
-
-
-  // Retrieve the Gamma1 Matrix. This is the 2D Gamma matrix defined as
-  // Gamma1 = Tr[v^a Tn v^bc Tm]
-  MatrixName = dirName + "Gamma1" + dirString;
-  try{
-		debug_message("Filling the Gamma1 matrix.\n");
-		Gamma1 = Eigen::Array<std::complex<T>,-1,-1>::Zero(NumMoments, NumMoments);
-		
-		if(complex)
-			get_hdf5(Gamma1.data(), &file, (char*)MatrixName.c_str());
-		
-		if(!complex){
-			Eigen::Array<T,-1,-1> Gamma1Real;
-			Gamma1Real = Eigen::Array<T,-1,-1>::Zero(NumMoments, NumMoments);
-			get_hdf5(Gamma1Real.data(), &file, (char*)MatrixName.c_str());
-			
-			Gamma1 = Gamma1Real.template cast<std::complex<T>>();
-		}				
-
-    hasGamma1 = true;
-  } catch(H5::Exception& e) {
-    debug_message("Conductivity optical: There is no Gamma1 matrix.\n");
-  }
-
-
-
-  // Retrieve the Gamma2 Matrix
-  MatrixName = dirName + "Gamma2" + dirString;
-  try{
-		debug_message("Filling the Gamma2 matrix.\n");
-		Gamma2 = Eigen::Array<std::complex<T>,-1,-1>::Zero(NumMoments, NumMoments);
-		
-		if(complex)
-			get_hdf5(Gamma2.data(), &file, (char*)MatrixName.c_str());
-		
-		if(!complex){
-			Eigen::Array<T,-1,-1> Gamma2Real;
-			Gamma2Real = Eigen::Array<T,-1,-1>::Zero(NumMoments, NumMoments);
-			get_hdf5(Gamma2Real.data(), &file, (char*)MatrixName.c_str());
-			
-			Gamma2 = Gamma2Real.template cast<std::complex<T>>();
-		}				
-
-    hasGamma2 = true;
-  } catch(H5::Exception& e) {
-    debug_message("Conductivity optical: There is no Gamma2 matrix.\n");
-  }
-
-
-  
-
-  // Retrieve the Gamma3 Matrix. This is the biggest matrix and doesn't need to be
-  // calculated when we want hBN because it is identically zero.
-  if(special == 0){
-    MatrixName = dirName + "Gamma3" + dirString;
-    try{
-      debug_message("Filling the Gamma3 matrix.\n");
-      Gamma3 = Eigen::Array<std::complex<T>,-1,-1>::Zero(1, NumMoments*NumMoments*NumMoments);
-      
-      if(complex)
-        get_hdf5(Gamma3.data(), &file, (char*)MatrixName.c_str());
-      
-      if(!complex){
-        Eigen::Array<T,-1,-1> Gamma3Real;
-        Gamma3Real = Eigen::Array<T,-1,-1>::Zero(1, NumMoments*NumMoments*NumMoments);
-        get_hdf5(Gamma3Real.data(), &file, (char*)MatrixName.c_str());
-        
-        Gamma3 = Gamma3Real.template cast<std::complex<T>>();
-      }				
-
-      hasGamma3 = true;
-    } catch(H5::Exception& e) {
-      debug_message("Conductivity DC: There is no Gamma3 matrix.\n");
-    }
-  }
+  // Fetch the Gamma matrices from the hdf file and return the success value
+  if(not special) hasGamma0 = fetch_gamma0(); 
+  hasGamma1 = fetch_gamma1();
+  hasGamma2 = fetch_gamma2(); 
+  if(not special) hasGamma3 = fetch_gamma3();
 
   // check if we have all the objects that we need
-  if(special == 1){
-    if(hasGamma1 and hasGamma2){
-      isPossible = true;
-    }
-  } else {
-    if(special == 0){
-      if(hasGamma0 and hasGamma1 and hasGamma2 and hasGamma3){
-        isPossible = true;
-      }
-    }
-  }
+  if(special)     isPossible = hasGamma1 and hasGamma2;
+  if(not special) isPossible = hasGamma0 and hasGamma1 and hasGamma2 and hasGamma3;
 
-
-	file.close();
-	debug_message("Left conductivity_nonlinear::read.\n");
+  file.close();
+  debug_message("Left conductivity_nonlinear::read.\n");
 }
 
+
 template <typename U, unsigned DIM>
-void conductivity_nonlinear<U, DIM>::calculate(){
-	debug_message("Entered calc_nonlinear_cond.\n");
-	//Calculates the nonlinear conductivity for a set of frequencies in the range [-sigma, sigma].
-	//These frequencies are in the KPM scale, that is, the scale where the energy is in the range ]-1,1[.
-	//the temperature is already in the KPM scale, but not the broadening or the Fermi Energy
-
-  // ########################################################
-  // default values for the fermi energy, broadening and frequencies
-  // ########################################################
-
-
+void conductivity_nonlinear<U, DIM>::print_parameters(){
   // Print out some useful information
   verbose_message("  Energy in rescaled units: [-1,1]\n");
   verbose_message("  Beta (1/kT): "); verbose_message(beta); verbose_message("\n");
@@ -325,13 +340,24 @@ void conductivity_nonlinear<U, DIM>::calculate(){
     verbose_message(maxFreq); verbose_message("]\n");
   verbose_message("  File name: ");verbose_message(filename); verbose_message("\n");
 
-  energies    = Eigen::Matrix<U, -1, 1>::LinSpaced(N_energies, -lim, lim);
-  frequencies = Eigen::Matrix<U, -1, 1>::LinSpaced(N_omegas, minFreq, maxFreq);
+}
+
+template <typename U, unsigned DIM>
+void conductivity_nonlinear<U, DIM>::calculate(){
+  debug_message("Entered calc_nonlinear_cond.\n");
+  //Calculates the nonlinear conductivity for a set of frequencies in the range [-sigma, sigma].
+  //These frequencies are in the KPM scale, that is, the scale where the energy is in the range ]-1,1[.
+  //the temperature is already in the KPM scale, but not the broadening or the Fermi Energy
+
+  print_parameters();
+
+  energies     = Eigen::Matrix<U, -1, 1>::LinSpaced(N_energies, -lim, lim);
+  frequencies  = Eigen::Matrix<U, -1, 1>::LinSpaced(N_omegas, minFreq, maxFreq);
   frequencies2 = Eigen::Matrix<U, -1, 2>::Zero(N_omegas, 2);
 
   for(int w = 0; w < N_omegas; w++){
     frequencies2(w,0) = frequencies(w);
-    frequencies2(w,1) = frequencies(w);
+    frequencies2(w,1) = RATIO*frequencies(w);
   }
   
   Eigen::Matrix<std::complex<U>, -1, -1> omega_energies0, omega_energies1, omega_energies2, omega_energies3, omega_energies4;
@@ -350,15 +376,15 @@ void conductivity_nonlinear<U, DIM>::calculate(){
   omega_energies3shg3 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
 
 
-  Eigen::Matrix<std::complex<U>,1,-1> cond0, cond1, cond2, cond3, cond4, cond;
-  Eigen::Matrix<std::complex<U>,1,-1> cond3shg1, cond3shg2, cond3shg3;
-  Eigen::Matrix<std::complex<U>,1,-1> cond1shg, cond2shg;
+  Eigen::Matrix<std::complex<U>,1,-1> cond, cond_shg;
+  Eigen::Matrix<std::complex<U>,1,-1> cond0, cond1, cond2, cond3, cond4;
+  Eigen::Matrix<std::complex<U>,1,-1> cond3shg1, cond3shg2, cond3shg3, cond1shg, cond2shg;
+
   cond0 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
   cond1 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
   cond2 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
   cond3 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
   cond4 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
-
 
   cond1shg  = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
   cond2shg  = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
@@ -366,23 +392,25 @@ void conductivity_nonlinear<U, DIM>::calculate(){
   cond3shg2 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
   cond3shg3 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
 
-  cond  = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
+  cond     = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
+  cond_shg = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
 
+  photo = 1;
+  shg = 1;
   // Contraction of the Gamma matrices with the delta functions and Green's functions
-  omega_energies0 += Gamma0contract();
-  omega_energies1 += 0.5*Gamma1contractAandR(); 
-  omega_energies2 += Gamma2contractAandR(); 
+  if(photo) omega_energies0 += Gamma0contract();
+  if(photo) omega_energies1 += 0.5*Gamma1contractAandR(); 
+  if(photo) omega_energies2 += Gamma2contractAandR(); 
 
-  omega_energies1shg += 0.5*Gamma1shgcontractAandR();
-  omega_energies2shg += Gamma2shgcontractAandR();
+  if(shg) omega_energies1shg += 0.5*Gamma1shgcontractAandR();
+  if(shg) omega_energies2shg += Gamma2shgcontractAandR();
 
-  //special = 1;
-  if(special != 1){
-    omega_energies3shg1 += Gamma3shgContract_RA();
-    omega_energies3shg2 += Gamma3shgContract_RR();
-    omega_energies3shg3 += Gamma3shgContract_AA();
-    omega_energies4 += Gamma3Contract_RA(); 
-    omega_energies3 += Gamma3Contract_RRandAAblocks();
+  if(not special){
+    if(shg) omega_energies3shg1 += Gamma3shgContract_RA();
+    if(shg) omega_energies3shg2 += Gamma3shgContract_RR();
+    if(shg) omega_energies3shg3 += Gamma3shgContract_AA();
+    if(photo) omega_energies4 += Gamma3Contract_RA(); 
+    if(photo) omega_energies3 += Gamma3Contract_RRandAAblocks();
   }
 
   U freq;
@@ -391,96 +419,116 @@ void conductivity_nonlinear<U, DIM>::calculate(){
     freq = frequencies(w);  
     w1 = frequencies2(w,0);
     w2 = frequencies2(w,1);
-    cond0(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies0.col(w)));
-    cond1(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies1.col(w)));
-    cond2(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies2.col(w)));
-    cond3(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies3.col(w)));
-    cond4(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies4.col(w)));
 
-    cond3shg1(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies3shg1.col(w)));
-    cond3shg2(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies3shg2.col(w)));
-    cond3shg3(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies3shg3.col(w)));
-    cond2shg(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies2shg.col(w)));
-    cond1shg(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies1shg.col(w)));
+    // Energy integration
+    if(photo) cond0(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies0.col(w)));
+    if(photo) cond1(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies1.col(w)));
+    if(photo) cond2(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies2.col(w)));
+    if(photo) cond3(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies3.col(w)));
+    if(photo) cond4(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies4.col(w)));
 
-    cond0(w) /= -scat*scat - freq*freq; 
-    cond1(w) /= -scat*scat - freq*freq; 
-    cond2(w) /= -scat*scat - freq*freq; 
-    cond3(w) /= -scat*scat - freq*freq; 
-    cond4(w) /= -scat*scat - freq*freq; 
+    if(shg) cond3shg1(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies3shg1.col(w)));
+    if(shg) cond3shg2(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies3shg2.col(w)));
+    if(shg) cond3shg3(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies3shg3.col(w)));
+    if(shg) cond2shg(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies2shg.col(w)));
+    if(shg) cond1shg(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies1shg.col(w)));
 
-    cond3shg1(w) /= (w1 + imaginary*scat)*(w2 + imaginary*scat);
-    cond3shg2(w) /= (w1 + imaginary*scat)*(w2 + imaginary*scat);
-    cond3shg3(w) /= (w1 + imaginary*scat)*(w2 + imaginary*scat);
-    cond2shg(w) /= (w1 + imaginary*scat)*(w2 + imaginary*scat);
-    cond1shg(w) /= (w1 + imaginary*scat)*(w2 + imaginary*scat);
+    // Divide by the frequencies
+    if(photo) cond0(w) /= -scat*scat - freq*freq; 
+    if(photo) cond1(w) /= -scat*scat - freq*freq; 
+    if(photo) cond2(w) /= -scat*scat - freq*freq; 
+    if(photo) cond3(w) /= -scat*scat - freq*freq; 
+    if(photo) cond4(w) /= -scat*scat - freq*freq; 
+
+    if(shg) cond3shg1(w) /= (w1 + imaginary*scat)*(w2 + imaginary*scat);
+    if(shg) cond3shg2(w) /= (w1 + imaginary*scat)*(w2 + imaginary*scat);
+    if(shg) cond3shg3(w) /= (w1 + imaginary*scat)*(w2 + imaginary*scat);
+    if(shg) cond2shg(w) /= (w1 + imaginary*scat)*(w2 + imaginary*scat);
+    if(shg) cond1shg(w) /= (w1 + imaginary*scat)*(w2 + imaginary*scat);
   }
 
+  U compat_factor = 2.0;//*systemInfo.energy_scale*systemInfo.energy_scale;
   std::complex<U> factor = imaginary*U(systemInfo.num_orbitals*
-      systemInfo.spin_degeneracy/systemInfo.unit_cell_area/systemInfo.energy_scale);
-  cond0 *= factor;
-  cond1 *= factor;
-  cond2 *= factor;
-  cond3 *= factor;
-  cond4 *= factor;
+      systemInfo.spin_degeneracy/systemInfo.unit_cell_area/systemInfo.energy_scale)*compat_factor;
 
-  cond3shg1 *= factor;
-  cond3shg2 *= factor;
-  cond3shg3 *= factor;
-  cond2shg *= factor;
-  cond1shg *= factor;
+  if(photo) cond0 *= factor;
+  if(photo) cond1 *= factor;
+  if(photo) cond2 *= factor;
+  if(photo) cond3 *= factor;
+  if(photo) cond4 *= factor;
 
-  cond =/* cond0 +*/ cond1 + cond2 + cond3 + cond4;
+  if(shg) cond3shg1 *= factor;
+  if(shg) cond3shg2 *= factor;
+  if(shg) cond3shg3 *= factor;
+  if(shg) cond2shg *= factor;
+  if(shg) cond1shg *= factor;
 
-  std::ofstream myfile0, myfile1, myfile2, myfile3, myfile4, myfile;
+  if(photo) cond     = cond1 + cond2 + cond3 + cond4;
+  if(shg) cond_shg = cond1shg + cond2shg + cond3shg1 + cond3shg2 + cond3shg3;
+
+  std::ofstream myfile, myfile_shg;
+  std::ofstream myfile0, myfile1, myfile2, myfile3, myfile4;
   std::ofstream myfile3shg1, myfile3shg2, myfile3shg3, myfile2shg, myfile1shg;
+
   myfile.open(filename);
-  myfile0.open ("nonlinear_cond0.dat");
-  myfile1.open ("nonlinear_cond1.dat");
-  myfile2.open ("nonlinear_cond2.dat");
-  myfile3.open ("nonlinear_cond3.dat");
-  myfile4.open ("nonlinear_cond4.dat");
-  myfile3shg1.open ("nonlinear_cond3shg1.dat");
-  myfile3shg2.open ("nonlinear_cond3shg2.dat");
-  myfile3shg3.open ("nonlinear_cond3shg3.dat");
-  myfile2shg.open ("nonlinear_cond2shg.dat");
-  myfile1shg.open ("nonlinear_cond1shg.dat");
+    myfile_shg.open(filename + "shg");
+
+  print_all_terms = 1;
+  if(print_all_terms){
+    if(photo) myfile0.open("nonlinear_cond0.dat");
+    if(photo) myfile1.open("nonlinear_cond1.dat");
+    if(photo) myfile2.open("nonlinear_cond2.dat");
+    if(photo) myfile3.open("nonlinear_cond_RR_AA.dat");
+    if(photo) myfile4.open("nonlinear_cond_RA.dat");
+
+    if(shg) myfile3shg1.open("nonlinear_cond_RA_shg.dat");
+    if(shg) myfile3shg2.open("nonlinear_cond_RR_shg.dat");
+    if(shg) myfile3shg3.open("nonlinear_cond_AA_shg.dat");
+    if(shg) myfile2shg.open("nonlinear_cond2shg.dat");
+    if(shg) myfile1shg.open("nonlinear_cond1shg.dat");
+  }
 
 
   for(int i=0; i < N_omegas; i++){
     freq = std::real(frequencies(i))*systemInfo.energy_scale;
-    myfile  << freq << " " << cond.real()(i) << " " << cond.imag()(i) << "\n";
-    myfile0 << freq << " " << cond0.real()(i) << " " << cond0.imag()(i) << "\n";
-    myfile1 << freq << " " << cond1.real()(i) << " " << cond1.imag()(i) << "\n";
-    myfile2 << freq << " " << cond2.real()(i) << " " << cond2.imag()(i) << "\n";
-    myfile3 << freq << " " << cond3.real()(i) << " " << cond3.imag()(i) << "\n";
-    myfile4 << freq << " " << cond4.real()(i) << " " << cond4.imag()(i) << "\n";
+    if(photo) myfile  << freq << " " << cond.real()(i) << " " << cond.imag()(i) << "\n";
+    if(shg) myfile_shg  << freq << " " << cond_shg.real()(i) << " " << cond_shg.imag()(i) << "\n";
+    if(print_all_terms){
+      if(photo) myfile0 << freq << " " << cond0.real()(i) << " " << cond0.imag()(i) << "\n";
+      if(photo) myfile1 << freq << " " << cond1.real()(i) << " " << cond1.imag()(i) << "\n";
+      if(photo) myfile2 << freq << " " << cond2.real()(i) << " " << cond2.imag()(i) << "\n";
+      if(photo) myfile3 << freq << " " << cond3.real()(i) << " " << cond3.imag()(i) << "\n";
+      if(photo) myfile4 << freq << " " << cond4.real()(i) << " " << cond4.imag()(i) << "\n";
 
-    myfile3shg1 << freq << " " << cond3shg1.real()(i) << " " << cond3shg1.imag()(i) << "\n";
-    myfile3shg2 << freq << " " << cond3shg2.real()(i) << " " << cond3shg2.imag()(i) << "\n";
-    myfile3shg3 << freq << " " << cond3shg3.real()(i) << " " << cond3shg3.imag()(i) << "\n";
-    myfile2shg << freq << " " << cond2shg.real()(i) << " " << cond2shg.imag()(i) << "\n";
-    myfile1shg << freq << " " << cond1shg.real()(i) << " " << cond1shg.imag()(i) << "\n";
+      if(shg) myfile3shg1 << freq << " " << cond3shg1.real()(i) << " " << cond3shg1.imag()(i) << "\n";
+      if(shg) myfile3shg2 << freq << " " << cond3shg2.real()(i) << " " << cond3shg2.imag()(i) << "\n";
+      if(shg) myfile3shg3 << freq << " " << cond3shg3.real()(i) << " " << cond3shg3.imag()(i) << "\n";
+      if(shg) myfile2shg << freq << " " << cond2shg.real()(i) << " " << cond2shg.imag()(i) << "\n";
+      if(shg) myfile1shg << freq << " " << cond1shg.real()(i) << " " << cond1shg.imag()(i) << "\n";
+    } 
   }
-  myfile.close();
-  myfile0.close();
-  myfile1.close();
-  myfile2.close();
-  myfile3.close();
-  myfile4.close();
+  if(photo) myfile.close();
+  if(shg) myfile_shg.close();
 
-  myfile3shg1.close();
-  myfile3shg2.close();
-  myfile3shg3.close();
-  myfile2shg.close();
-  myfile1shg.close();
+  if(photo) myfile0.close();
+  if(photo) myfile1.close();
+  if(photo) myfile2.close();
+  if(photo) myfile3.close();
+  if(photo) myfile4.close();
+
+  if(shg) myfile3shg1.close();
+  if(shg) myfile3shg2.close();
+  if(shg) myfile3shg3.close();
+  if(shg) myfile2shg.close();
+  if(shg) myfile1shg.close();
+
   debug_message("Left calc_nonlinear_cond.\n");
 };
 
-#include "Gamma0.hpp"
-#include "Gamma1.hpp"
-#include "Gamma2.hpp"
-#include "Gamma3.hpp"
+#include "Gamma0photo.hpp"
+#include "Gamma1photo.hpp"
+#include "Gamma2photo.hpp"
+#include "Gamma3photo.hpp"
 #include "Gamma3shg.hpp"
 #include "Gamma2shg.hpp"
 #include "Gamma1shg.hpp"
