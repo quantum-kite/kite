@@ -56,6 +56,7 @@ class shell_input{
         std::string CondOpt2_Name;
         bool CondOpt2_Exclusive;
         bool CondOpt2_is_required;
+        double CondOpt2_ratio;
 
         // Help menu
         bool help;
@@ -88,6 +89,7 @@ class shell_input{
             std::cout << "           -N              Name of the output file\n";
             std::cout << "           -X              Exclusive. Only calculate this quantity\n\n";
             std::cout << "--CondOpt2 -E              Number of energy points used in the integration\n";
+            std::cout << "           -R              Ratio of the second frequency relative to the first: w2 = R*w1\n";
             std::cout << "           -T              Temperature\n";
             std::cout << "           -S              Broadening parameter of the Green's functions\n";
             std::cout << "           -O min max num  Frequencies\n";
@@ -146,6 +148,7 @@ class shell_input{
             std::cout << "Printing parameters for the Second-Order Optical conductivity obtained from the shell:\n";
             if(CondOpt2_Temp != -8888)      std::cout << "    temperature: "                << CondOpt2_Temp << "\n";
             if(CondOpt2_NumEnergies != -1)  std::cout << "    number of energy points: "    << CondOpt2_NumEnergies << "\n";
+            if(CondOpt2_ratio != -8.8888)   std::cout << "    ratio of frequencies: "       << CondOpt2_ratio << "\n";
             if(CondOpt2_Scat != -8888)      std::cout << "    scattering parameter: "       << CondOpt2_Scat << "\n";
             if(CondOpt2_FreqMin != -8888)   std::cout << "    minimum frequency: "          << CondOpt2_FreqMin << "\n";
             if(CondOpt2_FreqMax != -8888)   std::cout << "    maximum frequency: "          << CondOpt2_FreqMax << "\n";
@@ -387,6 +390,7 @@ void parse_CondOpt2(int argc, char *argv[], std::vector<int> & keys_pos, std::ve
     int CondOpt2_Fermi = -8888;
     double CondOpt2_Scat = -8888;
     bool CondOpt2_Exclusive = false;
+    double CondOpt2_ratio = -8.8888;
     std::string CondOpt2_Name = "";
     // Process CondOpt2
     int j = 3;
@@ -400,6 +404,8 @@ void parse_CondOpt2(int argc, char *argv[], std::vector<int> & keys_pos, std::ve
                 CondOpt2_Temp = atof(n1.c_str());
             if(name == "-E")
                 CondOpt2_NumEnergies = atoi(n1.c_str());
+            if(name == "-R")
+                CondOpt2_ratio = atoi(n1.c_str());
             if(name == "-S")
                 CondOpt2_Scat = atof(n1.c_str());
             if(name == "-F")
@@ -422,6 +428,7 @@ void parse_CondOpt2(int argc, char *argv[], std::vector<int> & keys_pos, std::ve
 
     variables.CondOpt2_Temp         = CondOpt2_Temp; 
     variables.CondOpt2_NumEnergies  = CondOpt2_NumEnergies; 
+    variables.CondOpt2_ratio        = CondOpt2_ratio; 
     variables.CondOpt2_Scat         = CondOpt2_Scat; 
     variables.CondOpt2_Fermi        = CondOpt2_Fermi; 
     variables.CondOpt2_FreqMin      = CondOpt2_FreqMin; 

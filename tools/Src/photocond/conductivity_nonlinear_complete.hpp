@@ -6,9 +6,6 @@
 /****************************************************************/
 
 #include "../headers.hpp"
-#ifndef RATIO
-#define RATIO 1
-#endif
 #ifndef PRINTALL
 #define PRINTALL 1
 #endif
@@ -38,10 +35,10 @@ class conductivity_nonlinear{
 
     // Post-processing parameters
     int print_all_terms;
-    int photo, shg;
     std::complex<T> imaginary;
     std::string filename;
     double temperature;
+    double ratio;
     T beta;
     T e_fermi;
     T scat;
@@ -84,6 +81,9 @@ class conductivity_nonlinear{
     void override_parameters();
     void set_default_parameters();
     void calculate();
+
+    void calculate_photo();
+    void calculate_general();
 
     Eigen::Matrix<std::complex<T>, -1, -1> Gamma0contract();
     Eigen::Matrix<std::complex<T>, -1, -1> Gamma1contractAandR();
@@ -244,6 +244,7 @@ template <typename T, unsigned DIM>
 void conductivity_nonlinear<T, DIM>::override_parameters(){
     if(variables.CondOpt2_Temp != -8888)     temperature = variables.CondOpt2_Temp/systemInfo.energy_scale;
     if(variables.CondOpt2_NumEnergies != -1) N_energies  = variables.CondOpt2_NumEnergies;
+    if(variables.CondOpt2_ratio != 8.8888)   ratio       = variables.CondOpt2_ratio;
     if(variables.CondOpt2_FreqMax != -8888)  maxFreq     = variables.CondOpt2_FreqMax/systemInfo.energy_scale;
     if(variables.CondOpt2_FreqMin != -8888)  minFreq     = variables.CondOpt2_FreqMin/systemInfo.energy_scale;
     if(variables.CondOpt2_NumFreq != -1)     N_omegas    = variables.CondOpt2_NumFreq;
@@ -256,8 +257,9 @@ void conductivity_nonlinear<T, DIM>::override_parameters(){
 template <typename T, unsigned DIM>
 void conductivity_nonlinear<T, DIM>::set_default_parameters(){
     temperature = 0.01/systemInfo.energy_scale; 
+    ratio       = 1.0;
     N_energies  = 512; 
-    lim = 0.995;
+    lim         = 0.995;
     maxFreq     = 7.0/systemInfo.energy_scale; 
     minFreq     = 0.0/systemInfo.energy_scale;
     N_omegas    = 512;
@@ -343,42 +345,16 @@ void conductivity_nonlinear<U, DIM>::print_parameters(){
 }
 
 template <typename U, unsigned DIM>
-void conductivity_nonlinear<U, DIM>::calculate(){
-  debug_message("Entered calc_nonlinear_cond.\n");
-  //Calculates the nonlinear conductivity for a set of frequencies in the range [-sigma, sigma].
-  //These frequencies are in the KPM scale, that is, the scale where the energy is in the range ]-1,1[.
-  //the temperature is already in the KPM scale, but not the broadening or the Fermi Energy
-
-  print_parameters();
-
-  energies     = Eigen::Matrix<U, -1, 1>::LinSpaced(N_energies, -lim, lim);
-  frequencies  = Eigen::Matrix<U, -1, 1>::LinSpaced(N_omegas, minFreq, maxFreq);
-  frequencies2 = Eigen::Matrix<U, -1, 2>::Zero(N_omegas, 2);
-
-  for(int w = 0; w < N_omegas; w++){
-    frequencies2(w,0) = frequencies(w);
-    frequencies2(w,1) = RATIO*frequencies(w);
-  }
-  
+void conductivity_nonlinear<U, DIM>::calculate_photo(){
   Eigen::Matrix<std::complex<U>, -1, -1> omega_energies0, omega_energies1, omega_energies2, omega_energies3, omega_energies4;
-  Eigen::Matrix<std::complex<U>, -1, -1> omega_energies3shg1, omega_energies3shg2, omega_energies3shg3;
-  Eigen::Matrix<std::complex<U>, -1, -1> omega_energies2shg, omega_energies1shg;
   omega_energies0 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
   omega_energies1 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
   omega_energies2 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
   omega_energies3 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
   omega_energies4 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
 
-  omega_energies1shg  = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
-  omega_energies2shg  = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
-  omega_energies3shg1 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
-  omega_energies3shg2 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
-  omega_energies3shg3 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
-
-
-  Eigen::Matrix<std::complex<U>,1,-1> cond, cond_shg;
+  Eigen::Matrix<std::complex<U>,1,-1> cond;
   Eigen::Matrix<std::complex<U>,1,-1> cond0, cond1, cond2, cond3, cond4;
-  Eigen::Matrix<std::complex<U>,1,-1> cond3shg1, cond3shg2, cond3shg3, cond1shg, cond2shg;
 
   cond0 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
   cond1 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
@@ -386,31 +362,16 @@ void conductivity_nonlinear<U, DIM>::calculate(){
   cond3 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
   cond4 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
 
-  cond1shg  = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
-  cond2shg  = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
-  cond3shg1 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
-  cond3shg2 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
-  cond3shg3 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
-
   cond     = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
-  cond_shg = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
 
-  photo = 1;
-  shg = 1;
   // Contraction of the Gamma matrices with the delta functions and Green's functions
-  if(photo) omega_energies0 += Gamma0contract();
-  if(photo) omega_energies1 += 0.5*Gamma1contractAandR(); 
-  if(photo) omega_energies2 += Gamma2contractAandR(); 
-
-  if(shg) omega_energies1shg += 0.5*Gamma1shgcontractAandR();
-  if(shg) omega_energies2shg += Gamma2shgcontractAandR();
+  omega_energies0 += Gamma0contract();
+  omega_energies1 += 0.5*Gamma1contractAandR(); 
+  omega_energies2 += Gamma2contractAandR(); 
 
   if(not special){
-    if(shg) omega_energies3shg1 += Gamma3shgContract_RA();
-    if(shg) omega_energies3shg2 += Gamma3shgContract_RR();
-    if(shg) omega_energies3shg3 += Gamma3shgContract_AA();
-    if(photo) omega_energies4 += Gamma3Contract_RA(); 
-    if(photo) omega_energies3 += Gamma3Contract_RRandAAblocks();
+    omega_energies4 += Gamma3Contract_RA(); 
+    omega_energies3 += Gamma3Contract_RRandAAblocks();
   }
 
   U freq;
@@ -421,107 +382,198 @@ void conductivity_nonlinear<U, DIM>::calculate(){
     w2 = frequencies2(w,1);
 
     // Energy integration
-    if(photo) cond0(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies0.col(w)));
-    if(photo) cond1(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies1.col(w)));
-    if(photo) cond2(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies2.col(w)));
-    if(photo) cond3(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies3.col(w)));
-    if(photo) cond4(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies4.col(w)));
-
-    if(shg) cond3shg1(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies3shg1.col(w)));
-    if(shg) cond3shg2(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies3shg2.col(w)));
-    if(shg) cond3shg3(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies3shg3.col(w)));
-    if(shg) cond2shg(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies2shg.col(w)));
-    if(shg) cond1shg(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies1shg.col(w)));
+    cond0(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies0.col(w)));
+    cond1(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies1.col(w)));
+    cond2(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies2.col(w)));
+    cond3(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies3.col(w)));
+    cond4(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies4.col(w)));
 
     // Divide by the frequencies
-    if(photo) cond0(w) /= -scat*scat - freq*freq; 
-    if(photo) cond1(w) /= -scat*scat - freq*freq; 
-    if(photo) cond2(w) /= -scat*scat - freq*freq; 
-    if(photo) cond3(w) /= -scat*scat - freq*freq; 
-    if(photo) cond4(w) /= -scat*scat - freq*freq; 
-
-    if(shg) cond3shg1(w) /= (w1 + imaginary*scat)*(w2 + imaginary*scat);
-    if(shg) cond3shg2(w) /= (w1 + imaginary*scat)*(w2 + imaginary*scat);
-    if(shg) cond3shg3(w) /= (w1 + imaginary*scat)*(w2 + imaginary*scat);
-    if(shg) cond2shg(w) /= (w1 + imaginary*scat)*(w2 + imaginary*scat);
-    if(shg) cond1shg(w) /= (w1 + imaginary*scat)*(w2 + imaginary*scat);
+    cond0(w) /= -scat*scat - freq*freq; 
+    cond1(w) /= -scat*scat - freq*freq; 
+    cond2(w) /= -scat*scat - freq*freq; 
+    cond3(w) /= -scat*scat - freq*freq; 
+    cond4(w) /= -scat*scat - freq*freq; 
   }
 
   U compat_factor = 2.0;//*systemInfo.energy_scale*systemInfo.energy_scale;
   std::complex<U> factor = imaginary*U(systemInfo.num_orbitals*
       systemInfo.spin_degeneracy/systemInfo.unit_cell_area/systemInfo.energy_scale)*compat_factor;
 
-  if(photo) cond0 *= factor;
-  if(photo) cond1 *= factor;
-  if(photo) cond2 *= factor;
-  if(photo) cond3 *= factor;
-  if(photo) cond4 *= factor;
+  cond0 *= factor;
+  cond1 *= factor;
+  cond2 *= factor;
+  cond3 *= factor;
+  cond4 *= factor;
+  cond = cond1 + cond2 + cond3 + cond4;
 
-  if(shg) cond3shg1 *= factor;
-  if(shg) cond3shg2 *= factor;
-  if(shg) cond3shg3 *= factor;
-  if(shg) cond2shg *= factor;
-  if(shg) cond1shg *= factor;
-
-  if(photo) cond     = cond1 + cond2 + cond3 + cond4;
-  if(shg) cond_shg = cond1shg + cond2shg + cond3shg1 + cond3shg2 + cond3shg3;
-
-  std::ofstream myfile, myfile_shg;
+  std::ofstream myfile;
   std::ofstream myfile0, myfile1, myfile2, myfile3, myfile4;
-  std::ofstream myfile3shg1, myfile3shg2, myfile3shg3, myfile2shg, myfile1shg;
 
   myfile.open(filename);
-    myfile_shg.open(filename + "shg");
 
   print_all_terms = 1;
   if(print_all_terms){
-    if(photo) myfile0.open("nonlinear_cond0.dat");
-    if(photo) myfile1.open("nonlinear_cond1.dat");
-    if(photo) myfile2.open("nonlinear_cond2.dat");
-    if(photo) myfile3.open("nonlinear_cond_RR_AA.dat");
-    if(photo) myfile4.open("nonlinear_cond_RA.dat");
-
-    if(shg) myfile3shg1.open("nonlinear_cond_RA_shg.dat");
-    if(shg) myfile3shg2.open("nonlinear_cond_RR_shg.dat");
-    if(shg) myfile3shg3.open("nonlinear_cond_AA_shg.dat");
-    if(shg) myfile2shg.open("nonlinear_cond2shg.dat");
-    if(shg) myfile1shg.open("nonlinear_cond1shg.dat");
+    myfile0.open("photocond0.dat");
+    myfile1.open("photocond1.dat");
+    myfile2.open("photocond2.dat");
+    myfile3.open("photocond_RR_AA.dat");
+    myfile4.open("photocond_RA.dat");
   }
 
 
   for(int i=0; i < N_omegas; i++){
     freq = std::real(frequencies(i))*systemInfo.energy_scale;
-    if(photo) myfile  << freq << " " << cond.real()(i) << " " << cond.imag()(i) << "\n";
-    if(shg) myfile_shg  << freq << " " << cond_shg.real()(i) << " " << cond_shg.imag()(i) << "\n";
+    myfile  << freq << " " << cond.real()(i) << " " << cond.imag()(i) << "\n";
     if(print_all_terms){
-      if(photo) myfile0 << freq << " " << cond0.real()(i) << " " << cond0.imag()(i) << "\n";
-      if(photo) myfile1 << freq << " " << cond1.real()(i) << " " << cond1.imag()(i) << "\n";
-      if(photo) myfile2 << freq << " " << cond2.real()(i) << " " << cond2.imag()(i) << "\n";
-      if(photo) myfile3 << freq << " " << cond3.real()(i) << " " << cond3.imag()(i) << "\n";
-      if(photo) myfile4 << freq << " " << cond4.real()(i) << " " << cond4.imag()(i) << "\n";
-
-      if(shg) myfile3shg1 << freq << " " << cond3shg1.real()(i) << " " << cond3shg1.imag()(i) << "\n";
-      if(shg) myfile3shg2 << freq << " " << cond3shg2.real()(i) << " " << cond3shg2.imag()(i) << "\n";
-      if(shg) myfile3shg3 << freq << " " << cond3shg3.real()(i) << " " << cond3shg3.imag()(i) << "\n";
-      if(shg) myfile2shg << freq << " " << cond2shg.real()(i) << " " << cond2shg.imag()(i) << "\n";
-      if(shg) myfile1shg << freq << " " << cond1shg.real()(i) << " " << cond1shg.imag()(i) << "\n";
+      myfile0 << freq << " " << cond0.real()(i) << " " << cond0.imag()(i) << "\n";
+      myfile1 << freq << " " << cond1.real()(i) << " " << cond1.imag()(i) << "\n";
+      myfile2 << freq << " " << cond2.real()(i) << " " << cond2.imag()(i) << "\n";
+      myfile3 << freq << " " << cond3.real()(i) << " " << cond3.imag()(i) << "\n";
+      myfile4 << freq << " " << cond4.real()(i) << " " << cond4.imag()(i) << "\n";
     } 
   }
-  if(photo) myfile.close();
-  if(shg) myfile_shg.close();
+  myfile.close();
+  myfile0.close();
+  myfile1.close();
+  myfile2.close();
+  myfile3.close();
+  myfile4.close();
+};
 
-  if(photo) myfile0.close();
-  if(photo) myfile1.close();
-  if(photo) myfile2.close();
-  if(photo) myfile3.close();
-  if(photo) myfile4.close();
+template <typename U, unsigned DIM>
+void conductivity_nonlinear<U, DIM>::calculate_general(){
 
-  if(shg) myfile3shg1.close();
-  if(shg) myfile3shg2.close();
-  if(shg) myfile3shg3.close();
-  if(shg) myfile2shg.close();
-  if(shg) myfile1shg.close();
+  Eigen::Matrix<std::complex<U>, -1, -1> omega_energies3shg1, omega_energies3shg2, omega_energies3shg3;
+  Eigen::Matrix<std::complex<U>, -1, -1> omega_energies2shg, omega_energies1shg;
 
+  omega_energies1shg  = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
+  omega_energies2shg  = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
+  omega_energies3shg1 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
+  omega_energies3shg2 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
+  omega_energies3shg3 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
+
+
+  Eigen::Matrix<std::complex<U>,1,-1> cond_shg;
+  Eigen::Matrix<std::complex<U>,1,-1> cond3shg1, cond3shg2, cond3shg3, cond1shg, cond2shg;
+
+  cond1shg  = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
+  cond2shg  = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
+  cond3shg1 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
+  cond3shg2 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
+  cond3shg3 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
+
+  cond_shg = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
+
+  // Contraction of the Gamma matrices with the delta functions and Green's functions
+
+  omega_energies1shg += 0.5*Gamma1shgcontractAandR();
+  omega_energies2shg += Gamma2shgcontractAandR();
+
+  if(not special){
+    omega_energies3shg1 += Gamma3shgContract_RA();
+    omega_energies3shg2 += Gamma3shgContract_RR();
+    omega_energies3shg3 += Gamma3shgContract_AA();
+  }
+
+  U freq;
+  U w1, w2;
+  for(int w = 0; w < N_omegas; w++){
+    freq = frequencies(w);  
+    w1 = frequencies2(w,0);
+    w2 = frequencies2(w,1);
+
+    // Energy integration
+
+    cond3shg1(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies3shg1.col(w)));
+    cond3shg2(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies3shg2.col(w)));
+    cond3shg3(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies3shg3.col(w)));
+    cond2shg(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies2shg.col(w)));
+    cond1shg(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies1shg.col(w)));
+
+    // Divide by the frequencies
+
+    cond3shg1(w) /= (w1 + imaginary*scat)*(w2 + imaginary*scat);
+    cond3shg2(w) /= (w1 + imaginary*scat)*(w2 + imaginary*scat);
+    cond3shg3(w) /= (w1 + imaginary*scat)*(w2 + imaginary*scat);
+    cond2shg(w) /= (w1 + imaginary*scat)*(w2 + imaginary*scat);
+    cond1shg(w) /= (w1 + imaginary*scat)*(w2 + imaginary*scat);
+  }
+
+  U compat_factor = 2.0;//*systemInfo.energy_scale*systemInfo.energy_scale;
+  std::complex<U> factor = imaginary*U(systemInfo.num_orbitals*
+      systemInfo.spin_degeneracy/systemInfo.unit_cell_area/systemInfo.energy_scale)*compat_factor;
+
+
+  cond3shg1 *= factor;
+  cond3shg2 *= factor;
+  cond3shg3 *= factor;
+  cond2shg *= factor;
+  cond1shg *= factor;
+
+  cond_shg = cond1shg + cond2shg + cond3shg1 + cond3shg2 + cond3shg3;
+
+  std::ofstream myfile_shg;
+  std::ofstream myfile3shg1, myfile3shg2, myfile3shg3, myfile2shg, myfile1shg;
+
+  myfile_shg.open(filename + "shg");
+
+  print_all_terms = 1;
+  if(print_all_terms){
+
+    myfile3shg1.open("nonlinear_cond_RA_shg.dat");
+    myfile3shg2.open("nonlinear_cond_RR_shg.dat");
+    myfile3shg3.open("nonlinear_cond_AA_shg.dat");
+    myfile2shg.open("nonlinear_cond2shg.dat");
+    myfile1shg.open("nonlinear_cond1shg.dat");
+  }
+
+
+  for(int i=0; i < N_omegas; i++){
+    freq = std::real(frequencies(i))*systemInfo.energy_scale;
+    myfile_shg  << freq << " " << cond_shg.real()(i) << " " << cond_shg.imag()(i) << "\n";
+    if(print_all_terms){
+
+      myfile3shg1 << freq << " " << cond3shg1.real()(i) << " " << cond3shg1.imag()(i) << "\n";
+      myfile3shg2 << freq << " " << cond3shg2.real()(i) << " " << cond3shg2.imag()(i) << "\n";
+      myfile3shg3 << freq << " " << cond3shg3.real()(i) << " " << cond3shg3.imag()(i) << "\n";
+      myfile2shg << freq << " " << cond2shg.real()(i) << " " << cond2shg.imag()(i) << "\n";
+      myfile1shg << freq << " " << cond1shg.real()(i) << " " << cond1shg.imag()(i) << "\n";
+    } 
+  }
+  myfile_shg.close();
+  myfile3shg1.close();
+  myfile3shg2.close();
+  myfile3shg3.close();
+  myfile2shg.close();
+  myfile1shg.close();
+};
+
+template <typename U, unsigned DIM>
+void conductivity_nonlinear<U, DIM>::calculate(){
+  debug_message("Entered calc_nonlinear_cond.\n");
+  //Calculates the nonlinear conductivity for a set of frequencies in the range [-sigma, sigma].
+  //These frequencies are in the KPM scale, that is, the scale where the energy is in the range ]-1,1[.
+  //the temperature is already in the KPM scale, but not the broadening or the Fermi Energy
+
+  print_parameters();
+  int photo = 0;
+  if(ratio == -1.0) photo = 1;
+
+
+  energies     = Eigen::Matrix<U, -1, 1>::LinSpaced(N_energies, -lim, lim);
+  frequencies  = Eigen::Matrix<U, -1, 1>::LinSpaced(N_omegas, minFreq, maxFreq);
+  frequencies2 = Eigen::Matrix<U, -1, 2>::Zero(N_omegas, 2);
+
+
+  for(int w = 0; w < N_omegas; w++){
+    frequencies2(w,0) = frequencies(w);
+    frequencies2(w,1) = ratio*frequencies(w);
+  }
+
+  if(photo)     calculate_photo();
+  if(not photo) calculate_general();
+  
   debug_message("Left calc_nonlinear_cond.\n");
 };
 
