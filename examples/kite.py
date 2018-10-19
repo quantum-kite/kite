@@ -456,6 +456,12 @@ class Calculation:
         return self._dos
 
     @property
+    def get_gaussian_wave_packet(self):
+        """Returns the requested wave packet time evolution function, with a gaussian wavepacket mutiplied with different
+        plane waves."""
+        return self._gaussian_wave_packet
+
+    @property
     def get_special(self):
         """Returns the requested special function, with predefined vectors."""
         return self._special
@@ -492,6 +498,7 @@ class Calculation:
         self._conductivity_optical = []
         self._conductivity_optical_nonlinear = []
         self._special = []
+        self._gaussian_wave_packet = []
         self._singleshot_conductivity_dc = []
 
         self._avail_dir_full = {'xx': 0, 'yy': 1, 'zz': 2, 'xy': 3, 'xz': 4, 'yx': 5, 'yz': 6, 'zx': 7, 'zy': 8}
@@ -555,6 +562,31 @@ class Calculation:
 
     def conductivity_dc(self, direction, num_points, num_moments, num_random, num_disorder=1, temperature=0):
         """Calculate the density of states as a function of energy
+
+        Parameters
+        ----------
+        num_points : int
+            Number of energy point inside the spectrum at which the DOS will be calculated.
+        num_moments : int
+            Number of polynomials in the Chebyshev expansion.
+        timestep : float
+            Timestep for calculation of time evolution.
+        k_vector : np.array
+            Different wave vectors, components coresponding to vectors b0 and b1.
+        spinor : np.array
+            Spinors for each of the k vectors.
+        width : float
+            Width of the gaussian.
+        mean_value : [float, float]
+            Mean value of the gaussian envelope.
+        num_disorder : int
+            Number of different disorder realisations.
+        """
+
+        self._gaussian_wave_packet.append(
+            {'num_points': num_points, 'num_moments': num_moments,
+             'timestep': timestep, 'num_disorder': num_disorder, 'spinor': spinor, 'width': width, 'k_vector': k_vector,
+             'mean_value': mean_value})
 
         Parameters
         ----------
@@ -1422,6 +1454,33 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
         grpc_p.create_dataset('starting_index_ket', data=np.asarray(starting_index_ket), dtype=np.int32)
         grpc_p.create_dataset('bra', data=np.array(bra).astype(config.type))
         grpc_p.create_dataset('ket', data=np.array(ket).astype(config.type))
+        grpc_p.create_dataset('timestep', data=timestep, dtype=np.float32)
+
+    if calculation.get_gaussian_wave_packet:
+        grpc_p = grpc.create_group('gaussian_wave_packet')
+
+        num_moments, num_points, num_disorder, spinor, width, k_vector, mean_value = [], [], [], [], [], [], []
+        timestep = []
+        for single_gauss_wavepacket in calculation.get_gaussian_wave_packet:
+            num_moments.append(single_gauss_wavepacket['num_moments'])
+            num_points.append(single_gauss_wavepacket['num_points'])
+            num_disorder.append(single_gauss_wavepacket['num_disorder'])
+            spinor.append(single_gauss_wavepacket['spinor'])
+            width.append(single_gauss_wavepacket['width'])
+            k_vector.append(single_gauss_wavepacket['k_vector'])
+            mean_value.append(single_gauss_wavepacket['mean_value'])
+            timestep.append(single_gauss_wavepacket['timestep'])
+
+        if len(calculation.get_gaussian_wave_packet) > 1:
+            raise SystemExit('Only a single function request of each type is currently allowed. Please use another '
+                             'configuration file for the same functionality.')
+        grpc_p.create_dataset('NumMoments', data=num_moments, dtype=np.int32)
+        grpc_p.create_dataset('NumPoints', data=num_points, dtype=np.int32)
+        grpc_p.create_dataset('NumDisorder', data=num_disorder, dtype=np.int32)
+        grpc_p.create_dataset('mean_value', data=mean_value, dtype=np.int32)
+        grpc_p.create_dataset('width', data=width, dtype=np.float)
+        grpc_p.create_dataset('spinor', data=np.asmatrix(np.asarray(spinor)).astype(config.type))
+        grpc_p.create_dataset('k_vector', data=np.asmatrix(np.asarray(k_vector)), dtype=np.float32)
         grpc_p.create_dataset('timestep', data=timestep, dtype=np.float32)
 
     if calculation.get_conductivity_dc:
