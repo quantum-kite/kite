@@ -526,6 +526,34 @@ class Calculation:
         self._dos.append({'num_points': num_points, 'num_moments': num_moments, 'num_random': num_random,
                           'num_disorder': num_disorder})
 
+    def gaussian_wave_packet(self, num_points, num_moments, timestep, k_vector, spinor, width, mean_value, num_disorder=1):
+        """Calculate the density of states as a function of energy
+
+        Parameters
+        ----------
+        num_points : int
+            Number of energy point inside the spectrum at which the DOS will be calculated.
+        num_moments : int
+            Number of polynomials in the Chebyshev expansion.
+        timestep : float
+            Timestep for calculation of time evolution.
+        k_vector : np.array
+            Different wave vectors, components coresponding to vectors b0 and b1.
+        spinor : np.array
+            Spinors for each of the k vectors.
+        width : float
+            Width of the gaussian.
+        mean_value : [float, float]
+            Mean value of the gaussian envelope.
+        num_disorder : int
+            Number of different disorder realisations.
+        """
+
+        self._gaussian_wave_packet.append(
+            {'num_points': num_points, 'num_moments': num_moments,
+             'timestep': timestep, 'num_disorder': num_disorder, 'spinor': spinor, 'width': width, 'k_vector': k_vector,
+             'mean_value': mean_value})
+
     def special(self, num_points, num_moments, bra, dimension_bra, starting_index_bra,
                 ket, dimension_ket, starting_index_ket, timestep, num_disorder=1):
         """Calculate the density of states as a function of energy
@@ -562,31 +590,6 @@ class Calculation:
 
     def conductivity_dc(self, direction, num_points, num_moments, num_random, num_disorder=1, temperature=0):
         """Calculate the density of states as a function of energy
-
-        Parameters
-        ----------
-        num_points : int
-            Number of energy point inside the spectrum at which the DOS will be calculated.
-        num_moments : int
-            Number of polynomials in the Chebyshev expansion.
-        timestep : float
-            Timestep for calculation of time evolution.
-        k_vector : np.array
-            Different wave vectors, components coresponding to vectors b0 and b1.
-        spinor : np.array
-            Spinors for each of the k vectors.
-        width : float
-            Width of the gaussian.
-        mean_value : [float, float]
-            Mean value of the gaussian envelope.
-        num_disorder : int
-            Number of different disorder realisations.
-        """
-
-        self._gaussian_wave_packet.append(
-            {'num_points': num_points, 'num_moments': num_moments,
-             'timestep': timestep, 'num_disorder': num_disorder, 'spinor': spinor, 'width': width, 'k_vector': k_vector,
-             'mean_value': mean_value})
 
         Parameters
         ----------
