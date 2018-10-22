@@ -56,6 +56,7 @@ public:
     
   
   void initiate_vector() {};
+  void build_wave_packet(Eigen::Matrix<double,-1,-1> & k, Eigen::Matrix<T,-1,-1> & psi0, double & sigma) {};
   void initiate_from_data(int &, int *,  std::vector<T> &) {};
   template <unsigned MULT>
   void Multiply(){};

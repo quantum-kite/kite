@@ -13,6 +13,7 @@ struct GLOBAL_VARIABLES {
   std::vector<T> hopping;
   std::vector<std::size_t>    element;
   std::vector<T> U;
+  T soma; 
 
   // Averages
   Eigen::Array <T, Eigen::Dynamic, Eigen::Dynamic> mu;

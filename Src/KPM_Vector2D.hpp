@@ -169,6 +169,63 @@ public:
 	    v(x.set({i0,i1,io}).index, index) = data.at( j0 + j1*size + io*size*size );
 	  }
   };
+
+  void build_wave_packet(Eigen::Matrix<double,-1,-1> & k, Eigen::Matrix<T,-1,-1> & psi0, double & sigma)
+  {
+    index = 0;
+    Coordinates<std::size_t, 3> x(r.Ld), z(r.Lt);
+    Eigen::Matrix<T,-1,-1>  sum(r.Orb, 1);
+    Eigen::Map<Eigen::Matrix<std::size_t,2, 1>> vv(z.coord);
+    Eigen::Matrix<double, 1, 2> va;
+    T soma = assign_value<T> (0,0);
+
+    
+    double a00 = r.rLat.col(0).transpose()*r.rLat.col(0);
+    double a11 = r.rLat.col(1).transpose()*r.rLat.col(1);
+    double a01 = r.rLat.col(0).transpose()*r.rLat.col(1);
+    
+    for(std::size_t i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1++)
+      for(std::size_t i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0++)
+	{
+	  x.set({i0,i1,std::size_t(0)});
+	  r.convertCoordinates(z,x);
+	  double n1 = (z.coord[1] - r.Lt[1]/2.)/sigma;
+	  double n0 = (z.coord[0] - r.Lt[0]/2.)/sigma;
+	  double gauss = n0*n0 * a00 + n1*n1 * a11 + 2*n0*n1*a01;
+	  sum.setZero();
+	  va = vv.cast<double>().transpose();
+	  for(int ik = 0; ik < psi0.cols(); ik++)
+	    {
+	      double xx = va * k.col(ik);
+	      sum += (psi0.col(ik) * exp(assign_value<T>(-gauss, 2*M_PI *xx )));
+	    }
+	  
+	  for(std::size_t io = 0; io < r.Orb; io++)
+	    {
+	      x.set({i0,i1,io});
+	      v(x.index, 0) = sum(io,0);
+	      soma += sum(io,0) * std::conj(sum(io,0));
+	    }
+	}
+    
+#pragma omp master
+    simul.Global.soma = assign_value<T> (0,0);
+#pragma omp barrier
+#pragma omp critical
+    simul.Global.soma += soma;
+#pragma omp barrier
+    soma = simul.Global.soma;
+    value_type soma2 = sqrt(std::real(soma));
+    
+    for(std::size_t io = 0; io < r.Orb; io++)
+      for(std::size_t i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1++)
+	for(std::size_t i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0++)
+	  {
+	    x.set({i0,i1,io});
+	    v(x.index, 0) /= soma2;
+	  }
+  }
+
   
   template < unsigned MULT,bool VELOCITY> 
   void build_regular_phases(int i1, unsigned axis)
