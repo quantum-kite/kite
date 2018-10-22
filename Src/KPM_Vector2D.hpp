@@ -204,7 +204,7 @@ public:
 	    {
 	      x.set({i0,i1,io});
 	      v(x.index, 0) = sum(io,0);
-	      soma += sum(io,0) * std::conj(sum(io,0));
+	      soma += assign_value<T> ( std::real(sum(io,0) * std::conj(sum(io,0)) ), 0); 
 	    }
 	}
     

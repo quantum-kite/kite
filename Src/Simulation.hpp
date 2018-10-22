@@ -1418,7 +1418,7 @@ void Gaussian_Wave_Packet()
       {
 	sum_bra.v.setZero();
 	sum_ket.v.setZero();
-	
+
 	sum_bra.build_wave_packet(k_vector, spinor, width);
 	sum_ket.v.col(0) = sum_bra.v.col(0);
 	h.generate_disorder();
@@ -1495,10 +1495,11 @@ void Gaussian_Wave_Packet()
     
 #pragma omp master
     {
+      std::cout << name << std::endl;
       H5::H5File * file = new H5::H5File(name, H5F_ACC_RDWR);
-      write_hdf5(Global.avg_x, file, (char *) "/Calculation/special/Sx");
-      write_hdf5(Global.avg_y, file, (char *) "/Calculation/special/Sy");
-      write_hdf5(Global.avg_z, file, (char *) "/Calculation/special/Sz");
+      write_hdf5(Global.avg_x, file, (char *) "/Calculation/gaussian_wave_packet/Sx");
+      write_hdf5(Global.avg_y, file, (char *) "/Calculation/gaussian_wave_packet/Sy");
+      write_hdf5(Global.avg_z, file, (char *) "/Calculation/gaussian_wave_packet/Sz");
 
 
       for(unsigned i = 0; i < D; i++)
@@ -1506,7 +1507,7 @@ void Gaussian_Wave_Packet()
 	  std::string orient = "xyz";
 	  char name[200];
 	  avg_z.col(0) = Global.avg_results.row(2*i) ;
-	  sprintf(name,"/Calculation/special/mean_value%c", orient.at(i));
+	  sprintf(name,"/Calculation/gaussian_wave_packet/mean_value%c", orient.at(i));
 	  write_hdf5(avg_z, file, name);
 	}
       
@@ -1515,7 +1516,7 @@ void Gaussian_Wave_Packet()
 	  std::string orient = "xyz";
 	  char name[200];
 	  avg_z.col(0) = Global.avg_results.row(2*i + 1) - Global.avg_results.row(2*i)*Global.avg_results.row(2*i);
-	  sprintf(name,"/Calculation/special/Var%c", orient.at(i));
+	  sprintf(name,"/Calculation/gaussian_wave_packet/Var%c", orient.at(i));
 			  
 	  write_hdf5(avg_z, file, name);
 	}
