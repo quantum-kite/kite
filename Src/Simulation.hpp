@@ -56,6 +56,7 @@ public:
     
     omp_set_num_threads(rglobal.n_threads);
     debug_message("Starting parallelization\n");
+    int calculate_wavepacket = 0;
 #pragma omp parallel default(shared)
     {
       Simulation<T,D> simul(name, Global);
@@ -126,8 +127,32 @@ public:
 	//  simul.Special();
 
 #pragma omp barrier
-      simul.Gaussian_Wave_Packet();
+
+
+
+      // Check if the Gaussian_Wave_Packet needs to be calculated
+      //H5::Exception::dontPrint();
+#pragma omp master
+{
+      try{
+        H5::H5File * file = new H5::H5File(name, H5F_ACC_RDONLY);
+        int dummy_var;
+        get_hdf5<int>(&dummy_var, file, (char *) "/Calculation/gaussian_wave_packet/NumDisorder");
+        file->close();  
+        delete file;
+        calculate_wavepacket = 1;
+      } catch(H5::Exception& e) {debug_message("Wavepacket: no need to calculate.\n");}
+}
       
+      // Now calculate it
+#pragma omp barrier
+      if(calculate_wavepacket)
+        simul.Gaussian_Wave_Packet();
+
+
+
+
+
     }
     debug_message("Left global_simulation\n");
   };
