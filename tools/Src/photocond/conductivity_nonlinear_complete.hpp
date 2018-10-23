@@ -6,9 +6,6 @@
 /****************************************************************/
 
 #include "../headers.hpp"
-#ifndef PRINTALL
-#define PRINTALL 1
-#endif
 
 using std::cout;
 using namespace H5;
@@ -34,11 +31,11 @@ class conductivity_nonlinear{
     std::string dirString; 
 
     // Post-processing parameters
-    int print_all_terms;
     std::complex<T> imaginary;
     std::string filename;
     double temperature;
     double ratio;
+    int print_all;
     T beta;
     T e_fermi;
     T scat;
@@ -245,6 +242,7 @@ void conductivity_nonlinear<T, DIM>::override_parameters(){
     if(variables.CondOpt2_Temp != -8888)     temperature = variables.CondOpt2_Temp/systemInfo.energy_scale;
     if(variables.CondOpt2_NumEnergies != -1) N_energies  = variables.CondOpt2_NumEnergies;
     if(variables.CondOpt2_ratio != 8.8888)   ratio       = variables.CondOpt2_ratio;
+    if(variables.CondOpt2_print_all != -2)   print_all   = variables.CondOpt2_print_all;
     if(variables.CondOpt2_FreqMax != -8888)  maxFreq     = variables.CondOpt2_FreqMax/systemInfo.energy_scale;
     if(variables.CondOpt2_FreqMin != -8888)  minFreq     = variables.CondOpt2_FreqMin/systemInfo.energy_scale;
     if(variables.CondOpt2_NumFreq != -1)     N_omegas    = variables.CondOpt2_NumFreq;
@@ -258,6 +256,7 @@ template <typename T, unsigned DIM>
 void conductivity_nonlinear<T, DIM>::set_default_parameters(){
     temperature = 0.01/systemInfo.energy_scale; 
     ratio       = 1.0;
+    print_all   = 0;
     N_energies  = 512; 
     lim         = 0.995;
     maxFreq     = 7.0/systemInfo.energy_scale; 
@@ -412,20 +411,19 @@ void conductivity_nonlinear<U, DIM>::calculate_photo(){
 
   myfile.open(filename);
 
-  print_all_terms = 1;
-  if(print_all_terms){
-    myfile0.open("photocond0.dat");
-    myfile1.open("photocond1.dat");
-    myfile2.open("photocond2.dat");
-    myfile3.open("photocond_RR_AA.dat");
-    myfile4.open("photocond_RA.dat");
+  if(print_all){
+    myfile0.open(filename + "0");
+    myfile1.open(filename + "1");
+    myfile2.open(filename + "2");
+    myfile3.open(filename + "RR_AA");
+    myfile4.open(filename + "RA");
   }
 
 
   for(int i=0; i < N_omegas; i++){
     freq = std::real(frequencies(i))*systemInfo.energy_scale;
     myfile  << freq << " " << cond.real()(i) << " " << cond.imag()(i) << "\n";
-    if(print_all_terms){
+    if(print_all){
       myfile0 << freq << " " << cond0.real()(i) << " " << cond0.imag()(i) << "\n";
       myfile1 << freq << " " << cond1.real()(i) << " " << cond1.imag()(i) << "\n";
       myfile2 << freq << " " << cond2.real()(i) << " " << cond2.imag()(i) << "\n";
@@ -516,23 +514,22 @@ void conductivity_nonlinear<U, DIM>::calculate_general(){
   std::ofstream myfile_shg;
   std::ofstream myfile3shg1, myfile3shg2, myfile3shg3, myfile2shg, myfile1shg;
 
-  myfile_shg.open(filename + "shg");
+  myfile_shg.open(filename);
 
-  print_all_terms = 1;
-  if(print_all_terms){
+  if(print_all){
 
-    myfile3shg1.open("nonlinear_cond_RA_shg.dat");
-    myfile3shg2.open("nonlinear_cond_RR_shg.dat");
-    myfile3shg3.open("nonlinear_cond_AA_shg.dat");
-    myfile2shg.open("nonlinear_cond2shg.dat");
-    myfile1shg.open("nonlinear_cond1shg.dat");
+    myfile3shg1.open(filename + "RA");
+    myfile3shg2.open(filename + "RR");
+    myfile3shg3.open(filename + "AA");
+    myfile2shg.open(filename + "2");
+    myfile1shg.open(filename + "1");
   }
 
 
   for(int i=0; i < N_omegas; i++){
     freq = std::real(frequencies(i))*systemInfo.energy_scale;
     myfile_shg  << freq << " " << cond_shg.real()(i) << " " << cond_shg.imag()(i) << "\n";
-    if(print_all_terms){
+    if(print_all){
 
       myfile3shg1 << freq << " " << cond3shg1.real()(i) << " " << cond3shg1.imag()(i) << "\n";
       myfile3shg2 << freq << " " << cond3shg2.real()(i) << " " << cond3shg2.imag()(i) << "\n";

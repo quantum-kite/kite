@@ -193,7 +193,6 @@ Eigen::Matrix<std::complex<U>, -1, -1> conductivity_nonlinear<U, DIM>::Gamma3shg
     
     
     U w1, w2;
-    std::cout << "scat: " << scat << "\n";
     for(int w = 0; w < N_omegas; w++){
       w1 = frequencies2(w,0);
       w2 = frequencies2(w,1);
