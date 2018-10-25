@@ -1322,11 +1322,11 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
 
     grp_dis = grp.create_group('Disorder')
 
-    present = disorder._orbital > -1
-    len_orb = np.max(np.sum(present, axis=0))
-    disorder._orbital = disorder._orbital[0:len_orb, :]
-
     if disorder:
+        present = disorder._orbital > -1
+        len_orb = np.max(np.sum(present, axis=0))
+        disorder._orbital = disorder._orbital[0:len_orb, :]
+
         grp_dis.create_dataset('OnsiteDisorderModelType', data=disorder._type_id, dtype=np.int32)
         grp_dis.create_dataset('OrbitalNum', data=disorder._orbital, dtype=np.int32)
         # no need to substract config.energy_scale from mean value as it's already subtracted once from onsite energy
