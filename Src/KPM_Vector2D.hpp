@@ -176,28 +176,44 @@ public:
     Coordinates<std::size_t, 3> x(r.Ld), z(r.Lt);
     Eigen::Matrix<T,-1,-1>  sum(r.Orb, 1);
     Eigen::Map<Eigen::Matrix<std::size_t,2, 1>> vv(z.coord);
-    Eigen::Matrix<double, 1, 2> va;
+    Eigen::Matrix<double, 1, 2> va , vb;
+    Eigen::Matrix<double, -1,-1> phase(1, psi0.cols());
     T soma = assign_value<T> (0,0);
 
+    vb(0,0) = r.Lt[0]/2;
+    vb(0,1) = r.Lt[1]/2;
     
     double a00 = r.rLat.col(0).transpose()*r.rLat.col(0);
     double a11 = r.rLat.col(1).transpose()*r.rLat.col(1);
     double a01 = r.rLat.col(0).transpose()*r.rLat.col(1);
     
+#pragma omp master 
+    {
+      simul.Global.mu = Eigen::Matrix<T,-1,-1>(psi0.cols(), 1);
+      
+      for(int ik = 0; ik < psi0.cols(); ik++)
+	simul.Global.mu(ik, 0) = assign_value<T>( simul.rnd.get(), 0 );
+    }
+#pragma omp barrier
+
+#pragma omp critical
+    for(int ik = 0; ik < psi0.cols(); ik++)
+      phase(0,ik)  = std::real(simul.Global.mu(ik, 0)) ;
+#pragma omp barrier
     for(std::size_t i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1++)
       for(std::size_t i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0++)
 	{
 	  x.set({i0,i1,std::size_t(0)});
 	  r.convertCoordinates(z,x);
-	  double n1 = (z.coord[1] - r.Lt[1]/2.)/sigma;
-	  double n0 = (z.coord[0] - r.Lt[0]/2.)/sigma;
+	  double n1 = (double(z.coord[1]) - double(r.Lt[1])/2.)/sigma;
+	  double n0 = (double(z.coord[0]) - double(r.Lt[0])/2.)/sigma;
 	  double gauss = n0*n0 * a00 + n1*n1 * a11 + 2*n0*n1*a01;
 	  sum.setZero();
-	  va = vv.cast<double>().transpose();
+	  va = vv.cast<double>().transpose() - vb;
 	  for(int ik = 0; ik < psi0.cols(); ik++)
 	    {
 	      double xx = va * k.col(ik);
-	      sum += (psi0.col(ik) * exp(assign_value<T>(-gauss, 2*M_PI *xx )));
+      	      sum += (psi0.col(ik) * exp(assign_value<T>(-0.5*gauss, 2*M_PI * (xx + phase(0,ik) ) )) );
 	    }
 	  
 	  for(std::size_t io = 0; io < r.Orb; io++)
