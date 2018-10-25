@@ -384,7 +384,6 @@ class Disorder:
         for idx_sub, sub_name in enumerate(sublattice_name):
             if sub_name not in names:
                 raise SystemExit('Desired sublattice doesnt exist in the chosen lattice! ')
-            print(sub_name)
             indx = names.index(sub_name)
             lattice_sub = sublattices[indx]
             size_orb = self._num_orbitals[lattice_sub.alias_id]
@@ -433,7 +432,6 @@ class Disorder:
             self._orbital = chosen_orbitals_single
         else:
             self._orbital = np.column_stack((self._orbital, chosen_orbitals_single))
-        print(self._orbital)
 
 
 class Modification:
@@ -1325,6 +1323,10 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
     grp_dis = grp.create_group('Disorder')
 
     if disorder:
+        present = disorder._orbital > -1
+        len_orb = np.max(np.sum(present, axis=0))
+        disorder._orbital = disorder._orbital[0:len_orb, :]
+
         grp_dis.create_dataset('OnsiteDisorderModelType', data=disorder._type_id, dtype=np.int32)
         grp_dis.create_dataset('OrbitalNum', data=disorder._orbital, dtype=np.int32)
         # no need to substract config.energy_scale from mean value as it's already subtracted once from onsite energy
