@@ -384,7 +384,6 @@ class Disorder:
         for idx_sub, sub_name in enumerate(sublattice_name):
             if sub_name not in names:
                 raise SystemExit('Desired sublattice doesnt exist in the chosen lattice! ')
-            print(sub_name)
             indx = names.index(sub_name)
             lattice_sub = sublattices[indx]
             size_orb = self._num_orbitals[lattice_sub.alias_id]
@@ -433,7 +432,6 @@ class Disorder:
             self._orbital = chosen_orbitals_single
         else:
             self._orbital = np.column_stack((self._orbital, chosen_orbitals_single))
-        print(self._orbital)
 
 
 class Modification:
