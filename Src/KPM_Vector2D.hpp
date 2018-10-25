@@ -56,19 +56,19 @@ public:
     
     for(std::size_t io = 0; io < r.Orb; io++)
       {
-	d = 0;
-	max[d] =  r.ld[1];
-	stride[d]  = r.Ld[0];
-	stride_ghosts[d] = 1;
+	d                   = 0;
+	max[d]              = r.ld[1];
+	stride[d]           = r.Ld[0];
+	stride_ghosts[d]    = 1;
 	MemIndBeg[d][0][io] = z.set({std::size_t(NGHOSTS),               std::size_t(NGHOSTS), io}).index;   // From the index Starting here --- Right
 	MemIndEnd[d][0][io] = z.set({std::size_t(0),                     std::size_t(NGHOSTS), io}).index;   //   To the index Starting here --- Right
 	MemIndBeg[d][1][io] = z.set({std::size_t(r.Ld[0] - 2 * NGHOSTS), std::size_t(NGHOSTS), io}).index;   // From the index Starting here --- Left
 	MemIndEnd[d][1][io] = z.set({std::size_t(r.Ld[0] - NGHOSTS),     std::size_t(NGHOSTS), io}).index;   //   To the index Starting here --- Left
 	
-	d = 1;
-	max[d] =  r.Ld[0];
-	stride[d] = 1;
-	stride_ghosts[d] = r.Ld[0];
+	d                   = 1;
+	max[d]              = r.Ld[0];
+	stride[d]           = 1;
+	stride_ghosts[d]    = r.Ld[0];
 	MemIndBeg[d][0][io] = z.set({std::size_t(0), std::size_t(NGHOSTS),             io}).index;          // From the index Starting here --- Bottom
 	MemIndEnd[d][0][io] = z.set({std::size_t(0), std::size_t(0),                   io}).index;          //   To the index Starting here --- Bottom
 	MemIndBeg[d][1][io] = z.set({std::size_t(0), std::size_t(r.Ld[1] - 2*NGHOSTS), io}).index;          // From the index Starting here --- Top
