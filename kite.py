@@ -359,15 +359,15 @@ class Disorder:
 
     # class method that introduces the disorder to the lattice
     def add_disorder(self, sublattice, dis_type, mean_value, standard_deviation=0.):
-        if isinstance(dis_type, list):
-            if isinstance(sublattice, list):
-                for indx, name in enumerate(sublattice):
-                    self.add_local_disorder(name, dis_type[indx], mean_value[indx], standard_deviation[indx])
-            else:
-                self.add_local_disorder(sublattice, dis_type, mean_value, standard_deviation)
+        # make lists
+        if not (isinstance(sublattice, list)):
+            sublattice = [sublattice]
+        if not (isinstance(dis_type, list)):
+            dis_type = [dis_type]
+            mean_value = [mean_value]
+            standard_deviation = [standard_deviation]
 
-        else:
-            self.add_local_disorder(sublattice, [dis_type], [mean_value], [standard_deviation])
+        self.add_local_disorder(sublattice, dis_type, mean_value, standard_deviation)
 
     def add_local_disorder(self, sublattice_name, dis_type, mean_value, standard_deviation):
 
@@ -375,61 +375,65 @@ class Disorder:
         space_size = vectors.shape[0]
 
         names, sublattices = zip(*self._lattice.sublattices.items())
+        chosen_orbitals_single = -1 * np.ones((self._num_orbitals_total, len(dis_type)))  # automatically set to -1
 
-        if sublattice_name not in names:
-            raise SystemExit('Desired sublattice doesnt exist in the chosen lattice! ')
-        indx = names.index(sublattice_name)
-        lattice_sub = sublattices[indx]
-        size_orb = self._num_orbitals[lattice_sub.alias_id]
+        orbital_dis_mean = []
+        orbital_dis_stdv = []
+        orbital_dis_type_id = []
 
-        hopping = {'relative_index': np.zeros(space_size, dtype=np.int32), 'from_id': lattice_sub.alias_id,
-                   'to_id': lattice_sub.alias_id, 'mean_value': lattice_sub.energy}
+        for idx_sub, sub_name in enumerate(sublattice_name):
+            if sub_name not in names:
+                raise SystemExit('Desired sublattice doesnt exist in the chosen lattice! ')
+            print(sub_name)
+            indx = names.index(sub_name)
+            lattice_sub = sublattices[indx]
+            size_orb = self._num_orbitals[lattice_sub.alias_id]
 
-        # number of orbitals before i-th sublattice, where is is the array index
-        orbitals_before = self._num_orbitals_before
+            hopping = {'relative_index': np.zeros(space_size, dtype=np.int32), 'from_id': lattice_sub.alias_id,
+                       'to_id': lattice_sub.alias_id, 'mean_value': lattice_sub.energy}
 
-        orbital_from = self._orbital
-        orbital_to = []
-        orbital_dis_mean = self._mean
-        orbital_dis_stdv = self._stdv
-        orbital_dis_type = self._type
-        orbital_dis_type_id = self._type_id
+            # number of orbitals before i-th sublattice, where is is the array index
+            orbitals_before = self._num_orbitals_before
 
-        dis_number = {'Gaussian': 1, 'Uniform': 2, 'Deterministic': 3, 'gaussian': 1, 'uniform': 2, 'deterministic': 3}
-        for index, it in enumerate(mean_value):
-            relative_move = np.dot(hopping['relative_index'] + 1,
-                                   3 ** np.linspace(0, space_size - 1, space_size, dtype=np.int32))
-            if len(mean_value) > 1:
-                orbital_from.append(orbitals_before[hopping['from_id']] + index)
-                orbital_to.append(relative_move + (orbitals_before[hopping['to_id']] + index) * 3 ** space_size)
-            else:
-                orbital_from.append(hopping['from_id'])
-                orbital_to.append(relative_move + hopping['to_id'] * 3 ** space_size)
-            orbital_dis_mean.append(it)
-            orbital_dis_stdv.append(standard_deviation[index])
-            orbital_dis_type.append(dis_type[index])
-            if dis_type[index] in dis_number:
-                orbital_dis_type_id.append(dis_number[dis_type[index]])
-                if dis_type[index] == 'Deterministic' or dis_type[index] == 'deterministic':
-                    if standard_deviation[index] != 0:
-                        raise SystemExit(
-                            'Standard deviation of deterministic disorder must be 0.')
-            else:
-                raise SystemExit(
-                    'Disorder not present! Try between Gaussian, Deterministic, and Uniform case insensitive ')
+            orbital_from = []
+            orbital_dis_mean = []
+            orbital_dis_stdv = []
+            orbital_dis_type_id = []
 
-        if not (all(np.asarray(i).shape == size_orb for i in [dis_type, mean_value, standard_deviation])):
-            print('Shape of disorder', len(dis_type), len(mean_value), len(standard_deviation),
-                  'is different than the number of orbitals at sublattice ', sublattice_name, 'which is', size_orb,
-                  '\n')
-            raise SystemExit('All parameters should have the same length! ')
+            dis_number = {'Gaussian': 1, 'Uniform': 2, 'Deterministic': 3, 'gaussian': 1, 'uniform': 2,
+                          'deterministic': 3}
+            for index, it in enumerate(mean_value):
+                if len(mean_value) > 1:
+                    chosen_orbitals_single[idx_sub, index] = orbitals_before[hopping['from_id']] + index
+                else:
+                    chosen_orbitals_single[idx_sub, index] = hopping['from_id']
+                orbital_dis_mean.append(it)
+                orbital_dis_stdv.append(standard_deviation[index])
+                if dis_type[index] in dis_number:
+                    orbital_dis_type_id.append(dis_number[dis_type[index]])
+                    if dis_type[index] == 'Deterministic' or dis_type[index] == 'deterministic':
+                        if standard_deviation[index] != 0:
+                            raise SystemExit(
+                                'Standard deviation of deterministic disorder must be 0.')
+                else:
+                    raise SystemExit(
+                        'Disorder not present! Try between Gaussian, Deterministic, and Uniform case insensitive ')
 
-        self._sub_name.append(sublattice_name * len(mean_value))
-        self._type = orbital_dis_type
-        self._type_id = orbital_dis_type_id
-        self._mean = orbital_dis_mean
-        self._stdv = orbital_dis_stdv
-        self._orbital = orbital_from
+            if not (all(np.asarray(i).shape == size_orb for i in [dis_type, mean_value, standard_deviation])):
+                print('Shape of disorder', len(dis_type), len(mean_value), len(standard_deviation),
+                      'is different than the number of orbitals at sublattice ', sublattice_name, 'which is', size_orb,
+                      '\n')
+                raise SystemExit('All parameters should have the same length! ')
+
+        self._type_id.extend(orbital_dis_type_id)
+        self._mean.extend(orbital_dis_mean)
+        self._stdv.extend(orbital_dis_stdv)
+
+        if len(self._orbital) == 0:
+            self._orbital = chosen_orbitals_single
+        else:
+            self._orbital = np.column_stack((self._orbital, chosen_orbitals_single))
+        print(self._orbital)
 
 
 class Modification:
