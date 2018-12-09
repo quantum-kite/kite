@@ -24,6 +24,7 @@ struct GLOBAL_VARIABLES {
   Eigen::Array <T, Eigen::Dynamic, Eigen::Dynamic> avg_x;
   Eigen::Array <T, Eigen::Dynamic, Eigen::Dynamic> avg_y;
   Eigen::Array <T, Eigen::Dynamic, Eigen::Dynamic> avg_z;
+  Eigen::Array <T, Eigen::Dynamic, Eigen::Dynamic> avg_ident;
   Eigen::Array <T, Eigen::Dynamic, Eigen::Dynamic> avg_results;
   
   double kpm_iteration_time;
