@@ -521,7 +521,8 @@ class Calculation:
         self._dos.append({'num_points': num_points, 'num_moments': num_moments, 'num_random': num_random,
                           'num_disorder': num_disorder})
 
-    def gaussian_wave_packet(self, num_points, num_moments, timestep, k_vector, spinor, width, mean_value, num_disorder=1):
+    def gaussian_wave_packet(self, num_points, num_moments, timestep, k_vector, spinor, width, mean_value,
+                             num_disorder=1, **kwargs):
         """Calculate the density of states as a function of energy
 
         Parameters
@@ -542,12 +543,17 @@ class Calculation:
             Mean value of the gaussian envelope.
         num_disorder : int
             Number of different disorder realisations.
+
+            Optional parameters, forward probing point, defined with x, y coordinate were the wavepacket will be checked
+            at different timesteps.
+
         """
+        probing_point = kwargs.get('probing_point', 0)
 
         self._gaussian_wave_packet.append(
             {'num_points': num_points, 'num_moments': num_moments,
              'timestep': timestep, 'num_disorder': num_disorder, 'spinor': spinor, 'width': width, 'k_vector': k_vector,
-             'mean_value': mean_value})
+             'mean_value': mean_value, 'probing_point': probing_point})
 
     def conductivity_dc(self, direction, num_points, num_moments, num_random, num_disorder=1, temperature=0):
         """Calculate the density of states as a function of energy
@@ -1395,7 +1401,8 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
     if calculation.get_gaussian_wave_packet:
         grpc_p = grpc.create_group('gaussian_wave_packet')
 
-        num_moments, num_points, num_disorder, spinor, width, k_vector, mean_value = [], [], [], [], [], [], []
+        num_moments, num_points, num_disorder, spinor, width, k_vector, mean_value, \
+                                                                        probing_points = [], [], [], [], [], [], [], []
         timestep = []
         for single_gauss_wavepacket in calculation.get_gaussian_wave_packet:
             num_moments.append(single_gauss_wavepacket['num_moments'])
@@ -1406,7 +1413,7 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
             k_vector.append(single_gauss_wavepacket['k_vector'])
             mean_value.append(single_gauss_wavepacket['mean_value'])
             timestep.append(single_gauss_wavepacket['timestep'])
-
+            probing_points.append(single_gauss_wavepacket['probing_point'])
         if len(calculation.get_gaussian_wave_packet) > 1:
             raise SystemExit('Only a single function request of each type is currently allowed. Please use another '
                              'configuration file for the same functionality.')
@@ -1414,6 +1421,7 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
         grpc_p.create_dataset('NumPoints', data=num_points, dtype=np.int32)
         grpc_p.create_dataset('NumDisorder', data=num_disorder, dtype=np.int32)
         grpc_p.create_dataset('mean_value', data=mean_value, dtype=np.int32)
+        grpc_p.create_dataset('ProbingPoint', data=np.asmatrix(np.asarray(probing_points)).astype(np.float32))
         grpc_p.create_dataset('width', data=width, dtype=np.float)
         grpc_p.create_dataset('spinor', data=np.asmatrix(np.asarray(spinor)).astype(config.type))
         grpc_p.create_dataset('k_vector', data=np.asmatrix(np.asarray(k_vector)), dtype=np.float32)
