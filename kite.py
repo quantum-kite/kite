@@ -10,7 +10,6 @@
         ##############################################################################      
 """
 
-
 import numpy as np
 import h5py as hp
 import pybinding as pb
@@ -1286,7 +1285,6 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
     else:
         # hoppings
         grp.create_dataset('Hoppings', data=(t.real.astype(config.type)) / config.energy_scale)
-
     # magnetic field
     if modification.magnetic_field or modification.flux:
         print('\n##############################################################################\n')
@@ -1308,15 +1306,15 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
             if multiply_bmin == 0:
                 raise SystemExit('The system is to small for a desired field.')
             print('Closest_field to the one you selected is {:.2f} T'.format(
-                  multiply_bmin * magnetic_field_min))
+                multiply_bmin * magnetic_field_min))
 
         if modification.flux:
             multiply_bmin = int(round(modification.flux * config.leng[1]))
             if multiply_bmin == 0:
                 raise SystemExit('The system is to small for a desired field.')
             print('Closest_field to the one you selected is {:.2f} T which in the terms of flux quantum is {:.2f}'.
-                  format(multiply_bmin * magnetic_field_min, multiply_bmin/config.leng[1]))
-            print('Selected field is {:.2f} T'.format(multiply_bmin*magnetic_field_min))
+                  format(multiply_bmin * magnetic_field_min, multiply_bmin / config.leng[1]))
+            print('Selected field is {:.2f} T'.format(multiply_bmin * magnetic_field_min))
         grp.create_dataset('NUM_GHOST_CORR', data=int(multiply_bmin), dtype='u4')
         print('\n##############################################################################\n')
 
