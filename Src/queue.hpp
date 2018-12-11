@@ -311,6 +311,7 @@ std::vector<singleshot_measurement_queue> fill_singleshot_queue(char *name){
        debug_message("single_shot dc checking if we need to calculate it.\n");
        get_hdf5<int>(&direction, file, (char *)   "/Calculation/singleshot_conductivity_dc/Direction");
        get_hdf5<int>(&NRandom, file, (char *)   "/Calculation/singleshot_conductivity_dc/NumRandoms");
+       get_hdf5<int>(&NDisorder, file, (char *)   "/Calculation/singleshot_conductivity_dc/NumDisorder");
        
        if(direction == 0)
          direction_string = "x,x";

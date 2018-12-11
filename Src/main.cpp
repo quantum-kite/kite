@@ -33,7 +33,7 @@
 // STRIDE is the size of the memory blocks used in the program
 // COMPILE_MAIN is a flag to prevent compilation of unnecessary parts of the code when testing
 #ifndef MEMORY
-#define MEMORY 4
+#define MEMORY 16
 #endif
 
 #ifndef STRIDE
@@ -56,12 +56,15 @@
 #define ESTIMATE_TIME 1
 #endif
 
+#ifndef NUM_GHOST_CORR
+#define NUM_GHOST_CORR 0
+#endif
+
 // other compilation parameters not set in the Makefile
 // NGHOSTS is the extra length in each direction, to be used with the blocks of size STRIDE
 #define PATTERNS  4
 #define NGHOSTS   2
 #define VVERBOSE 0
-#define NUM_GHOST_CORR 0
 #define SSPRINT 0
 
 // These are the verbose and debug messages
