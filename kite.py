@@ -463,11 +463,6 @@ class Calculation:
         return self._gaussian_wave_packet
 
     @property
-    def get_special(self):
-        """Returns the requested special function, with predefined vectors."""
-        return self._special
-
-    @property
     def get_conductivity_dc(self):
         """Returns the requested DC conductivity functions."""
         return self._conductivity_dc
@@ -498,7 +493,6 @@ class Calculation:
         self._conductivity_dc = []
         self._conductivity_optical = []
         self._conductivity_optical_nonlinear = []
-        self._special = []
         self._gaussian_wave_packet = []
         self._singleshot_conductivity_dc = []
 
@@ -554,40 +548,6 @@ class Calculation:
             {'num_points': num_points, 'num_moments': num_moments,
              'timestep': timestep, 'num_disorder': num_disorder, 'spinor': spinor, 'width': width, 'k_vector': k_vector,
              'mean_value': mean_value})
-
-    def special(self, num_points, num_moments, bra, dimension_bra, starting_index_bra,
-                ket, dimension_ket, starting_index_ket, timestep, num_disorder=1):
-        """Calculate the density of states as a function of energy
-
-        Parameters
-        ----------
-        num_points : int
-            Number of energy point inside the spectrum at which the DOS will be calculated.
-        num_moments : int
-            Number of polynomials in the Chebyshev expansion.
-        ket : np.array
-            KET Part of the initial kpm vector.
-        dimension_ket : int
-            Number of unit cells along the direction 0 and 1 for KET vector.
-        starting_index_ket : tuple (int, int) of list
-            Index of the starting unit cell, bottom left corner for KET vector.
-        bra : np.array
-            BRA Part of the initial kpm vector.
-        starting_index_bra : tuple (int, int) of list
-            Index of the starting unit cell, bottom left corner for BRA vector.
-        dimension_bra : int
-            Number of unit cells along the direction 0 and 1 for BRA vector.
-        timestep : float
-            Timestep for calculation of time evolution.
-        num_disorder : int
-            Number of different disorder realisations.
-        """
-
-        self._special.append(
-            {'num_points': num_points, 'num_moments': num_moments,
-             'bra': bra, 'starting_index_bra': starting_index_bra, 'dimension_bra': dimension_bra,
-             'ket': ket, 'starting_index_ket': starting_index_ket, 'dimension_ket': dimension_ket,
-             'timestep':timestep, 'num_disorder': num_disorder})
 
     def conductivity_dc(self, direction, num_points, num_moments, num_random, num_disorder=1, temperature=0):
         """Calculate the density of states as a function of energy
@@ -1431,37 +1391,6 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
         grpc_p.create_dataset('NumRandoms', data=random, dtype=np.int32)
         grpc_p.create_dataset('NumPoints', data=point, dtype=np.int32)
         grpc_p.create_dataset('NumDisorder', data=dis, dtype=np.int32)
-
-    if calculation.get_special:
-        grpc_p = grpc.create_group('special')
-
-        bra, ket, moments, point, dis, temp, direction = [], [], [], [], [], [], []
-        dimension_bra, starting_index_bra, dimension_ket, starting_index_ket, timestep = [], [], [], [], []
-        for single_special in calculation.get_special:
-            moments.append(single_special['num_moments'])
-            point.append(single_special['num_points'])
-            dis.append(single_special['num_disorder'])
-            bra.append(single_special['bra'])
-            ket.append(single_special['ket'])
-            dimension_bra.append(single_special['dimension_bra'])
-            dimension_ket.append(single_special['dimension_ket'])
-            starting_index_bra.append(single_special['starting_index_bra'])
-            starting_index_ket.append(single_special['starting_index_ket'])
-            timestep.append(single_special['timestep'])
-
-        if len(calculation.get_special) > 1:
-            raise SystemExit('Only a single function request of each type is currently allowed. Please use another '
-                             'configuration file for the same functionality.')
-        grpc_p.create_dataset('NumMoments', data=moments, dtype=np.int32)
-        grpc_p.create_dataset('NumPoints', data=point, dtype=np.int32)
-        grpc_p.create_dataset('NumDisorder', data=dis, dtype=np.int32)
-        grpc_p.create_dataset('dimension_bra', data=dimension_bra, dtype=np.int32)
-        grpc_p.create_dataset('starting_index_bra', data=np.asarray(starting_index_bra), dtype=np.int32)
-        grpc_p.create_dataset('dimension_ket', data=dimension_ket, dtype=np.int32)
-        grpc_p.create_dataset('starting_index_ket', data=np.asarray(starting_index_ket), dtype=np.int32)
-        grpc_p.create_dataset('bra', data=np.array(bra).astype(config.type))
-        grpc_p.create_dataset('ket', data=np.array(ket).astype(config.type))
-        grpc_p.create_dataset('timestep', data=timestep, dtype=np.float32)
 
     if calculation.get_gaussian_wave_packet:
         grpc_p = grpc.create_group('gaussian_wave_packet')
