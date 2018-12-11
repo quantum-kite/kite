@@ -28,10 +28,15 @@ class dos{
     // the configuration file
     int NumMoments;
     int NumPoints = -1;
+    std::string filename = "dos.dat";
 
+    int NEnergies;
 
     // information about the Hamiltonian
     system_info<T, DIM> *systemInfo;
+
+    // Input from the shell to override the configuration file
+    shell_input variables;
 
     // Objects required to successfully calculate the conductivity
 		Eigen::Array<std::complex<T>, -1, -1> MU;
@@ -39,19 +44,23 @@ class dos{
 	  std::string dirName;
 
 
-    dos(system_info<T, DIM>&);
-		void read();
+    dos(system_info<T, DIM>&, shell_input &);
+	void fetch_parameters();
+	void override_parameters();
     void calculate();
 	
 };
 
 template <typename T, unsigned DIM>
-dos<T, DIM>::dos(system_info<T, DIM>& sysinfo){
+dos<T, DIM>::dos(system_info<T, DIM>& sysinfo, shell_input & vari){
   std::string name = sysinfo.filename;
 	file = H5::H5File(name.c_str(), H5F_ACC_RDONLY);
 
   // retrieve the information about the Hamiltonian
   systemInfo = &sysinfo;
+
+  // retrieve the shell input
+  variables = vari;
 
   // location of the information about the conductivity
   dirName = "/Calculation/dos/";
@@ -67,9 +76,14 @@ dos<T, DIM>::dos(system_info<T, DIM>& sysinfo){
 
 }
 	
+template <typename T, unsigned DIM>
+void dos<T, DIM>::override_parameters(){
+    if(variables.DOS_NumEnergies != -1) NEnergies   = variables.DOS_NumEnergies;
+    if(variables.DOS_Name != "")        filename    = variables.DOS_Name;
+};
 
 template <typename T, unsigned DIM>
-void dos<T, DIM>::read(){
+void dos<T, DIM>::fetch_parameters(){
 	debug_message("Entered conductivit_dc::read.\n");
 	//This function reads all the data from the hdf5 file that's needed to 
   //calculate the dc conductivity
@@ -90,6 +104,7 @@ void dos<T, DIM>::read(){
   int complex = systemInfo->isComplex;
 
 
+  NEnergies = NumPoints;
   
 
   // Retrieve the Gamma Matrix
@@ -135,7 +150,6 @@ void dos<U, DIM>::calculate(){
   verbose_message("  File name: dos.dat\n");
 
 
-  int NEnergies = NumPoints;
   Eigen::Matrix<U, -1, 1> energies;
   energies = Eigen::Matrix<U, -1, 1>::LinSpaced(NEnergies, Emin, Emax);
 
@@ -159,7 +173,7 @@ void dos<U, DIM>::calculate(){
   // Save the density of states to a file and find its maximum value
   U max = -1;
   std::ofstream myfile;
-  myfile.open("dos.dat");
+  myfile.open(filename);
   for(int i=0; i < NEnergies; i++){
     myfile  << energies(i)*systemInfo->energy_scale << " " << GammaE.real()(i) << " " << GammaE.imag()(i) << "\n";
     if(GammaE.real()(i) > max)

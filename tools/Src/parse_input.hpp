@@ -7,329 +7,452 @@
 
 #include <string>
 #include <vector>
-
-class command{
-  public:
-
-    std::vector<std::string> keys;
-    std::vector<std::string> values;
-    int num_commands;
-    std::string func_to_calculate;
-
-    // These are the valid command names
-    std::string help_key = "--help";
-    std::vector<std::string> valid_keys {"DOS","CondOpt","CondDC"};
-    int num_keys = valid_keys.size();
+#include <algorithm>
 
 
-    // Simulation parameters
-    double fermi_energy;  
-    double         temp;   //temperature
-    int      N_energies;
-    double     max_freq;
-    int         N_freqs;
-    double   scattering;
+class shell_input{
+    // Set of parameters that may be passed through the shell
 
-    bool override_config = true;
-    bool use_defaults = false;
+    public:
+        // DC conductivity
+        double CondDC_Temp; 
+        int CondDC_NumEnergies; 
+        double CondDC_Scat; 
+        double CondDC_FermiMin; 
+        double CondDC_FermiMax; 
+        int CondDC_NumFermi; 
+        std::string CondDC_Name;
+        bool CondDC_Exclusive;
+        bool CondDC_is_required;
+
+        // Optical Conductivity
+        double CondOpt_Temp; 
+        int CondOpt_NumEnergies; 
+        double CondOpt_Scat; 
+        double CondOpt_Fermi; 
+        double CondOpt_FreqMin; 
+        double CondOpt_FreqMax; 
+        int CondOpt_NumFreq; 
+        std::string CondOpt_Name;
+        bool CondOpt_Exclusive;
+        bool CondOpt_is_required;
 
 
-    // Class methods
-    command(std::vector<std::string>, std::vector<std::string>);
-    int check_function();
-    void print_help();
-    std::string find_keys(std::string);
-    void fetch_parameters();
-
-    void ifCondOpt();
-    void ifDOS();
+        // Density of states
+        int DOS_NumEnergies;
+        std::string DOS_Name;
+        bool DOS_Exclusive;
+        bool DOS_is_required;
 
 
+        // 2nd order optical conductivity
+        double CondOpt2_Temp; 
+        int CondOpt2_NumEnergies; 
+        double CondOpt2_Scat; 
+        double CondOpt2_Fermi; 
+        double CondOpt2_FreqMin; 
+        double CondOpt2_FreqMax; 
+        int CondOpt2_NumFreq; 
+        std::string CondOpt2_Name;
+        bool CondOpt2_Exclusive;
+        bool CondOpt2_is_required;
+
+        // Help menu
+        bool help;
+
+        void printHelp(){
+            std::cout << "KITE-Tools command-line configuration guide. Basic usage:\n\n";
+            std::cout << ".KITE-tools h5_file.h5 [options]\n";
+            std::cout << "--help -h    Prints this message\n\n";
+            std::cout << "When run without any more options, KITE-tools will simply read through the h5_file.h5 hdf5 file and find out what needs to be calculated. It will then proceed to calculate all the quantities present in that configuration file using the parameters in that same file, together with some defaults present in the source code. When given options, KITE-tools will still calculate all the quantities requested by the .h5 configuration file, but those parameters may be changed.\n\n";
+            std::cout << "There are four main parameters which may be configured. Each of these has several subparameters associated with them. The main parameters are:\n\n";
+            std::cout << "--DOS        Density of states\n";
+            std::cout << "--CondDC     DC conductivity\n";
+            std::cout << "--CondOpt    Optical conductivity\n";
+            std::cout << "--CondOpt2   Second-order optical conductivity (photoconductivity)\n\n";
+            std::cout << "After each of these keywords, the program will be expecting the subparameters associated with that word (always separated by spaces):\n\n";
+            std::cout << "--DOS      -E              Number of energy points\n";
+            std::cout << "           -N              Name of the output file\n";
+            std::cout << "           -X              Exclusive. Only calculate this quantity\n\n";
+            std::cout << "--CondDC   -E              Number of energy points used in the integration\n";
+            std::cout << "           -T              Temperature\n";
+            std::cout << "           -S              Broadening parameter of the Green's functions\n";
+            std::cout << "           -F min max num  Fermi energies. min and max may be ommited.\n";
+            std::cout << "           -N              Name of the output file\n";
+            std::cout << "           -X              Exclusive. Only calculate this quantity\n\n";
+            std::cout << "--CondOpt  -E              Number of energy points used in the integration\n";
+            std::cout << "           -T              Temperature\n";
+            std::cout << "           -S              Broadening parameter of the Green's functions\n";
+            std::cout << "           -O min max num  Frequencies\n";
+            std::cout << "           -F              Fermi energy\n";
+            std::cout << "           -N              Name of the output file\n";
+            std::cout << "           -X              Exclusive. Only calculate this quantity\n\n";
+            std::cout << "--CondOpt2 -E              Number of energy points used in the integration\n";
+            std::cout << "           -T              Temperature\n";
+            std::cout << "           -S              Broadening parameter of the Green's functions\n";
+            std::cout << "           -O min max num  Frequencies\n";
+            std::cout << "           -F              Fermi energy\n";
+            std::cout << "           -N              Name of the output file\n";
+            std::cout << "           -X              Exclusive. Only calculate this quantity\n\n";
+            std::cout << "All the quantities are in the same units as the ones in the python configuration script. All quantities are double-precision numbers except for the ones representing integers, such as the numbers of points.\n\n";
+            std::cout << "Examples:\n\n";
+            std::cout << "Example 1\n";
+            std::cout << "    ./KITE-tools h5_file.h5 --DOS -E 1024\n";
+            std::cout << "    Processes the .h5 file as usual but ignores the number of energy points in the density of states present there. Instead, KITE-tools will use the value 1024 as soecified in the example.\n\n";
+            std::cout << "Example 2\n";
+            std::cout << "    ./KITE-tools h5_file.h5 --CondDC -E 552 -S 0.01\n";
+            std::cout << "    Processes the .h5 file but uses 552 points for the energy integration and a broadening parameter of 0.01.\n\n";
+            std::cout << "Example 3\n";
+            std::cout << "    ./KITE-tools h5_file.h5 --CondDC -T 0.4 -F 500\n";
+            std::cout << "    Calculates the DC conductivity using a temperature of 0.4 and 500 equidistant Fermi energies spanning the spectrum of the Hamiltonian.\n\n";
+            std::cout << "Example 4\n";
+            std::cout << "    ./KITE-tools h5_file.h --CondDC -F -1.2 2.5 30 --CondOpt -T 93\n";
+            std::cout << "    Calculates the DC conductivity using 30 equidistant Fermi energies in the range [-1.2, 2.5] and the optical conductivity using a temperature of 93.\n";
+            std::cout << "\n";
+            std::cout << "Copyright (C) 2018, M. Andelkovic, L. Covaci, A. Ferreira, S. M. Joao, J. V. Lopes, T. G. Rappoport\n\n";
+            std::cout << "This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.\n\n";
+            std::cout << "This program is distributed in the hope that it will be useful but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.\n";
+        };
+
+        void printDC(){
+
+            // DC Conductivity
+            std::cout << "Printing parameters for the DC conductivity obtained from the shell:\n";
+            if(CondDC_Temp != -1)           std::cout << "    temperature: "                << CondDC_Temp << "\n";
+            if(CondDC_NumEnergies != -1)    std::cout << "    number of energy points: "    << CondDC_NumEnergies << "\n";
+            if(CondDC_Scat != -8888)        std::cout << "    scattering parameter: "       << CondDC_Scat << "\n";
+            if(CondDC_FermiMin != -8888)    std::cout << "    minimum Fermi energy: "       << CondDC_FermiMin << "\n";
+            if(CondDC_FermiMax != -8888)    std::cout << "    maximum Fermi energy: "       << CondDC_FermiMax << "\n";
+            if(CondDC_NumFermi != -1)       std::cout << "    number of Fermi energies: "   << CondDC_NumFermi << "\n";
+            if(CondDC_Name != "")           std::cout << "    name of the output file: "    << CondDC_Name << "\n";
+            if(CondDC_Exclusive == true)    std::cout << "    Exclusive.\n";
+            std::cout << "\n";
+        };
+        void printOpt(){
+            std::cout << "Printing parameters for the Optical Conductivity obtained from the shell:\n";
+            if(CondOpt_Temp != -8888)       std::cout << "    temperature: "                << CondOpt_Temp << "\n";
+            if(CondOpt_NumEnergies != -1)   std::cout << "    number of energy points: "    << CondOpt_NumEnergies << "\n";
+            if(CondOpt_Scat != -8888)       std::cout << "    scattering parameter: "       << CondOpt_Scat << "\n";
+            if(CondOpt_FreqMin != -8888)    std::cout << "    minimum frequency: "          << CondOpt_FreqMin << "\n";
+            if(CondOpt_FreqMax != -8888)    std::cout << "    maximum frequency: "          << CondOpt_FreqMax << "\n";
+            if(CondOpt_NumFreq != -1)       std::cout << "    number of frequencies: "      << CondOpt_NumFreq << "\n";
+            if(CondOpt_Fermi != -8888)      std::cout << "    number of Fermi energies: "   << CondOpt_Fermi << "\n";
+            if(CondOpt_Name != "")          std::cout << "    name of the output file: "    << CondOpt_Name << "\n";
+            if(CondOpt_Exclusive == true)   std::cout << "    Exclusive.\n";
+            std::cout << "\n";
+        };
+
+        void printOpt2(){
+            std::cout << "Printing parameters for the Second-Order Optical conductivity obtained from the shell:\n";
+            if(CondOpt2_Temp != -8888)      std::cout << "    temperature: "                << CondOpt2_Temp << "\n";
+            if(CondOpt2_NumEnergies != -1)  std::cout << "    number of energy points: "    << CondOpt2_NumEnergies << "\n";
+            if(CondOpt2_Scat != -8888)      std::cout << "    scattering parameter: "       << CondOpt2_Scat << "\n";
+            if(CondOpt2_FreqMin != -8888)   std::cout << "    minimum frequency: "          << CondOpt2_FreqMin << "\n";
+            if(CondOpt2_FreqMax != -8888)   std::cout << "    maximum frequency: "          << CondOpt2_FreqMax << "\n";
+            if(CondOpt2_NumFreq != -1)      std::cout << "    number of frequencies: "      << CondOpt2_NumFreq << "\n";
+            if(CondOpt2_Fermi != -8888)     std::cout << "    number of Fermi energies: "   << CondOpt2_Fermi << "\n";
+            if(CondOpt2_Name != "")         std::cout << "    name of the output file: "    << CondOpt2_Name << "\n";
+            if(CondOpt2_Exclusive == true)  std::cout << "    Exclusive.\n";
+            std::cout << "\n";
+        };
+
+        void printDOS(){
+            std::cout << "Printing parameters for the Density of States obtained from the shell:\n";
+            if(DOS_NumEnergies != -1 )      std::cout << "    number of energy points: "    << DOS_NumEnergies << "\n";
+            if(DOS_Name != "")              std::cout << "    name of the output file: "    << DOS_Name << "\n";
+            if(DOS_Exclusive == true)       std::cout << "    Exclusive.\n";
+            std::cout << "\n";
+        };
 };
 
-command::command(std::vector<std::string> input_keys, std::vector<std::string> input_values){
-  // Class constructor
-
-  // check if the sizes of the input keys and values are the same
-  if(input_values.size() != input_keys.size()){
-    std::cout << "There was an error processing the input to the program. The length of \
-      the keys and values obtained from parsing the input to the program is not the same. \
-      Please check that your input is correct. Exiting program. \n";
-    exit(1);
-  }
-
-  // initialize the class's keys and values to the programs's
-  num_commands = input_values.size();
-
-  keys.resize(num_commands);
-  values.resize(num_commands);
-
-  keys = input_keys;
-  values = input_values;
-}
-
-void command::print_help(){
-  // This is the text that appears when the user uses --help as a parameter
-  std::cout << "Usage:\n";
-  std::cout << "--calc \t\tspecify the function to calculate.\n";
-  
-  // exit the program successfully
-  exit(0);
-};
-
-
-int command::check_function(){
-  // check if the function being asked to calculate is one of the valid ones
-  // or if the user used --help
-  // If it's one of the valid ones, then that's the function the user wants to calculate
-  // If there's more than one, the user doesn't know what they're doing and the
-  // program should exit.
-  verbose_message("Checking function to evaluate.\n");
-
-
-  int num_matches = 0;
-  bool need_help = false;
-  for(int i = 0; i < num_commands; i++){
-    for(int j = 0; j < num_keys; j++)
-      if(values.at(i) == valid_keys.at(j)){
-        func_to_calculate = values.at(i);
-        num_matches++;
-      }
-    if(keys.at(i) == help_key)
-      need_help = true;
-  }
-
-
-  verbose_message("Number of matches: "); verbose_message(num_matches);
-  verbose_message("\nUsed --help? "); verbose_message(need_help);
-  verbose_message("\nNumber of commands: ");verbose_message(num_commands);
-  verbose_message("\n");
-
-
-  if(need_help and num_commands == 1)
-    print_help();
-
-  else if(need_help and num_commands > 1){
-    std::cout << "You requested a function to calculate but also the help menu. The";
-    std::cout << " program will print the help menu but will not calculate the function";
-    std::cout << "requested. To calculate the function, please do not request the help menu.\n";
-    print_help();
-  }
-
-  else if(num_matches > 1){
-    std::cout << "Please enter only one function to calculate. Leaving program.\n";
-    exit(1);
-  }
-
-  else if(num_matches == 0){
-    std::cout << "No valid function to calculate was requested. Leaving program.\n";
-    exit(1);
-  }
-
-  verbose_message("The function requested to calculate was ");
-  verbose_message(func_to_calculate);verbose_message("\n");
-
-  return num_matches;
-
-}
-
-void command::fetch_parameters(){
-  // After we know which function to calculate, this method will try to obtian the
-  // required parameters to calculate it from the shell input
-  verbose_message("Entered fetch_parameters\n");
-
-  if(func_to_calculate == "CondOpt") ifCondOpt();
-  if(func_to_calculate == "DOS") ifDOS();
-
-  verbose_message("Left fetch_parameters\n.");
-
-}
-
-
-void command::ifDOS(){
-  // In case the user requested DOS be calculated, some parameters must be present.
-  // This function checks for those parameters. Parameters:
-  // -NE       Number of energy points to use in the integration
-  verbose_message("Entered ifDOS\n");
-
-  // check if indeed the function to calculate is the correct one
-  if(func_to_calculate != "DOS"){
-    std::cout << "Bad usage of the ifDOS function. ";
-    std::cout << "This function is checking for the parameters of 'DOS' but ";
-    std::cout << "func_to_calculate is not 'DOS'. Leaving program.\n";
-    exit(1);
-  }
-
-  N_energies   = stoi(find_keys("-NE"));
-}
-
-void command::ifCondOpt(){
-  // In case the user requested CondOpt be calculated, some parameters must be present.
-  // This function checks for those parameters. Parameters:
-  // -EF       Fermi energy (eV)
-  // -T        Temperature  (K)
-  // -NE       Number of energy points to use in the integration
-  // -MF       Maximum frequency
-  // -NF       Number of frequency points to calculate
-  // -G        Finite scattering parameter (eV)
-  verbose_message("Entered ifCondOpt\n");
-
-  // check if indeed the function to calculate is the correct one
-  if(func_to_calculate != "CondOpt"){
-    std::cout << "Bad usage of the ifCondOpt function. ";
-    std::cout << "This function is checking for the parameters of 'CondOpt' but ";
-    std::cout << "func_to_calculate is not 'CondOpt'. Leaving program.\n";
-    exit(1);
-  }
-  
-  
-
-  fermi_energy = stod(find_keys("-EF"));
-  temp         = stod(find_keys("-T"));
-  N_energies   = stoi(find_keys("-NE"));
-  max_freq     = stod(find_keys("-MF"));
-  N_freqs      = stoi(find_keys("-NF"));
-  scattering   = stod(find_keys("-G"));
-}
-
-std::string command::find_keys(std::string name){
-  // Tries to find 'name' among the parameters passed on to the program
-  verbose_message("Entered find_keys.\n");
+void parse_CondDC(int argc, char *argv[], std::vector<int> & keys_pos, std::vector<int> & keys_len, shell_input & variables);
+void parse_CondOpt(int argc, char *argv[], std::vector<int> & keys_pos, std::vector<int> & keys_len, shell_input & variables);
+void parse_CondOpt2(int argc, char *argv[], std::vector<int> & keys_pos, std::vector<int> & keys_len, shell_input & variables);
+void parse_DOS(int argc, char *argv[], std::vector<int> & keys_pos, std::vector<int> & keys_len, shell_input & variables);
+int get_num_exclusives(shell_input & variables);
 
 
 
-  // Try to find 'name'
-  std::string val;
-  int num_matches = 0;
-  for(int i = 0; i < num_commands; i++){
-    if(name == keys.at(i)){
-      val = values.at(i);
-      num_matches++;
-    }
-  }
-
-  verbose_message("Number of matches: "); verbose_message(num_matches);
-  // Check if there's only one match. Any number different from one means something's wrong
-  if(num_matches == 0){
-    std::cout << "Unable to find " << name << " in the list of parameters for the ";
-    std::cout << "function " << func_to_calculate << ". Leaving program.\n";
-    exit(1);
-  }
-  else if(num_matches > 1){
-    std::cout << "More than one occurence of " << name << " was found. Please provide";
-    std::cout << " only one of each parameter.\n";
-    exit(1);
-  }
-  else{
-    verbose_message("The value found was "); verbose_message(val);verbose_message("\n");
-    verbose_message("Left find_keys.\n");
-    return val;
-  }
-
-  verbose_message("Left find_keys after return.\n");
-}
-
-void parser(int argc, char *argv[]){
+shell_input parser(int argc, char *argv[]){
 	// Processes the input that this program recieves from the command line	
-	
-	std::string *arguments; // Convert it all to strings
-	arguments = new std::string[argc];
-	for(int i=0; i<argc; i++){
-		arguments[i] = argv[i];	
-		std::cout << arguments[i] << std::endl;
-	}
-
-  std::cout << "Finished converting to strings\n" << std::flush;
-
-  // Determine the number of commands (the number of - )
-  int num_commands = 0;
-	for(int cursor = 1; cursor < argc; cursor++)
-    if(arguments[cursor][0]=='-')
-      num_commands++;  
-
-
-
-
-
-
-  std::vector<std::string> keys(num_commands);
-  std::vector<std::string> values(num_commands);
-  //std::string *keys;
-  //std::string *values;
-
-  //keys = new std::string[num_commands];
-  //values = new std::string[num_commands];
-
-  // organize the entries as a series of key-value pairs
-  // the last entry is the name of the configuration file
-  // and the first entry is the name of the executable file
-  bool prev_is_command = 0;
-  int n = -1;
-	for(int cursor = 1; cursor < argc-1; cursor++){
-    std::cout << arguments[cursor] << "\n" <<std::flush;
-    if(arguments[cursor][0]=='-' and !prev_is_command){
-      std::cout << "first if";
-      prev_is_command = 1;
-      n++;
-      keys.at(n) = arguments[cursor];
-    }
-
-    else if(arguments[cursor][0]=='-' and prev_is_command){
-      
-      std::cout << "second if";
-      prev_is_command = 1;
-      values.at(n) = "";
-      n++;
-      keys.at(n) = arguments[cursor];
-    }
-
     
-    else if(arguments[cursor][0]!='-' and prev_is_command){
-      std::cout << "third if";
-      prev_is_command = 0;
-      values.at(n) = arguments[cursor];
+    // Container for the shell input
+    shell_input variables;
+
+
+    // First, find the position of each of the following functions:
+    std::vector<std::string> valid_keys {"--DOS","--CondOpt","--CondDC", "--CondOpt2"};
+    int len = 4;
+    std::vector<int> keys_pos (len, -1);
+    std::vector<int> keys_len (len, -1);
+
+    int m = 0;
+    for(int i = argc-1; i >= 0; i--){
+        m++;
+        std::string arguments = std::string(argv[i]);
+        for(int j = 0; j < len; j++){
+            if(arguments == "--help" or arguments == "-h"){
+                variables.printHelp();
+                exit(0);
+            }
+
+            if(arguments == valid_keys.at(j)){
+                keys_pos.at(j) = i;
+                keys_len.at(j) = m-1;
+                m = 0;
+                break;
+            }
+        }
     }
-    
 
-    else if(arguments[cursor][0]!='-' and !prev_is_command){
-      std::cout << "fourth if";
 
-      std::cout << "Wrong string format. Aborting.\n";
-      exit(0);
+    // Run the input through each of these functions to find the relevant 
+    // parameters to each of them
+    parse_CondDC(argc, argv, keys_pos, keys_len, variables);
+    parse_DOS(argc, argv, keys_pos, keys_len, variables);
+    parse_CondOpt(argc, argv, keys_pos, keys_len, variables);
+    parse_CondOpt2(argc, argv, keys_pos, keys_len, variables);
+
+    // Process the exclusive flag. If there are no exclusive functions, 
+    // all will be calculated. If there's only one, that's the only one
+    // that needs to be calculated. Furthermore, we need to check
+    // whether there is only one exclusive flag
+    variables.CondDC_is_required = false;
+    variables.CondOpt_is_required = false;
+    variables.CondOpt2_is_required = false;
+    variables.DOS_is_required = false;
+
+    int num_exclusives = get_num_exclusives(variables);
+    if(num_exclusives > 1){
+        std::cout << "There can be only one exclusive function. Exiting.\n";
+        exit(1);
+    } else {
+        if(num_exclusives == 1){
+            if(variables.CondDC_Exclusive) variables.CondDC_is_required = true;
+            if(variables.CondOpt_Exclusive) variables.CondOpt_is_required = true;
+            if(variables.CondOpt2_Exclusive) variables.CondOpt2_is_required = true;
+            if(variables.DOS_Exclusive) variables.DOS_is_required = true;
+
+        } else {
+            variables.CondDC_is_required = true;
+            variables.CondOpt_is_required = true;
+            variables.CondOpt2_is_required = true;
+            variables.DOS_is_required = true;
+            }
     }
-  }
 
-  std::cout << "before print\n" << std::flush;
-  for(int i = 0; i < num_commands; i++)
-    std::cout << keys.at(i) << " " << values.at(i) << "\n";
-
-
-  command comm(keys, values);
-  comm.check_function();
-  comm.fetch_parameters();
-  
-
-
-
-  // the number of matches has to be exactly one
-  //std::cout << "number of matches: " << num_matches << "\n";
-  //std::cout << "need help? " << need_help << "\n";
-
-  //if(need_help)
-    //std::cout << "Help Menu: \n to be continued..." << std::endl;
-
-
-
-  
-  //std::cout << "CSTR" << "\n";    
-  
-	
-  
-  
-  
-  //delete[] keys;
-  //delete[] values;
-  delete[] arguments;
+    return variables;
 };
 
+int get_num_exclusives(shell_input & variables){
+    int N_exclusives = 0;
+    if(variables.CondDC_Exclusive)      N_exclusives++;
+    if(variables.CondOpt_Exclusive)     N_exclusives++;
+    if(variables.CondOpt2_Exclusive)    N_exclusives++;
+    if(variables.DOS_Exclusive)         N_exclusives++;
 
+    return N_exclusives;
+};
+
+void parse_CondDC(int argc, char *argv[], std::vector<int> & keys_pos, std::vector<int> & keys_len, shell_input & variables){
+    // This function looks at the command-line input pertaining to CondDC and
+    // finds the parameters for the temperature "t", number of energy points "E", 
+    // scattering parameter "S" and Fermi energy min, max and num "F"
+    
+    double CondDC_Temp = -1;
+    int CondDC_NumEnergies = -1;
+    double CondDC_FermiMin = -8888; // Some stupid values that I hope no-one will ever pick
+    double CondDC_FermiMax = -8888;
+    int CondDC_NumFermi = -1;
+    double CondDC_Scat = -8888;
+    std::string CondDC_Name = "";
+    bool CondDC_Exclusive = false;
+    // Process CondDC
+    int j = 2;
+    int pos = keys_pos.at(j);
+    if(pos != -1){
+        for(int k = 1; k < keys_len.at(j); k++){
+            std::string name = argv[k + pos];
+            std::string n1 = argv[k + pos + 1];
+
+            if(name == "-T")
+                CondDC_Temp = atof(n1.c_str());
+            if(name == "-E")
+                CondDC_NumEnergies = atoi(n1.c_str());
+            if(name == "-S")
+                CondDC_Scat = atof(n1.c_str());
+            if(name == "-N")
+                CondDC_Name = n1;
+            if(name == "-X" or n1 == "-X")
+                CondDC_Exclusive = true;
+            if(name == "-F"){
+                if(k == keys_len.at(j) - 1){
+                    CondDC_NumFermi = atoi(n1.c_str());
+                    continue;
+                } else {
+                    std::string n2 = argv[k + pos + 2];
+                    if(n2 == "-T" or n2 == "-E" or n2 == "-F" or n2 == "-S" or n2 == "-N" or n2 == "-X"){
+                        CondDC_NumFermi = atoi(n1.c_str());
+                    } else {
+                        std::string n3 = argv[k + pos + 3];
+                        CondDC_FermiMin = atof(n1.c_str());
+                        CondDC_FermiMax = atof(n2.c_str());
+                        CondDC_NumFermi = atoi(n3.c_str());
+                    }
+                }
+            }
+        }
+    }
+
+
+
+    variables.CondDC_Temp           = CondDC_Temp; 
+    variables.CondDC_NumEnergies    = CondDC_NumEnergies; 
+    variables.CondDC_Scat           = CondDC_Scat; 
+    variables.CondDC_FermiMin       = CondDC_FermiMin; 
+    variables.CondDC_FermiMax       = CondDC_FermiMax; 
+    variables.CondDC_NumFermi       = CondDC_NumFermi; 
+    variables.CondDC_Name           = CondDC_Name;
+    variables.CondDC_Exclusive      = CondDC_Exclusive;
+
+};
+
+void parse_CondOpt(int argc, char *argv[], std::vector<int> & keys_pos, std::vector<int> & keys_len, shell_input & variables){
+    // This function looks at the command-line input pertaining to CondOpt and
+    // finds the parameters for the temperature "t", number of energy points "E", 
+    // scattering parameter "S", Fermi energy "F" and min_freq, max_freq, num_freqs "O"
+    
+    double CondOpt_Temp = -8888;
+    int CondOpt_NumEnergies = -1;
+    double CondOpt_FreqMin = -8888; // Some stupid values that I hope no-one will every pick
+    double CondOpt_FreqMax = -8888;
+    int CondOpt_NumFreq = -1;
+    double CondOpt_Fermi = -8888;
+    double CondOpt_Scat = -8888;
+    bool CondOpt_Exclusive = false;
+    std::string CondOpt_Name = "";
+    // Process CondOpt
+    int j = 1;
+    int pos = keys_pos.at(j);
+    if(pos != -1){
+        for(int k = 1; k < keys_len.at(j); k++){
+            std::string name = argv[k + pos];
+            std::string n1 = argv[k + pos + 1];
+
+            if(name == "-T")
+                CondOpt_Temp = atof(n1.c_str());
+            if(name == "-E")
+                CondOpt_NumEnergies = atoi(n1.c_str());
+            if(name == "-S")
+                CondOpt_Scat = atof(n1.c_str());
+            if(name == "-N")
+                CondOpt_Name = n1;
+            if(name == "-F")
+                CondOpt_Fermi = atof(n1.c_str());
+            if(name == "-X" or n1 == "-X")
+                CondOpt_Exclusive = true;
+            if(name == "-O"){
+                std::string n2 = argv[k + pos + 2];
+                std::string n3 = argv[k + pos + 3];
+                CondOpt_FreqMin = atof(n1.c_str());
+                CondOpt_FreqMax = atof(n2.c_str());
+                CondOpt_NumFreq = atoi(n3.c_str());
+            }
+        }
+    }
+
+
+
+    variables.CondOpt_Temp          = CondOpt_Temp; 
+    variables.CondOpt_NumEnergies   = CondOpt_NumEnergies; 
+    variables.CondOpt_Scat          = CondOpt_Scat; 
+    variables.CondOpt_Fermi         = CondOpt_Fermi; 
+    variables.CondOpt_FreqMin       = CondOpt_FreqMin; 
+    variables.CondOpt_FreqMax       = CondOpt_FreqMax; 
+    variables.CondOpt_NumFreq       = CondOpt_NumFreq; 
+    variables.CondOpt_Name          = CondOpt_Name; 
+    variables.CondOpt_Exclusive     = CondOpt_Exclusive;
+};
+
+void parse_CondOpt2(int argc, char *argv[], std::vector<int> & keys_pos, std::vector<int> & keys_len, shell_input & variables){
+    // This function looks at the command-line input pertaining to CondOpt2 and
+    // finds the parameters for the temperature "t", number of energy points "E", 
+    // scattering parameter "S", Fermi energy "F" and min_freq, max_freq, num_freqs "O"
+    
+    double CondOpt2_Temp = -8888;
+    int CondOpt2_NumEnergies = -1;
+    double CondOpt2_FreqMin = -8888; // Some stupid values that I hope no-one will ever pick
+    double CondOpt2_FreqMax = -8888;
+    int CondOpt2_NumFreq = -1;
+    int CondOpt2_Fermi = -8888;
+    double CondOpt2_Scat = -8888;
+    bool CondOpt2_Exclusive = false;
+    std::string CondOpt2_Name = "";
+    // Process CondOpt2
+    int j = 3;
+    int pos = keys_pos.at(j);
+    if(pos != -1){
+        for(int k = 1; k < keys_len.at(j); k++){
+            std::string name = argv[k + pos];
+            std::string n1 = argv[k + pos + 1];
+
+            if(name == "-T")
+                CondOpt2_Temp = atof(n1.c_str());
+            if(name == "-E")
+                CondOpt2_NumEnergies = atoi(n1.c_str());
+            if(name == "-S")
+                CondOpt2_Scat = atof(n1.c_str());
+            if(name == "-F")
+                CondOpt2_Fermi = atof(n1.c_str());
+            if(name == "-N")
+                CondOpt2_Name = n1;
+            if(name == "-X" or n1 == "-X")
+                CondOpt2_Exclusive = true;
+            if(name == "-O"){
+                std::string n2 = argv[k + pos + 2];
+                std::string n3 = argv[k + pos + 3];
+                CondOpt2_FreqMin = atof(n1.c_str());
+                CondOpt2_FreqMax = atof(n2.c_str());
+                CondOpt2_NumFreq = atoi(n3.c_str());
+            }
+        }
+    }
+
+
+
+    variables.CondOpt2_Temp         = CondOpt2_Temp; 
+    variables.CondOpt2_NumEnergies  = CondOpt2_NumEnergies; 
+    variables.CondOpt2_Scat         = CondOpt2_Scat; 
+    variables.CondOpt2_Fermi        = CondOpt2_Fermi; 
+    variables.CondOpt2_FreqMin      = CondOpt2_FreqMin; 
+    variables.CondOpt2_FreqMax      = CondOpt2_FreqMax; 
+    variables.CondOpt2_NumFreq      = CondOpt2_NumFreq; 
+    variables.CondOpt2_Name         = CondOpt2_Name; 
+    variables.CondOpt2_Exclusive    = CondOpt2_Exclusive;
+};
+
+void parse_DOS(int argc, char *argv[], std::vector<int> & keys_pos, std::vector<int> & keys_len, shell_input & variables){
+    // This function looks at the command-line input pertaining to CondDC and
+    // finds the parameters for the temperature "t", number of energy points "E", 
+    // scattering parameter "S" and Fermi energy min, max and num "F"
+    
+    int DOS_NumEnergies = -1;
+    std::string DOS_Name = "";
+    bool DOS_Exclusive = false;
+    int pos = keys_pos.at(0);
+    if(pos != -1){
+        for(int k = 1; k < keys_len.at(0); k++){
+            std::string name = argv[k + pos];
+            std::string n1 = argv[k + pos + 1];
+            if(name == "-E")
+                DOS_NumEnergies = atoi(n1.c_str());
+            if(name == "-N")
+                DOS_Name = n1;
+            if(name == "-X" or n1 == "-X")
+                DOS_Exclusive = true;
+        }
+    }
+    variables.DOS_NumEnergies = DOS_NumEnergies; 
+    variables.DOS_Name = DOS_Name;
+    variables.DOS_Exclusive = DOS_Exclusive;
+};

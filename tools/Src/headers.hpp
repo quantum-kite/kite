@@ -6,6 +6,7 @@
 /****************************************************************/
 
 #include <stdio.h>		
+#include <stdlib.h>
 #include <iostream>
 #include <fstream>
 #include <functional>
@@ -15,6 +16,10 @@
 #include <complex>
 #include <string>
 #include <omp.h>
+<<<<<<< HEAD
+
+=======
+>>>>>>> full_code
 
 #define outcol "\033[1;31m"
 #define outres "\033[0m"
