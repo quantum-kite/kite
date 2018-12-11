@@ -132,6 +132,8 @@ public:
     hsize_t dim[2];
 #pragma omp critical
     {
+
+      
       H5::H5File    *file      = new H5::H5File(simul.name, H5F_ACC_RDONLY);
       H5::DataSet   dataset    = H5::DataSet(file->openDataSet("/Hamiltonian/Disorder/OrbitalNum"));
       H5::DataSpace dataspace  = dataset.getSpace();
@@ -157,7 +159,6 @@ public:
     
     std::fill_n ( Anderson_orb_address.begin(), r.Orb, -2 );
     std::fill_n ( U_Orbital.begin(), r.Orb,  0 );
-    
     int sum = 0;
     for (unsigned i = 0; i < model.size(); i++)
       {

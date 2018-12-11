@@ -71,7 +71,6 @@ public:
   void Velocity2( T *, T *, int, int){};
   T VelocityInternalProduct( T *  , T * , int);
   void empty_ghosts(int){}; 
-  
   T get_point(){ return assign_value<T>(0,0);};  
   template <typename U = T>
   typename std::enable_if<is_tt<std::complex, U>::value, U>::type ghosts_correlation2(double phase){return 1;};

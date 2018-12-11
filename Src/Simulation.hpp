@@ -39,7 +39,7 @@ public:
     // Regular quantities to calculate, such as DOS and CondXX
     H5::H5File * file         = new H5::H5File(name, H5F_ACC_RDONLY);
 
-    // Fetch the energy scale
+    // Fetch the energy scale and the magnetic field, if it exists
     get_hdf5<double>(&EnergyScale,  file, (char *)   "/EnergyScale");
     delete file;
 
@@ -245,8 +245,8 @@ public:
     debug_message("Indices: "); debug_message(indices_string); debug_message(".\n");
 		
 
+
     // First of all, we need to process the indices_string into something the program can use
-    // Each element of this vector is a list of the indices of a generalized velocity operator
 #pragma omp barrier
     std::vector<std::vector<unsigned>> indices = process_string(indices_string);
     int dim = indices.size();
@@ -270,8 +270,8 @@ public:
       if(dim == 3){
         Gamma3D(NRandomV, NDisorder, N_moments, indices, name_dataset);
       } else {
-        GammaGeneral(NRandomV, NDisorder, N_moments, indices, name_dataset);
-      }
+      GammaGeneral(NRandomV, NDisorder, N_moments, indices, name_dataset);
+    }
     }
 
 
@@ -298,8 +298,8 @@ public:
     // | G_10   G_11   G_12 | 
     // | G_20   G_21   G_22 | 
     //
-    //
-    //
+    // This function calculates all the kinds of one-dimensional Gamma matrices
+    // such as Tr[Tn]    Tr[v^xx Tn]     etc
 
     typedef typename extract_value_type<T>::value_type value_type;
 
@@ -373,7 +373,7 @@ public:
                 cheb_iteration(&kpm2, i-1);
               }
             }
-            
+              //std::cout << "index2: " << kpm2.get_index() << "\n";
             // Finally, do the matrix product and store the result in the Gamma matrix
 	          tmp.setZero();
             for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
@@ -386,17 +386,16 @@ public:
                 ind = (m+j)*N_moments.at(0) + n+i;
                 gamma(ind) += (flatten - gamma(ind))/value_type(average + 1);			
               }
-          }
+            }
         }
         average++;
       }
     } 
     gamma = gamma*factor;
-
+            
     store_gamma(&gamma, N_moments, indices, name_dataset);
   };
-
-
+            // Finally, do the matrix product and store the result in the Gamma matrix
   void Gamma3D(int NRandomV, int NDisorder, std::vector<int> N_moments, 
       std::vector<std::vector<unsigned>> indices, std::string name_dataset){
     Eigen::Matrix<T, MEMORY, MEMORY> tmp;
@@ -528,19 +527,19 @@ public:
 #pragma omp master
               {
               long int index;
-              for(int i = 0; i < MEMORY; i++)
-                for(int j = 0; j < MEMORY; j++){
+            for(int i = 0; i < MEMORY; i++)
+              for(int j = 0; j < MEMORY; j++){
                   index = p*N_moments.at(1)*N_moments.at(0) + (m+j)*N_moments.at(0) + n+i;
                   Global.general_gamma(index) += (Global.smaller_gamma(i, j) - Global.general_gamma(index))/value_type(average + 1);
                 }
               }
 #pragma omp barrier
-            }
+              }
           }
         }
         average++;
       }
-    }
+    } 
 #pragma omp master
    {
     store_gamma3D(&Global.general_gamma, N_moments, indices, name_dataset);
@@ -663,18 +662,15 @@ public:
       KPM_Vector<T,D> *kpm1 = kpm_vector->at(depth);
 			
       kpm1->template Multiply<0>();		
-
       tmp.setZero();
       for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
 	      tmp += kpm0->v.block(ii,0, r.Ld[0], 1).adjoint() * kpm1->v.block(ii, 0, r.Ld[0], 2);
       gamma->matrix().block(0,*index_gamma,1,2) += (tmp - gamma->matrix().block(0,*index_gamma,1,2))/value_type(*average + 1);			
-
       *index_gamma += 2;
 	
       for(int m = 2; m < N_moments.at(depth - 1); m += 2){
         kpm1->template Multiply<1>();
         kpm1->template Multiply<1>();
-
 	      tmp.setZero();
         for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
           tmp += kpm0->v.block(ii,0, r.Ld[0], 1).adjoint() * kpm1->v.block(ii, 0, r.Ld[0], 2);
@@ -744,8 +740,8 @@ public:
       std::vector<std::vector<unsigned>> indices, std::string name_dataset){
     debug_message("Entered store_gamma\n");
     // The whole purpose of this function is to take the Gamma matrix calculated by
-    // Gamma2D, Gamma3D or Gamma_general, check if there are any symmetries among the 
-    // matrix elements and then store the matrix in an HDF file.
+
+
 
     long int size_gamma = gamma->cols();
     int dim = indices.size();
@@ -755,38 +751,36 @@ public:
     // V^{x}  = [x,H]		-> one commutator
     // V^{xy} = [x,[y,H]]	-> two commutators
     // This is important because the commutator is anti-hermitian. So, an odd number of commutators
-    // means that the conjugate of the Gamma matrix has an overall minus sign
     int num_velocities = 0;
     for(int i = 0; i < int(indices.size()); i++)
       num_velocities += indices.at(i).size();
     int factor = 1 - (num_velocities % 2)*2;
-
 		
     switch(dim){
-      case 2:{
-        Eigen::Array<T,-1,-1> general_gamma = Eigen::Map<Eigen::Array<T,-1,-1>>(gamma->data(), N_moments.at(0), N_moments.at(1));
+      case 2: {
+	Eigen::Array<T,-1,-1> general_gamma = Eigen::Map<Eigen::Array<T,-1,-1>>(gamma->data(), N_moments.at(0), N_moments.at(1));
 #pragma omp master
-        Global.general_gamma = Eigen::Array<T, -1, -1 > :: Zero(N_moments.at(0), N_moments.at(1));
+	Global.general_gamma = Eigen::Array<T, -1, -1 > :: Zero(N_moments.at(0), N_moments.at(1));
 #pragma omp barrier
 #pragma omp critical
-        Global.general_gamma.matrix() += (general_gamma.matrix() + factor*general_gamma.matrix().adjoint())/2.0;
+	Global.general_gamma.matrix() += (general_gamma.matrix() + factor*general_gamma.matrix().adjoint())/2.0;
 #pragma omp barrier
-        break;
+	break;
       }
-      case 1:{
-        Eigen::Array<T,-1,-1> general_gamma = Eigen::Map<Eigen::Array<T,-1,-1>>(gamma->data(), 1, size_gamma);
+      case 1: {
+	Eigen::Array<T,-1,-1> general_gamma = Eigen::Map<Eigen::Array<T,-1,-1>>(gamma->data(), 1, size_gamma);
 #pragma omp master
-        Global.general_gamma = Eigen::Array<T, -1, -1 > :: Zero(1, size_gamma);
+	Global.general_gamma = Eigen::Array<T, -1, -1 > :: Zero(1, size_gamma);
 #pragma omp barrier
 #pragma omp critical
-        Global.general_gamma += general_gamma;
+	Global.general_gamma += general_gamma;
 #pragma omp barrier
-        break;
+	break;
       }
       default:
-          std::cout << "You're trying to store a matrix that is not expected by the program. Exiting.\n";
-          exit(1);
-      }
+	  std::cout << "You're trying to store a matrix that is not expected by the program. Exiting.\n";
+	  exit(1);
+	}
     
 
     
@@ -820,8 +814,6 @@ public:
     for(int i = 0; i < int(indices.size()); i++)
       num_velocities += indices.at(i).size();
     int factor = 1 - (num_velocities % 2)*2;
-    
-		
     int N0 = N_moments.at(0);
     int N1 = N_moments.at(1);
     int N2 = N_moments.at(2);
@@ -894,8 +886,6 @@ public:
         if(indices.at(0) != indices.at(1) and indices.at(0) != indices.at(2) and indices.at(1) != indices.at(2)){
           storage_gamma += general_gamma;
         }
-
-        
 
         break;
       }
@@ -972,13 +962,13 @@ public:
       std::cout << "Please use directions 'x,x' or 'y,y'. Exiting.\n";
       exit(1);
     }
-    
+
 
 		// initialize the kpm vectors necessary for this calculation
     typedef typename extract_value_type<T>::value_type value_type;
+	
+    // initialize the conductivity array
 
-    // if the SSPRINT flag is true, we need one kpm vector for the right vector
-    // and one for the left vector. Otherwise, we can just recycle it
 #if (SSPRINT == 0)
     KPM_Vector<T,D> phi (2, *this);
 #elif (SSPRINT != 0)
@@ -986,15 +976,15 @@ public:
     KPM_Vector<T,D> phir2 (2, *this);
 #endif
 
-    // right and left vectors
+
     KPM_Vector<T,D> phi0(1, *this);
     KPM_Vector<T,D> phi1(1, *this);
-    
-    // if SSPRINT is true, we need a temporary vector to store v|phi>
+    // iteration over each energy
+
 #if (SSPRINT != 0)
     KPM_Vector<T,D> phi2(1, *this);
 #endif
-	
+      // iteration over disorder and the number of random vectors
     // initialize the conductivity array
     Eigen::Array<T, -1, -1> cond_array;
     cond_array = Eigen::Array<T, -1, -1>::Zero(1, N_energies);
@@ -1006,14 +996,14 @@ public:
           }
 #pragma omp barrier 
 #endif
-    long average = 0;
+      long average = 0;
     double job_energy, job_gamma, job_preserve_disorder;
     int job_NMoments;
-    for(int disorder = 0; disorder < NDisorder; disorder++){
-      h.generate_disorder();
-      h.build_velocity(indices.at(0),0u);
-      h.build_velocity(indices.at(1),1u);
-      
+      for(int disorder = 0; disorder < NDisorder; disorder++){
+	      h.generate_disorder();
+    	  h.build_velocity(indices.at(0),0u);
+    	  h.build_velocity(indices.at(1),1u);
+
       // iteration over each energy and gammma
       for(int job_index = 0; job_index < N_energies; job_index++){
         job_energy = jobs(job_index, 0);
@@ -1032,7 +1022,7 @@ public:
         long average_R = average;
         // iteration over disorder and the number of random vectors
         for(int randV = 0; randV < NRandomV; randV++){
-                   
+
 #if (SSPRINT == 0)
           debug_message("Started SingleShot calculation for SSPRINT=0\n");
           // initialize the random vector
@@ -1040,8 +1030,8 @@ public:
           phi0.Exchange_Boundaries(); 	
           phi1.v.col(0).setZero();
 
-          // initialize the kpm vectors that will be used in the kpm recursion
-          // the left vector is multiplied by the velocity
+            
+          // calculate the left KPM vector
           phi.set_index(0);				
           generalized_velocity(&phi, &phi0, indices, 0);      // |phi> = v |phi_0>
 
@@ -1060,15 +1050,15 @@ public:
           phi.Exchange_Boundaries();
           generalized_velocity(&phi1, &phi, indices, 1);
           phi1.empty_ghosts(0);
+        
           
-          // calculate the right KPM vector. Now we may reuse phi0
           phi.set_index(0);			
           phi.v.col(0) = phi0.v.col(0);
           phi0.v.col(0).setZero(); 
 
           for(int n = 0; n < job_NMoments; n++){		
             if(n!=0) cheb_iteration(&phi, n-1);
-            
+
             phi0.v.col(0) += phi.v.col(phi.get_index())
               *green(n, 1, energy).imag()/(1.0 + int(n==0));
           }
@@ -1084,7 +1074,7 @@ public:
 #pragma omp master
           {
             std::cout << "   Random vector " << randV << "\n";
-          }
+        }
 #pragma omp barrier
           debug_message("Started SingleShot calculation for SSPRINT!=0\n");
           // initialize the random vector
@@ -1108,7 +1098,7 @@ public:
 
               phi1.v.col(0) += phir1.v.col(phir1.get_index())
                 *green(n, 1, energy).imag()/(1.0 + int(n==0));
-            }
+      }
             
             // multiply phi1 by the velocity operator again. 
             // We need a temporary vector to mediate the operation, which will be |phi>
@@ -1129,8 +1119,6 @@ public:
             // This is the conductivity for a smaller number of chebyshev moments
             // if you want to add it to the average conductivity, you have yo wait
             // until all the moments have been summed. otherwise the result would be wrong
-
-           
             T temp;
             temp *= 0.;
             for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
@@ -1214,7 +1202,7 @@ public:
     }
 #pragma omp barrier
   }
-
+	
 void Gaussian_Wave_Packet()
   {
     KPM_Vector<T,D> phi (2, *this), sum_ket(1u,*this);
@@ -1223,10 +1211,10 @@ void Gaussian_Wave_Packet()
     T zero = assign_value<T>(value_type(0),  value_type(0));
     T one  = assign_value<T>(value_type(1),  value_type(0));
     std::vector<double> times;
-    //    Coordinates <std::size_t, D> ponto(r.Lt);
+  
     Eigen::Array<T,-1,-1> avg_x, avg_y, avg_z, avg_ident;
     Eigen::Matrix<T, 2, 2> ident, spin_x, spin_y, spin_z;
-    // The data is organized by columns and the first orbitals are sz = 1 and the last sz = -1
+
     Eigen::Map<Eigen::Matrix<T,-1,-1>> vket (sum_ket.v.data(), r.Sized/2, 2);
     Eigen::Map<Eigen::Matrix<T,-1,-1>> vtmp (phi.v.data()    , r.Sized/2, 2);
     Eigen::Map<Eigen::Matrix<T,-1,-1>> vtmp1(phi.v.data()    , r.Sized  , 1);
@@ -1239,10 +1227,10 @@ void Gaussian_Wave_Packet()
     hsize_t dim[2];
     Eigen::Matrix <double,-1, -1> k_vector;
     Eigen::Matrix <T,-1, -1>        spinor;
-    
+
     ident <<  one, zero,
       zero, one;
-
+  
     spin_x << zero, one,
       one, zero;
     

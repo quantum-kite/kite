@@ -120,6 +120,9 @@ public:
     
   };
   
+  
+  
+  
   template < unsigned MULT,bool VELOCITY> 
   void build_regular_phases(int i1, unsigned axis)
   {
@@ -264,7 +267,7 @@ public:
 	    std::size_t istr = (i1 - NGHOSTS) /STRIDE * r.lStr[0] + (i0 - NGHOSTS)/ STRIDE;
 	    if(h.cross_mozaic.at(istr))
 	      initiate_stride<MULT>(istr);
-	    // These four lines pertrain only to the ghost_correlation field
+	    // These four lines pertrain only to the magnetic field
 	    for(std::size_t io = 0; io < r.Orb; io++)
 	      {
 		const std::size_t ip = io * x.basis[2];
@@ -300,7 +303,7 @@ public:
     for(auto id = h.hd.begin(); id != h.hd.end(); id++)
       id->template multiply_broken_defect<MULT,VELOCITY>(phi0, phiM1,axis);
 	  
-    // These four lines pertrain only to the ghost_correlation field
+    // These four lines pertrain only to the magnetic field
     Exchange_Boundaries();
   };
   
