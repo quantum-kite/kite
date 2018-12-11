@@ -39,7 +39,7 @@ struct Defect_Operator  {
     get_hdf5<double> ( &p, file, field );
     std::vector<unsigned> tmpU;
     std::vector<int> tmpI;
-    int n;
+    int n = 0;
     
     /* Read Number of nodes and their relative  positions */
     field = defect + std::string("/NumNodes");

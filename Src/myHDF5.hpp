@@ -80,7 +80,7 @@ typename std::enable_if<!is_tt<std::complex, T>::value, void>::type write_hdf5(c
     H5::Exception::dontPrint();
     dataset = file->createDataSet(name, DataTypeFor<T>::value, dataspace);
   }
-  catch (H5::FileIException E) { 
+  catch (H5::FileIException & E) { 
     dataset = file->openDataSet(name);
   }
   
@@ -111,7 +111,7 @@ typename std::enable_if<is_tt<std::complex, T>::value, void>::type write_hdf5(co
     H5::Exception::dontPrint();
     dataset = file->createDataSet(name, complex_datatype, dataspace);
   }
-  catch (H5::FileIException E) { 
+  catch (H5::FileIException & E) { 
     dataset = file->openDataSet( name);
   }
   
