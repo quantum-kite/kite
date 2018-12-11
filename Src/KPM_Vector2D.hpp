@@ -120,7 +120,97 @@ public:
     
   };
   
-  
+  T get_point()
+  {
+    T point;
+    if(r.thread_id == 0)
+      {
+	Coordinates<std::size_t, 3> x(r.Ld);
+	std::size_t indice = x.set({std::size_t(r.Ld[0]/2),std::size_t(r.Ld[1]/2), std::size_t(0)}).index;
+	point = v(indice,index);
+      }
+    else
+      point = assign_value<T>(0,0);
+    return point;
+  }
+
+  void build_wave_packet(Eigen::Matrix<double,-1,-1> & k, Eigen::Matrix<T,-1,-1> & psi0, double & sigma)
+  {
+    index = 0;
+    Coordinates<std::size_t, 3> x(r.Ld), z(r.Lt);
+    Eigen::Matrix<T,-1,-1>  sum(r.Orb, 1);
+    Eigen::Map<Eigen::Matrix<std::size_t,2, 1>> vv(z.coord);
+    Eigen::Matrix<double, 1, 2> va , vb;
+    Eigen::Matrix<double, -1,-1> phase(1, psi0.cols());
+    T soma = assign_value<T> (0,0);
+    auto bbs = r.rLat.inverse(); // each row is a bi / 2*M_PI 
+    auto vOrb = bbs * r.rOrb;    // each columns is a vector in a1 basis
+    
+
+    vb(0,0) = r.Lt[0]/2;
+    vb(0,1) = r.Lt[1]/2;
+    
+    double a00 = r.rLat.col(0).transpose()*r.rLat.col(0);
+    double a11 = r.rLat.col(1).transpose()*r.rLat.col(1);
+    double a01 = r.rLat.col(0).transpose()*r.rLat.col(1);
+    
+#pragma omp master 
+    {
+      simul.Global.mu = Eigen::Matrix<T,-1,-1>(psi0.cols(), 1);      
+      for(int ik = 0; ik < psi0.cols(); ik++)
+	simul.Global.mu(ik, 0) = assign_value<T>( simul.rnd.get(), 0 );
+    }
+#pragma omp barrier
+
+#pragma omp critical
+    for(int ik = 0; ik < psi0.cols(); ik++)
+      phase(0,ik)  = std::real(simul.Global.mu(ik, 0)) ;
+#pragma omp barrier
+    for(std::size_t i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1++)
+      for(std::size_t i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0++)
+	{
+	  x.set({i0,i1,std::size_t(0)});
+	  r.convertCoordinates(z,x);
+	  double n1 = (double(z.coord[1]) - double(r.Lt[1])/2.)/sigma;
+	  double n0 = (double(z.coord[0]) - double(r.Lt[0])/2.)/sigma;
+	  double gauss = n0*n0 * a00 + n1*n1 * a11 + 2*n0*n1*a01;
+	  sum.setZero();
+	  va = vv.cast<double>().transpose();
+	  
+	  for(int ik = 0; ik < psi0.cols(); ik++)
+	    {
+	      for(unsigned io = 0; io < r.Orb; io++)
+		{
+		  double xx = (va  + vOrb.col(io).transpose() ) * k.col(ik);
+		  sum(io, 0) += psi0(io,ik) * exp(assign_value<T>(-0.5*gauss,  2.*M_PI * (xx + 0.*phase(0,ik) )));
+		}
+	    }
+	  
+	  for(std::size_t io = 0; io < r.Orb; io++)
+	    {
+	      x.set({i0,i1,io});
+	      v(x.index, 0) = sum(io,0);
+	      soma += assign_value<T> ( std::real( sum(io,0) * std::conj(sum(io,0)) ), 0);
+	    }
+	}
+    
+#pragma omp master
+    simul.Global.soma = assign_value<T> (0,0);
+#pragma omp barrier
+#pragma omp critical
+    simul.Global.soma += soma;
+#pragma omp barrier
+    soma = simul.Global.soma;
+    value_type soma2 = sqrt(std::real(soma));
+    
+    for(std::size_t io = 0; io < r.Orb; io++)
+      for(std::size_t i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1++)
+	for(std::size_t i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0++)
+	  {
+	    x.set({i0,i1,io});
+	    v(x.index, 0) /= soma2;
+	  }
+  }
   
   
   template < unsigned MULT,bool VELOCITY> 
