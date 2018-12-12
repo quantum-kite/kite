@@ -39,7 +39,7 @@ public:
     // Regular quantities to calculate, such as DOS and CondXX
     H5::H5File * file         = new H5::H5File(name, H5F_ACC_RDONLY);
 
-    // Fetch the energy scale
+    // Fetch the energy scale and the magnetic field, if it exists
     get_hdf5<double>(&EnergyScale,  file, (char *)   "/EnergyScale");
     delete file;
 
@@ -56,6 +56,7 @@ public:
     
     omp_set_num_threads(rglobal.n_threads);
     debug_message("Starting parallelization\n");
+    int calculate_wavepacket = 0;
 #pragma omp parallel default(shared)
     {
       Simulation<T,D> simul(name, Global);
@@ -123,6 +124,28 @@ public:
         simul.Measure_Gamma(queue.at(i));			
       }
       verbose_message("------------------------------------------------------------------\n\n");
+#pragma omp barrier
+
+
+
+      // Check if the Gaussian_Wave_Packet needs to be calculated
+      //H5::Exception::dontPrint();
+#pragma omp master
+{
+      try{
+        H5::H5File * file = new H5::H5File(name, H5F_ACC_RDONLY);
+        int dummy_var;
+        get_hdf5<int>(&dummy_var, file, (char *) "/Calculation/gaussian_wave_packet/NumDisorder");
+        file->close();  
+        delete file;
+        calculate_wavepacket = 1;
+      } catch(H5::Exception& e) {debug_message("Wavepacket: no need to calculate.\n");}
+}
+      
+      // Now calculate it
+#pragma omp barrier
+      if(calculate_wavepacket)
+        simul.Gaussian_Wave_Packet();
     }
     debug_message("Left global_simulation\n");
   };
@@ -133,6 +156,7 @@ public:
 template <typename T,unsigned D>
 class Simulation  {
 public:
+  typedef typename extract_value_type<T>::value_type value_type;
   KPMRandom <T>          rnd;
   std::vector<T>         ghosts;
   LatticeStructure <D>   r;      
@@ -221,8 +245,8 @@ public:
     debug_message("Indices: "); debug_message(indices_string); debug_message(".\n");
 		
 
+
     // First of all, we need to process the indices_string into something the program can use
-    // Each element of this vector is a list of the indices of a generalized velocity operator
 #pragma omp barrier
     std::vector<std::vector<unsigned>> indices = process_string(indices_string);
     int dim = indices.size();
@@ -246,8 +270,8 @@ public:
       if(dim == 3){
         Gamma3D(NRandomV, NDisorder, N_moments, indices, name_dataset);
       } else {
-        GammaGeneral(NRandomV, NDisorder, N_moments, indices, name_dataset);
-      }
+      GammaGeneral(NRandomV, NDisorder, N_moments, indices, name_dataset);
+    }
     }
 
 
@@ -274,8 +298,8 @@ public:
     // | G_10   G_11   G_12 | 
     // | G_20   G_21   G_22 | 
     //
-    //
-    //
+    // This function calculates all the kinds of one-dimensional Gamma matrices
+    // such as Tr[Tn]    Tr[v^xx Tn]     etc
 
     typedef typename extract_value_type<T>::value_type value_type;
 
@@ -349,7 +373,7 @@ public:
                 cheb_iteration(&kpm2, i-1);
               }
             }
-            
+              //std::cout << "index2: " << kpm2.get_index() << "\n";
             // Finally, do the matrix product and store the result in the Gamma matrix
 	          tmp.setZero();
             for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
@@ -362,17 +386,16 @@ public:
                 ind = (m+j)*N_moments.at(0) + n+i;
                 gamma(ind) += (flatten - gamma(ind))/value_type(average + 1);			
               }
-          }
+            }
         }
         average++;
       }
     } 
     gamma = gamma*factor;
-
+            
     store_gamma(&gamma, N_moments, indices, name_dataset);
   };
-
-
+            // Finally, do the matrix product and store the result in the Gamma matrix
   void Gamma3D(int NRandomV, int NDisorder, std::vector<int> N_moments, 
       std::vector<std::vector<unsigned>> indices, std::string name_dataset){
     Eigen::Matrix<T, MEMORY, MEMORY> tmp;
@@ -504,19 +527,19 @@ public:
 #pragma omp master
               {
               long int index;
-              for(int i = 0; i < MEMORY; i++)
-                for(int j = 0; j < MEMORY; j++){
+            for(int i = 0; i < MEMORY; i++)
+              for(int j = 0; j < MEMORY; j++){
                   index = p*N_moments.at(1)*N_moments.at(0) + (m+j)*N_moments.at(0) + n+i;
                   Global.general_gamma(index) += (Global.smaller_gamma(i, j) - Global.general_gamma(index))/value_type(average + 1);
                 }
               }
 #pragma omp barrier
-            }
+              }
           }
         }
         average++;
       }
-    }
+    } 
 #pragma omp master
    {
     store_gamma3D(&Global.general_gamma, N_moments, indices, name_dataset);
@@ -639,18 +662,15 @@ public:
       KPM_Vector<T,D> *kpm1 = kpm_vector->at(depth);
 			
       kpm1->template Multiply<0>();		
-
       tmp.setZero();
       for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
 	      tmp += kpm0->v.block(ii,0, r.Ld[0], 1).adjoint() * kpm1->v.block(ii, 0, r.Ld[0], 2);
       gamma->matrix().block(0,*index_gamma,1,2) += (tmp - gamma->matrix().block(0,*index_gamma,1,2))/value_type(*average + 1);			
-
       *index_gamma += 2;
 	
       for(int m = 2; m < N_moments.at(depth - 1); m += 2){
         kpm1->template Multiply<1>();
         kpm1->template Multiply<1>();
-
 	      tmp.setZero();
         for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
           tmp += kpm0->v.block(ii,0, r.Ld[0], 1).adjoint() * kpm1->v.block(ii, 0, r.Ld[0], 2);
@@ -720,8 +740,8 @@ public:
       std::vector<std::vector<unsigned>> indices, std::string name_dataset){
     debug_message("Entered store_gamma\n");
     // The whole purpose of this function is to take the Gamma matrix calculated by
-    // Gamma2D, Gamma3D or Gamma_general, check if there are any symmetries among the 
-    // matrix elements and then store the matrix in an HDF file.
+
+
 
     long int size_gamma = gamma->cols();
     int dim = indices.size();
@@ -731,38 +751,36 @@ public:
     // V^{x}  = [x,H]		-> one commutator
     // V^{xy} = [x,[y,H]]	-> two commutators
     // This is important because the commutator is anti-hermitian. So, an odd number of commutators
-    // means that the conjugate of the Gamma matrix has an overall minus sign
     int num_velocities = 0;
     for(int i = 0; i < int(indices.size()); i++)
       num_velocities += indices.at(i).size();
     int factor = 1 - (num_velocities % 2)*2;
-
 		
     switch(dim){
-      case 2:{
-        Eigen::Array<T,-1,-1> general_gamma = Eigen::Map<Eigen::Array<T,-1,-1>>(gamma->data(), N_moments.at(0), N_moments.at(1));
+      case 2: {
+	Eigen::Array<T,-1,-1> general_gamma = Eigen::Map<Eigen::Array<T,-1,-1>>(gamma->data(), N_moments.at(0), N_moments.at(1));
 #pragma omp master
-        Global.general_gamma = Eigen::Array<T, -1, -1 > :: Zero(N_moments.at(0), N_moments.at(1));
+	Global.general_gamma = Eigen::Array<T, -1, -1 > :: Zero(N_moments.at(0), N_moments.at(1));
 #pragma omp barrier
 #pragma omp critical
-        Global.general_gamma.matrix() += (general_gamma.matrix() + factor*general_gamma.matrix().adjoint())/2.0;
+	Global.general_gamma.matrix() += (general_gamma.matrix() + factor*general_gamma.matrix().adjoint())/2.0;
 #pragma omp barrier
-        break;
+	break;
       }
-      case 1:{
-        Eigen::Array<T,-1,-1> general_gamma = Eigen::Map<Eigen::Array<T,-1,-1>>(gamma->data(), 1, size_gamma);
+      case 1: {
+	Eigen::Array<T,-1,-1> general_gamma = Eigen::Map<Eigen::Array<T,-1,-1>>(gamma->data(), 1, size_gamma);
 #pragma omp master
-        Global.general_gamma = Eigen::Array<T, -1, -1 > :: Zero(1, size_gamma);
+	Global.general_gamma = Eigen::Array<T, -1, -1 > :: Zero(1, size_gamma);
 #pragma omp barrier
 #pragma omp critical
-        Global.general_gamma += general_gamma;
+	Global.general_gamma += general_gamma;
 #pragma omp barrier
-        break;
+	break;
       }
       default:
-          std::cout << "You're trying to store a matrix that is not expected by the program. Exiting.\n";
-          exit(1);
-      }
+	  std::cout << "You're trying to store a matrix that is not expected by the program. Exiting.\n";
+	  exit(1);
+	}
     
 
     
@@ -796,8 +814,6 @@ public:
     for(int i = 0; i < int(indices.size()); i++)
       num_velocities += indices.at(i).size();
     int factor = 1 - (num_velocities % 2)*2;
-    
-		
     int N0 = N_moments.at(0);
     int N1 = N_moments.at(1);
     int N2 = N_moments.at(2);
@@ -871,8 +887,6 @@ public:
           storage_gamma += general_gamma;
         }
 
-        
-
         break;
       }
       default:
@@ -919,6 +933,7 @@ public:
   void Single_Shot(double EScale, singleshot_measurement_queue queue) {
     // Calculate the longitudinal dc conductivity for a single value of the energy
     
+    T tmp;
     debug_message("Entered Single_Shot\n");
     
     // Obtain the relevant quantities from the queue
@@ -947,13 +962,13 @@ public:
       std::cout << "Please use directions 'x,x' or 'y,y'. Exiting.\n";
       exit(1);
     }
-    
+
 
 		// initialize the kpm vectors necessary for this calculation
     typedef typename extract_value_type<T>::value_type value_type;
+	
+    // initialize the conductivity array
 
-    // if the SSPRINT flag is true, we need one kpm vector for the right vector
-    // and one for the left vector. Otherwise, we can just recycle it
 #if (SSPRINT == 0)
     KPM_Vector<T,D> phi (2, *this);
 #elif (SSPRINT != 0)
@@ -961,15 +976,15 @@ public:
     KPM_Vector<T,D> phir2 (2, *this);
 #endif
 
-    // right and left vectors
+
     KPM_Vector<T,D> phi0(1, *this);
     KPM_Vector<T,D> phi1(1, *this);
-    
-    // if SSPRINT is true, we need a temporary vector to store v|phi>
+    // iteration over each energy
+
 #if (SSPRINT != 0)
     KPM_Vector<T,D> phi2(1, *this);
 #endif
-	
+      // iteration over disorder and the number of random vectors
     // initialize the conductivity array
     Eigen::Array<T, -1, -1> cond_array;
     cond_array = Eigen::Array<T, -1, -1>::Zero(1, N_energies);
@@ -981,14 +996,14 @@ public:
           }
 #pragma omp barrier 
 #endif
-    long average = 0;
+      long average = 0;
     double job_energy, job_gamma, job_preserve_disorder;
     int job_NMoments;
-    for(int disorder = 0; disorder < NDisorder; disorder++){
-      h.generate_disorder();
-      h.build_velocity(indices.at(0),0u);
-      h.build_velocity(indices.at(1),1u);
-      
+      for(int disorder = 0; disorder < NDisorder; disorder++){
+	      h.generate_disorder();
+    	  h.build_velocity(indices.at(0),0u);
+    	  h.build_velocity(indices.at(1),1u);
+
       // iteration over each energy and gammma
       for(int job_index = 0; job_index < N_energies; job_index++){
         job_energy = jobs(job_index, 0);
@@ -1007,7 +1022,7 @@ public:
         long average_R = average;
         // iteration over disorder and the number of random vectors
         for(int randV = 0; randV < NRandomV; randV++){
-                   
+
 #if (SSPRINT == 0)
           debug_message("Started SingleShot calculation for SSPRINT=0\n");
           // initialize the random vector
@@ -1015,8 +1030,8 @@ public:
           phi0.Exchange_Boundaries(); 	
           phi1.v.col(0).setZero();
 
-          // initialize the kpm vectors that will be used in the kpm recursion
-          // the left vector is multiplied by the velocity
+            
+          // calculate the left KPM vector
           phi.set_index(0);				
           generalized_velocity(&phi, &phi0, indices, 0);      // |phi> = v |phi_0>
 
@@ -1035,29 +1050,31 @@ public:
           phi.Exchange_Boundaries();
           generalized_velocity(&phi1, &phi, indices, 1);
           phi1.empty_ghosts(0);
+        
           
-          // calculate the right KPM vector. Now we may reuse phi0
           phi.set_index(0);			
           phi.v.col(0) = phi0.v.col(0);
           phi0.v.col(0).setZero(); 
 
           for(int n = 0; n < job_NMoments; n++){		
             if(n!=0) cheb_iteration(&phi, n-1);
-            
+
             phi0.v.col(0) += phi.v.col(phi.get_index())
               *green(n, 1, energy).imag()/(1.0 + int(n==0));
           }
           
           
           // finally, the dot product of phi1 and phi0 yields the conductivity
-          cond_array(job_index) += (T(phi1.v.col(0).adjoint()*phi0.v.col(0)) - 
-              cond_array(job_index))/value_type(average_R+1);						
+	      tmp *= 0.;
+	      for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
+		tmp += T(phi1.v.col(0).segment(ii,r.Ld[0]).adjoint() * phi0.v.col(0).segment(ii,r.Ld[0]));
+	      cond_array(job_index) += (tmp - cond_array(job_index))/value_type(average_R+1);						
           debug_message("Concluded SingleShot calculation for SSPRINT=0\n");
 #elif (SSPRINT != 0)
 #pragma omp master
           {
             std::cout << "   Random vector " << randV << "\n";
-          }
+        }
 #pragma omp barrier
           debug_message("Started SingleShot calculation for SSPRINT!=0\n");
           // initialize the random vector
@@ -1081,7 +1098,7 @@ public:
 
               phi1.v.col(0) += phir1.v.col(phir1.get_index())
                 *green(n, 1, energy).imag()/(1.0 + int(n==0));
-            }
+      }
             
             // multiply phi1 by the velocity operator again. 
             // We need a temporary vector to mediate the operation, which will be |phi>
@@ -1102,8 +1119,6 @@ public:
             // This is the conductivity for a smaller number of chebyshev moments
             // if you want to add it to the average conductivity, you have yo wait
             // until all the moments have been summed. otherwise the result would be wrong
-
-           
             T temp;
             temp *= 0.;
             for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
@@ -1167,7 +1182,8 @@ public:
       Eigen::Array<double, -1, -1> store_data;
       store_data = Eigen::Array<double, -1, -1>::Zero(4, jobs.rows());
       
-      for(int ener = 0; ener < N_energies; ener++){
+      for(int ener = 0; ener < N_energies; ener++)
+	{
         store_data(0, ener) = jobs.real()(ener, 0)*EScale;
         store_data(1, ener) = jobs.real()(ener, 1)*EScale;
         store_data(2, ener) = jobs(ener, 3);
@@ -1187,5 +1203,186 @@ public:
 #pragma omp barrier
   }
 	
+void Gaussian_Wave_Packet()
+  {
+    KPM_Vector<T,D> phi (2, *this), sum_ket(1u,*this);
+    int NumDisorder, NumMoments, NumPoints;
+    T II   = assign_value<T> (value_type(0), value_type(1));
+    T zero = assign_value<T>(value_type(0),  value_type(0));
+    T one  = assign_value<T>(value_type(1),  value_type(0));
+    std::vector<double> times;
+  
+    Eigen::Array<T,-1,-1> avg_x, avg_y, avg_z, avg_ident;
+    Eigen::Matrix<T, 2, 2> ident, spin_x, spin_y, spin_z;
+
+    Eigen::Map<Eigen::Matrix<T,-1,-1>> vket (sum_ket.v.data(), r.Sized/2, 2);
+    Eigen::Map<Eigen::Matrix<T,-1,-1>> vtmp (phi.v.data()    , r.Sized/2, 2);
+    Eigen::Map<Eigen::Matrix<T,-1,-1>> vtmp1(phi.v.data()    , r.Sized  , 1);
+    float timestep;
+    double width;
+    Eigen::Array<T, -1, -1> avg_results;
+    Eigen::Array<T, -1, -1> results(2*D, 1);
+    H5::DataSet * dataset;
+    H5::DataSpace * dataspace;
+    hsize_t dim[2];
+    Eigen::Matrix <double,-1, -1> k_vector;
+    Eigen::Matrix <T,-1, -1>        spinor;
+
+    ident <<  one, zero,
+      zero, one;
+  
+    spin_x << zero, one,
+      one, zero;
+    
+    spin_y << zero, -II,
+      II, zero;
+    
+    spin_z << one, zero,
+      zero, -one;
+
+    //Load bra and ket
+#pragma omp critical
+    {
+      H5::H5File * file  = new H5::H5File(name, H5F_ACC_RDONLY);
+      dataset            = new H5::DataSet(file->openDataSet("/Calculation/gaussian_wave_packet/k_vector")  );
+      dataspace          = new H5::DataSpace(dataset->getSpace());
+      dataspace -> getSimpleExtentDims(dim, NULL);
+      dataspace->close(); delete dataspace;
+      dataset->close();   delete dataset;
+
+      k_vector  = Eigen::Matrix<double,-1, -1>::Zero(dim[1],dim[0]);
+      spinor    = Eigen::Matrix<     T,-1, -1>::Zero(r.Orb,dim[0]);
+      
+      get_hdf5    <int>(&NumDisorder,    file, (char *) "/Calculation/gaussian_wave_packet/NumDisorder");
+      get_hdf5    <int>(&NumMoments,     file, (char *) "/Calculation/gaussian_wave_packet/NumMoments" );
+      get_hdf5    <int>(&NumPoints,      file, (char *) "/Calculation/gaussian_wave_packet/NumPoints"  );
+      get_hdf5  <float>(&timestep,       file, (char *) "/Calculation/gaussian_wave_packet/timestep"   );
+      get_hdf5 <double>(&width,          file, (char *) "/Calculation/gaussian_wave_packet/width"      );
+      get_hdf5      <T>(spinor.data(),   file, (char *) "/Calculation/gaussian_wave_packet/spinor");
+      get_hdf5 <double>(k_vector.data(), file, (char *) "/Calculation/gaussian_wave_packet/k_vector");
+
+      file->close();  delete file;
+    }
+#pragma omp barrier
+    avg_x       = Eigen::Matrix<T,-1,-1>::Zero(NumPoints,1);
+    avg_y       = Eigen::Matrix<T,-1,-1>::Zero(NumPoints,1);
+    avg_z       = Eigen::Matrix<T,-1,-1>::Zero(NumPoints,1);
+    avg_ident   = Eigen::Matrix<T,-1,-1>::Zero(NumPoints,1);
+    avg_results = Eigen::Array<T, -1,-1>::Zero(2*D, NumPoints);
+    
+#pragma omp master
+    {
+      Global.avg_x       = Eigen::Matrix<T,-1,1>::Zero(NumPoints,1);
+      Global.avg_y       = Eigen::Matrix<T,-1,1>::Zero(NumPoints,1);
+      Global.avg_z       = Eigen::Matrix<T,-1,1>::Zero(NumPoints,1);
+      Global.avg_ident   = Eigen::Matrix<T,-1,1>::Zero(NumPoints,1);
+      Global.avg_results = Eigen::Array<T,-1,-1>::Zero(2*D,NumPoints);
+    }
+    
+    
+    NumMoments = (NumMoments/2)*2;
+    Eigen::Matrix<T,-1,1> m(NumMoments);
+    for(unsigned n = 0; n < unsigned(NumMoments); n++)
+      m(n) = value_type((n == 0 ? 1 : 2 )*boost::math::cyl_bessel_j(n, timestep )) * T(pow(-II,n));
+    
+    for(int id = 0; id < NumDisorder; id++)
+      {
+	sum_ket.set_index(0);
+	sum_ket.v.setZero();
+	sum_ket.build_wave_packet(k_vector, spinor, width);
+	h.generate_disorder();	
+	sum_ket.empty_ghosts(0);
+       	for(unsigned t = 0; t < unsigned(NumPoints); t++)
+	  {
+	    if(t > 0)
+	      {
+		phi.v.setZero();
+		phi.set_index(0);
+		phi.v.col(0) = sum_ket.v.col(0);
+		phi.Exchange_Boundaries();
+		cheb_iteration(&phi, 0); // multiply by H
+		sum_ket.v.col(0) = phi.v * m.segment(0, 2);
+		for(unsigned n = 2; n < unsigned(NumMoments); n += 2)
+		  {
+		    cheb_iteration(&phi, n - 1);
+		    cheb_iteration(&phi, n);
+		    sum_ket.v.col(0) += phi.v * m.segment(n,2);
+		  }
+	      }
+	    sum_ket.empty_ghosts(0);
+	    
+	    // In the multiplication of a matrix the number of columns of the first should be equal to
+	    // the number of rows of the second, because the spin is organized by columns we have:
+
+	    //	    vtmp = (vket * ident.transpose()) - vket;
+	    //	    auto x3 = sum_ket2.v.adjoint() * vtmp1;
+	    auto x3 = sum_ket.get_point();
+	    avg_ident(t) += (x3 - avg_ident(t) ) /T(id + 1);
+
+
+	    vtmp = vket * spin_x.transpose();
+	    auto x0 = sum_ket.v.adjoint() * vtmp1;
+	    avg_x(t) += (x0(0,0) - avg_x(t) ) /T(id + 1);
+	    
+	    vtmp = vket * spin_y.transpose();
+	    auto x1 = sum_ket.v.adjoint() * vtmp1;
+	    avg_y(t) += (x1(0,0) - avg_y(t) ) /T(id + 1);
+	    
+	    vtmp = vket * spin_z.transpose();
+	    auto x2 = sum_ket.v.adjoint() * vtmp1;
+
+	    avg_z(t) += (x2(0,0) - avg_z(t) ) /T(id + 1);
+	    phi.measure_wave_packet(sum_ket.v.data(), sum_ket.v.data(), results.data());
+	    avg_results.col(t) += (results - avg_results.col(t) ) /T(id + 1); 
+	  }
+	
+      }
+
+#pragma omp critical
+    {      
+      Global.avg_x += avg_x;
+      Global.avg_y += avg_y;
+      Global.avg_z += avg_z;
+      Global.avg_ident += avg_ident;
+      Global.avg_results += avg_results;
+    }
+#pragma omp barrier
+
+
+    
+#pragma omp master
+    {
+      std::cout << name << std::endl;
+      H5::H5File * file = new H5::H5File(name, H5F_ACC_RDWR);
+      write_hdf5(Global.avg_x, file, (char *) "/Calculation/gaussian_wave_packet/Sx");
+      write_hdf5(Global.avg_y, file, (char *) "/Calculation/gaussian_wave_packet/Sy");
+      write_hdf5(Global.avg_z, file, (char *) "/Calculation/gaussian_wave_packet/Sz");
+      write_hdf5(Global.avg_ident, file, (char *) "/Calculation/gaussian_wave_packet/Id");
+
+
+      for(unsigned i = 0; i < D; i++)
+	{
+	  std::string orient = "xyz";
+	  char name[200];
+	  avg_z.col(0) = Global.avg_results.row(2*i) ;
+	  sprintf(name,"/Calculation/gaussian_wave_packet/mean_value%c", orient.at(i));
+	  write_hdf5(avg_z, file, name);
+	}
+      
+      for(unsigned i = 0; i < D; i++)
+	{
+	  std::string orient = "xyz";
+	  char name[200];
+	  avg_z.col(0) = Global.avg_results.row(2*i + 1) - Global.avg_results.row(2*i)*Global.avg_results.row(2*i);
+	  sprintf(name,"/Calculation/gaussian_wave_packet/Var%c", orient.at(i));
+			  
+	  write_hdf5(avg_z, file, name);
+	}
+      
+      file->close();      
+      delete file;
+    }
+#pragma omp barrier
+  }
   
 };

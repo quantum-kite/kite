@@ -359,15 +359,15 @@ class Disorder:
 
     # class method that introduces the disorder to the lattice
     def add_disorder(self, sublattice, dis_type, mean_value, standard_deviation=0.):
-        if isinstance(dis_type, list):
-            if isinstance(sublattice, list):
-                for indx, name in enumerate(sublattice):
-                    self.add_local_disorder(name, dis_type[indx], mean_value[indx], standard_deviation[indx])
-            else:
-                self.add_local_disorder(sublattice, dis_type, mean_value, standard_deviation)
+        # make lists
+        if not (isinstance(sublattice, list)):
+            sublattice = [sublattice]
+        if not (isinstance(dis_type, list)):
+            dis_type = [dis_type]
+            mean_value = [mean_value]
+            standard_deviation = [standard_deviation]
 
-        else:
-            self.add_local_disorder(sublattice, [dis_type], [mean_value], [standard_deviation])
+        self.add_local_disorder(sublattice, dis_type, mean_value, standard_deviation)
 
     def add_local_disorder(self, sublattice_name, dis_type, mean_value, standard_deviation):
 
@@ -375,61 +375,79 @@ class Disorder:
         space_size = vectors.shape[0]
 
         names, sublattices = zip(*self._lattice.sublattices.items())
+        chosen_orbitals_single = -1 * np.ones((self._num_orbitals_total, len(dis_type)))  # automatically set to -1
 
-        if sublattice_name not in names:
-            raise SystemExit('Desired sublattice doesnt exist in the chosen lattice! ')
-        indx = names.index(sublattice_name)
-        lattice_sub = sublattices[indx]
-        size_orb = self._num_orbitals[lattice_sub.alias_id]
+        orbital_dis_mean = []
+        orbital_dis_stdv = []
+        orbital_dis_type_id = []
 
-        hopping = {'relative_index': np.zeros(space_size, dtype=np.int32), 'from_id': lattice_sub.alias_id,
-                   'to_id': lattice_sub.alias_id, 'mean_value': lattice_sub.energy}
+        for idx_sub, sub_name in enumerate(sublattice_name):
+            if sub_name not in names:
+                raise SystemExit('Desired sublattice doesnt exist in the chosen lattice! ')
+            indx = names.index(sub_name)
+            lattice_sub = sublattices[indx]
+            size_orb = self._num_orbitals[lattice_sub.alias_id]
 
-        # number of orbitals before i-th sublattice, where is is the array index
-        orbitals_before = self._num_orbitals_before
+            hopping = {'relative_index': np.zeros(space_size, dtype=np.int32), 'from_id': lattice_sub.alias_id,
+                       'to_id': lattice_sub.alias_id, 'mean_value': lattice_sub.energy}
 
-        orbital_from = self._orbital
-        orbital_to = []
-        orbital_dis_mean = self._mean
-        orbital_dis_stdv = self._stdv
-        orbital_dis_type = self._type
-        orbital_dis_type_id = self._type_id
+            # number of orbitals before i-th sublattice, where is is the array index
+            orbitals_before = self._num_orbitals_before
 
-        dis_number = {'Gaussian': 1, 'Uniform': 2, 'Deterministic': 3, 'gaussian': 1, 'uniform': 2, 'deterministic': 3}
-        for index, it in enumerate(mean_value):
-            relative_move = np.dot(hopping['relative_index'] + 1,
-                                   3 ** np.linspace(0, space_size - 1, space_size, dtype=np.int32))
-            if len(mean_value) > 1:
-                orbital_from.append(orbitals_before[hopping['from_id']] + index)
-                orbital_to.append(relative_move + (orbitals_before[hopping['to_id']] + index) * 3 ** space_size)
-            else:
-                orbital_from.append(hopping['from_id'])
-                orbital_to.append(relative_move + hopping['to_id'] * 3 ** space_size)
-            orbital_dis_mean.append(it)
-            orbital_dis_stdv.append(standard_deviation[index])
-            orbital_dis_type.append(dis_type[index])
-            if dis_type[index] in dis_number:
-                orbital_dis_type_id.append(dis_number[dis_type[index]])
-                if dis_type[index] == 'Deterministic' or dis_type[index] == 'deterministic':
-                    if standard_deviation[index] != 0:
-                        raise SystemExit(
-                            'Standard deviation of deterministic disorder must be 0.')
-            else:
-                raise SystemExit(
-                    'Disorder not present! Try between Gaussian, Deterministic, and Uniform case insensitive ')
+            orbital_from = []
+            orbital_dis_mean = []
+            orbital_dis_stdv = []
+            orbital_dis_type_id = []
 
-        if not (all(np.asarray(i).shape == size_orb for i in [dis_type, mean_value, standard_deviation])):
-            print('Shape of disorder', len(dis_type), len(mean_value), len(standard_deviation),
-                  'is different than the number of orbitals at sublattice ', sublattice_name, 'which is', size_orb,
-                  '\n')
-            raise SystemExit('All parameters should have the same length! ')
+            dis_number = {'Gaussian': 1, 'Uniform': 2, 'Deterministic': 3, 'gaussian': 1, 'uniform': 2,
+                          'deterministic': 3}
+            for index, it in enumerate(mean_value):
+                if len(mean_value) > 1:
+                    chosen_orbitals_single[idx_sub, index] = orbitals_before[hopping['from_id']] + index
+                else:
+                    chosen_orbitals_single[idx_sub, index] = hopping['from_id']
+                orbital_dis_mean.append(it)
+                orbital_dis_stdv.append(standard_deviation[index])
+                if dis_type[index] in dis_number:
+                    orbital_dis_type_id.append(dis_number[dis_type[index]])
+                    if dis_type[index] == 'Deterministic' or dis_type[index] == 'deterministic':
+                        if standard_deviation[index] != 0:
+                            raise SystemExit(
+                                'Standard deviation of deterministic disorder must be 0.')
+                else:
+                    raise SystemExit(
+                        'Disorder not present! Try between Gaussian, Deterministic, and Uniform case insensitive ')
 
-        self._sub_name.append(sublattice_name * len(mean_value))
-        self._type = orbital_dis_type
-        self._type_id = orbital_dis_type_id
-        self._mean = orbital_dis_mean
-        self._stdv = orbital_dis_stdv
-        self._orbital = orbital_from
+            if not (all(np.asarray(i).shape == size_orb for i in [dis_type, mean_value, standard_deviation])):
+                print('Shape of disorder', len(dis_type), len(mean_value), len(standard_deviation),
+                      'is different than the number of orbitals at sublattice ', sublattice_name, 'which is', size_orb,
+                      '\n')
+                raise SystemExit('All parameters should have the same length! ')
+
+        self._type_id.extend(orbital_dis_type_id)
+        self._mean.extend(orbital_dis_mean)
+        self._stdv.extend(orbital_dis_stdv)
+
+        if len(self._orbital) == 0:
+            self._orbital = chosen_orbitals_single
+        else:
+            self._orbital = np.column_stack((self._orbital, chosen_orbitals_single))
+
+
+class Modification:
+    def __init__(self, **kwargs):
+        self._magnetic_field = kwargs.get('magnetic_field', None)
+        self._flux = kwargs.get('flux', None)
+
+    @property
+    def magnetic_field(self):  # magnetic_field:
+        """Returns true if magnetic field is on, else False."""
+        return self._magnetic_field
+
+    @property
+    def flux(self):  # flux:
+        """Returns the number of multiples of flux quantum."""
+        return self._flux
 
 
 class Calculation:
@@ -438,6 +456,17 @@ class Calculation:
     def get_dos(self):
         """Returns the requested DOS functions."""
         return self._dos
+
+    @property
+    def get_gaussian_wave_packet(self):
+        """Returns the requested wave packet time evolution function, with a gaussian wavepacket mutiplied with different
+        plane waves."""
+        return self._gaussian_wave_packet
+
+    @property
+    def get_special(self):
+        """Returns the requested special function, with predefined vectors."""
+        return self._special
 
     @property
     def get_conductivity_dc(self):
@@ -470,6 +499,8 @@ class Calculation:
         self._conductivity_dc = []
         self._conductivity_optical = []
         self._conductivity_optical_nonlinear = []
+        self._special = []
+        self._gaussian_wave_packet = []
         self._singleshot_conductivity_dc = []
 
         self._avail_dir_full = {'xx': 0, 'yy': 1, 'zz': 2, 'xy': 3, 'xz': 4, 'yx': 5, 'yz': 6, 'zx': 7, 'zy': 8}
@@ -496,6 +527,68 @@ class Calculation:
 
         self._dos.append({'num_points': num_points, 'num_moments': num_moments, 'num_random': num_random,
                           'num_disorder': num_disorder})
+
+    def gaussian_wave_packet(self, num_points, num_moments, timestep, k_vector, spinor, width, mean_value, num_disorder=1):
+        """Calculate the density of states as a function of energy
+
+        Parameters
+        ----------
+        num_points : int
+            Number of energy point inside the spectrum at which the DOS will be calculated.
+        num_moments : int
+            Number of polynomials in the Chebyshev expansion.
+        timestep : float
+            Timestep for calculation of time evolution.
+        k_vector : np.array
+            Different wave vectors, components coresponding to vectors b0 and b1.
+        spinor : np.array
+            Spinors for each of the k vectors.
+        width : float
+            Width of the gaussian.
+        mean_value : [float, float]
+            Mean value of the gaussian envelope.
+        num_disorder : int
+            Number of different disorder realisations.
+        """
+
+        self._gaussian_wave_packet.append(
+            {'num_points': num_points, 'num_moments': num_moments,
+             'timestep': timestep, 'num_disorder': num_disorder, 'spinor': spinor, 'width': width, 'k_vector': k_vector,
+             'mean_value': mean_value})
+
+    def special(self, num_points, num_moments, bra, dimension_bra, starting_index_bra,
+                ket, dimension_ket, starting_index_ket, timestep, num_disorder=1):
+        """Calculate the density of states as a function of energy
+
+        Parameters
+        ----------
+        num_points : int
+            Number of energy point inside the spectrum at which the DOS will be calculated.
+        num_moments : int
+            Number of polynomials in the Chebyshev expansion.
+        ket : np.array
+            KET Part of the initial kpm vector.
+        dimension_ket : int
+            Number of unit cells along the direction 0 and 1 for KET vector.
+        starting_index_ket : tuple (int, int) of list
+            Index of the starting unit cell, bottom left corner for KET vector.
+        bra : np.array
+            BRA Part of the initial kpm vector.
+        starting_index_bra : tuple (int, int) of list
+            Index of the starting unit cell, bottom left corner for BRA vector.
+        dimension_bra : int
+            Number of unit cells along the direction 0 and 1 for BRA vector.
+        timestep : float
+            Timestep for calculation of time evolution.
+        num_disorder : int
+            Number of different disorder realisations.
+        """
+
+        self._special.append(
+            {'num_points': num_points, 'num_moments': num_moments,
+             'bra': bra, 'starting_index_bra': starting_index_bra, 'dimension_bra': dimension_bra,
+             'ket': ket, 'starting_index_ket': starting_index_ket, 'dimension_ket': dimension_ket,
+             'timestep':timestep, 'num_disorder': num_disorder})
 
     def conductivity_dc(self, direction, num_points, num_moments, num_random, num_disorder=1, temperature=0):
         """Calculate the density of states as a function of energy
@@ -728,7 +821,7 @@ class Configuration:
 
 
 def make_pybinding_model(lattice, disorder=None, disorder_structural=None, **kwargs):
-    """Build a Pybinding model with disorder used in Kite. Bond disorder is not currently supported.
+    """Build a Pybinding model with disorder used in Kite. Bond disorder or magnetic field are not currently supported.
 
     Parameters
     ----------
@@ -958,7 +1051,7 @@ def estimate_bounds(lattice, disorder=None, disorder_structural=None):
     return -a + b, a + b
 
 
-def config_system(lattice, config, calculation, **kwargs):
+def config_system(lattice, config, calculation, modification=None, **kwargs):
     """Export the lattice and related parameters to the *.h5 file
 
     Parameters
@@ -971,6 +1064,9 @@ def config_system(lattice, config, calculation, **kwargs):
         in the calculation.
     calculation : Calculation
         Calculation object that defines the requested functions for the calculation.
+    modification : Modification = None
+        If specified modification object, has the magnetic field selection, either in terms of field, or in the number
+        of flux quantum through the selected system.
     **kwargs: Optional arguments like filename, Disorder or Disorder_structural.
 
     """
@@ -992,13 +1088,23 @@ def config_system(lattice, config, calculation, **kwargs):
     # hamiltonian is complex 1 or real 0
     complx = int(config.comp)
 
-    # check if there are complex hoppings but identifier is_complex is 0
+    # check if there's complex hopping or magnetic field but identifier is_complex is 0
     imag_part = 0
     # loop through all hoppings
     for name, hop in lattice.hoppings.items():
         imag_part += np.linalg.norm(np.asarray(hop.energy).imag)
     if imag_part > 0 and complx == 0:
         print('Complex hoppings are added but is_complex identifier is 0. Automatically turning is_complex to 1!')
+        config._is_complex = 1
+        config.set_type()
+
+    # set default value
+    if not modification:
+        modification = Modification(magnetic_field=False)
+
+    # check if magnetic field is On
+    if modification.magnetic_field or modification.flux and complx == 0:
+        print('Magnetic field is added but is_complex identifier is 0. Automatically turning is_complex to 1!')
         config._is_complex = 1
         config.set_type()
 
@@ -1181,9 +1287,46 @@ def config_system(lattice, config, calculation, **kwargs):
         # hoppings
         grp.create_dataset('Hoppings', data=(t.real.astype(config.type)) / config.energy_scale)
 
+    # magnetic field
+    if modification.magnetic_field or modification.flux:
+        print('\n##############################################################################\n')
+        print('MAGNETIC FIELD:\n')
+
+        # find the minimum commensurate magnetic field
+        if not space_size == 2:
+            raise SystemExit('Magnetic field is currently supported only in 2D!')
+        hbar = 6.58211899 * 10 ** -16  #: [eV*s]
+        phi0 = 2 * np.pi * hbar  #: [V*s] flux quantum
+        unit_cell_area = np.linalg.norm(np.cross(vectors[0, :], vectors[1, :])) * 1e-18
+        magnetic_field_min = phi0 / (config.leng[1] * unit_cell_area)
+        print('For a selected system size, minimum field is: ', magnetic_field_min)
+
+        multiply_bmin = 0
+        if modification.magnetic_field:
+            multiply_bmin = int(round(modification.magnetic_field / magnetic_field_min))
+
+            if multiply_bmin == 0:
+                raise SystemExit('The system is to small for a desired field.')
+            print('Closest_field to the one you selected is {:.2f} T'.format(
+                  multiply_bmin * magnetic_field_min))
+
+        if modification.flux:
+            multiply_bmin = int(round(modification.flux * config.leng[1]))
+            if multiply_bmin == 0:
+                raise SystemExit('The system is to small for a desired field.')
+            print('Closest_field to the one you selected is {:.2f} T which in the terms of flux quantum is {:.2f}'.
+                  format(multiply_bmin * magnetic_field_min, multiply_bmin/config.leng[1]))
+            print('Selected field is {:.2f} T'.format(multiply_bmin*magnetic_field_min))
+        grp.create_dataset('NUM_GHOST_CORR', data=int(multiply_bmin), dtype='u4')
+        print('\n##############################################################################\n')
+
     grp_dis = grp.create_group('Disorder')
 
     if disorder:
+        present = disorder._orbital > -1
+        len_orb = np.max(np.sum(present, axis=0))
+        disorder._orbital = disorder._orbital[0:len_orb, :]
+
         grp_dis.create_dataset('OnsiteDisorderModelType', data=disorder._type_id, dtype=np.int32)
         grp_dis.create_dataset('OrbitalNum', data=disorder._orbital, dtype=np.int32)
         # no need to substract config.energy_scale from mean value as it's already subtracted once from onsite energy
@@ -1290,6 +1433,64 @@ def config_system(lattice, config, calculation, **kwargs):
         grpc_p.create_dataset('NumRandoms', data=random, dtype=np.int32)
         grpc_p.create_dataset('NumPoints', data=point, dtype=np.int32)
         grpc_p.create_dataset('NumDisorder', data=dis, dtype=np.int32)
+
+    if calculation.get_special:
+        grpc_p = grpc.create_group('special')
+
+        bra, ket, moments, point, dis, temp, direction = [], [], [], [], [], [], []
+        dimension_bra, starting_index_bra, dimension_ket, starting_index_ket, timestep = [], [], [], [], []
+        for single_special in calculation.get_special:
+            moments.append(single_special['num_moments'])
+            point.append(single_special['num_points'])
+            dis.append(single_special['num_disorder'])
+            bra.append(single_special['bra'])
+            ket.append(single_special['ket'])
+            dimension_bra.append(single_special['dimension_bra'])
+            dimension_ket.append(single_special['dimension_ket'])
+            starting_index_bra.append(single_special['starting_index_bra'])
+            starting_index_ket.append(single_special['starting_index_ket'])
+            timestep.append(single_special['timestep'])
+
+        if len(calculation.get_special) > 1:
+            raise SystemExit('Only a single function request of each type is currently allowed. Please use another '
+                             'configuration file for the same functionality.')
+        grpc_p.create_dataset('NumMoments', data=moments, dtype=np.int32)
+        grpc_p.create_dataset('NumPoints', data=point, dtype=np.int32)
+        grpc_p.create_dataset('NumDisorder', data=dis, dtype=np.int32)
+        grpc_p.create_dataset('dimension_bra', data=dimension_bra, dtype=np.int32)
+        grpc_p.create_dataset('starting_index_bra', data=np.asarray(starting_index_bra), dtype=np.int32)
+        grpc_p.create_dataset('dimension_ket', data=dimension_ket, dtype=np.int32)
+        grpc_p.create_dataset('starting_index_ket', data=np.asarray(starting_index_ket), dtype=np.int32)
+        grpc_p.create_dataset('bra', data=np.array(bra).astype(config.type))
+        grpc_p.create_dataset('ket', data=np.array(ket).astype(config.type))
+        grpc_p.create_dataset('timestep', data=timestep, dtype=np.float32)
+
+    if calculation.get_gaussian_wave_packet:
+        grpc_p = grpc.create_group('gaussian_wave_packet')
+
+        num_moments, num_points, num_disorder, spinor, width, k_vector, mean_value = [], [], [], [], [], [], []
+        timestep = []
+        for single_gauss_wavepacket in calculation.get_gaussian_wave_packet:
+            num_moments.append(single_gauss_wavepacket['num_moments'])
+            num_points.append(single_gauss_wavepacket['num_points'])
+            num_disorder.append(single_gauss_wavepacket['num_disorder'])
+            spinor.append(single_gauss_wavepacket['spinor'])
+            width.append(single_gauss_wavepacket['width'])
+            k_vector.append(single_gauss_wavepacket['k_vector'])
+            mean_value.append(single_gauss_wavepacket['mean_value'])
+            timestep.append(single_gauss_wavepacket['timestep'])
+
+        if len(calculation.get_gaussian_wave_packet) > 1:
+            raise SystemExit('Only a single function request of each type is currently allowed. Please use another '
+                             'configuration file for the same functionality.')
+        grpc_p.create_dataset('NumMoments', data=num_moments, dtype=np.int32)
+        grpc_p.create_dataset('NumPoints', data=num_points, dtype=np.int32)
+        grpc_p.create_dataset('NumDisorder', data=num_disorder, dtype=np.int32)
+        grpc_p.create_dataset('mean_value', data=mean_value, dtype=np.int32)
+        grpc_p.create_dataset('width', data=width, dtype=np.float)
+        grpc_p.create_dataset('spinor', data=np.asmatrix(np.asarray(spinor)).astype(config.type))
+        grpc_p.create_dataset('k_vector', data=np.asmatrix(np.asarray(k_vector)), dtype=np.float32)
+        grpc_p.create_dataset('timestep', data=timestep, dtype=np.float32)
 
     if calculation.get_conductivity_dc:
         grpc_p = grpc.create_group('conductivity_dc')

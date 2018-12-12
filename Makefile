@@ -21,8 +21,8 @@ endif
 #If you know what you are doing, feel free to edit and remove the unnecessary paths
 
 CFLAGS = -DEIGEN_DONT_PARALLELIZE -fopenmp -std=gnu++11 -Wall -ffast-math 
-CINCLUDE = -I/opt/local/lib/ 
-CINCLUDE += -ISrc -I$(HOME)/include -I/usr/local/hdf5/include -I/usr/local/Cellar/hdf5/1.10.1_2/include/ -I/usr/include/hdf5/serial #HDF5
+CINCLUDE = -I/opt/local/lib/ -ISrc
+CINCLUDE += -I$(HOME)/include -I/usr/local/hdf5/include -I/usr/local/Cellar/hdf5/1.10.1_2/include/ -I/usr/include/hdf5/serial #HDF5
 CINCLUDE += -I$(HOME)/include/eigen3 -I/opt/local/include/eigen3 -I/usr/include/eigen3/ -I/usr/local/include/eigen3 #EIGEN3 
 CLIBS = -L$(HOME)/lib -L/usr/local/hdf5/lib/ -L/usr/lib/x86_64-linux-gnu/hdf5/serial -L/usr/local/Cellar/hdf5/1.10.1_2/lib/ 
 CLIBS += -lhdf5_hl_cpp -lhdf5_cpp -lhdf5_hl -lhdf5  

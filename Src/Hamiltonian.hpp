@@ -129,17 +129,20 @@ public:
      * Uniform       : 2
      * Deterministic : 3
      */
+    hsize_t dim[2];
 #pragma omp critical
     {
+
+      
       H5::H5File    *file      = new H5::H5File(simul.name, H5F_ACC_RDONLY);
       H5::DataSet   dataset    = H5::DataSet(file->openDataSet("/Hamiltonian/Disorder/OrbitalNum"));
       H5::DataSpace dataspace  = dataset.getSpace();
-      size_t        m          = dataspace.getSimpleExtentNpoints();
+      dataspace.getSimpleExtentDims(dim, NULL);;
       
-      orb_num.resize(m);
-      model.resize(m);
-      mu.resize(m);
-      sigma.resize(m);
+      orb_num.resize(dim[0]*dim[1]);
+      model.resize(dim[1]);
+      mu.resize(dim[1]);
+      sigma.resize(dim[1]);
       try {
 	get_hdf5<int>(orb_num.data(), file, (char *) "/Hamiltonian/Disorder/OrbitalNum");               // read the orbitals that have local disorder
       	get_hdf5<int> (model.data(), file, (char *) "/Hamiltonian/Disorder/OnsiteDisorderModelType");   // read the the type  of local disorder
@@ -152,23 +155,35 @@ public:
     
     Anderson_orb_address.resize(r.Orb);
     U_Orbital.resize(r.Orb);
+    Eigen::Array<int,-1,-1> vv = Eigen::Map<Eigen::Array<int,-1,-1>>(orb_num.data(), dim[1], dim[0]);
     
     std::fill_n ( Anderson_orb_address.begin(), r.Orb, -2 );
     std::fill_n ( U_Orbital.begin(), r.Orb,  0 );
-    
     int sum = 0;
     for (unsigned i = 0; i < model.size(); i++)
       {
 	if(model.at(i) < 3)
 	  {
-	    Anderson_orb_address.at( orb_num.at(i) ) = sum;
+	    int count = 0;
+	    while(unsigned(count) < dim[0] &&  vv(i, count) != -1 )
+	      {
+		int io = vv(i, count);
+		Anderson_orb_address.at(io) = sum;
+		count++;
+	      }
 	    sum++;
 	  }
 	
 	if(model.at(i) == 3) // Deterministic
 	  {
-	    Anderson_orb_address.at( orb_num.at(i) ) = -1;
-	    U_Orbital.at( orb_num.at(i) ) = mu.at(i);
+	    int count = 0;
+	    while( vv(i, count) != -1 )
+	      {
+		int io = vv(i, count);
+		Anderson_orb_address.at(io) = -1;
+		U_Orbital.at(io) = mu.at(i);
+		count++;
+	      }
 	  }
       }
     

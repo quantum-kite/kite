@@ -44,8 +44,8 @@ class conductivity_optical{
 
     // information about the Hamiltonian
     system_info<T, DIM> systemInfo;
-    //
-    // Input from the shell to override the configuration file
+
+    // Objects required to successfully calculate the conductivity
     shell_input variables;
 
     // Objects required to successfully calculate the conductivity
@@ -71,7 +71,7 @@ conductivity_optical<T, DIM>::conductivity_optical(system_info<T, DIM>& info, sh
   // retrieve the information about the Hamiltonian
   systemInfo = info;
 
-  // retrieve the shell input
+  // location of the information about the conductivity
   variables = vari;
 
   // location of the information about the conductivity
@@ -95,7 +95,7 @@ void conductivity_optical<T, DIM>::fetch_parameters(){
   //calculate the optical conductivity
 	 
 
-
+  // Check if the data for the optical conductivity exists
   // Check if the data for the optical conductivity exists
   if(!isRequired){
     std::cout << "Data for optical conductivity does not exist. Exiting.\n";
@@ -143,7 +143,7 @@ void conductivity_optical<T, DIM>::fetch_parameters(){
 
 
 
-  // Retrieve the Lambda Matrix
+
   MatrixName = dirName + "Lambda" + dirString;
   try{
 		debug_message("Filling the Lambda matrix.\n");
@@ -166,13 +166,13 @@ void conductivity_optical<T, DIM>::fetch_parameters(){
     isPossible = false;
   }
 
-  // 1/kT, where k is the Boltzmann constant in eV/K
+	
   temperature = 0.001/systemInfo.energy_scale;
   beta = 1.0/8.6173303*pow(10,5)/temperature;
   e_fermi = 0.2/systemInfo.energy_scale;
   scat = 0.0166/systemInfo.energy_scale;
-	
-	// Calculate the number of frequencies and energies needed to perform the calculation.
+
+
   N_energies = 512;
 
   N_omegas = NumPoints;
@@ -197,17 +197,15 @@ void conductivity_optical<U, DIM>::override_parameters(){
     if(variables.CondOpt_Scat != -8888)     scat        = variables.CondOpt_Scat/systemInfo.energy_scale;
     if(variables.CondOpt_Name != "")        filename    = variables.CondOpt_Name;
     beta = 1.0/8.6173303*pow(10,5)/temperature;
-
+	//Calculates the optical conductivity for a set of frequencies in the range [-sigma, sigma].
 };
-
+	//These frequencies are in the KPM scale, that is, the scale where the energy is in the range ]-1,1[.
 template <typename U, unsigned DIM>
 void conductivity_optical<U, DIM>::calculate_efficient(){
 	debug_message("Entered calc_optical_cond.\n");
-	//Calculates the optical conductivity for a set of frequencies in the range [-sigma, sigma].
-	//These frequencies are in the KPM scale, that is, the scale where the energy is in the range ]-1,1[.
 	//the temperature is already in the KPM scale, but not the broadening or the Fermi Energy
 
-
+  // ########################################################
   if(!isPossible){
     std::cout << "Cannot calculate the conductivity because there is no matching Gamma matrix"
       "Exiting\n";
@@ -332,7 +330,7 @@ void conductivity_optical<U, DIM>::calculate_efficient(){
 }
 
   
-  temp3 = contract1<U>(deltaF, NumMoments, Lambda, energies);                            // This term is so easy to calculate I won't bother with parallelization
+  temp3 = contract1<U>(deltaF, NumMoments, Lambda, energies);
 
 
   std::complex<U> freq;

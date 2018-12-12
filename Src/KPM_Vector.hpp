@@ -56,11 +56,14 @@ public:
     
   
   void initiate_vector() {};
+  void build_wave_packet(Eigen::Matrix<double,-1,-1> & k, Eigen::Matrix<T,-1,-1> & psi0, double & sigma) {};
+  
   template <unsigned MULT>
   void Multiply(){};
   template <unsigned MULT>
   void Multiply2(){};
   void test_boundaries_system() {};
+  void measure_wave_packet(T * , T * , T * ){};
   void Exchange_Boundaries() {};
   inline void  HaIteration() { Multiply<0>(); };
   inline void  ChIteration() { Multiply<1>(); };
@@ -68,7 +71,7 @@ public:
   void Velocity2( T *, T *, int, int){};
   T VelocityInternalProduct( T *  , T * , int);
   void empty_ghosts(int){}; 
-  
+  T get_point(){ return assign_value<T>(0,0);};  
   template <typename U = T>
   typename std::enable_if<is_tt<std::complex, U>::value, U>::type ghosts_correlation2(double phase){return 1;};
   template <typename U = T>

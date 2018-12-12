@@ -120,6 +120,99 @@ public:
     
   };
   
+  T get_point()
+  {
+    T point;
+    if(r.thread_id == 0)
+      {
+	Coordinates<std::size_t, 3> x(r.Ld);
+	std::size_t indice = x.set({std::size_t(r.Ld[0]/2),std::size_t(r.Ld[1]/2), std::size_t(0)}).index;
+	point = v(indice,index);
+      }
+    else
+      point = assign_value<T>(0,0);
+    return point;
+  }
+
+  void build_wave_packet(Eigen::Matrix<double,-1,-1> & k, Eigen::Matrix<T,-1,-1> & psi0, double & sigma)
+  {
+    index = 0;
+    Coordinates<std::size_t, 3> x(r.Ld), z(r.Lt);
+    Eigen::Matrix<T,-1,-1>  sum(r.Orb, 1);
+    Eigen::Map<Eigen::Matrix<std::size_t,2, 1>> vv(z.coord);
+    Eigen::Matrix<double, 1, 2> va , vb;
+    Eigen::Matrix<double, -1,-1> phase(1, psi0.cols());
+    T soma = assign_value<T> (0,0);
+    auto bbs = r.rLat.inverse(); // each row is a bi / 2*M_PI 
+    auto vOrb = bbs * r.rOrb;    // each columns is a vector in a1 basis
+    
+
+    vb(0,0) = r.Lt[0]/2;
+    vb(0,1) = r.Lt[1]/2;
+    
+    double a00 = r.rLat.col(0).transpose()*r.rLat.col(0);
+    double a11 = r.rLat.col(1).transpose()*r.rLat.col(1);
+    double a01 = r.rLat.col(0).transpose()*r.rLat.col(1);
+    
+#pragma omp master 
+    {
+      simul.Global.mu = Eigen::Matrix<T,-1,-1>(psi0.cols(), 1);      
+      for(int ik = 0; ik < psi0.cols(); ik++)
+	simul.Global.mu(ik, 0) = assign_value<T>( simul.rnd.get(), 0 );
+    }
+#pragma omp barrier
+
+#pragma omp critical
+    for(int ik = 0; ik < psi0.cols(); ik++)
+      phase(0,ik)  = std::real(simul.Global.mu(ik, 0)) ;
+#pragma omp barrier
+    for(std::size_t i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1++)
+      for(std::size_t i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0++)
+	{
+	  x.set({i0,i1,std::size_t(0)});
+	  r.convertCoordinates(z,x);
+	  double n1 = (double(z.coord[1]) - double(r.Lt[1])/2.)/sigma;
+	  double n0 = (double(z.coord[0]) - double(r.Lt[0])/2.)/sigma;
+	  double gauss = n0*n0 * a00 + n1*n1 * a11 + 2*n0*n1*a01;
+	  sum.setZero();
+	  va = vv.cast<double>().transpose();
+	  
+	  for(int ik = 0; ik < psi0.cols(); ik++)
+	    {
+	      for(unsigned io = 0; io < r.Orb; io++)
+		{
+		  double xx = (va  + vOrb.col(io).transpose() ) * k.col(ik);
+		  sum(io, 0) += psi0(io,ik) * exp(assign_value<T>(-0.5*gauss,  2.*M_PI * (xx + 0.*phase(0,ik) )));
+		}
+	    }
+	  
+	  for(std::size_t io = 0; io < r.Orb; io++)
+	    {
+	      x.set({i0,i1,io});
+	      v(x.index, 0) = sum(io,0);
+	      soma += assign_value<T> ( std::real( sum(io,0) * std::conj(sum(io,0)) ), 0);
+	    }
+	}
+    
+#pragma omp master
+    simul.Global.soma = assign_value<T> (0,0);
+#pragma omp barrier
+#pragma omp critical
+    simul.Global.soma += soma;
+#pragma omp barrier
+    soma = simul.Global.soma;
+    value_type soma2 = sqrt(std::real(soma));
+    
+    for(std::size_t io = 0; io < r.Orb; io++)
+      for(std::size_t i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1++)
+	for(std::size_t i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0++)
+	  {
+	    x.set({i0,i1,io});
+	    v(x.index, 0) /= soma2;
+	  }
+  }
+  
+  
   template < unsigned MULT,bool VELOCITY> 
   void build_regular_phases(int i1, unsigned axis)
   {
@@ -264,7 +357,7 @@ public:
 	    std::size_t istr = (i1 - NGHOSTS) /STRIDE * r.lStr[0] + (i0 - NGHOSTS)/ STRIDE;
 	    if(h.cross_mozaic.at(istr))
 	      initiate_stride<MULT>(istr);
-	    // These four lines pertrain only to the ghost_correlation field
+	    // These four lines pertrain only to the magnetic field
 	    for(std::size_t io = 0; io < r.Orb; io++)
 	      {
 		const std::size_t ip = io * x.basis[2];
@@ -300,11 +393,55 @@ public:
     for(auto id = h.hd.begin(); id != h.hd.end(); id++)
       id->template multiply_broken_defect<MULT,VELOCITY>(phi0, phiM1,axis);
 	  
-    // These four lines pertrain only to the ghost_correlation field
+    // These four lines pertrain only to the magnetic field
     Exchange_Boundaries();
+  };
+  
+  void measure_wave_packet(T * bra, T * ket, T * results)  
+  {
+    Coordinates<std::size_t,3> ad(r.Ld), at(r.Lt);
+    ad.set({std::size_t(NGHOSTS), std::size_t(NGHOSTS), std::size_t(0)});
+    r.convertCoordinates(at,ad);
+    for(unsigned i = 0; i < 4; i++)
+      results[i] *= 0.;
+
+    for(unsigned io = 0; io < r.Orb; io++)
+      {
+	value_type deltax = r.rOrb(0,io);
+	value_type deltay = r.rOrb(1,io);
+	
+	for(unsigned i1 = 0; i1 < r.ld[1]; i1++)
+	  {
+	    std::size_t ind = ad.set({std::size_t(NGHOSTS),std::size_t(i1 + NGHOSTS), std::size_t(io)}).index;
+	    value_type z1 = at.coord[1] + i1;
+	    value_type x0 = at.coord[0]*r.rLat(0,0) + z1 * r.rLat(0,1) + deltax;
+	    value_type y0 = at.coord[0]*r.rLat(1,0) + z1 * r.rLat(1,1) + deltay;	    
+
+	    T xl1 = assign_value<T>(0., 0.);
+	    T xl2 = assign_value<T>(0., 0.);
+	    T yl1 = assign_value<T>(0., 0.);
+	    T yl2 = assign_value<T>(0., 0.);
+	    
+	    for(unsigned i0 = 0; i0 < r.ld[0]; i0++)
+	      {
+		std::size_t j0 = ind + i0;
+		value_type x = x0 + i0 * r.rLat(0,0);
+		value_type y = y0 + i0 * r.rLat(1,0);
+		T p = myconj(*(bra + j0)) * (*(ket + j0));
+		xl1 += p * x;
+		xl2 += p * x * x;
+		yl1 += p * y;
+		yl2 += p * y * y;
       }
     
+	    results[0] += xl1;
+	    results[1] += xl2;
+	    results[2] += yl1;
+	    results[3] += yl2;
+	  }
+      }
 	  // Periodic component of the Hamiltonian + Anderson disorder
+  };
 	  
   
 
