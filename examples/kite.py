@@ -1281,7 +1281,7 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
             print('Closest_field to the one you selected is {:.2f} T which in the terms of flux quantum is {:.2f}'.
                   format(multiply_bmin * magnetic_field_min, multiply_bmin / config.leng[1]))
             print('Selected field is {:.2f} T'.format(multiply_bmin * magnetic_field_min))
-        grp.create_dataset('NUM_GHOST_CORR', data=int(multiply_bmin), dtype='u4')
+        grp.create_dataset('MagneticFieldMul', data=int(multiply_bmin), dtype='u4')
         print('\n##############################################################################\n')
 
     grp_dis = grp.create_group('Disorder')

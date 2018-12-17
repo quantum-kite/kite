@@ -114,7 +114,7 @@ public:
   std::size_t NStr; // Number of lattice postions of the sub-domain without ghosts
   unsigned Orb; // Number of orbitals
   unsigned thread_id; // thread identification
-  int MagneticField;
+  int MagneticField = 0;
 
   
   Eigen::Matrix<double, D, D> ghost_pot; // ghosts_correlation potential
@@ -144,12 +144,17 @@ public:
         exit(1);
       }
 
+      try {
+          H5::Exception::dontPrint();
+          get_hdf5<int>(&MagneticField, file, (char *) "/Hamiltonian/MagneticFieldMul");
+      }
+      catch (H5::Exception& e){}
       file->close();
     }
 
     // Set the ghost_correlation potential and normalize it to the size of the system
     ghost_pot.setZero();
-		ghost_pot(0,1) = NUM_GHOST_CORR/Lt[1]*2.0*M_PI;
+    ghost_pot(0,1) = MagneticField * 1.0 /Lt[1]*2.0*M_PI;
     
     Nd = 1;
     N = 1;

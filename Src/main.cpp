@@ -32,7 +32,6 @@
 // MEMORY is the number of KPM vectors stored in the memory while calculating Gamma2D
 // STRIDE is the size of the memory blocks used in the program
 // COMPILE_MAIN is a flag to prevent compilation of unnecessary parts of the code when testing
-// NUM_GHOSTS_CORR is the onsite correction due to the usage of GHOSTS
 #ifndef MEMORY
 #define MEMORY 16
 #endif
@@ -55,10 +54,6 @@
 
 #ifndef ESTIMATE_TIME
 #define ESTIMATE_TIME 1
-#endif
-
-#ifndef NUM_GHOST_CORR
-#define NUM_GHOST_CORR 0
 #endif
 
 // other compilation parameters not set in the Makefile
