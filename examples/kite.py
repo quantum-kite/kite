@@ -575,13 +575,13 @@ class Calculation:
         Parameters
         ----------
         num_points : int
-            Number of energy point inside the spectrum at which the DOS will be calculated.
+            Number of time points for the time evolution.
         num_moments : int
             Number of polynomials in the Chebyshev expansion.
         timestep : float
             Timestep for calculation of time evolution.
         k_vector : np.array
-            Different wave vectors, components coresponding to vectors b0 and b1.
+            Different wave vectors, components corresponding to vectors b0 and b1.
         spinor : np.array
             Spinors for each of the k vectors.
         width : float
