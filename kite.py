@@ -21,6 +21,7 @@ from scipy.spatial import cKDTree
 # Class that introduces Structural Disorder into the initially built lattice.
 # The exported dataset StructuralDisorder has the following groups:
 # - Concentration: concentration of disorder,
+# - Position: If instead of concentration one want's to select an exact position of disorder,
 # - NumBondDisorder: number of bond changes,
 # - NumOnsiteDisorder: number of onsite energy,
 # The disorder is represented through nodes, where each node represents and maps a single orbital.
@@ -33,9 +34,17 @@ from scipy.spatial import cKDTree
 # - NodeOnsite: array of nodes that have onsite disorder,
 # - U0: value of the onsite disorder.
 class StructuralDisorder:
-    def __init__(self, lattice, concentration):
+    def __init__(self, lattice, concentration=0, position=None):
+
+        if (concentration != 0 and not(position is None)) or (position is None and concentration == 0):
+            SystemExit('Either select concentration which results in random distribution or '
+                       'the exact position of the defect!')
+
+        if position is None:
+            position = 0
 
         self._concentration = concentration
+        self._position = position
         self._num_bond_disorder_per_type = 0
         self._num_onsite_disorder_per_type = 0
 
@@ -77,20 +86,27 @@ class StructuralDisorder:
         self._num_orbitals_before = np.cumsum(np.asarray(num_orbitals)) - num_orbitals
         self._lattice = lattice
 
-    def add_vacancy(self, *disorder):
-        if len(disorder) == 1:
-            num_vacancy_disorder = 0
-            for dis in disorder:
-                # check if it's just concentration or sublatt
-                num_vacancy_disorder += 1
-                self.add_local_vacancy_disorder(dis)
+        vectors = np.asarray(self._lattice.vectors)
+        self._space_size = vectors.shape[0]
 
-        else:
-            raise SystemExit('Vacancy disorder should be added in a form:'
-                             '\n sublattice name,'
-                             '\n or in a form of disorder onsite energy:'
-                             '\n ([rel. unit cell], sublattice_name, '
-                             'onsite energy)')
+    def add_vacancy(self, *disorder):
+        num_vacancy_disorder = 0
+        for dis in disorder:
+            if len(disorder) == 1:
+                relative_index = [0, 0]
+                dis =[relative_index, dis]
+
+            # check if it's just concentration or sublatt
+            num_vacancy_disorder += 1
+            self.add_local_vacancy_disorder(*dis)
+
+            if len(disorder) > 2:
+                raise SystemExit('Vacancy disorder should be added in a form:'
+                                 '\n sublattice name,'
+                                 '\n sublattice name, [rel. unit cell],'
+                                 '\n or in a form of disorder onsite energy:'
+                                 '\n ([rel. unit cell], sublattice_name, '
+                                 'onsite energy)')
 
     def add_structural_disorder(self, *disorder):
         self._nodes_map = dict()
@@ -131,7 +147,7 @@ class StructuralDisorder:
 
         return idx_node
 
-    def add_local_vacancy_disorder(self, sub):
+    def add_local_vacancy_disorder(self, relative_index, sub):
         orbital_vacancy = []
 
         names, sublattices = zip(*self._lattice.sublattices.items())
@@ -145,8 +161,11 @@ class StructuralDisorder:
         sub_id = lattice_sub.alias_id
 
         it = np.nditer(lattice_sub.energy, flags=['multi_index'])
+        relative_move = np.dot(np.asarray(relative_index) + np.asarray(self._position) + 1,
+                                    3 ** np.linspace(0, self._space_size - 1, self._space_size, dtype=np.int32))
         while not it.finished:
-            orbit = self._num_orbitals_before[sub_id] + it.multi_index[0]
+            orbit = int(relative_move +
+                        self._num_orbitals_before[sub_id] + it.multi_index[0] * 3 ** self._space_size)
             if orbit not in orbital_vacancy:
                 orbital_vacancy.append(orbit)
             it.iternext()
@@ -167,12 +186,9 @@ class StructuralDisorder:
         orbital_to = []
         orbital_hop = []
 
-        vectors = np.asarray(self._lattice.vectors)
-        space_size = vectors.shape[0]
-
         distance_relative = np.asarray(relative_index_from) - np.asarray(relative_index_to)
 
-        if np.linalg.norm(distance_relative) > space_size:
+        if np.linalg.norm(distance_relative) > self._space_size:
             raise SystemExit('Currently only the next nearest distances are supported, make the bond of the bond '
                              'disorder shorter! ')
 
@@ -199,16 +215,16 @@ class StructuralDisorder:
 
         h = np.nditer(hoppings, flags=['multi_index'])
         while not h.finished:
-            relative_move_from = np.dot(np.asarray(relative_index_from) + 1,
-                                        3 ** np.linspace(0, space_size - 1, space_size, dtype=np.int32))
-            relative_move_to = np.dot(np.asarray(relative_index_to) + 1,
-                                      3 ** np.linspace(0, space_size - 1, space_size, dtype=np.int32))
+            relative_move_from = np.dot(np.asarray(relative_index_from) + np.asarray(self._position) + 1,
+                                        3 ** np.linspace(0, self._space_size - 1, self._space_size, dtype=np.int32))
+            relative_move_to = np.dot(np.asarray(relative_index_to) + np.asarray(self._position) + 1,
+                                      3 ** np.linspace(0, self._space_size - 1, self._space_size, dtype=np.int32))
 
             if isinstance(hoppings, np.ndarray):
                 orb_from = int(relative_move_from +
-                               (self._num_orbitals_before[from_sub_id] + h.multi_index[0]) * 3 ** space_size)
+                               (self._num_orbitals_before[from_sub_id] + h.multi_index[0]) * 3 ** self._space_size)
                 orb_to = int(relative_move_to +
-                             (self._num_orbitals_before[to_sub_id] + h.multi_index[1]) * 3 ** space_size)
+                             (self._num_orbitals_before[to_sub_id] + h.multi_index[1]) * 3 ** self._space_size)
 
                 self.map_the_orbital(orb_from, nodes_map)
                 self.map_the_orbital(orb_to, nodes_map)
@@ -230,8 +246,8 @@ class StructuralDisorder:
                 orbital_hop.append(np.conj(h[0]))
 
             else:
-                orb_from = int(relative_move_from + self._num_orbitals_before[from_sub_id] * 3 ** space_size)
-                orb_to = int(relative_move_to + self._num_orbitals_before[to_sub_id] * 3 ** space_size)
+                orb_from = int(relative_move_from + self._num_orbitals_before[from_sub_id] * 3 ** self._space_size)
+                orb_to = int(relative_move_to + self._num_orbitals_before[to_sub_id] * 3 ** self._space_size)
 
                 self.map_the_orbital(orb_from, nodes_map)
                 self.map_the_orbital(orb_to, nodes_map)
@@ -277,9 +293,6 @@ class StructuralDisorder:
 
         nodes_map = self._nodes_map
 
-        vectors = np.asarray(self._lattice.vectors)
-        space_size = vectors.shape[0]
-
         names, sublattices = zip(*self._lattice.sublattices.items())
 
         if sub not in names:
@@ -294,11 +307,11 @@ class StructuralDisorder:
 
         h = np.nditer(value, flags=['multi_index'])
         while not h.finished:
-            relative_move = np.dot(np.asarray(relative_index) + 1,
-                                   3 ** np.linspace(0, space_size - 1, space_size, dtype=np.int32))
+            relative_move = np.dot(np.asarray(relative_index) + np.asarray(self._position) + 1,
+                                   3 ** np.linspace(0, self._space_size - 1, self._space_size, dtype=np.int32))
 
             if isinstance(value, np.ndarray):
-                orb = int(relative_move + (self._num_orbitals_before[sub_id] + h.multi_index[0]) * 3 ** space_size)
+                orb = int(relative_move + (self._num_orbitals_before[sub_id] + h.multi_index[0]) * 3 ** self._space_size)
 
                 self.map_the_orbital(orb, nodes_map)
 
@@ -307,7 +320,7 @@ class StructuralDisorder:
                 nodes_onsite.append(nodes_map[orb])
                 orbital_onsite.append(orb)
             else:
-                orb = int(relative_move + self._num_orbitals_before[sub_id] * 3 ** space_size)
+                orb = int(relative_move + self._num_orbitals_before[sub_id] * 3 ** self._space_size)
 
                 self.map_the_orbital(orb, nodes_map)
 
