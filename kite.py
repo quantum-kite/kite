@@ -457,6 +457,16 @@ class Calculation:
         return self._dos
 
     @property
+    def get_ldos(self):
+        """Returns the requested LDOS functions."""
+        return self._ldos
+
+    @property
+    def get_arpes(self):
+        """Returns the requested ARPES functions."""
+        return self._arpes
+
+    @property
     def get_gaussian_wave_packet(self):
         """Returns the requested wave packet time evolution function, with a gaussian wavepacket mutiplied with different
         plane waves."""
@@ -490,6 +500,8 @@ class Calculation:
         self._scaling_factor = configuration.energy_scale
         self._energy_shift = configuration.energy_shift
         self._dos = []
+        self._ldos = []
+        self._arpes = []
         self._conductivity_dc = []
         self._conductivity_optical = []
         self._conductivity_optical_nonlinear = []
@@ -520,6 +532,41 @@ class Calculation:
 
         self._dos.append({'num_points': num_points, 'num_moments': num_moments, 'num_random': num_random,
                           'num_disorder': num_disorder})
+
+    def ldos(self, energy, num_moments, position, sublattice, num_disorder=1):
+        """Calculate the density of states as a function of energy
+
+        Parameters
+        ----------
+        energy : list or np.array
+            List of energy points at which the LDOS will be calculated.
+        num_moments : int
+            Number of polynomials in the Chebyshev expansion.
+        num_disorder : int
+            Number of different disorder realisations.
+        position : list
+            Relative index of the unit cell where the LDOS will be calculated.
+        sublattice : str
+            Name of the sublattice at which the LDOS will be calculated.
+        """
+
+        self._ldos.append({'energy': energy, 'num_moments': num_moments, 'position': position,
+                           'sublattice': sublattice, 'num_disorder': num_disorder})
+
+    def arpes(self, k_vector, num_moments, num_disorder=1):
+        """Calculate the density of states as a function of energy
+
+        Parameters
+        ----------
+        k_vector : List
+            List of K points with respect to reciprocal vectors b0 and b1 at which the band structure will be calculated.
+        num_moments : int
+            Number of polynomials in the Chebyshev expansion.
+        num_disorder : int
+            Number of different disorder realisations.
+        """
+
+        self._arpes.append({'k_vector': k_vector, 'num_moments': num_moments, 'num_disorder': num_disorder})
 
     def gaussian_wave_packet(self, num_points, num_moments, timestep, k_vector, spinor, width, mean_value,
                              num_disorder=1, **kwargs):
@@ -1396,6 +1443,83 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
         grpc_p.create_dataset('NumMoments', data=moments, dtype=np.int32)
         grpc_p.create_dataset('NumRandoms', data=random, dtype=np.int32)
         grpc_p.create_dataset('NumPoints', data=point, dtype=np.int32)
+        grpc_p.create_dataset('NumDisorder', data=dis, dtype=np.int32)
+
+    if calculation.get_ldos:
+        grpc_p = grpc.create_group('ldos')
+
+        moments, energy, orbitals, dis, position, sublattice = [], [], [], [], [], []
+        for single_ldos in calculation.get_ldos:
+            moments.append(single_ldos['num_moments'])
+            energy.append(single_ldos['energy'])
+            position.append(single_ldos['position'])
+            sublattice.append(single_ldos['sublattice'])
+            dis.append(single_ldos['num_disorder'])
+
+        len_pos = np.array(position).shape[0]
+        len_sub = len(sublattice)
+
+        if len_pos != len_sub and (len_pos != 1 or len_sub != 1):
+            raise SystemExit('Number of sublattices and number of positions should either have the same '
+                             'length or should be specified as a single value! Choose them accordingly.')
+
+        if len_sub == 1 and len_pos > 1:
+            sublattice = [sublattice] * len_pos
+        if len_pos == 1 and len_sub > 1:
+            position = [position] * len_sub
+
+        # get the names and sublattices from the lattice
+        names, sublattices_all = zip(*lattice.sublattices.items())
+
+        # convert relative index and sublattice to orbital number
+        orbitals = []
+        for sub, pos in zip(sublattice, position):
+
+            if sub not in names:
+                raise SystemExit('Desired sublattice for LDOS calculation doesn\'t exist in the chosen lattice! ')
+
+            indx = names.index(sub)
+            lattice_sub = sublattices_all[indx]
+            sub_id = lattice_sub.alias_id
+            it = np.nditer(lattice_sub.energy, flags=['multi_index'])
+            relative_move = np.dot(np.array(pos) + 1, 3 ** np.linspace(0, space_size - 1, space_size, dtype=np.int32))
+            while not it.finished:
+                orbit = int(relative_move + orbitals_before[sub_id] + it.multi_index[0] * 3 ** space_size)
+                if orbit not in orbitals:
+                    orbitals.append(orbit)
+                it.iternext()
+
+        if len(calculation.get_ldos) > 1:
+            raise SystemExit('Only a single function request of each type is currently allowed. Please use another '
+                             'configuration file for the same functionality.')
+        grpc_p.create_dataset('NumMoments', data=moments, dtype=np.int32)
+        grpc_p.create_dataset('Energy', data=np.asarray(energy), dtype=np.float32)
+        grpc_p.create_dataset('Orbitals', data=np.asarray(orbitals), dtype=np.int32)
+        grpc_p.create_dataset('NumDisorder', data=dis, dtype=np.int32)
+
+    if calculation.get_arpes:
+        grpc_p = grpc.create_group('arpes')
+
+        moments, k_vector, dis = [], [], []
+        for single_arpes in calculation.get_arpes:
+            moments.append(single_arpes['num_moments'])
+            k_vector.append(single_arpes['k_vector'])
+            dis.append(single_arpes['num_disorder'])
+
+        # convert to values with respect to b1 and b2 in 2D
+        k_vector = np.asmatrix(np.asarray(k_vector))
+
+        b1, b2 = lattice.reciprocal_vectors()
+        k1 = +(k_vector[:, 0] * b2[1] - k_vector[:, 1] * b2[0]) / (b1[0] * b2[1] - b1[1] * b2[0])
+        k2 = -(k_vector[:, 0] * b1[1] - k_vector[:, 1] * b1[0]) / (b1[0] * b2[1] - b1[1] * b2[0])
+
+        k_vector_rel = np.column_stack((k1, k2))
+
+        if len(calculation.get_arpes) > 1:
+            raise SystemExit('Only a single function request of each type is currently allowed. Please use another '
+                             'configuration file for the same functionality.')
+        grpc_p.create_dataset('NumMoments', data=moments, dtype=np.int32)
+        grpc_p.create_dataset('k_vector', data=np.asmatrix(np.asarray(k_vector_rel)), dtype=np.float32)
         grpc_p.create_dataset('NumDisorder', data=dis, dtype=np.int32)
 
     if calculation.get_gaussian_wave_packet:
