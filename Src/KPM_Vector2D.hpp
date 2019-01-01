@@ -9,13 +9,14 @@
 template <typename T>
 class KPM_Vector <T, 2> : public KPM_VectorBasis <T,2> {
 private:
-  std::size_t             max[2];
+  LatticeStructure<2u>       & r;
   std::size_t 	*MemIndBeg[2][2];
   std::size_t 	*MemIndEnd[2][2];
   std::size_t        block[2][2];
   std::size_t          stride[2];
   std::size_t   stride_ghosts[2];
-  LatticeStructure<2u>       & r;
+  std::size_t      transf_max[2]; // [d][edged]
+  std::size_t transf_bound[2][2]; // [d][edged]
   Hamiltonian<T,2u>          & h;
   T               ***mult_t1_ghost_cor;
   Coordinates<std::size_t,3>   x;
@@ -23,6 +24,7 @@ private:
   T                       *phiM1;
   T                       *phiM2;
   const std::size_t          std;
+  const unsigned D = 2u;
 public:
   typedef typename extract_value_type<T>::value_type value_type;
   using KPM_VectorBasis<T,2>::simul;
@@ -33,11 +35,13 @@ public:
   using KPM_VectorBasis<T,2>::aux_test;
   using KPM_VectorBasis<T,2>::inc_index;
   
-  KPM_Vector(int mem, Simulation<T,2> & sim) : KPM_VectorBasis<T,2>(mem, sim), r(sim.r), h(sim.h), x(r.Ld), std(x.basis[1]) {
+  KPM_Vector(int mem, Simulation<T,2> & sim) :
+    KPM_VectorBasis<T,2>(mem, sim),  r(sim.r), stride{r.Ld[0], 1}, stride_ghosts{1,r.Ld[0]},
+    transf_max{r.ld[1], r.Ld[0]}, h(sim.h), x(r.Ld), std(x.basis[1]) {
     unsigned d;
     Coordinates <std::size_t, 3>     z(r.Ld);
     Coordinates <int, 3> x(r.nd), dist(r.nd);
-
+    
     mult_t1_ghost_cor = new T**[r.Orb];
     for(unsigned io = 0; io < r.Orb; io++)
       {
@@ -51,31 +55,49 @@ public:
 	{
 	  MemIndBeg[d][b] = new std::size_t[r.Orb];
 	  MemIndEnd[d][b] = new std::size_t[r.Orb];
-	    
 	}
+    
+    
+    for(unsigned d = 0; d < 2u; d++)
+      for(unsigned edge = 0; edge < 2; edge++)
+	transf_bound[d][edge] = (r.boundary[d][edge] == true ? r.ld[D - 1 - d] : 0);
+    
+    for(unsigned edge = 0 ; edge < 2; edge++)
+      if(r.boundary[1][edge] == 1) // Botton/Top edge Increase the size due left and right corners
+	transf_bound[1][edge] += (r.boundary[0][0] == 1 ? NGHOSTS : 0 ) + (r.boundary[0][1] == 1 ? NGHOSTS : 0 ) ;
+    
     
     for(std::size_t io = 0; io < r.Orb; io++)
       {
 	d = 0;
-	max[d] =  r.ld[1];
-	stride[d]  = r.Ld[0];
-	stride_ghosts[d] = 1;
-	MemIndBeg[d][0][io] = z.set({std::size_t(NGHOSTS),               std::size_t(NGHOSTS), io}).index;   // From the index Starting here --- Right
-	MemIndEnd[d][0][io] = z.set({std::size_t(0),                     std::size_t(NGHOSTS), io}).index;   //   To the index Starting here --- Right
-	MemIndBeg[d][1][io] = z.set({std::size_t(r.Ld[0] - 2 * NGHOSTS), std::size_t(NGHOSTS), io}).index;   // From the index Starting here --- Left
-	MemIndEnd[d][1][io] = z.set({std::size_t(r.Ld[0] - NGHOSTS),     std::size_t(NGHOSTS), io}).index;   //   To the index Starting here --- Left
+	// Position of initial corner to copy the source
+	MemIndBeg[d][0][io] = z.set({std::size_t(NGHOSTS),               std::size_t(NGHOSTS), io}).index;   
+	MemIndBeg[d][1][io] = z.set({std::size_t(r.Ld[0] - 2 * NGHOSTS), std::size_t(NGHOSTS), io}).index;   
+	// Position of initial corner to copy to the destiny 
+	MemIndEnd[d][0][io] = z.set({std::size_t(0),                     std::size_t(NGHOSTS), io}).index;   
+	MemIndEnd[d][1][io] = z.set({std::size_t(r.Ld[0] - NGHOSTS),     std::size_t(NGHOSTS), io}).index;   
 	
 	d = 1;
-	max[d] =  r.Ld[0];
-	stride[d] = 1;
-	stride_ghosts[d] = r.Ld[0];
-	MemIndBeg[d][0][io] = z.set({std::size_t(0), std::size_t(NGHOSTS),             io}).index;          // From the index Starting here --- Bottom
-	MemIndEnd[d][0][io] = z.set({std::size_t(0), std::size_t(0),                   io}).index;          //   To the index Starting here --- Bottom
-	MemIndBeg[d][1][io] = z.set({std::size_t(0), std::size_t(r.Ld[1] - 2*NGHOSTS), io}).index;          // From the index Starting here --- Top
-	MemIndEnd[d][1][io] = z.set({std::size_t(0), std::size_t(r.Ld[1] - NGHOSTS),   io}).index;          //   To the index Starting here --- Top
+	// Bottom edge 
+	MemIndBeg[d][0][io] = z.set({std::size_t(NGHOSTS), std::size_t(NGHOSTS),             io}).index;
+	MemIndEnd[d][0][io] = z.set({std::size_t(NGHOSTS), std::size_t(0),                   io}).index;          
+	if(r.boundary[1][0] == 1 && r.boundary[0][0] == 1) // Add the Left bottom Corner
+	  {
+	    MemIndBeg[1][0][io] = z.set({std::size_t(0), std::size_t(NGHOSTS),             io}).index;
+	    MemIndEnd[1][0][io] = z.set({std::size_t(0), std::size_t(0),                   io}).index;
+	  }
+	// Top Edge 
+	MemIndBeg[d][1][io] = z.set({std::size_t(NGHOSTS), std::size_t(r.Ld[1] - 2*NGHOSTS), io}).index;
+	MemIndEnd[d][1][io] = z.set({std::size_t(NGHOSTS), std::size_t(r.Ld[1] - NGHOSTS),   io}).index;
+	if(r.boundary[1][1] == 1 && r.boundary[0][0] == 1) // Add the Left bottom Corner
+	  {
+	    MemIndBeg[1][1][io] = z.set({std::size_t(0), std::size_t(r.Ld[1] - 2*NGHOSTS), io}).index;
+	    MemIndEnd[1][1][io] = z.set({std::size_t(0), std::size_t(r.Ld[1] - NGHOSTS),   io}).index;
+	  }
       }
     
-    for(d = 0 ; d < 2; d++)
+    
+    for(d = 0 ; d < D; d++)
       for(unsigned b  = 0 ; b < 2; b++)
 	{
 	  dist.set({0,0,0});
@@ -453,35 +475,41 @@ public:
 #pragma omp barrier    
     Coordinates<std::size_t,3u> x(r.Ld), z(r.Lt);
     T  *phi = v.col(index).data();
-    
+
     
     for(unsigned d = 0; d < 2; d++)
       {
-	
-	std::size_t BSize = r.Orb * max[d] * NGHOSTS;
+	std::size_t BSize = r.Orb * transf_max[d] * NGHOSTS;
 	T * ghosts_left = & simul.ghosts[0];
 	T * ghosts_right = & simul.ghosts[BSize];
-    
+#pragma omp critical
+	{
+	  std::cout << "dim : " << d << " thread : " << r.thread_id << std::endl;
+	  std::cout << transf_bound[d][0] << std::endl;
+	  std::cout << transf_bound[d][1] << std::endl;
+	}
 	for(std::size_t io = 0; io < r.Orb; io++)
 	  {
 	    std::size_t il = MemIndBeg[d][0][io];
 	    std::size_t ir = MemIndBeg[d][1][io];
 	    
-	    for(std::size_t i = 0; i < max[d]; i++)
+	    for(std::size_t i = 0; i < transf_bound[d][0]; i++)
 	      {
 		for(unsigned ig = 0; ig < NGHOSTS; ig++)
-		  {
-		    ghosts_left [i + (ig + NGHOSTS*io) * max[d] ] = phi[il + ig*stride_ghosts[d]];
-		    ghosts_right[i + (ig + NGHOSTS*io) * max[d] ] = phi[ir + ig*stride_ghosts[d]];
-		  }
-		
+		  ghosts_left [i + (ig + NGHOSTS*io) * transf_bound[d][0] ] = phi[il + ig*stride_ghosts[d]];
 		il += stride[d];
+	      }
+	    
+	    for(std::size_t i = 0; i < transf_bound[d][1]; i++)
+	      {
+		for(unsigned ig = 0; ig < NGHOSTS; ig++)
+		  ghosts_right[i + (ig + NGHOSTS*io) * transf_bound[d][1] ] = phi[ir + ig*stride_ghosts[d]];
 		ir += stride[d];
 	      }
 	  }
 	
 	// Copy the boundaries to the shared memory
-	std::copy( ghosts_left, ghosts_left + 2 * BSize, simul.Global.ghosts.begin() + 2 * BSize * r.thread_id );	  
+	std::copy( ghosts_left, ghosts_left + 2*BSize, simul.Global.ghosts.begin() + 2*BSize * r.thread_id );	  
 #pragma omp barrier
 	auto neigh_left = simul.Global.ghosts.begin() + 2 * block[d][0] * BSize;
 	auto neigh_right  = simul.Global.ghosts.begin() + 2 * block[d][1] * BSize;
@@ -494,19 +522,21 @@ public:
 	    std::size_t il = MemIndEnd[d][0][io];
 	    std::size_t ir = MemIndEnd[d][1][io];
 	    
-	    for(std::size_t i = 0; i < max[d]; i++)
+	    for(std::size_t i = 0; i < transf_bound[d][0]; i++)
 	      {
 		for(int ig = 0; ig < NGHOSTS; ig++)
-		  {
-		    phi[il + ig*stride_ghosts[d]] = ghosts_left [i + (ig + NGHOSTS*io) * max[d]];
-		    phi[ir + ig*stride_ghosts[d]] = ghosts_right[i + (ig + NGHOSTS*io) * max[d]];
-		  }
+		  phi[il + ig*stride_ghosts[d]] = ghosts_left [i + (ig + NGHOSTS*io) * transf_bound[d][0]];
 		il += stride[d];
+	      }
+	    
+	    for(std::size_t i = 0; i < transf_bound[d][1]; i++)
+	      {
+		for(int ig = 0; ig < NGHOSTS; ig++)
+		  phi[ir + ig*stride_ghosts[d]] = ghosts_right[i + (ig + NGHOSTS*io) * transf_bound[d][1]];
 		ir += stride[d];
 	      }
 	  }
       }
-      
   }
   
  
@@ -515,7 +545,7 @@ public:
     /*
       This  function tests if the boudaries exchange are well implemented 
     */
-    
+
     Coordinates<std::size_t, 3> z(r.Lt);
     Coordinates<std::size_t, 3> x(r.Ld);
     
@@ -528,28 +558,31 @@ public:
 	  }
     
     Exchange_Boundaries();
-
+#pragma omp barrier
+    
 #pragma omp critical
     {
-
-      for(std::size_t  io = 0; io < (std::size_t) r.Ld[2]; io++)
+      for(std::size_t  io = 0; io < (std::size_t) r.Ld[2]*0 + 1; io++)
 	for(std::size_t i1 = 0; i1 < (std::size_t) r.Ld[1] ; i1++)
 	  {
 	    for(std::size_t i0 = 0; i0 < (std::size_t) r.Ld[0]; i0++)
 	      {
 		r.convertCoordinates(z, x.set({i0,i1,io}) );
-		T val = aux_wr(z.index); 
+		T val = aux_wr(z.index);
+		
 		if( aux_test(v(x.index , 0), val ) )
 		  {
-		    // std::cout << "Problems---->" << v(x.index , 0) << " " << val << std::endl;
-		    //std::cout << "\t wrong " << std::real(v(x.index , 0)) << " " << z.index << " " << x.index << "\t\t";
+		    std::cout << "Problems---->" << v(x.index , 0) << " " << val << " ";
+		    std::cout << "\t wrong " << std::real(v(x.index , 0)) << " " << z.index << " " << x.index << "\t\t";
 		    x.print();
 		    
 		  }
 	      };
 	  }
     }
-
+    std::cout << "Thread : " << r.thread_id << std::endl;
+#pragma omp barrier
+    exit(1);
   };
 
   void empty_ghosts(int mem_index) {

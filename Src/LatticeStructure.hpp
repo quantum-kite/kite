@@ -92,7 +92,7 @@ struct Coordinates {
 template <unsigned D>
 struct LatticeStructure {
 private:
-  
+
 public:
   std::size_t Sized; // Size of vector for each subdomain (with ghosts)
   std::size_t Size; // Size of vector for each subdomain (without ghosts)
@@ -115,8 +115,7 @@ public:
   unsigned Orb; // Number of orbitals
   unsigned thread_id; // thread identification
   int MagneticField = 0;
-
-  
+  bool boundary[D][2]; // Information about the Global border in the subdomain 
   Eigen::Matrix<double, D, D> ghost_pot; // ghosts_correlation potential
   
   LatticeStructure(char *name ) {
@@ -138,12 +137,13 @@ public:
         std::cout << "be a divisor of the length of that side ("<< Lt[0] <<"). Exiting.\n";
         exit(1);
       }
+      
       if(Lt[1]%nd[1] != 0){
         std::cout << "The number of divisions in the y direction ("<< nd[1] <<") must ";
         std::cout << "be a divisor of the length of that side ("<< Lt[1] <<"). Exiting.\n";
         exit(1);
       }
-
+      
       try {
           H5::Exception::dontPrint();
           get_hdf5<int>(&MagneticField, file, (char *) "/Hamiltonian/MagneticFieldMul");
@@ -185,6 +185,17 @@ public:
     Sizet = Nt * Orb;
     SizetVacancies = 0;
     thread_id = omp_get_thread_num();
+    
+    Coordinates<unsigned, D + 1> dist(nd);
+    dist.set_coord(unsigned(thread_id));
+
+    // Test if subdomain is in the Global border and if it has open boundaries set to FALSE
+    for(unsigned i = 0; i < D; i++)
+      {
+	boundary[i][0] = (dist.coord[i] == 0         && Bd[i] == 0 ? false : true); 
+	boundary[i][1] = (dist.coord[i] == nd[i] - 1 && Bd[i] == 0 ? false : true);	
+      }
+    
   };
   
   unsigned get_BorderSize() {
