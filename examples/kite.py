@@ -21,6 +21,7 @@ from scipy.spatial import cKDTree
 # Class that introduces Structural Disorder into the initially built lattice.
 # The exported dataset StructuralDisorder has the following groups:
 # - Concentration: concentration of disorder,
+# - Position: If instead of concentration one want's to select an exact position of disorder,
 # - NumBondDisorder: number of bond changes,
 # - NumOnsiteDisorder: number of onsite energy,
 # The disorder is represented through nodes, where each node represents and maps a single orbital.
@@ -33,9 +34,17 @@ from scipy.spatial import cKDTree
 # - NodeOnsite: array of nodes that have onsite disorder,
 # - U0: value of the onsite disorder.
 class StructuralDisorder:
-    def __init__(self, lattice, concentration):
+    def __init__(self, lattice, concentration=0, position=None):
+
+        if (concentration != 0 and not(position is None)) or (position is None and concentration == 0):
+            SystemExit('Either select concentration which results in random distribution or '
+                       'the exact position of the defect!')
+
+        if position is None:
+            position = 0
 
         self._concentration = concentration
+        self._position = position
         self._num_bond_disorder_per_type = 0
         self._num_onsite_disorder_per_type = 0
 
@@ -77,20 +86,27 @@ class StructuralDisorder:
         self._num_orbitals_before = np.cumsum(np.asarray(num_orbitals)) - num_orbitals
         self._lattice = lattice
 
-    def add_vacancy(self, *disorder):
-        if len(disorder) == 1:
-            num_vacancy_disorder = 0
-            for dis in disorder:
-                # check if it's just concentration or sublatt
-                num_vacancy_disorder += 1
-                self.add_local_vacancy_disorder(dis)
+        vectors = np.asarray(self._lattice.vectors)
+        self._space_size = vectors.shape[0]
 
-        else:
-            raise SystemExit('Vacancy disorder should be added in a form:'
-                             '\n sublattice name,'
-                             '\n or in a form of disorder onsite energy:'
-                             '\n ([rel. unit cell], sublattice_name, '
-                             'onsite energy)')
+    def add_vacancy(self, *disorder):
+        num_vacancy_disorder = 0
+        for dis in disorder:
+            if len(disorder) == 1:
+                relative_index = [0, 0]
+                dis =[relative_index, dis]
+
+            # check if it's just concentration or sublatt
+            num_vacancy_disorder += 1
+            self.add_local_vacancy_disorder(*dis)
+
+            if len(disorder) > 2:
+                raise SystemExit('Vacancy disorder should be added in a form:'
+                                 '\n sublattice name,'
+                                 '\n sublattice name, [rel. unit cell],'
+                                 '\n or in a form of disorder onsite energy:'
+                                 '\n ([rel. unit cell], sublattice_name, '
+                                 'onsite energy)')
 
     def add_structural_disorder(self, *disorder):
         self._nodes_map = dict()
@@ -131,7 +147,7 @@ class StructuralDisorder:
 
         return idx_node
 
-    def add_local_vacancy_disorder(self, sub):
+    def add_local_vacancy_disorder(self, relative_index, sub):
         orbital_vacancy = []
 
         names, sublattices = zip(*self._lattice.sublattices.items())
@@ -145,8 +161,11 @@ class StructuralDisorder:
         sub_id = lattice_sub.alias_id
 
         it = np.nditer(lattice_sub.energy, flags=['multi_index'])
+        relative_move = np.dot(np.asarray(relative_index) + np.asarray(self._position) + 1,
+                                    3 ** np.linspace(0, self._space_size - 1, self._space_size, dtype=np.int32))
         while not it.finished:
-            orbit = self._num_orbitals_before[sub_id] + it.multi_index[0]
+            orbit = int(relative_move +
+                        self._num_orbitals_before[sub_id] + it.multi_index[0] * 3 ** self._space_size)
             if orbit not in orbital_vacancy:
                 orbital_vacancy.append(orbit)
             it.iternext()
@@ -167,12 +186,9 @@ class StructuralDisorder:
         orbital_to = []
         orbital_hop = []
 
-        vectors = np.asarray(self._lattice.vectors)
-        space_size = vectors.shape[0]
-
         distance_relative = np.asarray(relative_index_from) - np.asarray(relative_index_to)
 
-        if np.linalg.norm(distance_relative) > space_size:
+        if np.linalg.norm(distance_relative) > self._space_size:
             raise SystemExit('Currently only the next nearest distances are supported, make the bond of the bond '
                              'disorder shorter! ')
 
@@ -199,16 +215,16 @@ class StructuralDisorder:
 
         h = np.nditer(hoppings, flags=['multi_index'])
         while not h.finished:
-            relative_move_from = np.dot(np.asarray(relative_index_from) + 1,
-                                        3 ** np.linspace(0, space_size - 1, space_size, dtype=np.int32))
-            relative_move_to = np.dot(np.asarray(relative_index_to) + 1,
-                                      3 ** np.linspace(0, space_size - 1, space_size, dtype=np.int32))
+            relative_move_from = np.dot(np.asarray(relative_index_from) + np.asarray(self._position) + 1,
+                                        3 ** np.linspace(0, self._space_size - 1, self._space_size, dtype=np.int32))
+            relative_move_to = np.dot(np.asarray(relative_index_to) + np.asarray(self._position) + 1,
+                                      3 ** np.linspace(0, self._space_size - 1, self._space_size, dtype=np.int32))
 
             if isinstance(hoppings, np.ndarray):
                 orb_from = int(relative_move_from +
-                               (self._num_orbitals_before[from_sub_id] + h.multi_index[0]) * 3 ** space_size)
+                               (self._num_orbitals_before[from_sub_id] + h.multi_index[0]) * 3 ** self._space_size)
                 orb_to = int(relative_move_to +
-                             (self._num_orbitals_before[to_sub_id] + h.multi_index[1]) * 3 ** space_size)
+                             (self._num_orbitals_before[to_sub_id] + h.multi_index[1]) * 3 ** self._space_size)
 
                 self.map_the_orbital(orb_from, nodes_map)
                 self.map_the_orbital(orb_to, nodes_map)
@@ -230,8 +246,8 @@ class StructuralDisorder:
                 orbital_hop.append(np.conj(h[0]))
 
             else:
-                orb_from = int(relative_move_from + self._num_orbitals_before[from_sub_id] * 3 ** space_size)
-                orb_to = int(relative_move_to + self._num_orbitals_before[to_sub_id] * 3 ** space_size)
+                orb_from = int(relative_move_from + self._num_orbitals_before[from_sub_id] * 3 ** self._space_size)
+                orb_to = int(relative_move_to + self._num_orbitals_before[to_sub_id] * 3 ** self._space_size)
 
                 self.map_the_orbital(orb_from, nodes_map)
                 self.map_the_orbital(orb_to, nodes_map)
@@ -277,9 +293,6 @@ class StructuralDisorder:
 
         nodes_map = self._nodes_map
 
-        vectors = np.asarray(self._lattice.vectors)
-        space_size = vectors.shape[0]
-
         names, sublattices = zip(*self._lattice.sublattices.items())
 
         if sub not in names:
@@ -294,11 +307,11 @@ class StructuralDisorder:
 
         h = np.nditer(value, flags=['multi_index'])
         while not h.finished:
-            relative_move = np.dot(np.asarray(relative_index) + 1,
-                                   3 ** np.linspace(0, space_size - 1, space_size, dtype=np.int32))
+            relative_move = np.dot(np.asarray(relative_index) + np.asarray(self._position) + 1,
+                                   3 ** np.linspace(0, self._space_size - 1, self._space_size, dtype=np.int32))
 
             if isinstance(value, np.ndarray):
-                orb = int(relative_move + (self._num_orbitals_before[sub_id] + h.multi_index[0]) * 3 ** space_size)
+                orb = int(relative_move + (self._num_orbitals_before[sub_id] + h.multi_index[0]) * 3 ** self._space_size)
 
                 self.map_the_orbital(orb, nodes_map)
 
@@ -307,7 +320,7 @@ class StructuralDisorder:
                 nodes_onsite.append(nodes_map[orb])
                 orbital_onsite.append(orb)
             else:
-                orb = int(relative_move + self._num_orbitals_before[sub_id] * 3 ** space_size)
+                orb = int(relative_move + self._num_orbitals_before[sub_id] * 3 ** self._space_size)
 
                 self.map_the_orbital(orb, nodes_map)
 
@@ -457,6 +470,16 @@ class Calculation:
         return self._dos
 
     @property
+    def get_ldos(self):
+        """Returns the requested LDOS functions."""
+        return self._ldos
+
+    @property
+    def get_arpes(self):
+        """Returns the requested ARPES functions."""
+        return self._arpes
+
+    @property
     def get_gaussian_wave_packet(self):
         """Returns the requested wave packet time evolution function, with a gaussian wavepacket mutiplied with different
         plane waves."""
@@ -490,6 +513,8 @@ class Calculation:
         self._scaling_factor = configuration.energy_scale
         self._energy_shift = configuration.energy_shift
         self._dos = []
+        self._ldos = []
+        self._arpes = []
         self._conductivity_dc = []
         self._conductivity_optical = []
         self._conductivity_optical_nonlinear = []
@@ -521,6 +546,41 @@ class Calculation:
         self._dos.append({'num_points': num_points, 'num_moments': num_moments, 'num_random': num_random,
                           'num_disorder': num_disorder})
 
+    def ldos(self, energy, num_moments, position, sublattice, num_disorder=1):
+        """Calculate the density of states as a function of energy
+
+        Parameters
+        ----------
+        energy : list or np.array
+            List of energy points at which the LDOS will be calculated.
+        num_moments : int
+            Number of polynomials in the Chebyshev expansion.
+        num_disorder : int
+            Number of different disorder realisations.
+        position : list
+            Relative index of the unit cell where the LDOS will be calculated.
+        sublattice : str
+            Name of the sublattice at which the LDOS will be calculated.
+        """
+
+        self._ldos.append({'energy': energy, 'num_moments': num_moments, 'position': position,
+                           'sublattice': sublattice, 'num_disorder': num_disorder})
+
+    def arpes(self, k_vector, num_moments, num_disorder=1):
+        """Calculate the density of states as a function of energy
+
+        Parameters
+        ----------
+        k_vector : List
+            List of K points with respect to reciprocal vectors b0 and b1 at which the band structure will be calculated.
+        num_moments : int
+            Number of polynomials in the Chebyshev expansion.
+        num_disorder : int
+            Number of different disorder realisations.
+        """
+
+        self._arpes.append({'k_vector': k_vector, 'num_moments': num_moments, 'num_disorder': num_disorder})
+
     def gaussian_wave_packet(self, num_points, num_moments, timestep, k_vector, spinor, width, mean_value,
                              num_disorder=1, **kwargs):
         """Calculate the density of states as a function of energy
@@ -528,13 +588,13 @@ class Calculation:
         Parameters
         ----------
         num_points : int
-            Number of energy point inside the spectrum at which the DOS will be calculated.
+            Number of time points for the time evolution.
         num_moments : int
             Number of polynomials in the Chebyshev expansion.
         timestep : float
             Timestep for calculation of time evolution.
         k_vector : np.array
-            Different wave vectors, components coresponding to vectors b0 and b1.
+            Different wave vectors, components corresponding to vectors b0 and b1.
         spinor : np.array
             Spinors for each of the k vectors.
         width : float
@@ -1396,6 +1456,83 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
         grpc_p.create_dataset('NumMoments', data=moments, dtype=np.int32)
         grpc_p.create_dataset('NumRandoms', data=random, dtype=np.int32)
         grpc_p.create_dataset('NumPoints', data=point, dtype=np.int32)
+        grpc_p.create_dataset('NumDisorder', data=dis, dtype=np.int32)
+
+    if calculation.get_ldos:
+        grpc_p = grpc.create_group('ldos')
+
+        moments, energy, orbitals, dis, position, sublattice = [], [], [], [], [], []
+        for single_ldos in calculation.get_ldos:
+            moments.append(single_ldos['num_moments'])
+            energy.append(single_ldos['energy'])
+            position.append(single_ldos['position'])
+            sublattice.append(single_ldos['sublattice'])
+            dis.append(single_ldos['num_disorder'])
+
+        len_pos = np.array(position).shape[0]
+        len_sub = len(sublattice)
+
+        if len_pos != len_sub and (len_pos != 1 or len_sub != 1):
+            raise SystemExit('Number of sublattices and number of positions should either have the same '
+                             'length or should be specified as a single value! Choose them accordingly.')
+
+        if len_sub == 1 and len_pos > 1:
+            sublattice = [sublattice] * len_pos
+        if len_pos == 1 and len_sub > 1:
+            position = [position] * len_sub
+
+        # get the names and sublattices from the lattice
+        names, sublattices_all = zip(*lattice.sublattices.items())
+
+        # convert relative index and sublattice to orbital number
+        orbitals = []
+        for sub, pos in zip(sublattice, position):
+
+            if sub not in names:
+                raise SystemExit('Desired sublattice for LDOS calculation doesn\'t exist in the chosen lattice! ')
+
+            indx = names.index(sub)
+            lattice_sub = sublattices_all[indx]
+            sub_id = lattice_sub.alias_id
+            it = np.nditer(lattice_sub.energy, flags=['multi_index'])
+            relative_move = np.dot(np.array(pos) + 1, 3 ** np.linspace(0, space_size - 1, space_size, dtype=np.int32))
+            while not it.finished:
+                orbit = int(relative_move + orbitals_before[sub_id] + it.multi_index[0] * 3 ** space_size)
+                if orbit not in orbitals:
+                    orbitals.append(orbit)
+                it.iternext()
+
+        if len(calculation.get_ldos) > 1:
+            raise SystemExit('Only a single function request of each type is currently allowed. Please use another '
+                             'configuration file for the same functionality.')
+        grpc_p.create_dataset('NumMoments', data=moments, dtype=np.int32)
+        grpc_p.create_dataset('Energy', data=np.asarray(energy), dtype=np.float32)
+        grpc_p.create_dataset('Orbitals', data=np.asarray(orbitals), dtype=np.int32)
+        grpc_p.create_dataset('NumDisorder', data=dis, dtype=np.int32)
+
+    if calculation.get_arpes:
+        grpc_p = grpc.create_group('arpes')
+
+        moments, k_vector, dis = [], [], []
+        for single_arpes in calculation.get_arpes:
+            moments.append(single_arpes['num_moments'])
+            k_vector.append(single_arpes['k_vector'])
+            dis.append(single_arpes['num_disorder'])
+
+        # convert to values with respect to b1 and b2 in 2D
+        k_vector = np.asmatrix(np.asarray(k_vector))
+
+        b1, b2 = lattice.reciprocal_vectors()
+        k1 = +(k_vector[:, 0] * b2[1] - k_vector[:, 1] * b2[0]) / (b1[0] * b2[1] - b1[1] * b2[0])
+        k2 = -(k_vector[:, 0] * b1[1] - k_vector[:, 1] * b1[0]) / (b1[0] * b2[1] - b1[1] * b2[0])
+
+        k_vector_rel = np.column_stack((k1, k2))
+
+        if len(calculation.get_arpes) > 1:
+            raise SystemExit('Only a single function request of each type is currently allowed. Please use another '
+                             'configuration file for the same functionality.')
+        grpc_p.create_dataset('NumMoments', data=moments, dtype=np.int32)
+        grpc_p.create_dataset('k_vector', data=np.asmatrix(np.asarray(k_vector_rel)), dtype=np.float32)
         grpc_p.create_dataset('NumDisorder', data=dis, dtype=np.int32)
 
     if calculation.get_gaussian_wave_packet:
