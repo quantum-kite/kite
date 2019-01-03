@@ -1486,6 +1486,16 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
 
         # convert relative index and sublattice to orbital number
         orbitals = []
+        system_l = config._length
+        Lx = system_l[0]
+        Ly = 1
+        Lz = 1
+
+        if len(system_l) == 2:
+            Ly = system_l[1]
+        elif len(system_l) == 3:
+            Lz = system_l[2]
+
         for sub, pos in zip(sublattice, position):
 
             if sub not in names:
@@ -1495,11 +1505,13 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
             lattice_sub = sublattices_all[indx]
             sub_id = lattice_sub.alias_id
             it = np.nditer(lattice_sub.energy, flags=['multi_index'])
-            relative_move = np.dot(np.array(pos) + 1, 3 ** np.linspace(0, space_size - 1, space_size, dtype=np.int32))
+            relative_move = np.dot(np.ones(len(pos)), 3 ** np.linspace(0, space_size - 1, space_size, dtype=np.int32))
             while not it.finished:
                 orbit = int(relative_move + orbitals_before[sub_id] + it.multi_index[0] * 3 ** space_size)
-                if orbit not in orbitals:
-                    orbitals.append(orbit)
+                total_idx = np.dot(np.array(pos), np.array([1, Lx, Lx*Ly], dtype=np.int32)[0:space_size]) \
+                            + Lx * Ly * Lz * orbit
+                if total_idx not in orbitals:
+                    orbitals.append(total_idx)
                 it.iternext()
 
         if len(calculation.get_ldos) > 1:
