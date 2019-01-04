@@ -1505,13 +1505,13 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
             lattice_sub = sublattices_all[indx]
             sub_id = lattice_sub.alias_id
             it = np.nditer(lattice_sub.energy, flags=['multi_index'])
-            relative_move = np.dot(np.ones(len(pos)), 3 ** np.linspace(0, space_size - 1, space_size, dtype=np.int32))
+            # orbit_idx = [i, j, k] x [1, Lx, Lx*Ly] + orbital * Lx*Ly*Lz
             while not it.finished:
-                orbit = int(relative_move + orbitals_before[sub_id] + it.multi_index[0] * 3 ** space_size)
-                total_idx = np.dot(np.array(pos), np.array([1, Lx, Lx*Ly], dtype=np.int32)[0:space_size]) \
+                orbit = int(orbitals_before[sub_id] + it.multi_index[0])
+                orbit_idx = np.dot(np.array(pos), np.array([1, Lx, Lx*Ly], dtype=np.int32)[0:space_size]) \
                             + Lx * Ly * Lz * orbit
-                if total_idx not in orbitals:
-                    orbitals.append(total_idx)
+                if orbit_idx not in orbitals:
+                    orbitals.append(orbit_idx)
                 it.iternext()
 
         if len(calculation.get_ldos) > 1:
