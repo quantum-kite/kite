@@ -924,10 +924,11 @@ public:
     auto t1 =  std::chrono::high_resolution_clock::now();
 		
     std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t1 - t0);
-    return time_span.count()/N_average;
+
 		
 #pragma omp barrier
     debug_message("Left time_kpm");
+    return double(time_span.count())/N_average;
   }
 
   void Single_Shot(double EScale, singleshot_measurement_queue queue) {
@@ -1283,7 +1284,7 @@ void Gaussian_Wave_Packet()
     NumMoments = (NumMoments/2)*2;
     Eigen::Matrix<T,-1,1> m(NumMoments);
     for(unsigned n = 0; n < unsigned(NumMoments); n++)
-      m(n) = value_type((n == 0 ? 1 : 2 )*boost::math::cyl_bessel_j(n, timestep )) * T(pow(-II,n));
+      m(n) = value_type((n == 0 ? 1 : 2 )*cyl_bessel_j(n, timestep )) * T(pow(-II,n));
     
     for(int id = 0; id < NumDisorder; id++)
       {

@@ -482,12 +482,7 @@ public:
 	std::size_t BSize = r.Orb * transf_max[d] * NGHOSTS;
 	T * ghosts_left = & simul.ghosts[0];
 	T * ghosts_right = & simul.ghosts[BSize];
-#pragma omp critical
-	{
-	  std::cout << "dim : " << d << " thread : " << r.thread_id << std::endl;
-	  std::cout << transf_bound[d][0] << std::endl;
-	  std::cout << transf_bound[d][1] << std::endl;
-	}
+
 	for(std::size_t io = 0; io < r.Orb; io++)
 	  {
 	    std::size_t il = MemIndBeg[d][0][io];

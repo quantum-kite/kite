@@ -9,7 +9,6 @@
 #include <omp.h>
 #include <time.h>
 #include <Eigen/Dense>
-#include <Eigen/Eigenvalues>
 #include "H5Cpp.h"
 #include <H5Group.h>
 #include <complex>
@@ -27,7 +26,7 @@
 #include <cmath>
 #include <math.h>
 #include <initializer_list>
-#include <boost/math/special_functions/bessel.hpp>
+
 // Set of compilation parameters chosen in the Makefile
 // MEMORY is the number of KPM vectors stored in the memory while calculating Gamma2D
 // STRIDE is the size of the memory blocks used in the program
