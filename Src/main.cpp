@@ -6,8 +6,9 @@ class Simulation;
 #include "ComplexTraits.hpp"
 #include "myHDF5.hpp"
 #include "Random.hpp"
-
+#include "Coordinates.hpp"
 #include "LatticeStructure.hpp"
+
 #include "Hamiltonian.hpp"
 #include "KPM_Vector.hpp"
 #include "KPM_Vector2D.hpp"
