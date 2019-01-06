@@ -23,7 +23,7 @@ class GlobalSimulation {
 private:
   GLOBAL_VARIABLES <T> Global;
   LatticeStructure <D> rglobal;
-  
+
   
   // Regular quantities to calculate, such as DOS and CondXX
   Eigen::Array<double, -1, 1> singleshot_energies;
@@ -154,8 +154,10 @@ public:
 
 
 template <typename T,unsigned D>
-class Simulation  {
+class Simulation : public ComplexTraits<T> {
 public:
+  using ComplexTraits<T>::assign_value;
+  using ComplexTraits<T>::myconj;
   typedef typename extract_value_type<T>::value_type value_type;
   KPMRandom <T>          rnd;
   std::vector<T>         ghosts;
@@ -795,6 +797,7 @@ public:
     
     debug_message("Left store_gamma\n");
   }
+  
   void store_gamma3D(Eigen::Array<T, -1, -1> *gamma, std::vector<int> N_moments, 
       std::vector<std::vector<unsigned>> indices, std::string name_dataset){
     debug_message("Entered store_gamma3d\n");
@@ -1206,11 +1209,13 @@ public:
 	
 void Gaussian_Wave_Packet()
   {
+    ComplexTraits<T> CT;
     KPM_Vector<T,D> phi (2, *this), sum_ket(1u,*this);
     int NumDisorder, NumMoments, NumPoints;
-    T II   = assign_value<T> (value_type(0), value_type(1));
-    T zero = assign_value<T>(value_type(0),  value_type(0));
-    T one  = assign_value<T>(value_type(1),  value_type(0));
+    
+    T II   = CT.assign_value(double(0), double(1));
+    T zero = CT.assign_value(double(0),  double(0));
+    T one  = CT.assign_value(double(1),  double(0));
     std::vector<double> times;
   
     Eigen::Array<T,-1,-1> avg_x, avg_y, avg_z, avg_ident;

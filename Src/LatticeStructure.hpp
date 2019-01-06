@@ -119,6 +119,7 @@ public:
   Eigen::Matrix<double, D, D> ghost_pot; // ghosts_correlation potential
   
   LatticeStructure(char *name ) {
+    
 #pragma omp critical
     {
       H5::H5File *file = new H5::H5File(name, H5F_ACC_RDONLY);

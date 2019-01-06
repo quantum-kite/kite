@@ -4,7 +4,7 @@
 /*                    S. M. Joao, J. V. Lopes, T. G. Rappoport  */
 /*                                                              */
 /****************************************************************/
-
+#include <complex>
 #include <type_traits>
 /*
   Auxiliar code to define specialized methods in templated classes depending on the argument T is complex:
@@ -23,6 +23,8 @@
   Get the template argument of a complex:
   typedef typename extract_value_type<T>::value_type value_type;
  */
+
+
 
 template <template <class...> class TT, class... Args>
 std::true_type is_tt_impl(TT<Args...>);
@@ -44,25 +46,17 @@ struct extract_value_type<X<T, Args...>>   //specialization
   typedef T value_type;
 };
 
-/****** assign *************/
 template <typename T>
-typename std::enable_if<!is_tt<std::complex, T>::value, T>::type assign_value(double x, double y) {
-  return T(x);
-};
-
-template <typename T>
-typename std::enable_if<is_tt<std::complex, T>::value, T>::type assign_value(double x, double y) {
-  typedef typename extract_value_type<T>::value_type value_type;
-  return T(value_type(x),value_type(y));
-};
-
-/****** myconj *************/
-template <typename T>
-typename std::enable_if<!is_tt<std::complex, T>::value, T>::type myconj(T & x) {
-  return x;
-};
-
-template <typename T>
-typename std::enable_if<is_tt<std::complex, T>::value, T>::type myconj(T & x) {
-  return std::conj(x);
+class ComplexTraits {
+public:
+  template <typename U = T>
+  typename std::enable_if<!is_tt<std::complex, U>::value, U>::type assign_valueB(double, double );
+  template <typename U = T>
+  typename std::enable_if< is_tt<std::complex, U>::value, U>::type assign_valueB(double, double );
+  template <typename U = T>
+  typename std::enable_if<!is_tt<std::complex, U>::value, U>::type myconjB(T & x);
+  template <typename U = T>
+  typename std::enable_if< is_tt<std::complex, U>::value, U>::type myconjB(T & x);
+  T myconj(T & );
+  T assign_value(double, double);
 };

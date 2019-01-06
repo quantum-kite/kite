@@ -34,7 +34,9 @@ public:
   using KPM_VectorBasis<T,2>::aux_wr;
   using KPM_VectorBasis<T,2>::aux_test;
   using KPM_VectorBasis<T,2>::inc_index;
-  
+  using KPM_VectorBasis<T,2>::assign_value;
+  using KPM_VectorBasis<T,2>::myconj;
+
   KPM_Vector(int mem, Simulation<T,2> & sim) :
     KPM_VectorBasis<T,2>(mem, sim),  r(sim.r), stride{r.Ld[0], 1}, stride_ghosts{1,r.Ld[0]},
     transf_max{r.ld[1], r.Ld[0]}, h(sim.h), x(r.Ld), std(x.basis[1]) {
@@ -152,7 +154,7 @@ public:
 	point = v(indice,index);
       }
     else
-      point = assign_value<T>(0,0);
+      point = assign_value(0,0);
     return point;
   }
 
@@ -164,7 +166,7 @@ public:
     Eigen::Map<Eigen::Matrix<std::size_t,2, 1>> vv(z.coord);
     Eigen::Matrix<double, 1, 2> va , vb;
     Eigen::Matrix<double, -1,-1> phase(1, psi0.cols());
-    T soma = assign_value<T> (0,0);
+    T soma = assign_value(0,0);
     auto bbs = r.rLat.inverse(); // each row is a bi / 2*M_PI 
     auto vOrb = bbs * r.rOrb;    // each columns is a vector in a1 basis
     
@@ -180,7 +182,7 @@ public:
     {
       simul.Global.mu = Eigen::Matrix<T,-1,-1>(psi0.cols(), 1);      
       for(int ik = 0; ik < psi0.cols(); ik++)
-	simul.Global.mu(ik, 0) = assign_value<T>( simul.rnd.get(), 0 );
+	simul.Global.mu(ik, 0) = assign_value( simul.rnd.get(), 0 );
     }
 #pragma omp barrier
 
@@ -204,7 +206,7 @@ public:
 	      for(unsigned io = 0; io < r.Orb; io++)
 		{
 		  double xx = (va  + vOrb.col(io).transpose() ) * k.col(ik);
-		  sum(io, 0) += psi0(io,ik) * exp(assign_value<T>(-0.5*gauss,  2.*M_PI * (xx + 0.*phase(0,ik) )));
+		  sum(io, 0) += psi0(io,ik) * exp(assign_value(-0.5*gauss,  2.*M_PI * (xx + 0.*phase(0,ik) )));
 		}
 	    }
 	  
@@ -212,12 +214,12 @@ public:
 	    {
 	      x.set({i0,i1,io});
 	      v(x.index, 0) = sum(io,0);
-	      soma += assign_value<T> ( std::real( sum(io,0) * std::conj(sum(io,0)) ), 0);
+	      soma += assign_value( std::real( sum(io,0) * std::conj(sum(io,0)) ), 0);
 	    }
 	}
     
 #pragma omp master
-    simul.Global.soma = assign_value<T> (0,0);
+    simul.Global.soma = assign_value(0,0);
 #pragma omp barrier
 #pragma omp critical
     simul.Global.soma += soma;
@@ -439,10 +441,10 @@ public:
 	    value_type x0 = at.coord[0]*r.rLat(0,0) + z1 * r.rLat(0,1) + deltax;
 	    value_type y0 = at.coord[0]*r.rLat(1,0) + z1 * r.rLat(1,1) + deltay;	    
 
-	    T xl1 = assign_value<T>(0., 0.);
-	    T xl2 = assign_value<T>(0., 0.);
-	    T yl1 = assign_value<T>(0., 0.);
-	    T yl2 = assign_value<T>(0., 0.);
+	    T xl1 = assign_value(0., 0.);
+	    T xl2 = assign_value(0., 0.);
+	    T yl1 = assign_value(0., 0.);
+	    T yl2 = assign_value(0., 0.);
 	    
 	    for(unsigned i0 = 0; i0 < r.ld[0]; i0++)
 	      {

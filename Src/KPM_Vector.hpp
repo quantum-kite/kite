@@ -6,14 +6,15 @@
 /****************************************************************/
 
 template <typename T, unsigned D>
-class KPM_VectorBasis {
+class KPM_VectorBasis: public ComplexTraits<T> {
 protected:
   int index;
   const int memory;
-  Simulation<T,D> & simul;
-  
-  
+  Simulation<T,D> & simul;  
 public:
+  using ComplexTraits<T>::assign_value;
+  using ComplexTraits<T>::myconj;
+  
   Eigen::Matrix <T, Eigen::Dynamic,  Eigen::Dynamic > v;
   KPM_VectorBasis(int mem,  Simulation<T,D> & sim) :
     memory(mem), simul(sim) {
@@ -48,16 +49,14 @@ public:
 
 
 template <typename T, unsigned D>
-class KPM_Vector : public KPM_VectorBasis <T,D> {
+class KPM_Vector : public KPM_VectorBasis<T,D> {
 public:
   typedef typename extract_value_type<T>::value_type value_type;
   KPM_Vector(int mem, Simulation<T,D> & sim) :
     KPM_VectorBasis<T,D>(mem,sim){};
-    
-  
+  using KPM_VectorBasis<T,D>::assign_value;
   void initiate_vector() {};
   void build_wave_packet(Eigen::Matrix<double,-1,-1> & k, Eigen::Matrix<T,-1,-1> & psi0, double & sigma) {};
-  
   template <unsigned MULT>
   void Multiply(){};
   template <unsigned MULT>
@@ -71,7 +70,7 @@ public:
   void Velocity2( T *, T *, int, int){};
   T VelocityInternalProduct( T *  , T * , int);
   void empty_ghosts(int){}; 
-  T get_point(){ return assign_value<T>(0,0);};  
+  T get_point(){ return assign_value(double(0),double(0));};  
   template <typename U = T>
   typename std::enable_if<is_tt<std::complex, U>::value, U>::type ghosts_correlation2(double phase){return 1;};
   template <typename U = T>

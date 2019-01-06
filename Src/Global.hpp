@@ -27,17 +27,9 @@ struct GLOBAL_VARIABLES {
   Eigen::Array <T, Eigen::Dynamic, Eigen::Dynamic> avg_z;
   Eigen::Array <T, Eigen::Dynamic, Eigen::Dynamic> avg_ident;
   Eigen::Array <T, Eigen::Dynamic, Eigen::Dynamic> avg_results;
-
   double kpm_iteration_time;
-  GLOBAL_VARIABLES() { };
-  void addbond( std::size_t  ele1, std::ptrdiff_t ele2, T hop ) {
-    element1.push_back(ele1);
-    element2_diff.push_back(ele2); 
-    hopping.push_back(hop);
-  }
 
-  void addlocal( std::size_t  ele,  T u ) {
-    element.push_back(ele);
-    U.push_back(u);
-  }
+  GLOBAL_VARIABLES();
+  void addbond ( std::size_t, std::ptrdiff_t, T );
+  void addlocal( std::size_t,  T);
 };
