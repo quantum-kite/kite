@@ -57,6 +57,21 @@ public:
   typename std::enable_if<!is_tt<std::complex, U>::value, U>::type myconjB(T & x);
   template <typename U = T>
   typename std::enable_if< is_tt<std::complex, U>::value, U>::type myconjB(T & x);
+  template <typename U = T>
+  typename std::enable_if<is_tt<std::complex, U>::value, U>::type multEiphaseB(double phase);
+  template <typename U = T>
+  typename std::enable_if<!is_tt<std::complex, U>::value, U>::type multEiphaseB(double phase);
+  
+  // Define aux_wr for complex T 
+  template <typename U = T>
+  typename std::enable_if<is_tt<std::complex, U>::value, U>::type aux_wrB(std::size_t x );
+  
+  // Define aux_wr for non complex T 
+  template <typename U = T>
+  typename std::enable_if<!is_tt<std::complex, U>::value, U>::type aux_wrB(std::size_t x);
+  
   T myconj(T & );
   T assign_value(double, double);
+  T multEiphase(double);
+  T aux_wr(std::size_t );
 };

@@ -5,76 +5,64 @@
 /*                                                              */
 /****************************************************************/
 
-template <typename T, unsigned D>
-class KPM_VectorBasis: public ComplexTraits<T> {
-protected:
-  int index;
-  const int memory;
-  Simulation<T,D> & simul;  
+#include <iomanip>
+template <typename T,unsigned D>
+class KPM_Vector : public KPM_VectorBasis <T, D> {
+private:
+  std::size_t 	*MemIndBeg[D][2];
+  std::size_t 	*MemIndEnd[D][2];
+  std::size_t        block[D][2];
+  std::size_t          stride[D];
+  std::size_t   stride_ghosts[D];
+  std::size_t      transf_max[D]; // [d][edged]
+  std::size_t transf_bound[D][2]; // [d][edged]
+  T          ***mult_t1_ghost_cor;
+  Coordinates<std::size_t,D+1>  x;
+  T                         *phi0;
+  T                        *phiM1;
+  T                        *phiM2;
+  const std::size_t           std;
+
 public:
-  using ComplexTraits<T>::assign_value;
-  using ComplexTraits<T>::myconj;
-  
-  Eigen::Matrix <T, Eigen::Dynamic,  Eigen::Dynamic > v;
-  KPM_VectorBasis(int mem,  Simulation<T,D> & sim) :
-    memory(mem), simul(sim) {
-    index  = 0;
-    v = Eigen::Matrix <T, Eigen::Dynamic,  Eigen::Dynamic >::Zero(simul.r.Sized, memory);
-  };
-  
-  void set_index(int i) {index = i;};
-  void inc_index() {index = (index + 1) % memory;};  
-  unsigned get_index(){return index;};
-
-  // Define aux_wr for complex T 
-  template <typename U = T>
-  typename std::enable_if<is_tt<std::complex, U>::value, U>::type aux_wr(std::size_t x ) {
-    typedef typename extract_value_type<U>::value_type value_type;
-    return U(value_type(x), value_type(2*x));
-  };
-
-  // Define aux_wr for non complex T 
-  template <typename U = T>
-  typename std::enable_if<!is_tt<std::complex, U>::value, U>::type aux_wr(std::size_t x) {
-    return U(x);
-  };
-  
-
-  bool aux_test(T & x, T & y ) {
-    return (abs(x - y) > std::numeric_limits<double>::epsilon());
-  };
-  
-  
-};
-
-
-template <typename T, unsigned D>
-class KPM_Vector : public KPM_VectorBasis<T,D> {
-public:
+  LatticeStructure<D>        & r;
+  Hamiltonian<T,D>           & h;
   typedef typename extract_value_type<T>::value_type value_type;
-  KPM_Vector(int mem, Simulation<T,D> & sim) :
-    KPM_VectorBasis<T,D>(mem,sim){};
+  using KPM_VectorBasis<T,D>::simul;
+  using KPM_VectorBasis<T,D>::index;
+  using KPM_VectorBasis<T,D>::v;
+  using KPM_VectorBasis<T,D>::memory;
+  using KPM_VectorBasis<T,D>::aux_wr;
+  using KPM_VectorBasis<T,D>::aux_test;
+  using KPM_VectorBasis<T,D>::inc_index;
   using KPM_VectorBasis<T,D>::assign_value;
-  void initiate_vector() {};
-  void build_wave_packet(Eigen::Matrix<double,-1,-1> & k, Eigen::Matrix<T,-1,-1> & psi0, double & sigma) {};
-  template <unsigned MULT>
-  void Multiply(){};
-  template <unsigned MULT>
-  void Multiply2(){};
-  void test_boundaries_system() {};
-  void measure_wave_packet(T * , T * , T * ){};
-  void Exchange_Boundaries() {};
-  inline void  HaIteration() { Multiply<0>(); };
-  inline void  ChIteration() { Multiply<1>(); };
-  void Velocity( T *, T *, int ){};
-  void Velocity2( T *, T *, int, int){};
-  T VelocityInternalProduct( T *  , T * , int);
-  void empty_ghosts(int){}; 
-  T get_point(){ return assign_value(double(0),double(0));};  
-  template <typename U = T>
-  typename std::enable_if<is_tt<std::complex, U>::value, U>::type ghosts_correlation2(double phase){return 1;};
-  template <typename U = T>
-  typename std::enable_if<!is_tt<std::complex, U>::value, U>::type ghosts_correlation2(double phase){return 1;};
+  using KPM_VectorBasis<T,D>::myconj;
+  using KPM_VectorBasis<T,D>::multEiphase;
+  
+  KPM_Vector(int mem, Simulation<T,D> & sim);
+  ~KPM_Vector(void);
+  void initiate_vector();
+  T get_point();
+  void build_wave_packet(Eigen::Matrix<double,-1,-1> & k, Eigen::Matrix<T,-1,-1> & psi0, double & sigma);
+  template < unsigned MULT,bool VELOCITY> 
+  void build_regular_phases(int i1, unsigned axis);
+  template < unsigned MULT> 
+  void initiate_stride(std::size_t & istr);
+  template < unsigned MULT> 
+  void inline mult_local_disorder(const  std::size_t & j0, const  std::size_t & io);
+  void inline mult_regular_hoppings(const  std::size_t & j0, const  std::size_t & io);
+  template <unsigned MULT> 
+  void Multiply();
+  void Velocity(T * phi0,T * phiM1, unsigned axis);
+  template <unsigned MULT, bool VELOCITY>
+  void KPM_MOTOR(T * phi0a, T * phiM1a, T *phiM2a, unsigned axis);
+  void measure_wave_packet(T * bra, T * ket, T * results);  
+  void Exchange_Boundaries();
+  void test_boundaries_system();
+  void empty_ghosts(int mem_index);
+  void Velocity( T *, T *, int );
+  void interface();
 };
+
+
 
 
