@@ -7,14 +7,17 @@
 template <typename T,unsigned D>
 Vacancy_Operator<T,D>::Vacancy_Operator(char * filename, LatticeStructure <D> & rr, KPMRandom <T> & rndB) : r(rr), position(r.NStr), rnd(rndB), name(filename)
 {
-  
+
 };
 
 template <typename T,unsigned D>
 void Vacancy_Operator<T,D>::generate_disorder()
 {
-  Coordinates<std::size_t,D + 1> latt(r.ld), Latt(r.Ld), latStr(r.lStr);
     
+      
+      
+
+  Coordinates<std::size_t,D + 1> latt(r.ld), Latt(r.Ld), latStr(r.lStr);
   // Clean former vacancy distribution
   for(unsigned i = 0; i < r.NStr ; i++)
     position.at(i).clear();

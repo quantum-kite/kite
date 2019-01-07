@@ -35,6 +35,7 @@ Periodic_Operator<T,D>::Periodic_Operator (char * name, LatticeStructure<D> & rr
   }
   debug_message("Left Periodic_Operator constructor.\n");
 };
+
 template <typename T, unsigned D>
 void Periodic_Operator<T,D>::Convert_Build (  LatticeStructure <D> & r )
 {

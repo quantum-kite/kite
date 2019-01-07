@@ -10,13 +10,12 @@
 
 extern "C" herr_t getMembers(hid_t loc_id, const char *name, void *opdata);
 template <typename T, unsigned D>
-Hamiltonian<T,D>::Hamiltonian(char *name,  LatticeStructure<D> & rr, GLOBAL_VARIABLES <T> & gg) : r(rr) ,Global(gg),  hr(name, r), cross_mozaic(r.NStr), hV(name, rr, rnd)
+Hamiltonian<T,D>::Hamiltonian(char *filename,  LatticeStructure<D> & rr, GLOBAL_VARIABLES <T> & gg) : name(filename), r(rr) , Global(gg),  hr(name, r), cross_mozaic(r.NStr), hV(name, rr, rnd)
 {
-  rnd.init_random();
   /* Anderson disorder */
   build_Anderson_disorder();
-  build_vacancies_disorder();    
-  //    build_structural_disorder();
+  build_vacancies_disorder();
+  build_structural_disorder();
 };
 
 template <typename T, unsigned D>
@@ -75,7 +74,7 @@ void Hamiltonian<T,D>::build_vacancies_disorder()
     std::vector<int> orbit;
     std::vector<std::string> vacancies;
     int n;
-      
+
     try {
       H5::Exception::dontPrint();
       grp = file->openGroup("/Hamiltonian/Vacancy");
@@ -112,21 +111,22 @@ void Hamiltonian<T,D>::build_Anderson_disorder() {
 #pragma omp critical
   {
 
-      
     H5::H5File    *file      = new H5::H5File(name, H5F_ACC_RDONLY);
-    H5::DataSet   dataset    = H5::DataSet(file->openDataSet("/Hamiltonian/Disorder/OrbitalNum"));
-    H5::DataSpace dataspace  = dataset.getSpace();
-    dataspace.getSimpleExtentDims(dim, NULL);;
-      
-    orb_num.resize(dim[0]*dim[1]);
-    model.resize(dim[1]);
-    mu.resize(dim[1]);
-    sigma.resize(dim[1]);
     try {
+      H5::DataSet   dataset    = H5::DataSet(file->openDataSet("/Hamiltonian/Disorder/OrbitalNum"));
+      H5::DataSpace dataspace  = dataset.getSpace();
+      dataspace.getSimpleExtentDims(dim, NULL);;
+      
+      
+      orb_num.resize(dim[0]*dim[1]);
+      model.resize(dim[1]);
+      mu.resize(dim[1]);
+      sigma.resize(dim[1]);   
       get_hdf5<int>(orb_num.data(), file, (char *) "/Hamiltonian/Disorder/OrbitalNum");               // read the orbitals that have local disorder
       get_hdf5<int> (model.data(), file, (char *) "/Hamiltonian/Disorder/OnsiteDisorderModelType");   // read the the type  of local disorder
       get_hdf5<double> (mu.data(), file, (char *) "/Hamiltonian/Disorder/OnsiteDisorderMeanValue");   // read the the mean value
       get_hdf5<double> (sigma.data(), file, (char *) "/Hamiltonian/Disorder/OnsiteDisorderMeanStdv"); // read the the variance
+
     }
     catch (...){}
     delete file;
