@@ -47,8 +47,8 @@ void calculate_conductivity_dc(system_info<U, DIM>& sysinfo, shell_input & varia
   if(info.isRequired and variables.CondDC_is_required){
     verbose_message("Retrieving DC conductivity...\n");
     variables.printDC();
-    info.fetch_parameters();
-    info.override_parameters();
+    //info.fetch_parameters();
+    //info.override_parameters();
     info.calculate();
   }
 };

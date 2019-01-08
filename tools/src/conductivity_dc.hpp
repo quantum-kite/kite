@@ -15,27 +15,35 @@ class conductivity_dc{
     bool isPossible; // do we have all we need to calculate the conductivity?
 
 
+    double temperature;
+    T beta;
+    bool default_temp;
+
 		// Functions to calculate. They will require the objects present in
     // the configuration file
     int direction;
     int NumDisorder;
     int NumMoments;
-    int NumPoints;
-    int NumRandoms;
-    double temperature;
     double units;
+    
     std::string filename;
-
+    bool default_filename;
 
     T scat;
-    T beta;
-    T minEnergy, maxEnergy;
+    bool default_scat;
+
     int NEnergies; 
+    bool default_NEnergies;
+
+    T minEnergy;
+    T maxEnergy;
+    bool default_energy_limits;
     Eigen::Matrix<T, -1, 1> energies;
 
     int NFermiEnergies;
     double minFermiEnergy;
     double maxFermiEnergy;
+    bool default_Fermi;
 
     // information about the Hamiltonian
     system_info<T, DIM> systemInfo;
@@ -52,6 +60,9 @@ class conductivity_dc{
 
 
     conductivity_dc(system_info<T, DIM>&, shell_input &);
+    void printDC();
+    void set_energy_limits();
+    void set_default_parameters();
 	void fetch_parameters();
 	void override_parameters();
     void calculate();

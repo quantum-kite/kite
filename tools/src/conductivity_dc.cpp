@@ -27,135 +27,190 @@
 
 template <typename T, unsigned DIM>
 conductivity_dc<T, DIM>::conductivity_dc(system_info<T, DIM>& info, shell_input & vari){
-  std::string name = info.filename;
+    // Class constructor
+
+    std::string name = info.filename;
 	file = H5::H5File(name.c_str(), H5F_ACC_RDONLY);
 
     isRequired = false; // was this quantity (conductivity_dc) asked for?
     isPossible = false; // do we have all we need to calculate the conductivity?
 
-    int NumPoints = -1;
-    double temperature = -1;
     double units = unit_scale;
-    std::string filename = "condDC.dat";
 
-  // retrieve the information about the Hamiltonian
-  systemInfo = info;
+    // retrieve the information about the Hamiltonian
+    systemInfo = info;
 
-  // retrieve the shell input
-  variables = vari;
+    // retrieve the shell input
+    variables = vari;
 
-  // location of the information about the conductivity
-  dirName = "/Calculation/conductivity_dc/";
+    // location of the information about the conductivity
+    dirName = "/Calculation/conductivity_dc/";
   
-  // check whether the conductivity_dc was asked for
-  try{
-    H5::Exception::dontPrint();
-    get_hdf5(&direction, &file, (char*)(dirName+"Direction").c_str());									
-    isRequired = true;
-  } catch(H5::Exception& e){}
-  
+    // check whether the conductivity_dc was asked for
+    try{
+        H5::Exception::dontPrint();
+        get_hdf5(&direction, &file, (char*)(dirName+"Direction").c_str());									
+        isRequired = true;
+    } catch(H5::Exception& e){}
 
+    set_default_parameters();   // sets a default set of paramters for the calculation
+    fetch_parameters();         // finds all the paramters in the .h5 file
+    override_parameters();       // overrides paramters with the ones from the shell input
+    set_energy_limits();        // sets the energy limits used in the integration
+	file.close();
+
+    printDC();                  // Print all the parameters used
+
+    // needs fetch_parameters() to evaluate isPossible
+    if(!isPossible and isRequired){
+        std::cout << "Couldn't find the Gamma matrix in the .h5 file. Exiting.\n";
+        exit(1);
+    }
 }
 	
+template <typename T, unsigned DIM>
+void conductivity_dc<T, DIM>::set_default_parameters(){
+    // Sets default values for the parameters used in the 
+    // calculation of the DC conductivity. These are the parameters
+    // that will be overwritten by the config file and the
+    // shell input parameters
+
+    NFermiEnergies  = 100;
+    minFermiEnergy  = -1.0;
+    maxFermiEnergy  = 1.0;
+    default_Fermi   = true;
+
+    NEnergies           = 512;      // Number of energies used in the energy integration
+    default_NEnergies   = true;
+
+    scat            = 0.015;    // scattering parameter of the Green's functions
+    default_scat    = true;
+
+    filename            = "condDC.dat"; // Filename to save the final result
+    default_filename    = true;
+
+    temperature     = 0.001;
+    beta            = 1.0/8.6173303*pow(10,5)/temperature;
+    default_temp    = true;
+}
+
+template <typename T, unsigned DIM>
+void conductivity_dc<T, DIM>::set_energy_limits(){
+    // Attempts to find the energy limits from the information
+    // about the density of states stored in the systemInfo class.
+    // If it cant, uses default limits.
+
+
+    minEnergy               = -0.99;    // Minimum energy
+    maxEnergy               = 0.99;     // Maximum energy
+    default_energy_limits   = true;
+
+    if(systemInfo.EnergyLimitsKnown){
+        minEnergy = systemInfo.minEnergy;
+        maxEnergy = systemInfo.maxEnergy;
+        default_energy_limits = false;
+    }
+}
 
 template <typename T, unsigned DIM>
 void conductivity_dc<T, DIM>::fetch_parameters(){
 	debug_message("Entered conductivit_dc::read.\n");
 	//This function reads all the data from the hdf5 file that's needed to 
-  //calculate the dc conductivity
+    //calculate the dc conductivity
 	 
+    // Fetch the direction of the conductivity and convert it to a string
+    get_hdf5(&direction, &file, (char*)(dirName+"Direction").c_str());
+    std::string dirString = num2str2(direction);
 
-  // Check if the data for the DC conductivity exists
-  if(!isRequired){
-    std::cout << "Data for DC conductivity does not exist. Exiting.\n";
-    exit(1);
-  }
-  
-  // Fetch the direction of the conductivity and convert it to a string
-  get_hdf5(&direction, &file, (char*)(dirName+"Direction").c_str());									
-  std::string dirString = num2str2(direction);
-
-  // Fetch the number of Chebyshev Moments, temperature and number of points
+    // Fetch the number of Chebyshev Moments
 	get_hdf5(&NumMoments, &file, (char*)(dirName+"NumMoments").c_str());	
+
+    // Fetch the temperature from the .h5 file
 	get_hdf5(&temperature, &file, (char*)(dirName+"Temperature").c_str());	
-	get_hdf5(&NumPoints, &file, (char*)(dirName+"NumPoints").c_str());	
+    beta = 1.0/8.6173303*pow(10,5)/temperature;
+    default_temp = false;
+
+    // Fetch the number of Fermi energies from the .h5 file
+	get_hdf5(&NFermiEnergies, &file, (char*)(dirName+"NumPoints").c_str());	
+    default_Fermi = false;
 
 
-  // Check whether the matrices we're going to retrieve are complex or not
-  int complex = systemInfo.isComplex;
+    // Check whether the matrices we're going to retrieve are complex or not
+    int complex = systemInfo.isComplex;
 
 
   
-  scat = 0.0032679;
-  beta = 1.0/8.6173303*pow(10,5)/temperature;
-  NEnergies = 200;
-  if(systemInfo.EnergyLimitsKnown){
-    minEnergy = systemInfo.minEnergy;
-    maxEnergy = systemInfo.maxEnergy;
-  }
-  else{
-    minEnergy = -0.99;
-    maxEnergy = 0.99;
-    verbose_message("  - Using default limits for the integration in the energies.\n");
-    verbose_message("  - For a more precise evaluation, calculate the density of states as well.\n");
-  }
 
-  NFermiEnergies = NumPoints;
-  //NFermiEnergies = 100;
-  minFermiEnergy = -1.0;
-  maxFermiEnergy = 1.0;
-  //minEnergy = -0.99;
-  //maxEnergy = 0.99;
-
-
-  // Retrieve the Gamma Matrix
-  std::string MatrixName = dirName + "Gamma" + dirString;
-  try{
-		debug_message("Filling the Gamma matrix.\n");
-    //Gamma = Eigen::Array<std::complex<T>,-1,-1, Eigen::RowMajor>::Zero(NumMoments, NumMoments);
-    Gamma = Eigen::Array<std::complex<T>,-1,-1>::Zero(NumMoments, NumMoments);
+    // Retrieve the Gamma Matrix
+    std::string MatrixName = dirName + "Gamma" + dirString;
+    try{
+        debug_message("Filling the Gamma matrix.\n");
+        Gamma = Eigen::Array<std::complex<T>,-1,-1>::Zero(NumMoments, NumMoments);
 		
 		if(complex)
 			get_hdf5(Gamma.data(), &file, (char*)MatrixName.c_str());
 		
 		if(!complex){
 			Eigen::Array<T,-1,-1> GammaReal;
-      //GammaReal = Eigen::Array<T,-1,-1, Eigen::RowMajor>::Zero(NumMoments, NumMoments);
-      GammaReal = Eigen::Array<T,-1,-1>::Zero(NumMoments, NumMoments);
-      get_hdf5(GammaReal.data(), &file, (char*)MatrixName.c_str());
+            GammaReal = Eigen::Array<T,-1,-1>::Zero(NumMoments, NumMoments);
+            get_hdf5(GammaReal.data(), &file, (char*)MatrixName.c_str());
 			
 			Gamma = GammaReal.template cast<std::complex<T>>();
 		}				
 
-    isPossible = true;
-  } catch(H5::Exception& e) {debug_message("Conductivity DC: There is no Gamma matrix.\n");}
+        isPossible = true;
+    } catch(H5::Exception& e) {
+        debug_message("Conductivity DC: There is no Gamma matrix.\n");
+    }
 	
 
-	file.close();
 	debug_message("Left conductivity_dc::read.\n");
 }
 
 template <typename U, unsigned DIM>
 void conductivity_dc<U, DIM>::override_parameters(){
-    if(variables.CondDC_Temp != -1)         temperature     = variables.CondDC_Temp/systemInfo.energy_scale;
-    if(variables.CondDC_NumEnergies != -1)  NEnergies       = variables.CondDC_NumEnergies;
-    if(variables.CondDC_Scat != -8888)      scat            = variables.CondDC_Scat/systemInfo.energy_scale;
-    if(variables.CondDC_FermiMin != -8888)  minFermiEnergy  = variables.CondDC_FermiMin/systemInfo.energy_scale;
-    if(variables.CondDC_FermiMax != -8888)  maxFermiEnergy  = variables.CondDC_FermiMax/systemInfo.energy_scale;
-    if(variables.CondDC_NumFermi != -1)     NFermiEnergies  = variables.CondDC_NumFermi;
-    if(variables.CondDC_Name != "")         filename        = variables.CondDC_Name;
-    
-    beta = 1.0/8.6173303*pow(10,5)/temperature;
-};
+    // overrides the current parameters with the ones from the shell input
+
+    if(variables.CondDC_Temp != -1){
+        temperature     = variables.CondDC_Temp/systemInfo.energy_scale;
+        beta            = 1.0/8.6173303*pow(10,5)/temperature;
+        default_temp    = false;
+    }
+
+    if(variables.CondDC_NumEnergies != -1){
+        NEnergies = variables.CondDC_NumEnergies;
+        default_NEnergies = false;
+    }
+
+    if(variables.CondDC_Scat != -8888){
+        scat            = variables.CondDC_Scat/systemInfo.energy_scale;
+        default_scat    = false;
+    }
+
+    if(variables.CondDC_FermiMin != -8888){
+        minFermiEnergy  = variables.CondDC_FermiMin/systemInfo.energy_scale;
+        default_Fermi   = false;
+    }
+
+    if(variables.CondDC_FermiMax != -8888){  
+        maxFermiEnergy  = variables.CondDC_FermiMax/systemInfo.energy_scale;
+        default_Fermi   = false;
+    }
+
+    if(variables.CondDC_NumFermi != -1){
+        NFermiEnergies  = variables.CondDC_NumFermi;
+        default_Fermi   = false;
+    }
+
+    if(variables.CondDC_Name != ""){
+        filename            = variables.CondDC_Name;
+        default_filename    = false;
+    }
+}
+
 
 template <typename U, unsigned DIM>
-void conductivity_dc<U, DIM>::calculate(){
-  if(!isPossible){
-    std::cout << "Cannot calculate the DC conductivity because there is not enough information. Exiting.\n";
-    exit(0);
-  }
-
-
+void conductivity_dc<U, DIM>::printDC(){
   verbose_message("  Energy in rescaled units: [-1,1]\n");
   verbose_message("  Beta (1/kT): "); verbose_message(beta); verbose_message("\n");
   //verbose_message("  Fermi energi (in KPM units): "); verbose_message(e_fermi); verbose_message("\n");
@@ -169,6 +224,14 @@ void conductivity_dc<U, DIM>::calculate(){
   verbose_message("  Fermi energies range: ["); verbose_message(minFermiEnergy); verbose_message(",");
     verbose_message(maxFermiEnergy); verbose_message("]\n");
   verbose_message("  File name: condDC.dat\n");
+
+}
+
+template <typename U, unsigned DIM>
+void conductivity_dc<U, DIM>::calculate(){
+
+
+
   energies = Eigen::Matrix<U, -1, 1>::LinSpaced(NEnergies, minEnergy, maxEnergy);
 
   // First perform the part of the product that only depends on the
