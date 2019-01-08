@@ -378,6 +378,32 @@ KPM_Vector.hpp
 
 /mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/Src/SimulationGlobal.hpp
 
+/mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/Src/SimulationLMU.cpp
+Generic.hpp
+/mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/Src/Generic.hpp
+ComplexTraits.hpp
+/mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/Src/ComplexTraits.hpp
+myHDF5.hpp
+/mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/Src/myHDF5.hpp
+Global.hpp
+/mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/Src/Global.hpp
+Random.hpp
+/mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/Src/Random.hpp
+Coordinates.hpp
+/mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/Src/Coordinates.hpp
+LatticeStructure.hpp
+/mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/Src/LatticeStructure.hpp
+queue.hpp
+/mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/Src/queue.hpp
+Simulation.hpp
+/mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/Src/Simulation.hpp
+Hamiltonian.hpp
+/mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/Src/Hamiltonian.hpp
+KPM_VectorBasis.hpp
+/mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/Src/KPM_VectorBasis.hpp
+KPM_Vector.hpp
+/mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/Src/KPM_Vector.hpp
+
 /mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/Src/SimulationSingleShot.cpp
 Generic.hpp
 /mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/Src/Generic.hpp

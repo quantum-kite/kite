@@ -83,7 +83,7 @@ fabric.properties
 # all hdf5 files
 *.h5
 
-tools/tests/output
+build
 
 # add .pdf files
 *.pdf

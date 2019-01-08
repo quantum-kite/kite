@@ -15,6 +15,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/KITEx.dir/Simulation.cpp.o"
   "CMakeFiles/KITEx.dir/SimulationGamma.cpp.o"
   "CMakeFiles/KITEx.dir/SimulationGaussianWavePacket.cpp.o"
+  "CMakeFiles/KITEx.dir/SimulationLMU.cpp.o"
   "CMakeFiles/KITEx.dir/SimulationSingleShot.cpp.o"
   "CMakeFiles/KITEx.dir/main.cpp.o"
   "CMakeFiles/KITEx.dir/myHDF5.cpp.o"

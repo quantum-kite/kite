@@ -555,6 +555,33 @@ SimulationGaussianWavePacket.cpp.s:
 	$(MAKE) -f CMakeFiles/KITEx.dir/build.make CMakeFiles/KITEx.dir/SimulationGaussianWavePacket.cpp.s
 .PHONY : SimulationGaussianWavePacket.cpp.s
 
+SimulationLMU.o: SimulationLMU.cpp.o
+
+.PHONY : SimulationLMU.o
+
+# target to build an object file
+SimulationLMU.cpp.o:
+	$(MAKE) -f CMakeFiles/KITEx.dir/build.make CMakeFiles/KITEx.dir/SimulationLMU.cpp.o
+.PHONY : SimulationLMU.cpp.o
+
+SimulationLMU.i: SimulationLMU.cpp.i
+
+.PHONY : SimulationLMU.i
+
+# target to preprocess a source file
+SimulationLMU.cpp.i:
+	$(MAKE) -f CMakeFiles/KITEx.dir/build.make CMakeFiles/KITEx.dir/SimulationLMU.cpp.i
+.PHONY : SimulationLMU.cpp.i
+
+SimulationLMU.s: SimulationLMU.cpp.s
+
+.PHONY : SimulationLMU.s
+
+# target to generate assembly for a file
+SimulationLMU.cpp.s:
+	$(MAKE) -f CMakeFiles/KITEx.dir/build.make CMakeFiles/KITEx.dir/SimulationLMU.cpp.s
+.PHONY : SimulationLMU.cpp.s
+
 SimulationSingleShot.o: SimulationSingleShot.cpp.o
 
 .PHONY : SimulationSingleShot.o
@@ -720,6 +747,9 @@ help:
 	@echo "... SimulationGaussianWavePacket.o"
 	@echo "... SimulationGaussianWavePacket.i"
 	@echo "... SimulationGaussianWavePacket.s"
+	@echo "... SimulationLMU.o"
+	@echo "... SimulationLMU.i"
+	@echo "... SimulationLMU.s"
 	@echo "... SimulationSingleShot.o"
 	@echo "... SimulationSingleShot.i"
 	@echo "... SimulationSingleShot.s"

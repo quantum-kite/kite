@@ -265,9 +265,22 @@ CMakeFiles/KITEx.dir/SimulationGaussianWavePacket.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/KITEx.dir/SimulationGaussianWavePacket.cpp.s"
 	g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/Src/SimulationGaussianWavePacket.cpp -o CMakeFiles/KITEx.dir/SimulationGaussianWavePacket.cpp.s
 
+CMakeFiles/KITEx.dir/SimulationLMU.cpp.o: CMakeFiles/KITEx.dir/flags.make
+CMakeFiles/KITEx.dir/SimulationLMU.cpp.o: /mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/Src/SimulationLMU.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building CXX object CMakeFiles/KITEx.dir/SimulationLMU.cpp.o"
+	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/KITEx.dir/SimulationLMU.cpp.o -c /mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/Src/SimulationLMU.cpp
+
+CMakeFiles/KITEx.dir/SimulationLMU.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/KITEx.dir/SimulationLMU.cpp.i"
+	g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/Src/SimulationLMU.cpp > CMakeFiles/KITEx.dir/SimulationLMU.cpp.i
+
+CMakeFiles/KITEx.dir/SimulationLMU.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/KITEx.dir/SimulationLMU.cpp.s"
+	g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/Src/SimulationLMU.cpp -o CMakeFiles/KITEx.dir/SimulationLMU.cpp.s
+
 CMakeFiles/KITEx.dir/SimulationSingleShot.cpp.o: CMakeFiles/KITEx.dir/flags.make
 CMakeFiles/KITEx.dir/SimulationSingleShot.cpp.o: /mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/Src/SimulationSingleShot.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building CXX object CMakeFiles/KITEx.dir/SimulationSingleShot.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building CXX object CMakeFiles/KITEx.dir/SimulationSingleShot.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/KITEx.dir/SimulationSingleShot.cpp.o -c /mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/Src/SimulationSingleShot.cpp
 
 CMakeFiles/KITEx.dir/SimulationSingleShot.cpp.i: cmake_force
@@ -280,7 +293,7 @@ CMakeFiles/KITEx.dir/SimulationSingleShot.cpp.s: cmake_force
 
 CMakeFiles/KITEx.dir/main.cpp.o: CMakeFiles/KITEx.dir/flags.make
 CMakeFiles/KITEx.dir/main.cpp.o: /mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/Src/main.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building CXX object CMakeFiles/KITEx.dir/main.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building CXX object CMakeFiles/KITEx.dir/main.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/KITEx.dir/main.cpp.o -c /mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/Src/main.cpp
 
 CMakeFiles/KITEx.dir/main.cpp.i: cmake_force
@@ -293,7 +306,7 @@ CMakeFiles/KITEx.dir/main.cpp.s: cmake_force
 
 CMakeFiles/KITEx.dir/myHDF5.cpp.o: CMakeFiles/KITEx.dir/flags.make
 CMakeFiles/KITEx.dir/myHDF5.cpp.o: /mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/Src/myHDF5.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building CXX object CMakeFiles/KITEx.dir/myHDF5.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building CXX object CMakeFiles/KITEx.dir/myHDF5.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/KITEx.dir/myHDF5.cpp.o -c /mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/Src/myHDF5.cpp
 
 CMakeFiles/KITEx.dir/myHDF5.cpp.i: cmake_force
@@ -306,7 +319,7 @@ CMakeFiles/KITEx.dir/myHDF5.cpp.s: cmake_force
 
 CMakeFiles/KITEx.dir/queue.cpp.o: CMakeFiles/KITEx.dir/flags.make
 CMakeFiles/KITEx.dir/queue.cpp.o: /mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/Src/queue.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building CXX object CMakeFiles/KITEx.dir/queue.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building CXX object CMakeFiles/KITEx.dir/queue.cpp.o"
 	g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/KITEx.dir/queue.cpp.o -c /mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/Src/queue.cpp
 
 CMakeFiles/KITEx.dir/queue.cpp.i: cmake_force
@@ -335,6 +348,7 @@ KITEx_OBJECTS = \
 "CMakeFiles/KITEx.dir/Simulation.cpp.o" \
 "CMakeFiles/KITEx.dir/SimulationGamma.cpp.o" \
 "CMakeFiles/KITEx.dir/SimulationGaussianWavePacket.cpp.o" \
+"CMakeFiles/KITEx.dir/SimulationLMU.cpp.o" \
 "CMakeFiles/KITEx.dir/SimulationSingleShot.cpp.o" \
 "CMakeFiles/KITEx.dir/main.cpp.o" \
 "CMakeFiles/KITEx.dir/myHDF5.cpp.o" \
@@ -359,6 +373,7 @@ KITEx: CMakeFiles/KITEx.dir/Random.cpp.o
 KITEx: CMakeFiles/KITEx.dir/Simulation.cpp.o
 KITEx: CMakeFiles/KITEx.dir/SimulationGamma.cpp.o
 KITEx: CMakeFiles/KITEx.dir/SimulationGaussianWavePacket.cpp.o
+KITEx: CMakeFiles/KITEx.dir/SimulationLMU.cpp.o
 KITEx: CMakeFiles/KITEx.dir/SimulationSingleShot.cpp.o
 KITEx: CMakeFiles/KITEx.dir/main.cpp.o
 KITEx: CMakeFiles/KITEx.dir/myHDF5.cpp.o
@@ -371,7 +386,7 @@ KITEx: /usr/lib/libz.so
 KITEx: /usr/lib/libdl.so
 KITEx: /usr/lib/libm.so
 KITEx: CMakeFiles/KITEx.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Linking CXX executable KITEx"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Linking CXX executable KITEx"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/KITEx.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

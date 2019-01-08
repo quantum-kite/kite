@@ -7,6 +7,8 @@ H5::DataType DataTypeFor<int>::value = H5::PredType::NATIVE_INT;
 template<>
 H5::DataType DataTypeFor<unsigned int>::value = H5::PredType::NATIVE_UINT;
 template<>
+H5::DataType DataTypeFor<unsigned long>::value = H5::PredType::NATIVE_ULONG;
+template<>
 H5::DataType DataTypeFor<float>::value = H5::PredType::NATIVE_FLOAT;
 template<>
 H5::DataType DataTypeFor<double>::value = H5::PredType::NATIVE_DOUBLE;
@@ -125,6 +127,7 @@ void instantiateHDF<T>:: write_hdf5A(const Eigen::Array<T, -1, -1 > & mu, H5::H5
 
 template struct instantiateHDF<int>;
 template struct instantiateHDF<unsigned>;
+template struct instantiateHDF<unsigned long>;
 template struct instantiateHDF<float>;
 template struct instantiateHDF<double>;
 template struct instantiateHDF<long double>;
