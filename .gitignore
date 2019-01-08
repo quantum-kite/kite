@@ -83,7 +83,13 @@ fabric.properties
 # all hdf5 files
 *.h5
 
-build
+# the build directory
+build/
+
+# except the test folders
+!tests/*/*.h5
+!tools/tests/*/*.h5
+
 
 # add .pdf files
 *.pdf
@@ -94,7 +100,8 @@ build
 *.fuse*
 # compiled programs
 pp
-tools/kpm_calculate/calc_cond
+KITEx
+KITE-tools
 
 # Python cache files
 __pycache__
