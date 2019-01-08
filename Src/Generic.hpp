@@ -47,12 +47,12 @@
 #define VERBOSE 1
 #endif
 
-#ifndef COMPILE_MAIN
-#define COMPILE_MAIN 1
-#endif
-
 #ifndef ESTIMATE_TIME
 #define ESTIMATE_TIME 1
+#endif
+
+#ifndef COMPILE_WAVEPACKET
+#define COMPILE_WAVEPACKET 1
 #endif
 
 // other compilation parameters not set in the Makefile

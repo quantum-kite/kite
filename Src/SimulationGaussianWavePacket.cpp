@@ -15,9 +15,15 @@ class KPM_Vector;
 #include "KPM_VectorBasis.hpp"
 #include "KPM_Vector.hpp"
 
+#if !(COMPILE_WAVEPACKET)
+#warning "Cannot compile SimulationGaussianWavepacket.cpp. This error is not fatal, but KITE will not be able to run GaussianWavepacket(). A more recent version of gcc (8.0) is required."
+#endif
+
+
 template <typename T, unsigned D>
 void Simulation<T,D>::Gaussian_Wave_Packet()
 {
+#if COMPILE_WAVEPACKET
   ComplexTraits<T> CT;
   KPM_Vector<T,D> phi (2, *this), sum_ket(1u,*this);
   int NumDisorder, NumMoments, NumPoints;
@@ -198,6 +204,7 @@ void Simulation<T,D>::Gaussian_Wave_Packet()
     delete file;
   }
 #pragma omp barrier
+#endif
 };
 
 template class Simulation<float ,1u>;

@@ -102,19 +102,16 @@ int main(int argc, char *argv[]){
   // This speeds up the compilation time considerably, while only support
   int index =   dim - 1 + 3 * precision + is_complex * 3 * 3; 
   switch (index ) {
-#if COMPILE_MAIN==1
   case 0:
     {
       class GlobalSimulation <float, 1u> h(argv[1]); // float real 1D
       break;
     }
-#endif
   case 1:
     {
       class GlobalSimulation <float, 2u> h(argv[1]); // float real 2D
       break;
     }
-#if COMPILE_MAIN==1
   case 2:
     {
       class GlobalSimulation <float, 3u> h(argv[1]); // float real 3D
@@ -125,13 +122,11 @@ int main(int argc, char *argv[]){
       class GlobalSimulation <double, 1u> h(argv[1]); // double real 1D
       break;
       }
-#endif
   case 4:
       {
       class GlobalSimulation <double, 2u> h(argv[1]); //double real 2D. You get the picture.
       break;
       }
-#if COMPILE_MAIN==1  
   case 5:
       {
       class GlobalSimulation <double, 3u> h(argv[1]);
@@ -172,13 +167,11 @@ int main(int argc, char *argv[]){
       class GlobalSimulation <std::complex<double>, 1u> h(argv[1]);
       break;
       }
-#endif    
   case 13:
       {
       class GlobalSimulation <std::complex<double>, 2u> h(argv[1]);
       break;
       }
-#if COMPILE_MAIN==1  
   case 14:
       {
       class GlobalSimulation <std::complex<double>, 3u> h(argv[1]);
@@ -199,7 +192,6 @@ int main(int argc, char *argv[]){
       class GlobalSimulation <std::complex<long double>, 3u> h(argv[1]);
       break;
       }
-#endif
   default:
       { 
       std::cout << "Unexpected parameters. Please use valid values for the precision, dimension and 'complex' flag.";

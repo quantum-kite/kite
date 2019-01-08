@@ -28,6 +28,15 @@ endif()
 
 add_compile_options(-Wall -ffast-math -O2 -fdiagnostics-color=always -DEIGEN_DONT_PARALLELIZE)
 
+set(compile_wp 1)
+if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.0.0)
+    MESSAGE( STATUS "variable is: " ${CMAKE_CXX_COMPILER_VERSION})
+    MESSAGE( STATUS "Cannot compile gaussian wavepacket")
+    set(compile_wp 0)
+endif()
+add_definitions(-DCOMPILE_WAVEPACKET=${compile_wp})
+
+
 
 include_directories(${Src})
 target_link_libraries(KITEx ${HDF5_CXX_LIBRARIES} )
