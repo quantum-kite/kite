@@ -27,12 +27,12 @@ from pybinding.repository import graphene
 # load a monolayer graphene lattice
 lattice = graphene.monolayer()
 # add Disorder
-disorder = kite.Disorder(lattice)
-disorder.add_disorder('B', 'Gaussian', 0.0, 0.6)
-disorder.add_disorder('A', 'Gaussian', 0.0, 0.6)
+# disorder = kite.Disorder(lattice)
+# disorder.add_disorder('B', 'Gaussian', 0.0, 0.6)
+# disorder.add_disorder('A', 'Gaussian', 0.0, 0.6)
 # number of decomposition parts in each direction of matrix. This divides the lattice into various sections,
 # each of which is calculated in parallel
-nx = ny = 1
+nx = ny = 2
 # number of unit cells in each direction.
 lx = ly = 512
 # make config object which caries info about
@@ -46,7 +46,7 @@ configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundari
                                    is_complex=False, precision=1)
 # require the calculation of DOS and conductivity_optical
 calculation = kite.Calculation(configuration)
-calculation.dos(num_points=4000, num_moments=512, num_random=10, num_disorder=1)
-calculation.conductivity_optical(num_points=1000, num_disorder=1, num_random=5, num_moments=256, direction='xx')
+calculation.dos(num_points=4096, num_moments=512, num_random=10, num_disorder=1)
+calculation.conductivity_optical(num_points=1024, num_disorder=1, num_random=5, num_moments=256, direction='xx')
 # configure the *.h5 file
 kite.config_system(lattice, configuration, calculation, filename='optcond_gaussian_disorder.h5', disorder=disorder)
