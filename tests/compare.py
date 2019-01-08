@@ -20,4 +20,4 @@ norm1 = np.linalg.norm(npset1)
 norm2 = np.linalg.norm(npset2)
 pct = sumall/np.sqrt(norm1*norm2)
 
-print("{:f} {:f} {:f} {:f} {:f}".format(sumall, maxim, norm1, norm2, pct))
+print("{:<11f} {:<11f} {:<11f} {:<11f} {:<11f}".format(sumall, maxim, norm1, norm2, pct))
