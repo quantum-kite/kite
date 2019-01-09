@@ -34,7 +34,7 @@ if (OPENMP_FOUND)
 endif()
 
 
-add_compile_options(-Wall -ffast-math -O2 -fdiagnostics-color=always -DEIGEN_DONT_PARALLELIZE)
+add_compile_options(-march=native -O2 -DEIGEN_DONT_PARALLELIZE -std=gnu++11 -Wall -ffast-math )
 
 set(compile_wp 1)
 if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.0.0)

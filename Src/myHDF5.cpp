@@ -135,3 +135,23 @@ template struct instantiateHDF<std::complex<float>>;
 template struct instantiateHDF<std::complex<double>>;
 template struct instantiateHDF<std::complex<long double>>;
 
+template void get_hdf5<int>(int*, H5::H5File*, char*);
+template void get_hdf5<unsigned>(unsigned*, H5::H5File*, char*);
+template void get_hdf5<unsigned long>(unsigned long*, H5::H5File*, char*);
+template void get_hdf5<float>(float*, H5::H5File*, char*);
+template void get_hdf5<double>(double*, H5::H5File*, char*);
+template void get_hdf5<long double>(long double*, H5::H5File*, char*);
+template void get_hdf5<std::complex<float>>(std::complex<float>*, H5::H5File*, char*);
+template void get_hdf5<std::complex<double>>(std::complex<double>*, H5::H5File*, char*);
+template void get_hdf5<std::complex<long double>>(std::complex<long double>*, H5::H5File*, char*);
+
+
+template void get_hdf5<int>(int*, H5::H5File*, std::string &);
+template void get_hdf5<unsigned>(unsigned*, H5::H5File*, std::string &);
+template void get_hdf5<unsigned long>(unsigned long*, H5::H5File*, std::string &);
+template void get_hdf5<float>(float*, H5::H5File*, std::string &);
+template void get_hdf5<double>(double*, H5::H5File*, std::string &);
+template void get_hdf5<long double>(long double*, H5::H5File*, std::string &);
+template void get_hdf5<std::complex<float>>(std::complex<float>*, H5::H5File*, std::string &);
+template void get_hdf5<std::complex<double>>(std::complex<double>*, H5::H5File*, std::string &);
+template void get_hdf5<std::complex<long double>>(std::complex<long double>*, H5::H5File*, std::string &);
