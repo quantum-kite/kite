@@ -81,7 +81,7 @@ fabric.properties
 .ipynb_checkpoints/
 
 # all hdf5 files
-*.h5
+*REF.h5
 
 # the build directory
 build/

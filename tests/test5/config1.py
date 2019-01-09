@@ -41,5 +41,5 @@ configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundari
                                    is_complex=False, precision=1, spectrum_range=[-4.1,4.1])
 
 calculation = kite.Calculation(configuration)
-calculation.dos(num_points=1000, num_moments=256, num_disorder=1, num_random=1)
-kite.config_system(lattice, configuration, calculation, filename='config1.h5')
+calculation.dos(num_points=1000, num_moments=128, num_disorder=1, num_random=1)
+kite.config_system(lattice, configuration, calculation, filename='configREF.h5')

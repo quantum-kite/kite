@@ -31,11 +31,13 @@ conductivity_dc<T, DIM>::conductivity_dc(system_info<T, DIM>& info, shell_input 
 
     std::string name = info.filename;
 	file = H5::H5File(name.c_str(), H5F_ACC_RDONLY);
+        H5::Exception::dontPrint();
 
     isRequired = false; // was this quantity (conductivity_dc) asked for?
     isPossible = false; // do we have all we need to calculate the conductivity?
 
-    double units = unit_scale;
+    units = unit_scale;
+    std::cout << "unit scale: " << unit_scale << "\n";
 
     // retrieve the information about the Hamiltonian
     systemInfo = info;
@@ -47,12 +49,9 @@ conductivity_dc<T, DIM>::conductivity_dc(system_info<T, DIM>& info, shell_input 
     dirName = "/Calculation/conductivity_dc/";
   
     // check whether the conductivity_dc was asked for
-    try{
-        H5::Exception::dontPrint();
-        get_hdf5(&direction, &file, (char*)(dirName+"Direction").c_str());									
-        isRequired = true;
-    } catch(H5::Exception& e){}
 
+    isRequired = is_required();
+    if(isRequired){
     set_default_parameters();   // sets a default set of paramters for the calculation
     fetch_parameters();         // finds all the paramters in the .h5 file
     override_parameters();       // overrides paramters with the ones from the shell input
@@ -60,12 +59,21 @@ conductivity_dc<T, DIM>::conductivity_dc(system_info<T, DIM>& info, shell_input 
 	file.close();
 
     printDC();                  // Print all the parameters used
-
+    }
     // needs fetch_parameters() to evaluate isPossible
     if(!isPossible and isRequired){
         std::cout << "Couldn't find the Gamma matrix in the .h5 file. Exiting.\n";
         exit(1);
     }
+}
+template <typename T, unsigned DIM>
+bool conductivity_dc<T, DIM>::is_required(){
+    bool result;
+    try{
+        get_hdf5(&direction, &file, (char*)(dirName+"Direction").c_str());
+        result = true;
+    } catch(H5::Exception& e){}
+    return result;
 }
 	
 template <typename T, unsigned DIM>
@@ -78,7 +86,9 @@ void conductivity_dc<T, DIM>::set_default_parameters(){
     NFermiEnergies  = 100;
     minFermiEnergy  = -1.0;
     maxFermiEnergy  = 1.0;
-    default_Fermi   = true;
+    default_NFermi  = true;
+    default_mFermi  = true;
+    default_MFermi  = true;
 
     NEnergies           = 512;      // Number of energies used in the energy integration
     default_NEnergies   = true;
@@ -132,7 +142,7 @@ void conductivity_dc<T, DIM>::fetch_parameters(){
 
     // Fetch the number of Fermi energies from the .h5 file
 	get_hdf5(&NFermiEnergies, &file, (char*)(dirName+"NumPoints").c_str());	
-    default_Fermi = false;
+    default_NFermi = false;
 
 
     // Check whether the matrices we're going to retrieve are complex or not
@@ -189,17 +199,17 @@ void conductivity_dc<U, DIM>::override_parameters(){
 
     if(variables.CondDC_FermiMin != -8888){
         minFermiEnergy  = variables.CondDC_FermiMin/systemInfo.energy_scale;
-        default_Fermi   = false;
+        default_mFermi   = false;
     }
 
     if(variables.CondDC_FermiMax != -8888){  
         maxFermiEnergy  = variables.CondDC_FermiMax/systemInfo.energy_scale;
-        default_Fermi   = false;
+        default_MFermi   = false;
     }
 
     if(variables.CondDC_NumFermi != -1){
         NFermiEnergies  = variables.CondDC_NumFermi;
-        default_Fermi   = false;
+        default_NFermi   = false;
     }
 
     if(variables.CondDC_Name != ""){
@@ -211,25 +221,23 @@ void conductivity_dc<U, DIM>::override_parameters(){
 
 template <typename U, unsigned DIM>
 void conductivity_dc<U, DIM>::printDC(){
-  verbose_message("  Energy in rescaled units: [-1,1]\n");
-  verbose_message("  Beta (1/kT): "); verbose_message(beta); verbose_message("\n");
-  //verbose_message("  Fermi energi (in KPM units): "); verbose_message(e_fermi); verbose_message("\n");
-  //verbose_message("  Using kernel for delta function: Jackson\n");
-  verbose_message("  Broadening parameter for Green's function: ");
-    verbose_message(scat); verbose_message("\n");
-  verbose_message("  Number of energies: "); verbose_message(NEnergies); verbose_message("\n");
-  verbose_message("  Energy range: ["); verbose_message(minEnergy); verbose_message(",");
-    verbose_message(maxEnergy); verbose_message("]\n");
-  verbose_message("  Number of Fermi energies: "); verbose_message(NFermiEnergies); verbose_message("\n");
-  verbose_message("  Fermi energies range: ["); verbose_message(minFermiEnergy); verbose_message(",");
-    verbose_message(maxFermiEnergy); verbose_message("]\n");
-  verbose_message("  File name: condDC.dat\n");
+    double scale = systemInfo.energy_scale;
+    std::string energy_range = "[" + std::to_string(minEnergy*scale) + ", " + std::to_string(maxEnergy*scale) + "]";
 
+    // Prints all the information about the parameters
+    std::cout << "The DC conductivity will be calculated with these parameters: (eV, Kelvin)\n"
+        "   Temperature: "             << temperature*scale        << ((default_temp)?         " (default)":"") << "\n"
+        "   Broadening: "              << scat*scale               << ((default_scat)?         " (default)":"") << "\n"
+        "   Max Fermi energy: "        << maxFermiEnergy*scale     << ((default_MFermi)?       " (default)":"") << "\n"
+        "   Min Fermi energy: "        << minFermiEnergy*scale     << ((default_mFermi)?       " (default)":"") << "\n"
+        "   Number Fermi energies: "   << NFermiEnergies           << ((default_NFermi)?       " (default)":"") << "\n"
+        "   Filename: "                << filename                 << ((default_filename)?     " (default)":"") << "\n"
+        "   Integration range: "       << energy_range             << ((default_energy_limits)?" (default)":" (Estimated from DoS)") << "\n"
+        "   Num integration points: "  << NEnergies                << ((default_NEnergies)?    " (default)":"") << "\n"; 
 }
 
 template <typename U, unsigned DIM>
 void conductivity_dc<U, DIM>::calculate(){
-
 
 
   energies = Eigen::Matrix<U, -1, 1>::LinSpaced(NEnergies, minEnergy, maxEnergy);
@@ -250,6 +258,8 @@ void conductivity_dc<U, DIM>::calculate(){
   }
   int N_threads;
 
+  std::cout << "normGreenR: " << greenR.norm() << "\n";
+
   Eigen::Array<std::complex<U>, -1, -1> GammaE;
   GammaE = Eigen::Array<std::complex<U>, -1, -1>::Zero(NEnergies, 1);
   omp_set_num_threads(systemInfo.NumThreads);
@@ -268,8 +278,11 @@ void conductivity_dc<U, DIM>::calculate(){
       Eigen::Matrix<std::complex<U>, -1, -1, Eigen::RowMajor> LocalGamma;
       LocalGamma = Gamma.matrix().block(thread*localMoments, 0, localMoments, NumMoments);
 
+      std::cout << "LocalGamma: " << omp_get_thread_num() << " " << LocalGamma.norm() << "\n";
       Eigen::Matrix<std::complex<U>, -1, -1, Eigen::ColMajor> GammaEN;
       GammaEN = LocalGamma*greenR;
+
+      std::cout << "GammaEN: " << GammaEN.norm() << "\n";
 
       std::complex<U> complexEnergyP, complexEnergyN;
 
@@ -289,17 +302,23 @@ void conductivity_dc<U, DIM>::calculate(){
         }
       }
 
+      std::cout << "R:" << dgreenR.norm() << "\n";
+      std::cout << "A:" << dgreenA.norm() << "\n";
+
 
       // Now perform the part of the product that depends on both kinds of polynomials
       Eigen::Array<std::complex<U>, -1, -1> LocalGammaE;
       LocalGammaE = Eigen::Array<std::complex<U>, -1, -1>::Zero(NEnergies, 1);
 
       U den = systemInfo.num_orbitals*systemInfo.spin_degeneracy/systemInfo.unit_cell_area/units; 
+      std::cout << "units:" << units << "\n";
+      std::cout << "den: " << den<<"\n";
       for(int i = 0; i < NEnergies; i++){
         LocalGammaE(i) += std::complex<U>(dgreenR.row(i)*GammaEN.col(i))*den;
         LocalGammaE(i) += -std::complex<U>(dgreenA.row(i)*GammaEN.col(i).conjugate())*den;
       }
 
+      std::cout << "LocalGammaE norm: " << LocalGammaE.matrix().norm() << "\n";
 
 #pragma omp critical
       {

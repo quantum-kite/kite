@@ -45,10 +45,7 @@ template <typename U, unsigned DIM>
 void calculate_conductivity_dc(system_info<U, DIM>& sysinfo, shell_input & variables){
   conductivity_dc<U, DIM> info(sysinfo, variables);
   if(info.isRequired and variables.CondDC_is_required){
-    verbose_message("Retrieving DC conductivity...\n");
-    variables.printDC();
-    //info.fetch_parameters();
-    //info.override_parameters();
+    //variables.printDC();
     info.calculate();
   }
 };
