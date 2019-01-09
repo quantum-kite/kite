@@ -53,13 +53,13 @@ public:
   template <unsigned MULT> 
   void Multiply();
   void Velocity(T * phi0,T * phiM1, unsigned axis);
+  void Velocity(T * phi0,T * phiM1, int axis);
   template <unsigned MULT, bool VELOCITY>
   void KPM_MOTOR(T * phi0a, T * phiM1a, T *phiM2a, unsigned axis);
   void measure_wave_packet(T * bra, T * ket, T * results);  
   void Exchange_Boundaries();
   void test_boundaries_system();
   void empty_ghosts(int mem_index);
-  void Velocity( T *, T *, int );
   void interface();
 };
 

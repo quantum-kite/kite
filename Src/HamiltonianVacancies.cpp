@@ -5,7 +5,7 @@
 #include "Random.hpp"
 #include "HamiltonianVacancies.hpp"
 template <typename T,unsigned D>
-Vacancy_Operator<T,D>::Vacancy_Operator(char * filename, LatticeStructure <D> & rr, KPMRandom <T> & rndB) : r(rr), position(r.NStr), rnd(rndB), name(filename)
+Vacancy_Operator<T,D>::Vacancy_Operator(char * filename, LatticeStructure <D> & rr, KPMRandom <T> & rndB) : r(rr), rnd(rndB), name(filename), position(r.NStr)
 {
 
 };
