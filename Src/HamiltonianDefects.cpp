@@ -370,29 +370,6 @@ void Defect_Operator<T,D>::build_velocity(std::vector<unsigned> & components, un
     }
 }
 
-#pragma GCC optimize ("O0")
-template <typename T,unsigned D>
-void Defect_Operator<T,D>::interface_multiply_defect(std::size_t istr, T* & phi0, T* & phiM1, unsigned axis)
-{
-  Defect_Operator<T,D>::multiply_defect<0u,false>(istr, phi0, phiM1, axis);
-  Defect_Operator<T,D>::multiply_defect<0u,true>(istr, phi0, phiM1, axis);
-  Defect_Operator<T,D>::multiply_defect<1u,false>(istr, phi0, phiM1, axis);
-  Defect_Operator<T,D>::multiply_defect<1u,true>(istr, phi0, phiM1, axis);
-  Defect_Operator<T,D>::multiply_defect<2u,false>(istr, phi0, phiM1, axis);
-  Defect_Operator<T,D>::multiply_defect<2u,true>(istr, phi0, phiM1, axis);
-};
-
-template <typename T,unsigned D>
-void Defect_Operator<T,D>::interface_multiply_broken_defect(T* & phi0, T* & phiM1, unsigned axis){
-  Defect_Operator<T,D>::multiply_broken_defect<0u,false>(phi0, phiM1, axis);
-  Defect_Operator<T,D>::multiply_broken_defect<0u,true>(phi0, phiM1, axis);
-  Defect_Operator<T,D>::multiply_broken_defect<1u,false>(phi0, phiM1, axis);
-  Defect_Operator<T,D>::multiply_broken_defect<1u,true>(phi0, phiM1, axis);
-  Defect_Operator<T,D>::multiply_broken_defect<2u,false>(phi0, phiM1, axis);
-  Defect_Operator<T,D>::multiply_broken_defect<2u,true>(phi0, phiM1, axis);
-};
-#pragma GCC optimize ("O3")
-
 template struct Defect_Operator<float, 1u>;
 template struct Defect_Operator<double, 1u>;
 template struct Defect_Operator<long double, 1u>;

@@ -51,7 +51,8 @@ public:
   void inline mult_local_disorder(const  std::size_t & j0, const  std::size_t & io);
   void inline mult_regular_hoppings(const  std::size_t & j0, const  std::size_t & io);
   template <unsigned MULT> 
-  void Multiply();
+  void Multiply(){};
+
   void Velocity(T * phi0,T * phiM1, unsigned axis);
   void Velocity(T * phi0,T * phiM1, int axis);
   template <unsigned MULT, bool VELOCITY>
@@ -60,7 +61,7 @@ public:
   void Exchange_Boundaries();
   void test_boundaries_system();
   void empty_ghosts(int mem_index);
-  void interface();
+
 };
 
 

@@ -56,12 +56,6 @@ void inline KPM_Vector<T,D>::mult_regular_hoppings(const  std::size_t & j0, cons
   (void) io;
 };
 
-#pragma GCC optimize ("O0")
-template <typename T, unsigned D>
-template <unsigned MULT> 
-void KPM_Vector<T,D>::Multiply(){};
-#pragma GCC optimize ("O3")
-
 template <typename T, unsigned D>
 void KPM_Vector<T,D>::Velocity(T * phi0,T * phiM1, unsigned axis){
   (void) phi0;
@@ -101,15 +95,6 @@ void KPM_Vector<T,D>::test_boundaries_system(){};
 
 template <typename T, unsigned D>
 void KPM_Vector<T,D>::empty_ghosts(int mem_index){(void) mem_index;};
-
-
-#pragma GCC optimize ("O0")
-template <typename T, unsigned D>
-void KPM_Vector<T,D>::interface(){
-Multiply<0u>();
-Multiply<1u>();
-};
-#pragma GCC optimize ("O3")
 
 template class KPM_Vector<float ,1u>;
 template class KPM_Vector<double ,1u>;
