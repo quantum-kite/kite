@@ -43,17 +43,8 @@ Coordinates<T,D> & Coordinates<T,D>::set(std::initializer_list<T> a_args)  {
   set_index(coord);
   return *this;
 }
-template <typename T, unsigned D>
-template <typename T1>
-Coordinates<T,D> & Coordinates<T,D>::set_index(T1 (&c)[D] ) {
-  index = 0;
-  for(int i = D - 1; i >= 0; i--)
-    {
-      coord[i] = T(c[i]);
-      index += T(c[i]) * basis[i];
-    }
-  return *this;
-}
+
+
 template <typename T, unsigned D>  
 Coordinates<T,D> & Coordinates<T,D>::set_coord(T x ) {
   index = x;

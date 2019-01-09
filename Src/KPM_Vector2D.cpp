@@ -330,6 +330,7 @@ void inline KPM_Vector <T, 2>::mult_regular_hoppings(const  std::size_t & j0, co
 
 
 // Structural disorder contribution - iterate over the disorder models
+#pragma GCC optimize ("O0")
 template <typename T>
 template <unsigned MULT> 
 void KPM_Vector <T, 2>::Multiply() {
@@ -348,6 +349,7 @@ void KPM_Vector <T, 2>::Multiply() {
   phiM2 = v.col((memory + index - 2) % memory ).data();
   KPM_MOTOR<MULT, false>(phi0, phiM1, phiM2, i);
 };
+#pragma GCC optimize ("O3")
 
 template <typename T>
 void KPM_Vector <T, 2>::Velocity(T * phi0,T * phiM1, unsigned axis) {

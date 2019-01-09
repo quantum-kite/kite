@@ -20,6 +20,7 @@ typedef int indextype;
 
 
 int main(int argc, char *argv[]){  
+  (void) argc;
   verbose_message(
       "\n+------------------------------------------------------------------------+\n"
       "|            Chebyshev Polynomial Green's Function Approach              | \n"

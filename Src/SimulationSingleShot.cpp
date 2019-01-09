@@ -25,7 +25,7 @@ template <typename T, unsigned D>
 void Simulation<T,D>::Single_Shot(double EScale, singleshot_measurement_queue queue) {
   // Calculate the longitudinal dc conductivity for a single value of the energy
     
-  T tmp;
+  T tmp = assign_value(0.,0.);
   debug_message("Entered Single_Shot\n");
     
   // Obtain the relevant quantities from the queue
