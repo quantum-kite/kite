@@ -22,7 +22,7 @@ endif()
 
 
 #add_compile_options(-ffast-math -O2 -DEIGEN_DONT_PARALLELIZE)
-add_compile_options(-ffast-math -O2 -fdiagnostics-color=always -DEIGEN_DONT_PARALLELIZE)
+add_compile_options(-Wall -ffast-math -march=native -O2 -fdiagnostics-color=always -DEIGEN_DONT_PARALLELIZE)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
 
 MESSAGE(STATUS "Hdf5HL Library:  ${HDF5_CXX_HL_LIBRARIES}")

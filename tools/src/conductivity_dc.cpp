@@ -27,52 +27,70 @@
 
 template <typename T, unsigned DIM>
 conductivity_dc<T, DIM>::conductivity_dc(system_info<T, DIM>& info, shell_input & vari){
-    // Class constructor
+    /* Class constructor
+     * Finds all the information needed to compute the DC conductivity
+     * but does not compute it. To calculate the DC conductivity, the method 
+     * calculate() needs to be called. If there is not enough data to compute
+     * the DC conductivity, the code will exit with an error.
+     */
 
-    std::string name = info.filename;
-	file = H5::H5File(name.c_str(), H5F_ACC_RDONLY);
-        H5::Exception::dontPrint();
+    H5::Exception::dontPrint();
+    units = unit_scale;     // units of the DC conductivity
+    systemInfo = info;      // retrieve the information about the Hamiltonian
+    variables = vari;       // retrieve the shell input
 
-    isRequired = false; // was this quantity (conductivity_dc) asked for?
-    isPossible = false; // do we have all we need to calculate the conductivity?
+    isPossible = false;         // do we have all we need to calculate the conductivity?
+    isRequired = is_required(); // was this quantity (conductivity_dc) asked for?
 
-    units = unit_scale;
-    std::cout << "unit scale: " << unit_scale << "\n";
 
-    // retrieve the information about the Hamiltonian
-    systemInfo = info;
-
-    // retrieve the shell input
-    variables = vari;
-
-    // location of the information about the conductivity
-    dirName = "/Calculation/conductivity_dc/";
-  
-    // check whether the conductivity_dc was asked for
-
-    isRequired = is_required();
+    // If the DC conductivity was requested, all the necessary parameters for its
+    // computation will be set and printed out to std::cout
     if(isRequired){
-    set_default_parameters();   // sets a default set of paramters for the calculation
-    fetch_parameters();         // finds all the paramters in the .h5 file
-    override_parameters();       // overrides paramters with the ones from the shell input
-    set_energy_limits();        // sets the energy limits used in the integration
-	file.close();
-
-    printDC();                  // Print all the parameters used
+        set_default_parameters();   // sets a default set of paramters for the calculation
+        fetch_parameters();         // finds all the paramters in the .h5 file
+        override_parameters();      // overrides parameters with the ones from the shell input
+        set_energy_limits();        // sets the energy limits used in the integration
+        printDC();                  // Print all the parameters used
     }
+
+
+
     // needs fetch_parameters() to evaluate isPossible
     if(!isPossible and isRequired){
-        std::cout << "Couldn't find the Gamma matrix in the .h5 file. Exiting.\n";
+        std::cout << "ERROR. The DC conductivity was requested but the data "
+            "needed for its computation was not found in the input .h5 file. "
+            "Make sure KITEx has processed the file first. Exiting.";
         exit(1);
     }
 }
+
 template <typename T, unsigned DIM>
 bool conductivity_dc<T, DIM>::is_required(){
-    bool result;
+    // Checks whether the DC conductivity has been requested
+    // by analysing the .h5 config file. If it has been requested, 
+    // some fields have to exist, such as "Direction"
+
+
+    // Make sure the config filename has been initialized
+    std::string name = systemInfo.filename.c_str();
+    if(name == ""){
+        std::cout << "ERROR: Filename uninitialized. Exiting.\n";
+        exit(1);
+    }
+
+    // location of the information about the conductivity
+    char dirName[] = "/Calculation/conductivity_dc/Direction";
+	H5::H5File file = H5::H5File(name, H5F_ACC_RDONLY);
+
+    // Check if this dataset exists
+    bool result = false;
     try{
-        get_hdf5(&direction, &file, (char*)(dirName+"Direction").c_str());
+        get_hdf5(&direction, &file, dirName);
         result = true;
     } catch(H5::Exception& e){}
+
+
+    file.close();
     return result;
 }
 	
@@ -81,27 +99,29 @@ void conductivity_dc<T, DIM>::set_default_parameters(){
     // Sets default values for the parameters used in the 
     // calculation of the DC conductivity. These are the parameters
     // that will be overwritten by the config file and the
-    // shell input parameters
+    // shell input parameters. 
 
-    NFermiEnergies  = 100;
-    minFermiEnergy  = -1.0;
-    maxFermiEnergy  = 1.0;
-    default_NFermi  = true;
-    default_mFermi  = true;
-    default_MFermi  = true;
+    double scale = systemInfo.energy_scale;
 
-    NEnergies           = 512;      // Number of energies used in the energy integration
+    NFermiEnergies      = 100;
+    minFermiEnergy      = -1.0/scale;       // -1eV in KPM reduced units [-1,1]
+    maxFermiEnergy      = 1.0/scale;        //  1eV in KPM reduced units [-1,1]
+    default_NFermi      = true;
+    default_mFermi      = true;
+    default_MFermi      = true;
+
+    NEnergies           = 512;              // Number of energies used in the energy integration
     default_NEnergies   = true;
 
-    scat            = 0.015;    // scattering parameter of the Green's functions
-    default_scat    = true;
+    scat                = 0.01/scale;       // scattering parameter of 10meV in
+    default_scat        = true;             // the Green's functions in KPM reduced units
 
-    filename            = "condDC.dat"; // Filename to save the final result
+    filename            = "condDC.dat";     // Filename to save the final result
     default_filename    = true;
 
-    temperature     = 0.001;
-    beta            = 1.0/8.6173303*pow(10,5)/temperature;
-    default_temp    = true;
+    temperature         = 0.001/scale;      // Temperature of 1mK in KPM reduced units
+    beta                = 1.0/8.6173303*pow(10,5)/temperature;
+    default_temp        = true;
 }
 
 template <typename T, unsigned DIM>
@@ -128,6 +148,10 @@ void conductivity_dc<T, DIM>::fetch_parameters(){
 	//This function reads all the data from the hdf5 file that's needed to 
     //calculate the dc conductivity
 	 
+	H5::H5File file;
+    std::string dirName = "/Calculation/conductivity_dc/";  // location of the information about the conductivity
+	file = H5::H5File(systemInfo.filename.c_str(), H5F_ACC_RDONLY);
+
     // Fetch the direction of the conductivity and convert it to a string
     get_hdf5(&direction, &file, (char*)(dirName+"Direction").c_str());
     std::string dirString = num2str2(direction);
@@ -136,6 +160,7 @@ void conductivity_dc<T, DIM>::fetch_parameters(){
 	get_hdf5(&NumMoments, &file, (char*)(dirName+"NumMoments").c_str());	
 
     // Fetch the temperature from the .h5 file
+    // The temperature is already in KPM reduced units
 	get_hdf5(&temperature, &file, (char*)(dirName+"Temperature").c_str());	
     beta = 1.0/8.6173303*pow(10,5)/temperature;
     default_temp = false;
@@ -147,9 +172,6 @@ void conductivity_dc<T, DIM>::fetch_parameters(){
 
     // Check whether the matrices we're going to retrieve are complex or not
     int complex = systemInfo.isComplex;
-
-
-  
 
     // Retrieve the Gamma Matrix
     std::string MatrixName = dirName + "Gamma" + dirString;
@@ -174,12 +196,15 @@ void conductivity_dc<T, DIM>::fetch_parameters(){
     }
 	
 
+    file.close();
 	debug_message("Left conductivity_dc::read.\n");
 }
 
 template <typename U, unsigned DIM>
 void conductivity_dc<U, DIM>::override_parameters(){
-    // overrides the current parameters with the ones from the shell input
+    // Overrides the current parameters with the ones from the shell input.
+    // These parameters are in eV or Kelvin, so they must scaled down
+    // to the KPM units. This includes the temperature
 
     if(variables.CondDC_Temp != -1){
         temperature     = variables.CondDC_Temp/systemInfo.energy_scale;
@@ -258,7 +283,6 @@ void conductivity_dc<U, DIM>::calculate(){
   }
   int N_threads;
 
-  std::cout << "normGreenR: " << greenR.norm() << "\n";
 
   Eigen::Array<std::complex<U>, -1, -1> GammaE;
   GammaE = Eigen::Array<std::complex<U>, -1, -1>::Zero(NEnergies, 1);
@@ -278,11 +302,9 @@ void conductivity_dc<U, DIM>::calculate(){
       Eigen::Matrix<std::complex<U>, -1, -1, Eigen::RowMajor> LocalGamma;
       LocalGamma = Gamma.matrix().block(thread*localMoments, 0, localMoments, NumMoments);
 
-      std::cout << "LocalGamma: " << omp_get_thread_num() << " " << LocalGamma.norm() << "\n";
       Eigen::Matrix<std::complex<U>, -1, -1, Eigen::ColMajor> GammaEN;
       GammaEN = LocalGamma*greenR;
 
-      std::cout << "GammaEN: " << GammaEN.norm() << "\n";
 
       std::complex<U> complexEnergyP, complexEnergyN;
 
@@ -302,8 +324,6 @@ void conductivity_dc<U, DIM>::calculate(){
         }
       }
 
-      std::cout << "R:" << dgreenR.norm() << "\n";
-      std::cout << "A:" << dgreenA.norm() << "\n";
 
 
       // Now perform the part of the product that depends on both kinds of polynomials
@@ -311,14 +331,11 @@ void conductivity_dc<U, DIM>::calculate(){
       LocalGammaE = Eigen::Array<std::complex<U>, -1, -1>::Zero(NEnergies, 1);
 
       U den = systemInfo.num_orbitals*systemInfo.spin_degeneracy/systemInfo.unit_cell_area/units; 
-      std::cout << "units:" << units << "\n";
-      std::cout << "den: " << den<<"\n";
       for(int i = 0; i < NEnergies; i++){
         LocalGammaE(i) += std::complex<U>(dgreenR.row(i)*GammaEN.col(i))*den;
         LocalGammaE(i) += -std::complex<U>(dgreenA.row(i)*GammaEN.col(i).conjugate())*den;
       }
 
-      std::cout << "LocalGammaE norm: " << LocalGammaE.matrix().norm() << "\n";
 
 #pragma omp critical
       {

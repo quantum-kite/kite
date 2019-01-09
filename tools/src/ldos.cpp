@@ -37,7 +37,6 @@ ldos<T, DIM>::ldos(system_info<T, DIM>& sysinfo, shell_input & vari){
     NumMoments = -1;                                    // Number of Chebyshev moments
     NumPositions = -1;                                  // Number of lattice sites in which to compute the LDoS
     NumEnergies = -1;                                   // Number of energies
-    filename = "ldos";                          // Saving results to file with this name
 
     systemInfo = &sysinfo;              // retrieve the information about the Hamiltonian
     variables = vari;                   // retrieve the shell input
@@ -59,8 +58,18 @@ ldos<T, DIM>::ldos(system_info<T, DIM>& sysinfo, shell_input & vari){
 	
 template <typename T, unsigned DIM>
 void ldos<T, DIM>::override_parameters(){
-    if(variables.lDOS_Name != "")        filename    = variables.lDOS_Name;
+    if(variables.lDOS_Name != ""){
+        filename         = variables.lDOS_Name;
+        default_filename = false;
+    }
 };
+
+template <typename T, unsigned DIM>
+void ldos<T, DIM>::set_default_parameters(){
+    filename = "ldos";
+    default_filename = true;
+};
+
 
 template <typename T, unsigned DIM>
 void ldos<T, DIM>::fetch_parameters(){
