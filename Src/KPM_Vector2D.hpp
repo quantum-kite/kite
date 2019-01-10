@@ -52,28 +52,12 @@ public:
   void inline mult_regular_hoppings(const  std::size_t & j0, const  std::size_t & io);
   template <unsigned MULT, bool VELOCITY>
   void KPM_MOTOR(T * phi0a, T * phiM1a, T *phiM2a, unsigned axis);
-  // Structural disorder contribution - iterate over the disorder models
+
   template <unsigned MULT> 
-  void Multiply() {
-    vverbose_message("Entered Multiply");
-    
-    unsigned i = 0;
-    /*
-      Mosaic Multiplication using a TILE of STRIDE x STRIDE 
-      Right Now We expect that both ld[0] and ld[1]  are multiple of STRIDE
-      MULT = 0 : For the case of the Velocity/Hamiltonian
-      MULT = 1 : For the case of the KPM_iteration
-    */
-    inc_index();
-    phi0 = v.col(index).data();
-    phiM1 = v.col((memory + index - 1) % memory ).data();
-    phiM2 = v.col((memory + index - 2) % memory ).data();
-    KPM_MOTOR<MULT, false>(phi0, phiM1, phiM2, i);
-  };
-  
+  void Multiply();
   void Velocity(T * phi0,T * phiM1, unsigned axis);
   void Velocity(T * phi0,T * phiM1, int);
-
+  
   void measure_wave_packet(T * bra, T * ket, T * results);  
   void Exchange_Boundaries();
   void test_boundaries_system();
