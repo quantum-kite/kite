@@ -7,7 +7,6 @@
 
 template <typename T, unsigned DIM>
 class conductivity_dc{
-	H5::H5File file;
 	public:
 
 
@@ -57,7 +56,6 @@ class conductivity_dc{
     //Eigen::Array<std::complex<T>, -1, -1, Eigen::RowMajor> Gamma;
     Eigen::Array<std::complex<T>, -1, -1> Gamma;
 
-	  std::string dirName;
 
 
 

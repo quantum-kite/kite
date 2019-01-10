@@ -16,10 +16,11 @@ class ldos{
     // Flags that will be accessed from the other classes
     bool isRequired;                        // was this quantity local density of states asked for?
     bool isPossible;                        // do we have all we need to calculate the density of states?
+    bool default_filename;
 
     // Variables needed to compute the Local density of states
     int NumMoments;                                    // Number of Chebyshev moments
-    int NumPositions;                                  // Number of lattice sites in which to compute the LDoS
+    unsigned NumPositions;                                  // Number of lattice sites in which to compute the LDoS
     int NumEnergies;                                   // Number of energies
     std::string filename;                          // Saving results to file with this name
     Eigen::Matrix<unsigned long, -1, -1> ldos_Orbitals;     // Position of the lattice sites
@@ -37,7 +38,10 @@ class ldos{
 
     // Class methods
     ldos(system_info<T, DIM>&, shell_input &);  // Constructor
-	void fetch_parameters();                    // Get the parameters from the hdf5 file
+	bool fetch_parameters();                    // Get the parameters from the hdf5 file
+    bool is_required();
+    void printLDOS();
+    void set_default_parameters();
 	void override_parameters();                 // If shell variables were given, this function overrides the current parameters
     void calculate();                           // Compute the local density of states
 	

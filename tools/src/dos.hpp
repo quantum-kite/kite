@@ -8,37 +8,40 @@
 
 template <typename T, unsigned DIM>
 class dos{
-	H5::H5File file;
 	public:
 
+        system_info<T, DIM> *systemInfo;    // information about the Hamiltonian
+        shell_input variables;              // Input from the shell to override the configuration file
 
         bool isRequired; // was this quantity density of states asked for?
         bool isPossible; // do we have all we need to calculate the density of states?
 
+        double Emax, Emin;
+        bool default_Emax, default_Emin;
 
             // Functions to calculate. They will require the objects present in
         // the configuration file
         int NumMoments;
-        int NumPoints;
         std::string filename;
+        bool default_filename;
 
+        bool default_NEnergies;
         int NEnergies;
+        Eigen::Matrix<T, -1, 1> energies;
 
-        // information about the Hamiltonian
-        system_info<T, DIM> *systemInfo;
 
-        // Input from the shell to override the configuration file
-        shell_input variables;
+        Eigen::Array<std::complex<T>, -1, -1> MU;   // Objects required to successfully calculate the conductivity
 
-        // Objects required to successfully calculate the conductivity
-        Eigen::Array<std::complex<T>, -1, -1> MU;
-
-        std::string dirName;
-
+        Eigen::Array<std::complex<T>, -1, -1> GammaE;
+        bool dos_finished;
 
         dos(system_info<T, DIM>&, shell_input &);
         dos();
-        void fetch_parameters();
+        bool is_required();
+        void printDOS();
+        void find_limits();
+        void set_default_parameters();
+        bool fetch_parameters();
         void override_parameters();
         void calculate();
 	

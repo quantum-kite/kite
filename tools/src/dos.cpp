@@ -22,74 +22,127 @@
 
 #include "macros.hpp"
 
-//template <typename T, unsigned DIM>
-//dos<T, DIM>::dos(){};
-
 template <typename T, unsigned DIM>
 dos<T, DIM>::dos(system_info<T, DIM>& sysinfo, shell_input & vari){
-    std::string name = sysinfo.filename;
-	file = H5::H5File(name.c_str(), H5F_ACC_RDONLY);
+    H5::Exception::dontPrint();
 
-    isRequired = false; // was this quantity density of states asked for?
-    isPossible = false; // do we have all we need to calculate the density of states?
+    systemInfo = &sysinfo;  // retrieve the information about the Hamiltonian
+    variables = vari;       // retrieve the shell input
 
-    NumPoints = -1;
-    filename = "dos.dat";
+    dos_finished = false;
+    isPossible = false;         // do we have all we need to calculate the density of states?
+    isRequired = is_required(); // check whether the DOS  was asked for
+    if(isRequired){
+        set_default_parameters();
+        isPossible = fetch_parameters();
+        override_parameters();      // overrides parameters with the ones from the shell input
+        printDOS();
+        energies = Eigen::Matrix<T, -1, 1>::LinSpaced(NEnergies, Emin, Emax);
+    }
 
-    // retrieve the information about the Hamiltonian
-    systemInfo = &sysinfo;
+    if(!isPossible and isRequired){
+        std::cout << "ERROR. The density of states was requested but the data "
+            "needed for its computation was not found in the input .h5 file. "
+            "Make sure KITEx has processed the file first. Exiting.";
+        exit(1);
+    }
 
-    // retrieve the shell input
-    variables = vari;
 
-    // location of the information about the conductivity
+}
+
+template <typename T, unsigned DIM>
+bool dos<T, DIM>::is_required(){
+    // Checks whether the DC conductivity has been requested
+    // by analysing the .h5 config file. If it has been requested, 
+    // some fields have to exist, such as "Direction"
+
+    // Make sure the config filename has been initialized
+    std::string name = systemInfo->filename;
+    if(name == ""){
+        std::cout << "ERROR: Filename uninitialized. Exiting.\n";
+        exit(1);
+    }
+
+	H5::H5File file = H5::H5File(name.c_str(), H5F_ACC_RDONLY);
+
+    std::string dirName;
     dirName = "/Calculation/dos/";
-
-    // check whether the conductivity_dc was asked for
-    // if this quantity exists, so should all the others.
+    bool result = false;
     try{
-        H5::Exception::dontPrint();
-        get_hdf5(&NumMoments, &file, (char*)(dirName+"NumMoments").c_str());									
-        isRequired = true;
+        get_hdf5(&NumMoments, &file, (char*)(dirName+"NumMoments").c_str());
+        result = true;
     } catch(H5::Exception& e){}
 
+
+    file.close();
+    return result;
+}
+
+template <typename T, unsigned DIM>
+void dos<T, DIM>::set_default_parameters(){
+    // Sets default values for the parameters used in the 
+    // calculation of the density of stats. These are the parameters
+    // that will be overwritten by the config file and the
+    // shell input parameters. 
+
+    NEnergies = 1024;           // Number of energies
+    default_NEnergies = true;
+
+    filename  = "dos.dat";      // Filename to save final result
+    default_filename = true;
+  
+    Emax = 0.99;
+    Emin = -0.99;
+    default_Emin = true;
+    default_Emax = true;
 
 }
 	
 template <typename T, unsigned DIM>
 void dos<T, DIM>::override_parameters(){
-    if(variables.DOS_NumEnergies != -1) NEnergies   = variables.DOS_NumEnergies;
-    if(variables.DOS_Name != "")        filename    = variables.DOS_Name;
-};
+    // Overrides the current parameters with the ones from the shell input.
+    // These parameters are in eV or Kelvin, so they must scaled down
+    // to the KPM units. This includes the temperature
+
+
+    if(variables.DOS_NumEnergies != -1){
+        NEnergies           = variables.DOS_NumEnergies;
+        default_NEnergies   = false;
+    }
+
+
+    if(variables.DOS_Name != ""){
+        filename            = variables.DOS_Name;
+        default_filename    = false;
+    }
+}
 
 template <typename T, unsigned DIM>
-void dos<T, DIM>::fetch_parameters(){
+bool dos<T, DIM>::fetch_parameters(){
 	debug_message("Entered conductivit_dc::read.\n");
 	//This function reads all the data from the hdf5 file that's needed to 
-  //calculate the dc conductivity
+    //calculate the dc conductivity
 	 
 
-  // Check if the data for the DC conductivity exists
-  if(!isRequired){
-    std::cout << "Data for DC conductivity does not exist. Exiting.\n";
-    exit(1);
-  }
+    std::string name = systemInfo->filename;
+	H5::H5File file = H5::H5File(name.c_str(), H5F_ACC_RDONLY);
+
   
-  // Fetch the number of Chebyshev Moments, temperature and number of points
+    std::string dirName;
+    dirName = "/Calculation/dos/";
+    
+    // Fetch the number of Chebyshev Moments, temperature and number of points
 	get_hdf5(&NumMoments, &file, (char*)(dirName+"NumMoments").c_str());	
-	get_hdf5(&NumPoints, &file, (char*)(dirName+"NumPoints").c_str());	
+	get_hdf5(&NEnergies, &file, (char*)(dirName+"NumPoints").c_str());	
 
 
-  // Check whether the matrices we're going to retrieve are complex or not
-  int complex = systemInfo->isComplex;
+    // Check whether the matrices we're going to retrieve are complex or not
+    int complex = systemInfo->isComplex;
 
-
-  NEnergies = NumPoints;
-  
-
-  // Retrieve the Gamma Matrix
-  std::string MatrixName = dirName + "MU";
-  try{
+    // Retrieve the Gamma Matrix
+    bool result = false;
+    std::string MatrixName = dirName + "MU";
+    try{
 		debug_message("Filling the MU matrix.\n");
 		MU = Eigen::Array<std::complex<T>,-1,-1>::Zero(1, NumMoments);
 		
@@ -104,7 +157,7 @@ void dos<T, DIM>::fetch_parameters(){
 			MU = MUReal.template cast<std::complex<T>>();
 		}				
 
-    isPossible = true;
+    result = true;
   } catch(H5::Exception& e) {debug_message("DOS: There is no MU matrix.\n");}
 	
 
@@ -112,32 +165,35 @@ void dos<T, DIM>::fetch_parameters(){
 
 	file.close();
 	debug_message("Left DOS::read.\n");
+    return result;
+}
+
+template <typename U, unsigned DIM>
+void dos<U, DIM>::printDOS(){
+    // Prints all the information about the parameters
+    
+    double scale = systemInfo->energy_scale;
+    std::string energy_range = "[" + std::to_string(Emin*scale) + ", " + std::to_string(Emax*scale) + "]";
+    bool default_energy_limits = default_Emin && default_Emax;
+
+    std::cout << "The density of states will be calculated with these parameters: (eV)\n"
+        "   Energy range: "         << energy_range << ((default_energy_limits)?" (default)":"") << "\n"
+        "   Number of energies: "   << NEnergies    << ((default_NEnergies)?    " (default)":"") << "\n"
+        "   Filename: "             << filename     << ((default_filename)?     " (default)":"") << "\n"
+        "   Using Jackson kernel\n";
+
+
 }
 
 template <typename U, unsigned DIM>
 void dos<U, DIM>::calculate(){
-  if(!isPossible){
-    std::cout << "Cannot retrieve DOS since there is not enough information. Exiting.\n";
-    exit(0);
-  }
-
-  double Emax = 0.99;
-  double Emin = -Emax;
-  verbose_message("  Number of points: "); verbose_message(NumPoints); verbose_message("\n");
-  verbose_message("  Energy range: ["); verbose_message(Emin); verbose_message(",");
-      verbose_message(Emax); verbose_message("]\n");
-  verbose_message("  Using kernel: Jackson\n");
-  verbose_message("  File name: dos.dat\n");
 
 
-  Eigen::Matrix<U, -1, 1> energies;
-  energies = Eigen::Matrix<U, -1, 1>::LinSpaced(NEnergies, Emin, Emax);
 
 
 
   // First perform the part of the product that only depends on the
   // chebyshev polynomial of the first kind
-  Eigen::Array<std::complex<U>, -1, -1> GammaE;
   GammaE = Eigen::Array<std::complex<U>, -1, -1>::Zero(NEnergies, 1);
 
   U mult = 1.0/systemInfo->energy_scale;
@@ -151,48 +207,62 @@ void dos<U, DIM>::calculate(){
   }
 
   // Save the density of states to a file and find its maximum value
-  U max = -1;
   std::ofstream myfile;
   myfile.open(filename);
   for(int i=0; i < NEnergies; i++){
     myfile  << energies(i)*systemInfo->energy_scale << " " << GammaE.real()(i) << " " << GammaE.imag()(i) << "\n";
-    if(GammaE.real()(i) > max)
-      max = GammaE.real()(i);
   }
 
   myfile.close();
+  dos_finished = true;
   
   
-  // Check the limits of the density of states
-  U threshold = max*0.01;
-  U lowest = 2, highest = -2, a, b;
-  bool founda = false, foundb = false;
-  for(int i = 0; i < NEnergies; i++){
-    a = GammaE.real()(i);
-    b = GammaE.real()(NEnergies - i - 1);
-    
-    if(a > threshold && !founda){
-      lowest = energies(i);
-      if(i > 0)
-        lowest = energies(i-1);
-      founda = true;
-    }
-    
-    if(b > threshold && !foundb){
-      highest = energies(NEnergies - i -1);
-      if(i>0)
-        highest = energies(NEnergies-i);
-      foundb = true;
-    }
-    
+  find_limits();
 
-  }
+}
+
+template <typename T, unsigned DIM>
+void dos<T,DIM>::find_limits(){
+  // Check the limits of the density of states
+
+    if(!dos_finished){
+        std::cout << "Cannot estimate the limits of the density of states without first calculating it. Exiting.\n";
+        exit(1);
+    }
+
+    T max = -1;
+    for(int i=0; i < NEnergies; i++){
+        if(GammaE(i).real() > max)
+            max = GammaE(i).real();
+    }
+  
+    T threshold = max*0.01;
+    T lowest = 2, highest = -2, a, b;
+    bool founda = false, foundb = false;
+    for(int i = 0; i < NEnergies; i++){
+        a = GammaE(i).real();
+        b = GammaE(NEnergies - i - 1).real();
+    
+        if(a > threshold && !founda){
+            lowest = energies(i);
+        if(i > 0)
+            lowest = energies(i-1);
+        founda = true;
+        }
+    
+        if(b > threshold && !foundb){
+            highest = energies(NEnergies - i -1);
+            if(i>0)
+                highest = energies(NEnergies-i);
+            foundb = true;
+        }
+    }
 
   systemInfo->EnergyLimitsKnown = true;
   systemInfo->minEnergy = lowest;
   systemInfo->maxEnergy = highest;
+}
 
-};
 
 // Instantiations
 template class dos<float, 1u>;
