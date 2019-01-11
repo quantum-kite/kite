@@ -40,11 +40,20 @@ class StructuralDisorder:
             SystemExit('Either select concentration which results in random distribution or '
                        'the exact position of the defect!')
 
+        self._lattice = lattice
+
+        vectors = np.asarray(self._lattice.vectors)
+        self._space_size = vectors.shape[0]
+
         if position is None:
-            position = 0
+            position = np.zeros(self._space_size)
+            self._exact_position = False
+        else:
+            self._exact_position = True
 
         self._concentration = concentration
-        self._position = position
+        self._position = np.asmatrix(position)
+
         self._num_bond_disorder_per_type = 0
         self._num_onsite_disorder_per_type = 0
 
@@ -71,6 +80,7 @@ class StructuralDisorder:
         self._hopping = []
 
         self._orbital_vacancy = []
+        self._orbital_vacancy_cell = []
         self._vacancy_sub = []
 
         self._num_nodes = 0
@@ -149,7 +159,7 @@ class StructuralDisorder:
 
     def add_local_vacancy_disorder(self, relative_index, sub):
         orbital_vacancy = []
-
+        orbital_vacancy_cell = []
         names, sublattices = zip(*self._lattice.sublattices.items())
 
         if sub not in names:
@@ -161,17 +171,15 @@ class StructuralDisorder:
         sub_id = lattice_sub.alias_id
 
         it = np.nditer(lattice_sub.energy, flags=['multi_index'])
-        relative_move = np.dot(np.asarray(relative_index) + np.asarray(self._position) + 1,
-                                    3 ** np.linspace(0, self._space_size - 1, self._space_size, dtype=np.int32))
+
         while not it.finished:
-            orbit = int(relative_move +
-                        self._num_orbitals_before[sub_id] + it.multi_index[0] * 3 ** self._space_size)
+            orbit = int(self._num_orbitals_before[sub_id] + it.multi_index[0])
             if orbit not in orbital_vacancy:
                 orbital_vacancy.append(orbit)
             it.iternext()
 
-        self._orbital_vacancy.append(orbital_vacancy)
-        self._vacancy_sub.append(sub)
+        self._orbital_vacancy.extend(orbital_vacancy)
+        self._vacancy_sub.extend(sub)
 
     def add_local_bond_disorder(self, relative_index_from, from_sub, relative_index_to, to_sub, hoppings):
 
@@ -215,9 +223,9 @@ class StructuralDisorder:
 
         h = np.nditer(hoppings, flags=['multi_index'])
         while not h.finished:
-            relative_move_from = np.dot(np.asarray(relative_index_from) + np.asarray(self._position) + 1,
+            relative_move_from = np.dot(np.asarray(relative_index_from) + 1,
                                         3 ** np.linspace(0, self._space_size - 1, self._space_size, dtype=np.int32))
-            relative_move_to = np.dot(np.asarray(relative_index_to) + np.asarray(self._position) + 1,
+            relative_move_to = np.dot(np.asarray(relative_index_to) + 1,
                                       3 ** np.linspace(0, self._space_size - 1, self._space_size, dtype=np.int32))
 
             if isinstance(hoppings, np.ndarray):
@@ -307,7 +315,7 @@ class StructuralDisorder:
 
         h = np.nditer(value, flags=['multi_index'])
         while not h.finished:
-            relative_move = np.dot(np.asarray(relative_index) + np.asarray(self._position) + 1,
+            relative_move = np.dot(np.asarray(relative_index) + 1,
                                    3 ** np.linspace(0, self._space_size - 1, self._space_size, dtype=np.int32))
 
             if isinstance(value, np.ndarray):
@@ -559,11 +567,11 @@ class Calculation:
             Number of different disorder realisations.
         position : list
             Relative index of the unit cell where the LDOS will be calculated.
-        sublattice : str
+        sublattice : str or list
             Name of the sublattice at which the LDOS will be calculated.
         """
 
-        self._ldos.append({'energy': energy, 'num_moments': num_moments, 'position': position,
+        self._ldos.append({'energy': energy, 'num_moments': num_moments, 'position': np.asmatrix(position),
                            'sublattice': sublattice, 'num_disorder': num_disorder})
 
     def arpes(self, k_vector, num_moments, num_disorder=1):
@@ -995,7 +1003,7 @@ def make_pybinding_model(lattice, disorder=None, disorder_structural=None, **kwa
         return modify_energy
 
     if not shape:
-        referent_size = 100
+        referent_size = 50
         a1, a2 = lattice.vectors
         norm_a1 = np.linalg.norm(a1)
         norm_a2 = np.linalg.norm(a2)
@@ -1368,6 +1376,7 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
     grp_dis_vac = grp.create_group('Vacancy')
     idx_vacancy = 0
     grp_dis = grp.create_group('StructuralDisorder')
+
     if disorder_structural:
 
         if isinstance(disorder_structural, list):
@@ -1380,39 +1389,92 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
 
             disorder_struct = disorder_structural[idx]
 
+            fixed_positions = disorder_struct._position
+
+            system_l = config._length
+            Lx = system_l[0]
+            Ly = 1
+            Lz = 1
+
+            # fixed_positions_index = [i, j, k] x [1, Lx, Lx*Ly]
+            fixed_positions_index = np.asarray(np.dot(fixed_positions, np.array([1, Lx, Lx * Ly], dtype=np.int32)[0:space_size]), dtype=np.int32).reshape(-1)
+
+            if len(system_l) == 2:
+                Ly = system_l[1]
+            elif len(system_l) == 3:
+                Lz = system_l[2]
+
+            # Check if pos cell is valid
+            if space_size == 1:
+                if not all(0 <= np.squeeze(np.asarray(item))[0] < Lx for item in fixed_positions):
+                    raise SystemExit(
+                        'The unit cell should be selected within the range of [0, {}]'.format(Lx - 1))
+            if space_size == 2:
+                if not all(0 <= np.squeeze(np.asarray(item))[0] < Lx and 0 <= np.squeeze(np.asarray(item))[1] < Ly for item in fixed_positions):
+                    raise SystemExit(
+                        'The unit cell should be selected within the range of [0, {}]'.format(Lx - 1))
+
+            if space_size == 3:
+                if not all(0 <= np.squeeze(np.asarray(item))[0] < Lx and 0 <= np.squeeze(np.asarray(item))[1] < Ly and 0 <= np.squeeze(np.asarray(item))[2] < Lz for item in fixed_positions):
+                    raise SystemExit(
+                        'The unit cell should be selected within the range of [0, {}]'.format(Lx - 1))
+
             num_orb_vac = len(disorder_struct._orbital_vacancy)
+            num_positions = len(fixed_positions_index)
             if num_orb_vac > 0:
+                print('vacancies ', disorder_struct._orbital_vacancy)
                 grp_dis_type = grp_dis_vac.create_group('Type{val}'.format(val=idx_vacancy))
-                grp_dis_type.create_dataset('Orbitals', data=np.asarray(disorder_struct._orbital_vacancy),
-                                            dtype=np.int32)
-                grp_dis_type.create_dataset('Concentration', data=disorder_struct._concentration,
-                                            dtype=np.float64)
-                grp_dis_type.create_dataset('NumOrbitals', data=num_orb_vac, dtype=np.int32)
+
+                grp_dis_type.create_dataset('Orbitals', data=np.tile(np.asarray(disorder_struct._orbital_vacancy,
+                                                                                dtype=np.int32), num_positions).reshape(-1))
+
+                if disorder_struct._exact_position:
+                    grp_dis_type.create_dataset('FixPosition',
+                                                data=np.repeat(np.asarray(fixed_positions_index,
+                                                dtype=np.int32), num_orb_vac))
+                else:
+                    grp_dis_type.create_dataset('Concentration', data=disorder_struct._concentration,
+                                                dtype=np.float64)
+                grp_dis_type.create_dataset('NumOrbitals', data=num_orb_vac * num_positions, dtype=np.int32)
                 idx_vacancy += 1
 
-            if disorder_struct._num_bond_disorder_per_type or disorder_struct._num_onsite_disorder_per_type:
+            num_bond_disorder = 2 * disorder_struct._num_bond_disorder_per_type
+            num_onsite_disorder = disorder_struct._num_onsite_disorder_per_type
+            if num_bond_disorder or num_onsite_disorder:
                 # Type idx
                 grp_dis_type = grp_dis.create_group('Type{val}'.format(val=idx))
-                # Concentration of this type
-                grp_dis_type.create_dataset('Concentration', data=np.asarray(disorder_struct._concentration),
-                                            dtype=np.float64)
+
+                if disorder_struct._exact_position:
+                    if num_bond_disorder:
+
+                        grp_dis_type.create_dataset('FixPositionBond',
+                                                    data=np.repeat(np.asarray(fixed_positions_index,
+                                                    dtype=np.int32), num_bond_disorder))
+                    if num_onsite_disorder:
+                        grp_dis_type.create_dataset('FixPositionOnsite',
+                                                    data=np.repeat(np.asarray(fixed_positions_index,
+                                                    dtype=np.int32), num_onsite_disorder))
+                else:
+                    # Concentration of this type
+                    grp_dis_type.create_dataset('Concentration', data=np.asarray(disorder_struct._concentration),
+                                                dtype=np.float64)
                 # Number of bond disorder
                 grp_dis_type.create_dataset('NumBondDisorder',
-                                            data=2 * np.asarray(disorder_struct._num_bond_disorder_per_type),
+                                            data=np.asarray(num_bond_disorder*num_positions),
                                             dtype=np.int32)
                 # Number of onsite disorder
                 grp_dis_type.create_dataset('NumOnsiteDisorder',
-                                            data=np.asarray(disorder_struct._num_onsite_disorder_per_type),
+                                            data=np.asarray(num_onsite_disorder*num_positions),
                                             dtype=np.int32)
 
                 # Node of the bond disorder from
-                grp_dis_type.create_dataset('NodeFrom', data=np.asarray(disorder_struct._nodes_from).flatten(),
+                grp_dis_type.create_dataset('NodeFrom', data=np.tile(np.asarray(disorder_struct._nodes_from).flatten(), num_positions).reshape(-1),
                                             dtype=np.int32)
                 # Node of the bond disorder to
-                grp_dis_type.create_dataset('NodeTo', data=np.asarray(disorder_struct._nodes_to).flatten(),
+                grp_dis_type.create_dataset('NodeTo', data=np.tile(np.asarray(disorder_struct._nodes_to).flatten(), num_positions).reshape(-1),
                                             dtype=np.int32)
                 # Node of the onsite disorder
-                grp_dis_type.create_dataset('NodeOnsite', data=np.asarray(disorder_struct._nodes_onsite),
+                grp_dis_type.create_dataset('NodeOnsite', data=np.tile(np.asarray(disorder_struct._nodes_onsite), num_positions).reshape(-1),
                                             dtype=np.int32)
 
                 # Num nodes
@@ -1423,20 +1485,20 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
 
                 # Onsite disorder energy
                 grp_dis_type.create_dataset('U0',
-                                            data=(np.asarray(disorder_struct._disorder_onsite).real.astype(
-                                                config.type)) / config.energy_scale)
+                                            data=np.tile(np.asarray(disorder_struct._disorder_onsite).real.astype(
+                                                config.type) / config.energy_scale, num_positions).reshape(-1))
                 # Bond disorder hopping
                 disorder_hopping = disorder_struct._disorder_hopping
                 if complx:
                     # hoppings
                     grp_dis_type.create_dataset('Hopping',
-                                                data=(np.asarray(disorder_hopping).astype(
-                                                    config.type).flatten()) / config.energy_scale)
+                                                data=np.tile(np.asarray(disorder_hopping).astype(
+                                                    config.type).flatten() / config.energy_scale, num_positions).reshape(-1))
                 else:
                     # hoppings
                     grp_dis_type.create_dataset('Hopping',
-                                                data=(np.asarray(disorder_hopping).real.astype(
-                                                    config.type).flatten()) / config.energy_scale)
+                                                data=np.tile(np.asarray(disorder_hopping).real.astype(
+                                                    config.type).flatten() / config.energy_scale, num_positions).reshape(-1))
 
     # Calculation function defined with num_moments, num_random vectors, and num_disorder etc. realisations
     grpc = f.create_group('Calculation')
