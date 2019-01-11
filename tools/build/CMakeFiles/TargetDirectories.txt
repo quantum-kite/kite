@@ -1,3 +1,0 @@
-/mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/tools/build/CMakeFiles/rebuild_cache.dir
-/mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/tools/build/CMakeFiles/KITE-tools.dir
-/mnt/data/projectos/kpm/kpm_transport/kpm_transport_repository/kpm_transport/tools/build/CMakeFiles/edit_cache.dir

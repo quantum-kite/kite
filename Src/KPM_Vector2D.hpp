@@ -43,6 +43,7 @@ public:
   void initiate_vector();
   T get_point();
   void build_wave_packet(Eigen::Matrix<double,-1,-1> & k, Eigen::Matrix<T,-1,-1> & psi0, double & sigma);
+  void KPM_Vector <T, 2>::build_planewave(Eigen::Matrix<double,-1,1> & k, Eigen::Matrix<T,-1,1> & weight);
   template < unsigned MULT,bool VELOCITY> 
   void build_regular_phases(int i1, unsigned axis);
   template < unsigned MULT> 

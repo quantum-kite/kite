@@ -184,6 +184,8 @@ GlobalSimulation<T,D>::GlobalSimulation( char *name ) : rglobal(name)
         simul.LMU(ldos_NumDisorder, ldos_NumMoments, ldos_Orbitals);
       }
 
+    simul.calc_ARPES(); // fetches paramterers from .h5 file and calculates ARPES
+
   }
   debug_message("Left global_simulation\n");
 };
