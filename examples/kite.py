@@ -1461,25 +1461,29 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
     if calculation.get_ldos:
         grpc_p = grpc.create_group('ldos')
 
-        moments, energy, orbitals, dis, position, sublattice = [], [], [], [], [], []
-        for single_ldos in calculation.get_ldos:
-            moments.append(single_ldos['num_moments'])
-            energy.append(single_ldos['energy'])
-            position.append(single_ldos['position'])
-            sublattice.append(single_ldos['sublattice'])
-            dis.append(single_ldos['num_disorder'])
+        single_ldos = calculation.get_ldos[0]
+        moments = single_ldos['num_moments']
+        energy = single_ldos['energy']
+        position = single_ldos['position']
+        sublattice = single_ldos['sublattice']
+        dis = single_ldos['num_disorder']
 
+        if len(calculation.get_ldos) > 1:
+            raise SystemExit('Only a single function request of each type is currently allowed. Please use another '
+                             'configuration file for the same functionality.')
+
+        position = np.squeeze(position)
         len_pos = np.array(position).shape[0]
-        len_sub = len(sublattice)
 
-        if len_pos != len_sub and (len_pos != 1 or len_sub != 1):
+        if isinstance(sublattice, list):
+            len_sub = len(sublattice)
+        else:
+            len_sub = 1
+            sublattice = [sublattice]
+
+        if len_pos != len_sub and (len_pos != 1 and len_sub != 1):
             raise SystemExit('Number of sublattices and number of positions should either have the same '
                              'length or should be specified as a single value! Choose them accordingly.')
-
-        if len_sub == 1 and len_pos > 1:
-            sublattice = [sublattice] * len_pos
-        if len_pos == 1 and len_sub > 1:
-            position = [position] * len_sub
 
         # get the names and sublattices from the lattice
         names, sublattices_all = zip(*lattice.sublattices.items())
@@ -1496,7 +1500,29 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
         elif len(system_l) == 3:
             Lz = system_l[2]
 
-        for sub, pos in zip(sublattice, position):
+        # Check if pos cell is valid
+        if space_size == 1:
+            if not all(0 <= np.squeeze(np.asarray(item))[0] < Lx for item in position):
+                raise SystemExit(
+                    'The unit cell should be selected within the range of [0, {}]'.format(Lx - 1))
+        if space_size == 2:
+            if not all(
+                    0 <= np.squeeze(np.asarray(item))[0] < Lx and 0 <= np.squeeze(np.asarray(item))[1] < Ly for item in
+                    position):
+                raise SystemExit(
+                    'The unit cell should be selected within the range of [0, {}]'.format(Lx - 1))
+
+        if space_size == 3:
+            if not all(0 <= np.squeeze(np.asarray(item))[0] < Lx and 0 <= np.squeeze(np.asarray(item))[1] < Ly and 0 <=
+                       np.squeeze(np.asarray(item))[2] < Lz for item in position):
+                raise SystemExit(
+                    'The unit cell should be selected within the range of [0, {}]'.format(Lx - 1))
+
+        # fixed_positions_index = [i, j, k] x [1, Lx, Lx*Ly]
+        fixed_positions = np.asarray(np.dot(position, np.array([1, Lx, Lx * Ly], dtype=np.int32)[0:space_size]),
+            dtype=np.int32).reshape(-1)
+        num_positions_ldos = fixed_positions.shape[0]
+        for sub in sublattice:
 
             if sub not in names:
                 raise SystemExit('Desired sublattice for LDOS calculation doesn\'t exist in the chosen lattice! ')
@@ -1505,21 +1531,24 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
             lattice_sub = sublattices_all[indx]
             sub_id = lattice_sub.alias_id
             it = np.nditer(lattice_sub.energy, flags=['multi_index'])
+
             # orbit_idx = [i, j, k] x [1, Lx, Lx*Ly] + orbital * Lx*Ly*Lz
             while not it.finished:
                 orbit = int(orbitals_before[sub_id] + it.multi_index[0])
-                orbit_idx = np.dot(np.array(pos), np.array([1, Lx, Lx*Ly], dtype=np.int32)[0:space_size]) \
-                            + Lx * Ly * Lz * orbit
-                if orbit_idx not in orbitals:
-                    orbitals.append(orbit_idx)
+                orbitals.append(orbit)
                 it.iternext()
-
+        num_orbitals = np.asarray(orbitals).shape[0]
         if len(calculation.get_ldos) > 1:
             raise SystemExit('Only a single function request of each type is currently allowed. Please use another '
                              'configuration file for the same functionality.')
         grpc_p.create_dataset('NumMoments', data=moments, dtype=np.int32)
         grpc_p.create_dataset('Energy', data=np.asarray(energy), dtype=np.float32)
-        grpc_p.create_dataset('Orbitals', data=np.asarray(orbitals), dtype=np.int32)
+        if len_sub != len_pos:
+            grpc_p.create_dataset('Orbitals', data=np.tile(np.asarray(orbitals),len_pos).reshape(-1), dtype=np.int32)
+            grpc_p.create_dataset('FixPosition', data=np.repeat(np.asarray(fixed_positions),len_sub), dtype=np.int32)
+        else:
+            grpc_p.create_dataset('Orbitals', data=np.asarray(orbitals), dtype=np.int32)
+            grpc_p.create_dataset('FixPosition', data=np.asarray(fixed_positions), dtype=np.int32)
         grpc_p.create_dataset('NumDisorder', data=dis, dtype=np.int32)
 
     if calculation.get_arpes:
