@@ -196,9 +196,13 @@ class StructuralDisorder:
 
         distance_relative = np.asarray(relative_index_from) - np.asarray(relative_index_to)
 
-        if np.linalg.norm(distance_relative) > self._space_size:
-            raise SystemExit('Currently only the next nearest distances are supported, make the bond of the bond '
-                             'disorder shorter! ')
+        if np.linalg.norm(distance_relative) > 1:
+            print('WARNING: hopping distance inside structural disorder exceed the nearest neighbour! '
+                  'The NGHOST flag inside the C++ code has at least to be equal to the norm of the relative distance ')
+
+        if np.linalg.norm(np.asarray(relative_index_from)) > 1 or np.linalg.norm(np.asarray(relative_index_to)) > 1:
+            raise SystemExit('When using structural disorder, only the distance within nearest unit cells are '
+                             'supported, make the bond in the bond disorder shorter! ')
 
         names, sublattices = zip(*self._lattice.sublattices.items())
 
