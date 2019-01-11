@@ -35,8 +35,15 @@ public:
   double time_kpm(int);
   void Single_Shot(double, singleshot_measurement_queue);
   void Gaussian_Wave_Packet();
+
   void LMU(int, int, Eigen::Array<unsigned long, -1, 1>);
   void store_LMU(Eigen::Array<T, -1, -1> *);
 	
+  void calc_ARPES();
+  void ARPES(int NDisorder, int NMoments, Eigen::Array<T, -1, -1> k_vectors);
+  void store_ARPES(Eigen::Array<T, -1, -1> *);
+
+  void LMU(int, int, Eigen::Array<unsigned long, -1, 1>);
+  void store_LMU(Eigen::Array<T, -1, -1> *);
   
 };
