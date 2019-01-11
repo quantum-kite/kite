@@ -599,11 +599,52 @@ void KPM_Vector <T, 2>::empty_ghosts(int mem_index) {
 };
 
 
+// Structural disorder contribution - iterate over the disorder models
+template <typename T>
+template <unsigned MULT> 
+void KPM_Vector<T,2>::Multiply() {
+  vverbose_message("Entered Multiply");
+  
+  unsigned i = 0;
+  /*
+    Mosaic Multiplication using a TILE of STRIDE x STRIDE 
+    Right Now We expect that both ld[0] and ld[1]  are multiple of STRIDE
+    MULT = 0 : For the case of the Velocity/Hamiltonian
+    MULT = 1 : For the case of the KPM_iteration
+  */
+  inc_index();
+  phi0 = v.col(index).data();
+  phiM1 = v.col((memory + index - 1) % memory ).data();
+  phiM2 = v.col((memory + index - 2) % memory ).data();
+  KPM_MOTOR<MULT, false>(phi0, phiM1, phiM2, i);
+};
+
+
+
+
 template class KPM_Vector<float ,2u>;
 template class KPM_Vector<double ,2u>;
 template class KPM_Vector<long double ,2u>;
 template class KPM_Vector<std::complex<float> ,2u>;
 template class KPM_Vector<std::complex<double> ,2u>;
 template class KPM_Vector<std::complex<long double> ,2u>;
+
+
+template void KPM_Vector<float ,2u>::Multiply<0u>();
+template void KPM_Vector<double ,2u>::Multiply<0u>();
+template void KPM_Vector<long double ,2u>::Multiply<0u>();
+template void KPM_Vector<std::complex<float> ,2u>::Multiply<0u>();
+template void KPM_Vector<std::complex<double> ,2u>::Multiply<0u>();
+template void KPM_Vector<std::complex<long double> ,2u>::Multiply<0u>();
+
+
+template void KPM_Vector<float ,2u>::Multiply<1u>();
+template void KPM_Vector<double ,2u>::Multiply<1u>();
+template void KPM_Vector<long double ,2u>::Multiply<1u>();
+template void KPM_Vector<std::complex<float> ,2u>::Multiply<1u>();
+template void KPM_Vector<std::complex<double> ,2u>::Multiply<1u>();
+template void KPM_Vector<std::complex<long double> ,2u>::Multiply<1u>();
+
+
 
 
