@@ -1307,17 +1307,19 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
     f.create_dataset('Boundaries', data=bound, dtype='u4')
     print('\n##############################################################################\n')
     print('DECOMPOSITION:\n')
-
+    domain_dec = config.div
+    if len(domain_dec) != space_size:
+        raise SystemExit('Select number of decomposition parts accordingly with the number of dimensions '
+                         'of your system!')
     # number of divisions of the in each direction of hamiltonian. nx x ny = num_threads
-    print('\nChosen number of decomposition parts is:', config.div[0], 'x', config.div[1], '.'
-                                                                                           '\nINFO: this product will correspond to the total number of threads. '
-                                                                                           '\nYou should choose at most the number of processor cores you have.'
-                                                                                           '\nWARNING: System size need\'s to be an integer multiple of \n'
-                                                                                           '[STRIDE * ', config.div[0],
-          ' and STRIDE * ', config.div[1], '] '
-                                           '\nwhere STRIDE is selected when compiling the C++ code. \n')
+    print('\nChosen number of decomposition parts is:', config, '.'
+          '\nINFO: this product will correspond to the total number of threads. '
+          '\nYou should choose at most the number of processor cores you have.'
+          '\nWARNING: System size need\'s to be an integer multiple of \n'
+          '[STRIDE * ', domain_dec, '] '
+          '\nwhere STRIDE is selected when compiling the C++ code. \n')
 
-    f.create_dataset('Divisions', data=config.div, dtype='u4')
+    f.create_dataset('Divisions', data=domain_dec, dtype='u4')
     # space dimension of the lattice 1D, 2D, 3D
     f.create_dataset('DIM', data=space_size, dtype='u4')
     # lattice vectors. Size is same as DIM
