@@ -24,6 +24,7 @@ class ldos{
     int NumEnergies;                                   // Number of energies
     std::string filename;                          // Saving results to file with this name
     Eigen::Matrix<unsigned long, -1, -1> ldos_Orbitals;     // Position of the lattice sites
+    Eigen::Matrix<unsigned long, -1, -1> ldos_Positions;     // Position of the lattice sites
     Eigen::Matrix<float, -1, -1> energies;                  // Energies specified to be calculated
     std::string dirName;                                    // Name of the hdf5 dataset where the ldos moments are saved
 

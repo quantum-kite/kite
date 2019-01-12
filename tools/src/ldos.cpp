@@ -122,16 +122,21 @@ bool ldos<T, DIM>::fetch_parameters(){
     dataspace -> getSimpleExtentDims(dim, NULL);
     dataspace->close(); delete dataspace;
     dataset->close();   delete dataset;
-    NumEnergies = dim[1];
+    NumEnergies = dim[0];
+    std::cout << "NumEnergies: " << NumEnergies << "\n";
 
     ldos_Orbitals = Eigen::Matrix<unsigned long, -1, -1>::Zero(NumPositions,1);
+    ldos_Positions = Eigen::Matrix<unsigned long, -1, -1>::Zero(NumPositions,1);
     energies = Eigen::Matrix<float, -1, -1>::Zero(NumEnergies,1);
 
      //Fetch the relevant parameters from the hdf file
     get_hdf5(&NumMoments, &file, (char*)(dirName+"NumMoments").c_str());	
     get_hdf5(ldos_Orbitals.data(), &file, (char*)"/Calculation/ldos/Orbitals");
+    get_hdf5(ldos_Positions.data(), &file, (char*)"/Calculation/ldos/FixPosition");
     get_hdf5(energies.data(), &file, (char*)"/Calculation/ldos/Energy");
 
+    std::cout << "NumPositions" << NumPositions << "\n" << std::flush;
+    std::cout << "NumPositions" << NumPositions << "\n" << std::flush;
 
   // Check whether the matrices we're going to retrieve are complex or not
   int complex = systemInfo->isComplex;

@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.11.4)
+cmake_minimum_required (VERSION 3.9)
 project (Post-processing)
 
 set(CMAKE_C_COMPILER "gcc")
@@ -8,9 +8,15 @@ set(CMAKE_CXX_STANDARD 17)
 
 find_package(HDF5 COMPONENTS CXX C HL)
 set(HDF5_USE_STATIC_LIBRARIES ON)
+include_directories(~/include/)
 
-find_package(Eigen3 REQUIRED)
-include_directories(${EIGEN3_INCLUDE_DIR})
+find_package(Eigen3)
+if(${EIGEN3_FOUND})
+  include_directories(${EIGEN3_INCLUDE_DIR})
+else()
+  include_directories(~/include/eigen3)
+  MESSAGE(STATUS "Couldn't find Eigen3. Looking in ~/include")
+endif()
 
 find_package(OpenMP)
     MESSAGE(STATUS "OPENMP:  ${OPENMP_FOUND}")      

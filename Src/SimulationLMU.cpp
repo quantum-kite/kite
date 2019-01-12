@@ -127,6 +127,7 @@ void Simulation<T,D>::calc_LDOS(){
           unsigned ldos_NumMoments;
           unsigned ldos_NumDisorder;
           Eigen::Array<unsigned long, -1, 1> ldos_Orbitals;
+          Eigen::Array<unsigned long, -1, 1> ldos_Positions;
 
         local_calculate_ldos = Global.calculate_ldos;
         if(local_calculate_ldos){
@@ -144,16 +145,23 @@ void Simulation<T,D>::calc_LDOS(){
           dataset->close();   delete dataset;
 
           ldos_Orbitals = Eigen::Array<unsigned long, -1, 1>::Zero(dim[0],1);
+          ldos_Positions = Eigen::Array<unsigned long, -1, 1>::Zero(dim[0],1);
 
           get_hdf5<unsigned>(&ldos_NumMoments, file, (char *) "/Calculation/ldos/NumMoments");
           get_hdf5<unsigned>(&ldos_NumDisorder, file, (char *) "/Calculation/ldos/NumDisorder");
           get_hdf5<unsigned long>(ldos_Orbitals.data(), file, (char *) "/Calculation/ldos/Orbitals");
+          get_hdf5<unsigned long>(ldos_Positions.data(), file, (char *) "/Calculation/ldos/FixPosition");
           file->close();  
           delete file;
   }
 #pragma omp barrier
 
-          LMU(ldos_NumDisorder, ldos_NumMoments, ldos_Orbitals);
+
+
+          
+          Eigen::Array<unsigned long, -1, 1> total_positions;
+          total_positions = ldos_Positions + ldos_Orbitals*r.Lt[0]*r.Lt[1];
+          LMU(ldos_NumDisorder, ldos_NumMoments, total_positions);
         }
     
 
