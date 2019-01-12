@@ -783,6 +783,14 @@ class Configuration:
             self._energy_scale = None
             self._energy_shift = None
 
+        # promote to lists
+        if not (isinstance(length, list)):
+            length = [length]
+        if not (isinstance(divisions, list)):
+            divisions = [divisions]
+        if not (isinstance(boundaries, list)):
+            boundaries = [boundaries]
+
         self._is_complex = int(is_complex)
         self._precision = precision
         self._divisions = divisions
