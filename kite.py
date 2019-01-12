@@ -1294,11 +1294,16 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
     # precision of hamiltonian float, double, long double
     f.create_dataset('PRECISION', data=config.prec, dtype='u4')
     # number of repetitions in each of the directions
-    f.create_dataset('L', data=config.leng, dtype='u4')
+    leng = config.leng
+    if len(leng) != space_size:
+        raise SystemExit('Select number of unit cells accordingly with the number of dimensions of your system!')
+    f.create_dataset('L', data=leng, dtype='u4')
     # periodic boundary conditions, 0 - no, 1 - yes.
     bound = config.bound
+    if len(bound) != space_size:
+        raise SystemExit('Select boundary condition accordingly with the number of dimensions of your system!')
     print('\nPeriodic boundary conditions along the direction of lattice vectors \n'
-          'respectively are set to: ', bool(bound[0]), 'and ', bool(bound[1]), '\n')
+          'respectively are set to: ', bound, '\n')
     f.create_dataset('Boundaries', data=bound, dtype='u4')
     print('\n##############################################################################\n')
     print('DECOMPOSITION:\n')
@@ -1349,7 +1354,7 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
         hbar = 6.58211899 * 10 ** -16  #: [eV*s]
         phi0 = 2 * np.pi * hbar  #: [V*s] flux quantum
         unit_cell_area = np.linalg.norm(np.cross(vectors[0, :], vectors[1, :])) * 1e-18
-        magnetic_field_min = phi0 / (config.leng[1] * unit_cell_area)
+        magnetic_field_min = phi0 / (leng[1] * unit_cell_area)
         print('For a selected system size, minimum field is: ', magnetic_field_min)
 
         multiply_bmin = 0
@@ -1362,11 +1367,11 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
                 multiply_bmin * magnetic_field_min))
 
         if modification.flux:
-            multiply_bmin = int(round(modification.flux * config.leng[1]))
+            multiply_bmin = int(round(modification.flux * leng[1]))
             if multiply_bmin == 0:
                 raise SystemExit('The system is to small for a desired field.')
             print('Closest_field to the one you selected is {:.2f} T which in the terms of flux quantum is {:.2f}'.
-                  format(multiply_bmin * magnetic_field_min, multiply_bmin / config.leng[1]))
+                  format(multiply_bmin * magnetic_field_min, multiply_bmin / leng[1]))
             print('Selected field is {:.2f} T'.format(multiply_bmin * magnetic_field_min))
         grp.create_dataset('MagneticFieldMul', data=int(multiply_bmin), dtype='u4')
         print('\n##############################################################################\n')
@@ -1415,33 +1420,44 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
             Ly = 1
             Lz = 1
 
-            # fixed_positions_index = [i, j, k] x [1, Lx, Lx*Ly]
-            fixed_positions_index = np.asarray(np.dot(fixed_positions, np.array([1, Lx, Lx * Ly], dtype=np.int32)[0:space_size]), dtype=np.int32).reshape(-1)
-
             if len(system_l) == 2:
                 Ly = system_l[1]
             elif len(system_l) == 3:
+                Ly = system_l[1]
                 Lz = system_l[2]
+
+            for item in fixed_positions:
+                if item.shape[1] != space_size:
+                    raise SystemExit('The position of the structural disorder should be selected with the '
+                                     'relative index of length {}'.format(space_size))
 
             # Check if pos cell is valid
             if space_size == 1:
                 if not all(0 <= np.squeeze(np.asarray(item))[0] < Lx for item in fixed_positions):
-                    raise SystemExit(
-                        'The unit cell should be selected within the range of [0, {}]'.format(Lx - 1))
+                    raise SystemExit('The position of the structural disorder should be selected within the relative '
+                                     'coordinates [[0, {}],[0, {}],[0, {}]] with the relative index '
+                                     'of length {}'.format(Lx - 1, Ly - 1, Lz - 1, space_size))
             if space_size == 2:
-                if not all(0 <= np.squeeze(np.asarray(item))[0] < Lx and 0 <= np.squeeze(np.asarray(item))[1] < Ly for item in fixed_positions):
-                    raise SystemExit(
-                        'The unit cell should be selected within the range of [0, {}]'.format(Lx - 1))
+                if not all(0 <= np.squeeze(np.asarray(item))[0] < Lx and 0 <= np.squeeze(np.asarray(item))[1] < Ly
+                           for item in fixed_positions):
+                    raise SystemExit('The position of the structural disorder should be selected within the relative '
+                                     'coordinates [[0, {}],[0, {}],[0, {}]] with the relative index '
+                                     'of length {}'.format(Lx - 1, Ly - 1, Lz - 1, space_size))
 
             if space_size == 3:
-                if not all(0 <= np.squeeze(np.asarray(item))[0] < Lx and 0 <= np.squeeze(np.asarray(item))[1] < Ly and 0 <= np.squeeze(np.asarray(item))[2] < Lz for item in fixed_positions):
-                    raise SystemExit(
-                        'The unit cell should be selected within the range of [0, {}]'.format(Lx - 1))
+                if not all(0 <= np.squeeze(np.asarray(item))[0] < Lx and 0 <= np.squeeze(np.asarray(item))[1] < Ly
+                           and 0 <= np.squeeze(np.asarray(item))[2] < Lz for item in fixed_positions):
+                    raise SystemExit('The position of the structural disorder should be selected within the relative '
+                                     'coordinates [[0, {}],[0, {}],[0, {}]] with the relative index '
+                                     'of length {}'.format(Lx - 1, Ly - 1, Lz - 1, space_size))
+
+            # fixed_positions_index = [i, j, k] x [1, Lx, Lx*Ly]
+            fixed_positions_index = np.asarray(np.dot(fixed_positions, np.array([1, Lx, Lx * Ly], dtype=np.int32)[0:space_size]),
+                                    dtype=np.int32).reshape(-1)
 
             num_orb_vac = len(disorder_struct._orbital_vacancy)
             num_positions = len(fixed_positions_index)
             if num_orb_vac > 0:
-                print('vacancies ', disorder_struct._orbital_vacancy)
                 grp_dis_type = grp_dis_vac.create_group('Type{val}'.format(val=idx_vacancy))
 
                 grp_dis_type.create_dataset('Orbitals', data=np.asarray(disorder_struct._orbital_vacancy,
@@ -1575,30 +1591,38 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
         if len(system_l) == 2:
             Ly = system_l[1]
         elif len(system_l) == 3:
+            Ly = system_l[1]
             Lz = system_l[2]
+
+        for item in fixed_positions:
+            if item.shape[1] != space_size:
+                raise SystemExit('The position of the structural disorder should be selected with the '
+                                 'relative index of length {}'.format(space_size))
 
         # Check if pos cell is valid
         if space_size == 1:
-            if not all(0 <= np.squeeze(np.asarray(item))[0] < Lx for item in position):
-                raise SystemExit(
-                    'The unit cell should be selected within the range of [0, {}]'.format(Lx - 1))
+            if not all(0 <= np.squeeze(np.asarray(item))[0] < Lx for item in fixed_positions):
+                raise SystemExit('The position of the structural disorder should be selected within the relative '
+                                 'coordinates [[0, {}],[0, {}],[0, {}]] with the relative index '
+                                 'of length {}'.format(Lx - 1, Ly - 1, Lz - 1, space_size))
         if space_size == 2:
-            if not all(
-                    0 <= np.squeeze(np.asarray(item))[0] < Lx and 0 <= np.squeeze(np.asarray(item))[1] < Ly for item in
-                    position):
-                raise SystemExit(
-                    'The unit cell should be selected within the range of [0, {}]'.format(Lx - 1))
+            if not all(0 <= np.squeeze(np.asarray(item))[0] < Lx and 0 <= np.squeeze(np.asarray(item))[1] < Ly
+                       for item in fixed_positions):
+                raise SystemExit('The position of the structural disorder should be selected within the relative '
+                                 'coordinates [[0, {}],[0, {}],[0, {}]] with the relative index '
+                                 'of length {}'.format(Lx - 1, Ly - 1, Lz - 1, space_size))
 
         if space_size == 3:
-            if not all(0 <= np.squeeze(np.asarray(item))[0] < Lx and 0 <= np.squeeze(np.asarray(item))[1] < Ly and 0 <=
-                       np.squeeze(np.asarray(item))[2] < Lz for item in position):
-                raise SystemExit(
-                    'The unit cell should be selected within the range of [0, {}]'.format(Lx - 1))
+            if not all(0 <= np.squeeze(np.asarray(item))[0] < Lx and 0 <= np.squeeze(np.asarray(item))[1] < Ly
+                       and 0 <= np.squeeze(np.asarray(item))[2] < Lz for item in fixed_positions):
+                raise SystemExit('The position of the structural disorder should be selected within the relative '
+                                 'coordinates [[0, {}],[0, {}],[0, {}]] with the relative index '
+                                 'of length {}'.format(Lx - 1, Ly - 1, Lz - 1, space_size))
 
         # fixed_positions_index = [i, j, k] x [1, Lx, Lx*Ly]
         fixed_positions = np.asarray(np.dot(position, np.array([1, Lx, Lx * Ly], dtype=np.int32)[0:space_size]),
             dtype=np.int32).reshape(-1)
-        num_positions_ldos = fixed_positions.shape[0]
+        # num_positions_ldos = fixed_positions.shape[0]
         for sub in sublattice:
 
             if sub not in names:
@@ -1614,7 +1638,7 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
                 orbit = int(orbitals_before[sub_id] + it.multi_index[0])
                 orbitals.append(orbit)
                 it.iternext()
-        num_orbitals = np.asarray(orbitals).shape[0]
+        # num_orbitals = np.asarray(orbitals).shape[0]
         if len(calculation.get_ldos) > 1:
             raise SystemExit('Only a single function request of each type is currently allowed. Please use another '
                              'configuration file for the same functionality.')
