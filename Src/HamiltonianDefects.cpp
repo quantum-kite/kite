@@ -11,10 +11,47 @@
 template <typename T, unsigned D>
 Defect_Operator<T,D>::Defect_Operator( Hamiltonian<T,D> & h1,  std::string & defect, H5::H5File *file ) : h(h1), r(h1.r), Global(h1.Global), position(h1.r.NStr), rnd(h.rnd)
 {
+  Coordinates<std::size_t,D + 1> latt(r.ld), LATT(r.Lt), Latt(r.Ld), Latt2(r.Ld), latStr(r.lStr), x(r.nd);
+  std::vector<int> tmp;
   debug_message("Entered Defect_Operator\n");
+  std::string field = defect + std::string("/Concentration");  
+
+  try {
+    H5::Exception::dontPrint();
+    get_hdf5<double> ( &p, file, field );    
+  } catch(H5::Exception& e) {
+    // Do nothing
+    p = 0.;
+  }
+
+  field = defect + std::string("/FixPosition");  
+  try {
+    H5::Exception::dontPrint();
+    H5::DataSet dataset = H5::DataSet(file->openDataSet(field));
+    H5::DataSpace dataspace = H5::DataSpace(dataset.getSpace());  
+    std::size_t num = dataspace.getSimpleExtentNpoints ();
+    tmp.resize(num);
+    dataspace.close();
+    dataset.close();
+    get_hdf5<int> ( tmp.data(), file, field );
+  } catch(H5::Exception& e) {
+  }
   
-  std::string field = defect + std::string("/Concentration");
-  get_hdf5<double> ( &p, file, field );
+  for(unsigned i = 0; i < tmp.size(); i++)
+    {
+      std::size_t  posGlobal = tmp.at(i);
+      LATT.set_coord(posGlobal);
+      r.convertCoordinates(x, LATT);
+      if(x.index == r.thread_id)
+        {
+          r.convertCoordinates(latt, LATT);
+          if(!any_of(positions_fixed.begin(), positions_fixed.end(), std::bind2nd(std::equal_to<std::size_t>(), latt.index )))
+            positions_fixed.push_back(latt.index);
+        }
+    }
+  tmp.clear();
+  
+  
   std::vector<unsigned> tmpU;
   std::vector<int> tmpI;
   int n = 0;
@@ -147,26 +184,38 @@ void Defect_Operator<T,D>::generate_disorder()  {
   }
 #pragma omp barrier
 
-  Coordinates<std::size_t,D + 1> latt(r.ld), LATT(r.Lt), Latt(r.Ld), Latt2(r.Ld), latStr(r.lStr);
+  Coordinates<std::size_t,D + 1> latt(r.ld), LATT(r.Lt), Latt(r.Ld), Latt2(r.Ld), latStr(r.lStr), x(r.nd);
   // Distribute the local disorder
 
   std::size_t ndefects= p * r.N , count = 0;
-    
+  if(ndefects < positions_fixed.size())
+    ndefects = positions_fixed.size();
+  
+  
+  
   while(count < ndefects) 
     {
-      std::size_t  pos = r.N * h.rnd.get();
+      std::size_t  pos;
+      if(count < positions_fixed.size() )
+        pos = positions_fixed.at(count);
+      else
+        pos = r.N * h.rnd.get();
+      
       latt.set_coord(pos);
       r.convertCoordinates(Latt,latt);
       r.convertCoordinates(latStr,latt);
       auto & st = position.at(latStr.index);
-
+      
       if( !any_of(st.begin(), st.end(), std::bind2nd(std::equal_to<std::size_t>(), Latt.index)))
         {	    
           st.push_back(Latt.index);
           count++;
         }
     }
-    
+  
+
+  
+  
   // Test if any of the defect cross the borders
   for(std::size_t istr = 0; istr < r.NStr; istr++)
     for(auto it = position.at(istr).begin(); it != position.at(istr).end(); it++)

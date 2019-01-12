@@ -24,7 +24,9 @@ public:
   unsigned Ld[D+1]; // Dimensions of each sub-domain (domain  + ghosts) 
   unsigned ld[D+1]; // Dimensions of each sub-domain (domain) 
   unsigned Bd[D+1]; // Information about periodic or non-periodic boundary conditions
-  unsigned lStr[D + 1];
+  unsigned lStr[D+1];
+  unsigned lB3[D+1];
+  
   std::size_t Nt; // Number of lattice postions of the global sample
   std::size_t Nd; // Number of lattice postions of the sub-domain with ghosts
   std::size_t N; // Number of lattice postions of the sub-domain without ghosts

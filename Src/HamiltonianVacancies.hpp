@@ -15,9 +15,10 @@ struct Vacancy_Operator {
   std::vector <double>                   concentration;
   std::vector <std::vector<int>>         orbitals;
   std::vector <std::size_t>              vacancies_with_defects;
+  std::vector <std::vector<int>>         positions_fixed;
   Vacancy_Operator(char *, LatticeStructure <D> & , KPMRandom <T> &);
   void generate_disorder();
-  void add_model(double p, std::vector <int> & orb);
+  void add_model(double p, std::vector <int> & orb, std::vector<int> & positions);
   void add_conflict_with_defect(std::size_t element, unsigned istride);
   bool test_vacancy(Coordinates<std::size_t,D + 1> & Latt);
   void test_field( T * phi0 );
