@@ -12,9 +12,30 @@ template <typename T, unsigned D>
 Defect_Operator<T,D>::Defect_Operator( Hamiltonian<T,D> & h1,  std::string & defect, H5::H5File *file ) : h(h1), r(h1.r), Global(h1.Global), position(h1.r.NStr), rnd(h.rnd)
 {
   debug_message("Entered Defect_Operator\n");
+  std::string field = defect + std::string("/Concentration");  
+
+  try {
+    //    H5::Exception::dontPrint();
+    get_hdf5<double> ( &p, file, field );    
+  }
+  catch(H5::Exception& e) {
+    // Do nothing
+    p = 0.;
+  }
+
+  field = defect + std::string("/FixPosition");  
+  try {
+    H5::DataSet dataset = H5::DataSet(file->openDataSet(field));
+    H5::DataSpace dataspace = H5::DataSpace(dataset.getSpace());  
+    std::size_t num = dataspace.getSimpleExtentNpoints ();
+    tmp.resize(num);
+    dataspace.close();
+    dataset.close();
+    get_hdf5<int> ( tmp.data(), file, field );
+  }
+  catch(H5::Exception& e) {
+  }
   
-  std::string field = defect + std::string("/Concentration");
-  get_hdf5<double> ( &p, file, field );
   std::vector<unsigned> tmpU;
   std::vector<int> tmpI;
   int n = 0;
@@ -166,7 +187,23 @@ void Defect_Operator<T,D>::generate_disorder()  {
           count++;
         }
     }
-    
+  
+  // Added fixed Disorder positions 
+  
+  for(unsigned i = 0; i < tmp.size(); i++)
+    {
+      std::size_t  pos = tmp.at(i);
+      latt.set_coord(pos);
+      r.convertCoordinates(Latt,latt);
+      r.convertCoordinates(latStr,latt);
+      auto & st = position.at(latStr.index);
+      
+      if( !any_of(st.begin(), st.end(), std::bind2nd(std::equal_to<std::size_t>(), Latt.index)))
+        st.push_back(Latt.index);
+    }
+
+  
+  
   // Test if any of the defect cross the borders
   for(std::size_t istr = 0; istr < r.NStr; istr++)
     for(auto it = position.at(istr).begin(); it != position.at(istr).end(); it++)
