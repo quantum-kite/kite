@@ -753,8 +753,8 @@ class Calculation:
 
 class Configuration:
 
-    def __init__(self, divisions=(1, 1), length=(1, 1), boundaries=(False, False), is_complex=False, precision=1,
-                 spectrum_range=None):
+    def __init__(self, divisions=(1, 1, 1), length=(1, 1, 1), boundaries=(False, False, False),
+                 is_complex=False, precision=1, spectrum_range=None):
         """Define basic parameters used in the calculation
 
        Parameters
@@ -1304,17 +1304,19 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
     print('DECOMPOSITION:\n')
     domain_dec = config.div
     if len(domain_dec) != space_size:
+        # worst case 1 selected 3D case
+        domain_dec.extend([1, 1])
         print('WARNING: Select number of decomposition parts accordingly with the number of dimensions '
-              'of your system!')
+              'of your system! They are chosen automatically to be {}.'.format(domain_dec[0:space_size]))
     # number of divisions of the in each direction of hamiltonian. nx x ny = num_threads
-    print('\nChosen number of decomposition parts is:', domain_dec, '.'
+    print('\nChosen number of decomposition parts is:', domain_dec[0:space_size], '.'
           '\nINFO: this product will correspond to the total number of threads. '
           '\nYou should choose at most the number of processor cores you have.'
           '\nWARNING: System size need\'s to be an integer multiple of \n'
           '[STRIDE * ', domain_dec, '] '
           '\nwhere STRIDE is selected when compiling the C++ code. \n')
 
-    f.create_dataset('Divisions', data=domain_dec, dtype='u4')
+    f.create_dataset('Divisions', data=domain_dec[0:space_size], dtype='u4')
     # space dimension of the lattice 1D, 2D, 3D
     f.create_dataset('DIM', data=space_size, dtype='u4')
     # lattice vectors. Size is same as DIM
