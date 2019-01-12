@@ -1596,34 +1596,34 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
             Ly = system_l[1]
             Lz = system_l[2]
 
-        for item in fixed_positions:
+        for item in position:
             if item.shape[1] != space_size:
-                raise SystemExit('The position of the structural disorder should be selected with the '
+                raise SystemExit('The probing position for the LDOS should be selected with the '
                                  'relative index of length {}'.format(space_size))
 
         # Check if pos cell is valid
         if space_size == 1:
-            if not all(0 <= np.squeeze(np.asarray(item))[0] < Lx for item in fixed_positions):
-                raise SystemExit('The position of the structural disorder should be selected within the relative '
+            if not all(0 <= np.squeeze(np.asarray(item))[0] < Lx for item in position):
+                raise SystemExit('The probing position for the LDOS should be selected within the relative '
                                  'coordinates [[0, {}],[0, {}],[0, {}]] with the relative index '
                                  'of length {}'.format(Lx - 1, Ly - 1, Lz - 1, space_size))
         if space_size == 2:
             if not all(0 <= np.squeeze(np.asarray(item))[0] < Lx and 0 <= np.squeeze(np.asarray(item))[1] < Ly
-                       for item in fixed_positions):
-                raise SystemExit('The position of the structural disorder should be selected within the relative '
+                       for item in position):
+                raise SystemExit('The probing position for the LDOS should be selected within the relative '
                                  'coordinates [[0, {}],[0, {}],[0, {}]] with the relative index '
                                  'of length {}'.format(Lx - 1, Ly - 1, Lz - 1, space_size))
 
         if space_size == 3:
             if not all(0 <= np.squeeze(np.asarray(item))[0] < Lx and 0 <= np.squeeze(np.asarray(item))[1] < Ly
-                       and 0 <= np.squeeze(np.asarray(item))[2] < Lz for item in fixed_positions):
-                raise SystemExit('The position of the structural disorder should be selected within the relative '
+                       and 0 <= np.squeeze(np.asarray(item))[2] < Lz for item in position):
+                raise SystemExit('The probing position for the LDOS should be selected within the relative '
                                  'coordinates [[0, {}],[0, {}],[0, {}]] with the relative index '
                                  'of length {}'.format(Lx - 1, Ly - 1, Lz - 1, space_size))
 
         # fixed_positions_index = [i, j, k] x [1, Lx, Lx*Ly]
         fixed_positions = np.asarray(np.dot(position, np.array([1, Lx, Lx * Ly], dtype=np.int32)[0:space_size]),
-            dtype=np.int32).reshape(-1)
+                          dtype=np.int32).reshape(-1)
         # num_positions_ldos = fixed_positions.shape[0]
         for sub in sublattice:
 
