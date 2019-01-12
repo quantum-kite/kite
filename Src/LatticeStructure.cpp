@@ -180,7 +180,17 @@ void  LatticeStructure<D>::convertCoordinates(Coordinates<T1, D + 1> & dest, Coo
       dest.coord[D] = 0;
       dest.set_index(dest.coord);
     }
-    
+
+  // Convert from Ld to nd
+  if( std::equal(std::begin(source.L), std::end(source.L), std::begin(Lt)) && std::equal(std::begin(dest.L), std::end(dest.L), std::begin(nd)))
+    {
+      for(unsigned i = 0; i < D; i++)
+        dest.coord[i] =  source.coord[i]/ld[i]; 
+      dest.coord[D] = 0;
+      dest.set_index(dest.coord);
+    }
+
+  
 };
 
 template <unsigned D>

@@ -55,7 +55,7 @@ void Hamiltonian<T,D>::build_structural_disorder()
     }
     catch(H5::Exception& e) {
       // Do nothing
-    }
+    };
     delete file;
   }
 }
@@ -70,6 +70,7 @@ void Hamiltonian<T,D>::build_vacancies_disorder()
     H5::H5File *file = new H5::H5File(name, H5F_ACC_RDONLY);
     // Test if there is vacancies to build
     H5::Group  grp;
+    std::vector<int> tmp;
     double p;
     std::vector<int> orbit;
     std::vector<std::string> vacancies;
@@ -83,13 +84,35 @@ void Hamiltonian<T,D>::build_vacancies_disorder()
       for(auto id = vacancies.begin(); id != vacancies.end(); id++)
         {
           std::string field = *id + std::string("/Concentration");
-          get_hdf5<double> ( &p, file, field );
+          try {
+            H5::Exception::dontPrint();
+            get_hdf5<double> ( &p, file, field );
+          } catch(H5::Exception& e) {
+            // Do nothing
+            p = 0.;
+          }; 
+          
+
+          field = *id + std::string("/FixPosition");  
+          try {
+            H5::Exception::dontPrint();
+            H5::DataSet dataset = H5::DataSet(file->openDataSet(field));
+            H5::DataSpace dataspace = H5::DataSpace(dataset.getSpace());  
+            std::size_t num = dataspace.getSimpleExtentNpoints ();
+            tmp.resize(num);
+            dataspace.close();
+            dataset.close();
+            get_hdf5<int> ( tmp.data(), file, field );
+          } catch(H5::Exception& e) {
+          };
+          
           field = *id + std::string("/NumOrbitals");
           get_hdf5<int> ( &n, file, field );
           orbit.resize(n);
           field = *id + std::string("/Orbitals");
           get_hdf5<int> ( orbit.data(), file, field );
-          hV.add_model(p, orbit);
+          hV.add_model(p, orbit, tmp);
+          tmp.clear();
         }
     }
     catch(H5::Exception& e) {
@@ -97,7 +120,7 @@ void Hamiltonian<T,D>::build_vacancies_disorder()
     }
     delete file;
   }
-    
+  
 }
 
 template <typename T, unsigned D>

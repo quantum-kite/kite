@@ -32,7 +32,7 @@ struct Defect_Operator: public ComplexTraits<T> {
   std::vector <std::vector<std::size_t>> position;                   // vector of vectors with positions in the lattice of the Orbital 0 of the defects for each stride block
   Eigen::Array<T, -1, -1>        new_hopping;
   KPMRandom <T>                        & rnd;
-  std::vector <int>                      tmp;
+  std::vector <int>          positions_fixed;
   
   Defect_Operator(Hamiltonian<T,D> &,  std::string & defect, H5::H5File *file);
   void generate_disorder();
