@@ -7,7 +7,6 @@
 
 template <typename T, unsigned DIM>
 class conductivity_dc{
-	H5::H5File file;
 	public:
 
 
@@ -43,7 +42,9 @@ class conductivity_dc{
     int NFermiEnergies;
     double minFermiEnergy;
     double maxFermiEnergy;
-    bool default_Fermi;
+    bool default_NFermi;
+    bool default_mFermi;
+    bool default_MFermi;
 
     // information about the Hamiltonian
     system_info<T, DIM> systemInfo;
@@ -55,13 +56,13 @@ class conductivity_dc{
     //Eigen::Array<std::complex<T>, -1, -1, Eigen::RowMajor> Gamma;
     Eigen::Array<std::complex<T>, -1, -1> Gamma;
 
-	  std::string dirName;
 
 
 
     conductivity_dc(system_info<T, DIM>&, shell_input &);
     void printDC();
     void set_energy_limits();
+    bool is_required();
     void set_default_parameters();
 	void fetch_parameters();
 	void override_parameters();

@@ -1,8 +1,17 @@
-cmake_minimum_required(VERSION 2.8)
-project(KITEx)
+cmake_minimum_required(VERSION 3.9)
 set(CMAKE_C_COMPILER "gcc")
 set(CMAKE_CXX_COMPILER "g++") 
 set(CMAKE_CXX_STANDARD 17)
+
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
+project(KITEx)
 
 FILE(GLOB SRCFILES *.cpp)
 add_executable(KITEx ${SRCFILES})
@@ -34,7 +43,6 @@ if (OPENMP_FOUND)
 endif()
 
 
-add_compile_options(-march=native -O2 -DEIGEN_DONT_PARALLELIZE -std=gnu++11 -Wall -ffast-math )
 
 set(compile_wp 1)
 if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.0.0)

@@ -4,7 +4,7 @@
 template <typename T>
 template <typename U>
 typename std::enable_if<!is_tt<std::complex, U>::value, U>::type ComplexTraits <T>::assign_valueB(double x, double y) {
-  return T(x);
+  return T(x +0*y);
 };
 
 template <typename T>
@@ -36,7 +36,7 @@ typename std::enable_if<is_tt<std::complex, U>::value, U>::type ComplexTraits<T>
 template <typename T>
 template <typename U>
 typename std::enable_if<!is_tt<std::complex, U>::value, U>::type ComplexTraits<T>::multEiphaseB(double phase) {
-  return T(1.0);
+  return T(1.0 + 0*phase);
 };
 
 // Define aux_wr for complex T

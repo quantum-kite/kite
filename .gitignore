@@ -87,8 +87,8 @@ fabric.properties
 build/
 
 # except the test folders
-!tests/*/*.h5
-!tools/tests/*/*.h5
+!tests/*/*REF.h5
+!tools/tests/*/*REF.h5
 
 
 # add .pdf files
@@ -100,8 +100,8 @@ build/
 *.fuse*
 # compiled programs
 pp
-KITEx
-KITE-tools
+*KITEx
+*KITE-tools
 
 # Python cache files
 __pycache__

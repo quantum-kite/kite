@@ -43,6 +43,9 @@ public:
   void initiate_vector();
   T get_point();
   void build_wave_packet(Eigen::Matrix<double,-1,-1> & k, Eigen::Matrix<T,-1,-1> & psi0, double & sigma);
+  void build_planewave(Eigen::Matrix<double,-1,1> & k, Eigen::Matrix<T,-1,1> & weight);
+  void build_site(unsigned long R);
+
   template < unsigned MULT,bool VELOCITY> 
   void build_regular_phases(int i1, unsigned axis);
   template < unsigned MULT> 
@@ -50,16 +53,17 @@ public:
   template < unsigned MULT> 
   void inline mult_local_disorder(const  std::size_t & j0, const  std::size_t & io);
   void inline mult_regular_hoppings(const  std::size_t & j0, const  std::size_t & io);
+  template <unsigned MULT, bool VELOCITY>
+  void KPM_MOTOR(T * phi0a, T * phiM1a, T *phiM2a, unsigned axis);
+
   template <unsigned MULT> 
   void Multiply();
   void Velocity(T * phi0,T * phiM1, unsigned axis);
   void Velocity(T * phi0,T * phiM1, int);
-  template <unsigned MULT, bool VELOCITY>
-  void KPM_MOTOR(T * phi0a, T * phiM1a, T *phiM2a, unsigned axis);
+  
   void measure_wave_packet(T * bra, T * ket, T * results);  
   void Exchange_Boundaries();
   void test_boundaries_system();
   void empty_ghosts(int mem_index);
-  void interface();
 };
       

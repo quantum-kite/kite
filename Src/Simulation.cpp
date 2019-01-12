@@ -13,6 +13,7 @@ class KPM_Vector;
 #include "Hamiltonian.hpp"
 #include "KPM_VectorBasis.hpp"
 #include "KPM_Vector.hpp"
+#include "KPM_Vector2D.hpp"
 
 template<typename T,unsigned D>
 Simulation<T,D>::Simulation(char *filename, GLOBAL_VARIABLES <T> & Global1): r(filename),  Global(Global1), name(filename), h(name, r, Global1)  {
