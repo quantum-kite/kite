@@ -33,6 +33,17 @@ void KPM_Vector<T,D>::build_wave_packet(Eigen::Matrix<double,-1,-1> & k, Eigen::
 };
 
 template <typename T, unsigned D>
+void KPM_Vector<T,D>::build_site(unsigned long pos){
+  (void) pos;
+};
+
+template <typename T, unsigned D>
+void KPM_Vector <T, D>::build_planewave(Eigen::Matrix<double,-1,1> & k, Eigen::Matrix<T,-1,1> & weight){
+  (void) k;
+  (void) weight;
+};
+
+template <typename T, unsigned D>
 template < unsigned MULT,bool VELOCITY> 
 void KPM_Vector<T,D>::build_regular_phases(int i1, unsigned axis){
   (void) i1 ;

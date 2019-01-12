@@ -149,6 +149,44 @@ T KPM_Vector <T, 2>::get_point()
 }
 
 template <typename T>
+void KPM_Vector <T, 2>::build_site(unsigned long pos){
+    // Builds an initial vector which is zero everywhere except
+    // for a single site, where it is one
+    Coordinates<unsigned long, 3> thread_coords(r.ld);
+    Coordinates<unsigned long, 3> thread_coords_gh(r.Ld);
+    Coordinates<unsigned long, 3> thread(r.nd);
+    Coordinates<unsigned long, 3> total_coords(r.Lt);
+    bool correct_thread;
+    unsigned long T_thread[3]; // index of the thread
+    unsigned long x_thread[3]; // position within the thread
+
+    index = 0;
+#pragma omp critical
+{
+    total_coords.set_coord(pos);
+    for(unsigned d = 0; d < 2; d++){
+        T_thread[d] = total_coords.coord[d]/r.ld[d];
+        x_thread[d] = total_coords.coord[d]%r.ld[d];
+    }
+
+    T_thread[2] = 0;
+    x_thread[2] = total_coords.coord[2];
+    thread_coords.set_index(x_thread);
+    thread.set_index(T_thread);
+
+    //convert to coordinates with ghosts
+    r.convertCoordinates(thread_coords_gh, thread_coords); 
+ 
+    // check if the site is in the current thread
+    correct_thread = thread.index == r.thread_id;
+}
+
+#pragma omp barrier
+    v.setZero();
+    v(thread_coords_gh.index,0) = T(correct_thread);
+}
+
+template <typename T>
 void KPM_Vector <T, 2>::build_planewave(Eigen::Matrix<double,-1,1> & k, Eigen::Matrix<T,-1,1> & weight){
     // Builds an initial vector which is a plane wave with a specific value of k
     // weight is the weight of each orbital for this plane wave 
@@ -158,7 +196,7 @@ void KPM_Vector <T, 2>::build_planewave(Eigen::Matrix<double,-1,1> & k, Eigen::M
     // w = weight (only depends on orbital)
 
     if(weight.rows() != r.Orb)
-        std::cout << "Warning in build_planewave: the weight matrix must have the same number
+        std::cout << "Warning in build_planewave: the weight matrix must have the same number"
             " of elements as the number of orbitals.";
 
 
@@ -168,13 +206,14 @@ void KPM_Vector <T, 2>::build_planewave(Eigen::Matrix<double,-1,1> & k, Eigen::M
     Eigen::Map<Eigen::Matrix<std::size_t, 2, 1>> position(global_coords.coord); // spacial part of the coord vector in global_coords
     auto orb_a_coords = r.rLat.inverse() * r.rOrb;          // column i is the position of the i-th orbital in basis a
                                                             // r.rLat.inverse() each row is a bi / 2*M_PI 
-    auto exp_R = Eigen::Array<T, -1, -1>::Zero(r.Orb, 1);   // exponential related to the orbital
+    Eigen::Array<T, -1, 1> exp_R;
+    exp_R = Eigen::Array<T, -1, 1>::Zero(r.Orb, 1);   // exponential related to the orbital
     T exp_r;                                                // exponential related to the lattice site
 
     // Calculate the exponential related to the orbital exp(i k R) w(R)
     // It is already divided by the norm, which is the number of total sites r.Nt
     for(std::size_t io = 0; io < r.Orb; io++)
-        exp_R(io) = weight(io)*exp(std::complex<T>(0, 2.0*M_PI*orb_a_coords.col(io).transpose()*k))/r.Nt;
+        exp_R(io) = weight(io)*exp(assign_value(0, 2.0*M_PI*orb_a_coords.col(io).transpose()*k))/T(sqrt(r.Nt));
 
     // Calculate the exponential related to each unit cell
     for(std::size_t i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1++){
