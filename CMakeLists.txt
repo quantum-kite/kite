@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.11)
-set(CMAKE_C_COMPILER "gcc-mp-8")
-set(CMAKE_CXX_COMPILER "g++-mp-8") 
+cmake_minimum_required(VERSION 3.9)
+set(CMAKE_C_COMPILER "gcc")
+set(CMAKE_CXX_COMPILER "g++") 
 set(CMAKE_CXX_STANDARD 17)
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -43,7 +43,7 @@ if (OPENMP_FOUND)
 endif()
 
 
-add_compile_options(-Wall -ffast-math -O2 -fdiagnostics-color=always -DEIGEN_DONT_PARALLELIZE)
+#add_compile_options(-Wall -ffast-math -O2 -fdiagnostics-color=always -DEIGEN_DONT_PARALLELIZE)
 
 set(compile_wp 1)
 if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.0.0)

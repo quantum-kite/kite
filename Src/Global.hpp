@@ -28,6 +28,10 @@ struct GLOBAL_VARIABLES {
   Eigen::Array <T, Eigen::Dynamic, Eigen::Dynamic> avg_ident;
   Eigen::Array <T, Eigen::Dynamic, Eigen::Dynamic> avg_results;
   double kpm_iteration_time;
+  
+  bool calculate_arpes;
+  bool calculate_ldos;
+  bool calculate_wavepacket;
 
   GLOBAL_VARIABLES();
   void addbond ( std::size_t, std::ptrdiff_t, T );

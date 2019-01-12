@@ -28,42 +28,73 @@ template <typename T, unsigned DIM>
 ldos<T, DIM>::ldos(system_info<T, DIM>& sysinfo, shell_input & vari){
     // Class constructor
     
+    systemInfo  = &sysinfo;              // retrieve the information about the Hamiltonian
+    variables   = vari;                   // retrieve the shell input
+    dirName     = "/Calculation/ldos/";     // location of the information about the conductivity
     
-    // Flags that will be accessed from the other classes
-    isRequired = false;                        // was this quantity local density of states asked for?
-    isPossible = false;                        // do we have all we need to calculate the density of states?
+    isRequired = is_required();         // was the local density of states requested?
+    isPossible = false;                 // do we have all we need to calculate the density of states?
+    if(isRequired){
+        set_default_parameters();
+        isPossible = fetch_parameters();
+        override_parameters();
+        printLDOS();
+    }
 
-    // Variables needed to compute the Local density of states
-    NumMoments = -1;                                    // Number of Chebyshev moments
-    NumPositions = -1;                                  // Number of lattice sites in which to compute the LDoS
-    NumEnergies = -1;                                   // Number of energies
-    filename = "ldos";                          // Saving results to file with this name
+    if(isRequired and !isPossible){
+        std::cout << "Local density of states was requested but the necessary data to calculate it was not found in the input file. Make sure the input file has been processed by KITEx first. Exiting.\n";
+        exit(1);
+    }
 
-    systemInfo = &sysinfo;              // retrieve the information about the Hamiltonian
-    variables = vari;                   // retrieve the shell input
-    dirName = "/Calculation/ldos/";     // location of the information about the conductivity
 
+}
+
+template <typename T, unsigned DIM>
+void ldos<T, DIM>::printLDOS(){
+    std::cout << "The local density of states will be calculated with the following parameters:\n"
+        "   Number of energies: " << NumEnergies << "\n"
+        "   Number of positions: " << NumPositions << "\n"
+        "   Filename: " << filename  << "X.dat" << ((default_filename)?" (default)":"") << "\n"
+        "   Using Jackson kernel\n";
+}
+
+template <typename T, unsigned DIM>
+bool ldos<T, DIM>::is_required(){
     // check whether the local density of states was asked for
     // if this quantity exists, so should all the others.
-    name = sysinfo.filename;
-	file = H5::H5File(name.c_str(), H5F_ACC_RDONLY);
+
+    name = systemInfo->filename;
+	H5::H5File file = H5::H5File(name.c_str(), H5F_ACC_RDONLY);
+    bool result = false;
     try{
         H5::Exception::dontPrint();
         get_hdf5(&NumMoments, &file, (char*)(dirName+"NumMoments").c_str());									
-        isRequired = true;
+        result = true;
     } catch(H5::Exception& e){}
   
 
-    //file.close();
+    file.close();
+
+    return result;
 }
 	
 template <typename T, unsigned DIM>
 void ldos<T, DIM>::override_parameters(){
-    if(variables.lDOS_Name != "")        filename    = variables.lDOS_Name;
+    if(variables.lDOS_Name != ""){
+        filename         = variables.lDOS_Name;
+        default_filename = false;
+    }
 };
 
 template <typename T, unsigned DIM>
-void ldos<T, DIM>::fetch_parameters(){
+void ldos<T, DIM>::set_default_parameters(){
+    filename = "ldos";
+    default_filename = true;
+};
+
+
+template <typename T, unsigned DIM>
+bool ldos<T, DIM>::fetch_parameters(){
 	debug_message("Entered ldos::fetch_parameters.\n");
 	//This function reads all the data from the hdf5 file that's needed to 
     //calculate the LDoS
@@ -76,9 +107,9 @@ void ldos<T, DIM>::fetch_parameters(){
   
     H5::DataSet * dataset;
     H5::DataSpace * dataspace;
-    hsize_t dim[1];
+    hsize_t dim[2];
+	H5::H5File file = H5::H5File(name.c_str(), H5F_ACC_RDONLY);
 
-	//file = H5::H5File(name.c_str(), H5F_ACC_RDONLY);
     dataset            = new H5::DataSet(file.openDataSet("/Calculation/ldos/Orbitals")  );
     dataspace          = new H5::DataSpace(dataset->getSpace());
     dataspace -> getSimpleExtentDims(dim, NULL);
@@ -105,6 +136,7 @@ void ldos<T, DIM>::fetch_parameters(){
   // Check whether the matrices we're going to retrieve are complex or not
   int complex = systemInfo->isComplex;
 
+  bool result = false;
   // Retrieve the lmu Matrix
   std::string MatrixName = dirName + "lMU";
   try{
@@ -122,26 +154,16 @@ void ldos<T, DIM>::fetch_parameters(){
             lMU = lMUReal.template cast<std::complex<T>>();
 		}				
 
-    isPossible = true;
+    result = true;
   } catch(H5::Exception& e) {debug_message("DOS: There is no lMU matrix.\n");}
 	
     file.close();
 	debug_message("Left lDOS::fetch_parameters.\n");
+    return result;
 }
 
 template <typename U, unsigned DIM>
 void ldos<U, DIM>::calculate(){
-  if(!isPossible){
-    std::cout << "Cannot retrieve lDOS since there is not enough information. Exiting.\n";
-    exit(0);
-  }
-
-  verbose_message("  Number of energies: "); verbose_message(NumEnergies); verbose_message("\n");
-  verbose_message("  Using kernel: Jackson\n");
-  verbose_message("  File name: dos.dat\n");
-
-
-
 
   Eigen::Matrix<std::complex<U>, -1, -1> LDOS;
   LDOS = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(NumEnergies, NumPositions);
@@ -157,9 +179,8 @@ void ldos<U, DIM>::calculate(){
   int thread_id = omp_get_thread_num();
   long offset = thread_id*localN*NumPositions;
   Eigen::Map<Eigen::Matrix<std::complex<U>, -1, -1, Eigen::RowMajor>> locallMU(OrderedMU.data() + offset, localN, NumPositions);
-  //std::cout << "thread_id: " << thread_id << "\n";
-  //std::cout << "local LMU\n" << locallMU << "\n";
-  // First perform the part of the product that only depends on the
+
+
   // chebyshev polynomial of the first kind
   Eigen::Matrix<std::complex<U>, -1, -1> GammaE;
   GammaE = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(NumEnergies, localN);
