@@ -62,7 +62,9 @@ LatticeStructure<D>::LatticeStructure(char *name )
       NStr *= lStr[i] ;
       n_threads *= nd[i];
     }
-    
+
+  std::fill_n(lB3, D, 3); 
+  lB3[D]  = Orb;  
   Lt[D] = Orb;
   Ld[D] = Orb;
   ld[D] = Orb;
