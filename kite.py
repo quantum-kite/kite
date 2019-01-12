@@ -1007,14 +1007,29 @@ def make_pybinding_model(lattice, disorder=None, disorder_structural=None, **kwa
         return modify_energy
 
     if not shape:
-        referent_size = 50
-        a1, a2 = lattice.vectors
-        norm_a1 = np.linalg.norm(a1)
-        norm_a2 = np.linalg.norm(a2)
-        num_a1 = referent_size / norm_a1
-        num_a2 = referent_size / norm_a2
-        shape = pb.rectangle(4 * num_a1 * norm_a1, 4 * num_a2 * norm_a2)
-        trans_symm = pb.translational_symmetry(a1=num_a1 * norm_a1, a2=num_a2 * norm_a2)
+
+        vectors = np.asarray(lattice.vectors)
+        space_size = vectors.shape[0]
+
+        # fix a size for 1D, 2D, or 3D
+        referent_size = 1
+
+        if space_size == 1:
+            referent_size = 1000
+        elif space_size == 2:
+            referent_size = 200
+        elif space_size == 3:
+            referent_size = 50
+
+        norm = np.sum(np.abs(vectors)**2, axis=-1)**(1./2)
+
+        num_each_dir = (referent_size / norm).astype(int)
+
+        shape_size = 2 * num_each_dir[0:space_size]
+        symmetry = 1 * num_each_dir[0:space_size]
+
+        shape = pb.primitive(*shape_size)
+        trans_symm = pb.translational_symmetry(*symmetry)
         param = [shape, trans_symm]
     else:
         param = [shape]
