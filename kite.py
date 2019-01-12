@@ -194,14 +194,9 @@ class StructuralDisorder:
         orbital_to = []
         orbital_hop = []
 
-        distance_relative = np.asarray(relative_index_from) - np.asarray(relative_index_to)
-
-        if np.linalg.norm(distance_relative) > 1:
-            print('WARNING: hopping distance inside structural disorder exceed the nearest neighbour! '
-                  'The NGHOST flag inside the C++ code has at least to be equal to the norm of the relative distance ')
-
-        if np.linalg.norm(np.asarray(relative_index_from)) > 1 or np.linalg.norm(np.asarray(relative_index_to)) > 1:
-            raise SystemExit('When using structural disorder, only the distance within nearest unit cells are '
+        if not (np.all(np.abs(np.asarray(relative_index_from)) < 2) and
+                np.all(np.abs(np.asarray(relative_index_to)) < 2)):
+            raise SystemExit('When using structural disorder, only the distance between nearest unit cells are '
                              'supported, make the bond in the bond disorder shorter! ')
 
         names, sublattices = zip(*self._lattice.sublattices.items())
@@ -1478,6 +1473,17 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
             num_bond_disorder = 2 * disorder_struct._num_bond_disorder_per_type
             num_onsite_disorder = disorder_struct._num_onsite_disorder_per_type
             if num_bond_disorder or num_onsite_disorder:
+
+                for idx_from, idx_to in zip(disorder_struct._rel_idx_from, disorder_struct._rel_idx_to):
+                    distance_rel = np.asarray(idx_from) - np.asarray(idx_to)
+
+                    rel_norm = np.linalg.norm(distance_rel)
+                    if rel_norm > 1:
+                        print('WARNING: hopping distance inside structural disorder exceed the nearest neighbour! \n'
+                              'The NGHOST flag inside the C++ code has at least to be equal to the norm of '
+                              'the relative distance, \n'
+                              'which in this case is between cells {} and {}'.format(idx_from, idx_to))
+
                 # Type idx
                 grp_dis_type = grp_dis.create_group('Type{val}'.format(val=idx))
 
