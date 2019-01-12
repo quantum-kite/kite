@@ -1309,10 +1309,10 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
     print('DECOMPOSITION:\n')
     domain_dec = config.div
     if len(domain_dec) != space_size:
-        raise SystemExit('Select number of decomposition parts accordingly with the number of dimensions '
-                         'of your system!')
+        print('WARNING: Select number of decomposition parts accordingly with the number of dimensions '
+              'of your system!')
     # number of divisions of the in each direction of hamiltonian. nx x ny = num_threads
-    print('\nChosen number of decomposition parts is:', config, '.'
+    print('\nChosen number of decomposition parts is:', domain_dec, '.'
           '\nINFO: this product will correspond to the total number of threads. '
           '\nYou should choose at most the number of processor cores you have.'
           '\nWARNING: System size need\'s to be an integer multiple of \n'
