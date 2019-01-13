@@ -1,14 +1,29 @@
-cmake_minimum_required (VERSION 3.9)
-project (Post-processing)
-
+cmake_minimum_required(VERSION 3.9)
 set(CMAKE_C_COMPILER "gcc")
-set(CMAKE_CXX_COMPILER "g++")
+set(CMAKE_CXX_COMPILER "g++") 
 set(CMAKE_CXX_STANDARD 17)
 
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
+project(KITE-tools)
+
+FILE(GLOB SRCFILES src/*.cpp)
+FILE(GLOB SRCFILES2 src/cond_2order/*.cpp)
+add_executable(KITE-tools ${SRCFILES} ${SRCFILES2})
 
 find_package(HDF5 COMPONENTS CXX C HL)
 set(HDF5_USE_STATIC_LIBRARIES ON)
+MESSAGE(STATUS "Hdf5 Library:  ${HDF5_CXX_HL_LIBRARIES}")
+MESSAGE(STATUS "Hdf5Hl Library:  ${HDF5_CXX_LIBRARIES}")
+MESSAGE(STATUS "Compiler:  ${CMAKE_CXX_COMPILER}")
 include_directories(~/include/)
+
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
 
 find_package(Eigen3)
 if(${EIGEN3_FOUND})
@@ -18,8 +33,9 @@ else()
   MESSAGE(STATUS "Couldn't find Eigen3. Looking in ~/include")
 endif()
 
+
 find_package(OpenMP)
-    MESSAGE(STATUS "OPENMP:  ${OPENMP_FOUND}")      
+MESSAGE(STATUS "OPENMP:  ${OPENMP_FOUND}")      
 if (OPENMP_FOUND)
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
@@ -27,18 +43,9 @@ if (OPENMP_FOUND)
 endif()
 
 
-add_compile_options(-ffast-math -march=native -O2 -fdiagnostics-color=always -DEIGEN_DONT_PARALLELIZE)
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
+include_directories(${Src})
+target_link_libraries(KITE-tools ${HDF5_CXX_LIBRARIES} )
 
-MESSAGE(STATUS "Hdf5HL Library:  ${HDF5_CXX_HL_LIBRARIES}")
-MESSAGE(STATUS "Hdf5 Library:  ${HDF5_CXX_LIBRARIES}")
-MESSAGE(STATUS "Compiler:  ${CMAKE_CXX_COMPILER}")
 
-FILE(GLOB sources "src/*.cpp")
-FILE(GLOB sources2 "src/cond_2order/*.cpp")
-FILE(GLOB includes "src/")
-FILE(GLOB includes2 "src/cond_2order/")
 
-add_executable(KITE-tools ${sources} ${sources2})
-include_directories(${includes} ${includes2})
-target_link_libraries(KITE-tools ${HDF5_CXX_LIBRARIES})
+
