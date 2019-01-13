@@ -123,7 +123,6 @@ bool ldos<T, DIM>::fetch_parameters(){
     dataspace->close(); delete dataspace;
     dataset->close();   delete dataset;
     NumEnergies = dim[0];
-    std::cout << "NumEnergies: " << NumEnergies << "\n";
 
     ldos_Orbitals = Eigen::Matrix<unsigned long, -1, -1>::Zero(NumPositions,1);
     ldos_Positions = Eigen::Matrix<unsigned long, -1, -1>::Zero(NumPositions,1);
@@ -135,8 +134,16 @@ bool ldos<T, DIM>::fetch_parameters(){
     get_hdf5(ldos_Positions.data(), &file, (char*)"/Calculation/ldos/FixPosition");
     get_hdf5(energies.data(), &file, (char*)"/Calculation/ldos/Energy");
 
-    std::cout << "NumPositions" << NumPositions << "\n" << std::flush;
-    std::cout << "NumPositions" << NumPositions << "\n" << std::flush;
+
+    global_positions = Eigen::Matrix<unsigned long, -1, -1>::Zero(NumPositions,3);
+    for(long i = 0; i < NumPositions; i++){
+      int L = systemInfo->size[0];
+      global_positions(i,0) = ldos_Positions(i)%L;
+      global_positions(i,1) = ldos_Positions(i)/L;
+      global_positions(i,2) = ldos_Orbitals(i);
+    }
+
+
 
   // Check whether the matrices we're going to retrieve are complex or not
   int complex = systemInfo->isComplex;
@@ -209,10 +216,14 @@ void ldos<U, DIM>::calculate(){
   // Save the density of states to a file
   U mult = 1.0/systemInfo->energy_scale;
   std::ofstream myfile;
-  for(unsigned pos = 0; pos < NumPositions; pos++){
-    myfile.open(filename + std::to_string(pos) + ".dat");
-    for(int i=0; i < NumEnergies; i++){
-    myfile  << energies(i)*systemInfo->energy_scale << " " << LDOS(i).real()*mult << "\n";
+  for(int i=0; i < NumEnergies; i++){
+    myfile.open(filename + std::to_string(energies(i)*systemInfo->energy_scale) + ".dat");
+    for(unsigned pos = 0; pos < NumPositions; pos++){
+      int x, y, orb;
+      x = global_positions(pos,0);
+      y = global_positions(pos,1);
+      orb = global_positions(pos,2);
+      myfile  << x << " " << y << " " << orb << " " << LDOS(i,pos).real()*mult << "\n";
     }
   myfile.close();
   }

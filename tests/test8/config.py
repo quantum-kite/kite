@@ -7,10 +7,13 @@ import pybinding as pb
 # define lattice of monolayer graphene with 1[nm] interatomic distance and t=1/3[eV] hopping
 #  INFO: other examples are defined in define_lattice.py script
 
-rho  = 0.0000+0.0000j
-timp = 0.1500+0.0000j
-nu   = 0.0000+0.1000j
-EnergyScale = (3  +  6*np.abs(np.real(timp))) * 1.01
+# rho  = 1.0000+0.0000j
+# timp = 1.0000+0.0000j
+# nu   = 1.0000+0.1000j
+# EnergyScale = (3  +  6*np.abs(np.real(timp))) * 1.01
+timp = -0.0
+limp = -1.0
+EnergyScale = 4.0
 
 def graphene_initial(onsite=(0, 0)):
     """Return the basic lattice specification for monolayer graphene with nearest neighbor"""
@@ -35,7 +38,7 @@ def graphene_initial(onsite=(0, 0)):
     # Add hoppings
     lat.add_hoppings(
         # inside the main cell, between which atoms, and the value
-        ([0, 0], 'A', 'B', - 1/EnergyScale),
+        ([0, 0], 'A', 'B', - 1),
         # between neighboring cells, between which atoms, and the value
         ([-1, 0], 'A', 'B', - 1/EnergyScale),
         ([-1, 1], 'A', 'B', - 1/EnergyScale)
@@ -55,32 +58,40 @@ def graphene_initial(onsite=(0, 0)):
     # Same procedure as adding the hopping + concentration
     node0 = [[+0,+0],'A']
     node1 = [[+0,+0],'B']
-    node2 = [[+1,+0],'A']
-    node3 = [[+0,+1],'B']
-    node4 = [[+0,+1],'A']
-    node5 = [[-1,+1],'B']
+    node2 = [[-1,+0],'B']
+    node3 = [[-1,+1],'B']
+    # node0 = [[+0,+0],'A']
+    # node1 = [[+0,+0],'B']
+    # node2 = [[+1,+0],'A']
+    # node3 = [[+0,+1],'B']
+    # node4 = [[+0,+1],'A']
+    # node5 = [[-1,+1],'B']
     
-    struc_disorder_one = kite.StructuralDisorder(lat, position=[[64,64], [64,32], [32, 32]])
+    # struc_disorder_one = kite.StructuralDisorder(lat, position=[[64,64], [64,32], [32, 32]])
+    struc_disorder_one = kite.StructuralDisorder(lat, position=[[32, 32]])
     struc_disorder_one.add_structural_disorder(
-        (*node0, *node1, timp/EnergyScale),
-        (*node1, *node2, timp/EnergyScale),
-        (*node2, *node3, timp/EnergyScale),
-        (*node3, *node4, timp/EnergyScale),
-        (*node4, *node5, timp/EnergyScale),
-        (*node5, *node0, timp/EnergyScale),
-        #
-        (*node0, *node2, nu/EnergyScale),
-        (*node2, *node4, nu/EnergyScale),
-        (*node4, *node0, nu/EnergyScale),
-        (*node1, *node3, nu/EnergyScale),
-        (*node3, *node5, nu/EnergyScale),
-        (*node5, *node1, nu/EnergyScale),
-        #
-        (*node0, *node3, rho/EnergyScale),
-        (*node1, *node4, rho/EnergyScale),
-        (*node2, *node5, rho/EnergyScale),
+        (*node0, *node1, timp),
+        (*node0, *node2, timp),
+        (*node0, *node3, timp),
+        # (*node0, *node1, timp/EnergyScale),
+        # (*node1, *node2, timp/EnergyScale),
+        # (*node2, *node3, timp/EnergyScale),
+        # (*node3, *node4, timp/EnergyScale),
+        # (*node4, *node5, timp/EnergyScale),
+        # (*node5, *node0, timp/EnergyScale),
+        # #
+        # (*node0, *node2, nu/EnergyScale),
+        # (*node2, *node4, nu/EnergyScale),
+        # (*node4, *node0, nu/EnergyScale),
+        # (*node1, *node3, nu/EnergyScale),
+        # (*node3, *node5, nu/EnergyScale),
+        # (*node5, *node1, nu/EnergyScale),
+        # #
+        # (*node0, *node3, rho/EnergyScale),
+        # (*node1, *node4, rho/EnergyScale),
+        # (*node2, *node5, rho/EnergyScale),
         # in this way we can add onsite disorder again        
-        (*node0, 0.)
+        (*node0, limp)
     )
     
     # if there is disorder it should be returned separately from the lattice
@@ -94,22 +105,26 @@ nx = ny = 4
 lx = 256
 ly = 256
 configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
-                                 is_complex=True, precision=1, spectrum_range=[-10,10])
+                                 is_complex=True, precision=1, spectrum_range=[-EnergyScale, EnergyScale])
 
 
 pos_matrix=[]
 sub_matrix=[]
 d1 = 32
 d2 = 32
-for i in range(-5,5):
-  for j in range(-5,5):
+N = 512
+for i in range(-10,10):
+  for j in range(-10,10):
     pos_matrix.append([d1+i,d2+j])
     pos_matrix.append([d1+i,d2+j])
     sub_matrix.append('A')
     sub_matrix.append('B')
+# for i in range(-3,3):
+    # pos_matrix.append([d1+i,d2])
+    # sub_matrix.append('A')
 
 calculation = kite.Calculation(configuration)
-calculation.ldos(energy=np.linspace(-1, 1, 4), num_moments=256, num_disorder=1,
+calculation.ldos(energy=np.linspace(-1, 1, 100), num_moments=N, num_disorder=1,
                      position=pos_matrix, sublattice=sub_matrix)
 
 kite.config_system(lattice, configuration, calculation, filename='config.h5', disorder_structural=disorded_structural)

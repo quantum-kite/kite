@@ -23,6 +23,7 @@ class ldos{
     unsigned NumPositions;                                  // Number of lattice sites in which to compute the LDoS
     int NumEnergies;                                   // Number of energies
     std::string filename;                          // Saving results to file with this name
+    Eigen::Matrix<unsigned long, -1, -1> global_positions;
     Eigen::Matrix<unsigned long, -1, -1> ldos_Orbitals;     // Position of the lattice sites
     Eigen::Matrix<unsigned long, -1, -1> ldos_Positions;     // Position of the lattice sites
     Eigen::Matrix<float, -1, -1> energies;                  // Energies specified to be calculated

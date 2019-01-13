@@ -110,10 +110,10 @@ void choose_simulation_type(char *name, shell_input & variables){
     
     file.close();
     
-    if(dim < 1 || dim > 2){
-    std::cout << "Invalid value for the dimension of the system. Exiting.\n";
-        exit(0);
-    }
+    //if(dim < 1 || dim > 2){
+    //std::cout << "Invalid value for the dimension of the system. Exiting.\n";
+        //exit(0);
+    //}
   
     if(precision < 0 || precision > 2){
     std::cout << "Invalid value for the precision of the data values. Exiting. \n";
