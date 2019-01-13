@@ -13,7 +13,7 @@ class Simulation;
 #include "Simulation.hpp"
 
 template <typename T, unsigned D>
-KPM_Vector<T,D>::KPM_Vector(int mem, Simulation<T,D> & sim) : KPM_VectorBasis<T,D>(mem, sim), x(sim.r.Ld),std(x.basis[1]), r(sim.r),h(sim.h)  {
+KPM_Vector<T,D>::KPM_Vector(int mem, Simulation<T,D> & sim) : KPM_VectorBasis<T,D>(mem, sim), std(x.basis[1]), r(sim.r),h(sim.h),x(sim.r.Ld)  {
 };
 
 template <typename T, unsigned D>
