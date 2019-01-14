@@ -47,7 +47,7 @@ nx = 1
 ny = 1
 nz = 2
 # number of unit cells in each direction.
-lx = ly = lz = 128
+lx = ly = lz = 256
 # make config object which caries info about
 # - the number of decomposition parts [nx, ny],
 # - lengths of structure [lx, ly]
@@ -59,6 +59,6 @@ configuration = kite.Configuration(divisions=[nx, ny, nz], length=[lx, ly, lz], 
                                    is_complex=False, precision=1)
 # require the calculation of DOS
 calculation = kite.Calculation(configuration)
-calculation.dos(num_points=1000, num_moments=128, num_random=1, num_disorder=1)
+calculation.dos(num_points=1000, num_moments=256, num_random=1, num_disorder=1)
 # configure the *.h5 file
 kite.config_system(lattice, configuration, calculation, filename='cube.h5')
