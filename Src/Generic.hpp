@@ -32,7 +32,7 @@
 // STRIDE is the size of the memory blocks used in the program
 // COMPILE_MAIN is a flag to prevent compilation of unnecessary parts of the code when testing
 #ifndef MEMORY
-#define MEMORY 16
+#define MEMORY 64
 #endif
 
 #ifndef STRIDE

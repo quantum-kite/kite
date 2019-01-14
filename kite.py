@@ -40,11 +40,20 @@ class StructuralDisorder:
             SystemExit('Either select concentration which results in random distribution or '
                        'the exact position of the defect!')
 
+        self._lattice = lattice
+
+        vectors = np.asarray(self._lattice.vectors)
+        self._space_size = vectors.shape[0]
+
         if position is None:
-            position = 0
+            position = np.zeros(self._space_size)
+            self._exact_position = False
+        else:
+            self._exact_position = True
 
         self._concentration = concentration
-        self._position = position
+        self._position = np.asmatrix(position)
+
         self._num_bond_disorder_per_type = 0
         self._num_onsite_disorder_per_type = 0
 
@@ -71,6 +80,7 @@ class StructuralDisorder:
         self._hopping = []
 
         self._orbital_vacancy = []
+        self._orbital_vacancy_cell = []
         self._vacancy_sub = []
 
         self._num_nodes = 0
@@ -149,7 +159,7 @@ class StructuralDisorder:
 
     def add_local_vacancy_disorder(self, relative_index, sub):
         orbital_vacancy = []
-
+        orbital_vacancy_cell = []
         names, sublattices = zip(*self._lattice.sublattices.items())
 
         if sub not in names:
@@ -161,17 +171,15 @@ class StructuralDisorder:
         sub_id = lattice_sub.alias_id
 
         it = np.nditer(lattice_sub.energy, flags=['multi_index'])
-        relative_move = np.dot(np.asarray(relative_index) + np.asarray(self._position) + 1,
-                                    3 ** np.linspace(0, self._space_size - 1, self._space_size, dtype=np.int32))
+
         while not it.finished:
-            orbit = int(relative_move +
-                        self._num_orbitals_before[sub_id] + it.multi_index[0] * 3 ** self._space_size)
+            orbit = int(self._num_orbitals_before[sub_id] + it.multi_index[0])
             if orbit not in orbital_vacancy:
                 orbital_vacancy.append(orbit)
             it.iternext()
 
-        self._orbital_vacancy.append(orbital_vacancy)
-        self._vacancy_sub.append(sub)
+        self._orbital_vacancy.extend(orbital_vacancy)
+        self._vacancy_sub.extend(sub)
 
     def add_local_bond_disorder(self, relative_index_from, from_sub, relative_index_to, to_sub, hoppings):
 
@@ -186,11 +194,10 @@ class StructuralDisorder:
         orbital_to = []
         orbital_hop = []
 
-        distance_relative = np.asarray(relative_index_from) - np.asarray(relative_index_to)
-
-        if np.linalg.norm(distance_relative) > self._space_size:
-            raise SystemExit('Currently only the next nearest distances are supported, make the bond of the bond '
-                             'disorder shorter! ')
+        if not (np.all(np.abs(np.asarray(relative_index_from)) < 2) and
+                np.all(np.abs(np.asarray(relative_index_to)) < 2)):
+            raise SystemExit('When using structural disorder, only the distance between nearest unit cells are '
+                             'supported, make the bond in the bond disorder shorter! ')
 
         names, sublattices = zip(*self._lattice.sublattices.items())
 
@@ -215,9 +222,9 @@ class StructuralDisorder:
 
         h = np.nditer(hoppings, flags=['multi_index'])
         while not h.finished:
-            relative_move_from = np.dot(np.asarray(relative_index_from) + np.asarray(self._position) + 1,
+            relative_move_from = np.dot(np.asarray(relative_index_from) + 1,
                                         3 ** np.linspace(0, self._space_size - 1, self._space_size, dtype=np.int32))
-            relative_move_to = np.dot(np.asarray(relative_index_to) + np.asarray(self._position) + 1,
+            relative_move_to = np.dot(np.asarray(relative_index_to) + 1,
                                       3 ** np.linspace(0, self._space_size - 1, self._space_size, dtype=np.int32))
 
             if isinstance(hoppings, np.ndarray):
@@ -307,7 +314,7 @@ class StructuralDisorder:
 
         h = np.nditer(value, flags=['multi_index'])
         while not h.finished:
-            relative_move = np.dot(np.asarray(relative_index) + np.asarray(self._position) + 1,
+            relative_move = np.dot(np.asarray(relative_index) + 1,
                                    3 ** np.linspace(0, self._space_size - 1, self._space_size, dtype=np.int32))
 
             if isinstance(value, np.ndarray):
@@ -559,11 +566,11 @@ class Calculation:
             Number of different disorder realisations.
         position : list
             Relative index of the unit cell where the LDOS will be calculated.
-        sublattice : str
+        sublattice : str or list
             Name of the sublattice at which the LDOS will be calculated.
         """
 
-        self._ldos.append({'energy': energy, 'num_moments': num_moments, 'position': position,
+        self._ldos.append({'energy': energy, 'num_moments': num_moments, 'position': np.asmatrix(position),
                            'sublattice': sublattice, 'num_disorder': num_disorder})
 
     def arpes(self, k_vector, num_moments, num_disorder=1):
@@ -746,8 +753,8 @@ class Calculation:
 
 class Configuration:
 
-    def __init__(self, divisions=(1, 1), length=(1, 1), boundaries=(False, False), is_complex=False, precision=1,
-                 spectrum_range=None):
+    def __init__(self, divisions=(1, 1, 1), length=(1, 1, 1), boundaries=(False, False, False),
+                 is_complex=False, precision=1, spectrum_range=None):
         """Define basic parameters used in the calculation
 
        Parameters
@@ -775,6 +782,14 @@ class Configuration:
         else:
             self._energy_scale = None
             self._energy_shift = None
+
+        # promote to lists
+        if not (isinstance(length, list)):
+            length = [length]
+        if not (isinstance(divisions, list)):
+            divisions = [divisions]
+        if not (isinstance(boundaries, list)):
+            boundaries = [boundaries]
 
         self._is_complex = int(is_complex)
         self._precision = precision
@@ -995,14 +1010,29 @@ def make_pybinding_model(lattice, disorder=None, disorder_structural=None, **kwa
         return modify_energy
 
     if not shape:
-        referent_size = 100
-        a1, a2 = lattice.vectors
-        norm_a1 = np.linalg.norm(a1)
-        norm_a2 = np.linalg.norm(a2)
-        num_a1 = referent_size / norm_a1
-        num_a2 = referent_size / norm_a2
-        shape = pb.rectangle(4 * num_a1 * norm_a1, 4 * num_a2 * norm_a2)
-        trans_symm = pb.translational_symmetry(a1=num_a1 * norm_a1, a2=num_a2 * norm_a2)
+
+        vectors = np.asarray(lattice.vectors)
+        space_size = vectors.shape[0]
+
+        # fix a size for 1D, 2D, or 3D
+        referent_size = 1
+
+        if space_size == 1:
+            referent_size = 1000
+        elif space_size == 2:
+            referent_size = 200
+        elif space_size == 3:
+            referent_size = 50
+
+        norm = np.sum(np.abs(vectors)**2, axis=-1)**(1./2)
+
+        num_each_dir = (referent_size / norm).astype(int)
+
+        shape_size = 2 * num_each_dir[0:space_size]
+        symmetry = 1 * num_each_dir[0:space_size]
+
+        shape = pb.primitive(*shape_size)
+        trans_symm = pb.translational_symmetry(*symmetry)
         param = [shape, trans_symm]
     else:
         param = [shape]
@@ -1267,25 +1297,34 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
     # precision of hamiltonian float, double, long double
     f.create_dataset('PRECISION', data=config.prec, dtype='u4')
     # number of repetitions in each of the directions
-    f.create_dataset('L', data=config.leng, dtype='u4')
+    leng = config.leng
+    if len(leng) != space_size:
+        raise SystemExit('Select number of unit cells accordingly with the number of dimensions of your system!')
+    f.create_dataset('L', data=leng, dtype='u4')
     # periodic boundary conditions, 0 - no, 1 - yes.
     bound = config.bound
+    if len(bound) != space_size:
+        raise SystemExit('Select boundary condition accordingly with the number of dimensions of your system!')
     print('\nPeriodic boundary conditions along the direction of lattice vectors \n'
-          'respectively are set to: ', bool(bound[0]), 'and ', bool(bound[1]), '\n')
+          'respectively are set to: ', bound, '\n')
     f.create_dataset('Boundaries', data=bound, dtype='u4')
     print('\n##############################################################################\n')
     print('DECOMPOSITION:\n')
-
+    domain_dec = config.div
+    if len(domain_dec) != space_size:
+        # worst case 1 selected 3D case
+        domain_dec.extend([1, 1])
+        print('WARNING: Select number of decomposition parts accordingly with the number of dimensions '
+              'of your system! They are chosen automatically to be {}.'.format(domain_dec[0:space_size]))
     # number of divisions of the in each direction of hamiltonian. nx x ny = num_threads
-    print('\nChosen number of decomposition parts is:', config.div[0], 'x', config.div[1], '.'
-                                                                                           '\nINFO: this product will correspond to the total number of threads. '
-                                                                                           '\nYou should choose at most the number of processor cores you have.'
-                                                                                           '\nWARNING: System size need\'s to be an integer multiple of \n'
-                                                                                           '[STRIDE * ', config.div[0],
-          ' and STRIDE * ', config.div[1], '] '
-                                           '\nwhere STRIDE is selected when compiling the C++ code. \n')
+    print('\nChosen number of decomposition parts is:', domain_dec[0:space_size], '.'
+          '\nINFO: this product will correspond to the total number of threads. '
+          '\nYou should choose at most the number of processor cores you have.'
+          '\nWARNING: System size need\'s to be an integer multiple of \n'
+          '[STRIDE * ', domain_dec, '] '
+          '\nwhere STRIDE is selected when compiling the C++ code. \n')
 
-    f.create_dataset('Divisions', data=config.div, dtype='u4')
+    f.create_dataset('Divisions', data=domain_dec[0:space_size], dtype='u4')
     # space dimension of the lattice 1D, 2D, 3D
     f.create_dataset('DIM', data=space_size, dtype='u4')
     # lattice vectors. Size is same as DIM
@@ -1322,7 +1361,7 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
         hbar = 6.58211899 * 10 ** -16  #: [eV*s]
         phi0 = 2 * np.pi * hbar  #: [V*s] flux quantum
         unit_cell_area = np.linalg.norm(np.cross(vectors[0, :], vectors[1, :])) * 1e-18
-        magnetic_field_min = phi0 / (config.leng[1] * unit_cell_area)
+        magnetic_field_min = phi0 / (leng[1] * unit_cell_area)
         print('For a selected system size, minimum field is: ', magnetic_field_min)
 
         multiply_bmin = 0
@@ -1335,11 +1374,11 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
                 multiply_bmin * magnetic_field_min))
 
         if modification.flux:
-            multiply_bmin = int(round(modification.flux * config.leng[1]))
+            multiply_bmin = int(round(modification.flux * leng[1]))
             if multiply_bmin == 0:
                 raise SystemExit('The system is to small for a desired field.')
             print('Closest_field to the one you selected is {:.2f} T which in the terms of flux quantum is {:.2f}'.
-                  format(multiply_bmin * magnetic_field_min, multiply_bmin / config.leng[1]))
+                  format(multiply_bmin * magnetic_field_min, multiply_bmin / leng[1]))
             print('Selected field is {:.2f} T'.format(multiply_bmin * magnetic_field_min))
         grp.create_dataset('MagneticFieldMul', data=int(multiply_bmin), dtype='u4')
         print('\n##############################################################################\n')
@@ -1368,6 +1407,7 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
     grp_dis_vac = grp.create_group('Vacancy')
     idx_vacancy = 0
     grp_dis = grp.create_group('StructuralDisorder')
+
     if disorder_structural:
 
         if isinstance(disorder_structural, list):
@@ -1380,29 +1420,100 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
 
             disorder_struct = disorder_structural[idx]
 
+            fixed_positions = disorder_struct._position
+
+            system_l = config._length
+            Lx = system_l[0]
+            Ly = 1
+            Lz = 1
+
+            if len(system_l) == 2:
+                Ly = system_l[1]
+            elif len(system_l) == 3:
+                Ly = system_l[1]
+                Lz = system_l[2]
+
+            for item in fixed_positions:
+                if item.shape[1] != space_size:
+                    raise SystemExit('The position of the structural disorder should be selected with the '
+                                     'relative index of length {}'.format(space_size))
+
+            # Check if pos cell is valid
+            if space_size == 1:
+                if not all(0 <= np.squeeze(np.asarray(item))[0] < Lx for item in fixed_positions):
+                    raise SystemExit('The position of the structural disorder should be selected within the relative '
+                                     'coordinates [[0, {}],[0, {}],[0, {}]] with the relative index '
+                                     'of length {}'.format(Lx - 1, Ly - 1, Lz - 1, space_size))
+            if space_size == 2:
+                if not all(0 <= np.squeeze(np.asarray(item))[0] < Lx and 0 <= np.squeeze(np.asarray(item))[1] < Ly
+                           for item in fixed_positions):
+                    raise SystemExit('The position of the structural disorder should be selected within the relative '
+                                     'coordinates [[0, {}],[0, {}],[0, {}]] with the relative index '
+                                     'of length {}'.format(Lx - 1, Ly - 1, Lz - 1, space_size))
+
+            if space_size == 3:
+                if not all(0 <= np.squeeze(np.asarray(item))[0] < Lx and 0 <= np.squeeze(np.asarray(item))[1] < Ly
+                           and 0 <= np.squeeze(np.asarray(item))[2] < Lz for item in fixed_positions):
+                    raise SystemExit('The position of the structural disorder should be selected within the relative '
+                                     'coordinates [[0, {}],[0, {}],[0, {}]] with the relative index '
+                                     'of length {}'.format(Lx - 1, Ly - 1, Lz - 1, space_size))
+
+            # fixed_positions_index = [i, j, k] x [1, Lx, Lx*Ly]
+            fixed_positions_index = np.asarray(np.dot(fixed_positions, np.array([1, Lx, Lx * Ly], dtype=np.int32)[0:space_size]),
+                                    dtype=np.int32).reshape(-1)
+
             num_orb_vac = len(disorder_struct._orbital_vacancy)
+            num_positions = len(fixed_positions_index)
             if num_orb_vac > 0:
                 grp_dis_type = grp_dis_vac.create_group('Type{val}'.format(val=idx_vacancy))
-                grp_dis_type.create_dataset('Orbitals', data=np.asarray(disorder_struct._orbital_vacancy),
-                                            dtype=np.int32)
-                grp_dis_type.create_dataset('Concentration', data=disorder_struct._concentration,
-                                            dtype=np.float64)
+
+                grp_dis_type.create_dataset('Orbitals', data=np.asarray(disorder_struct._orbital_vacancy,
+                                                                                dtype=np.int32))
+
+                if disorder_struct._exact_position:
+                    grp_dis_type.create_dataset('FixPosition',
+                                                data=np.asarray(fixed_positions_index,
+                                                dtype=np.int32))
+                else:
+                    grp_dis_type.create_dataset('Concentration', data=disorder_struct._concentration,
+                                                dtype=np.float64)
                 grp_dis_type.create_dataset('NumOrbitals', data=num_orb_vac, dtype=np.int32)
                 idx_vacancy += 1
 
-            if disorder_struct._num_bond_disorder_per_type or disorder_struct._num_onsite_disorder_per_type:
+            num_bond_disorder = 2 * disorder_struct._num_bond_disorder_per_type
+            num_onsite_disorder = disorder_struct._num_onsite_disorder_per_type
+            if num_bond_disorder or num_onsite_disorder:
+
+                for idx_from, idx_to in zip(disorder_struct._rel_idx_from, disorder_struct._rel_idx_to):
+                    distance_rel = np.asarray(idx_from) - np.asarray(idx_to)
+
+                    rel_norm = np.linalg.norm(distance_rel)
+                    if rel_norm > 1:
+                        print('WARNING: hopping distance inside structural disorder exceed the nearest neighbour! \n'
+                              'The NGHOST flag inside the C++ code has at least to be equal to the norm of '
+                              'the relative distance, \n'
+                              'which in this case is between cells {} and {}'.format(idx_from, idx_to))
+
                 # Type idx
                 grp_dis_type = grp_dis.create_group('Type{val}'.format(val=idx))
-                # Concentration of this type
-                grp_dis_type.create_dataset('Concentration', data=np.asarray(disorder_struct._concentration),
-                                            dtype=np.float64)
+
+                if disorder_struct._exact_position:
+
+                    grp_dis_type.create_dataset('FixPosition',
+                                                data=np.asarray(fixed_positions_index,
+                                                dtype=np.int32))
+
+                else:
+                    # Concentration of this type
+                    grp_dis_type.create_dataset('Concentration', data=np.asarray(disorder_struct._concentration),
+                                                dtype=np.float64)
                 # Number of bond disorder
                 grp_dis_type.create_dataset('NumBondDisorder',
-                                            data=2 * np.asarray(disorder_struct._num_bond_disorder_per_type),
+                                            data=np.asarray(num_bond_disorder),
                                             dtype=np.int32)
                 # Number of onsite disorder
                 grp_dis_type.create_dataset('NumOnsiteDisorder',
-                                            data=np.asarray(disorder_struct._num_onsite_disorder_per_type),
+                                            data=np.asarray(num_onsite_disorder),
                                             dtype=np.int32)
 
                 # Node of the bond disorder from
@@ -1423,20 +1534,20 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
 
                 # Onsite disorder energy
                 grp_dis_type.create_dataset('U0',
-                                            data=(np.asarray(disorder_struct._disorder_onsite).real.astype(
-                                                config.type)) / config.energy_scale)
+                                            data=np.asarray(disorder_struct._disorder_onsite).real.astype(
+                                                 config.type) / config.energy_scale)
                 # Bond disorder hopping
                 disorder_hopping = disorder_struct._disorder_hopping
                 if complx:
                     # hoppings
                     grp_dis_type.create_dataset('Hopping',
-                                                data=(np.asarray(disorder_hopping).astype(
-                                                    config.type).flatten()) / config.energy_scale)
+                                                data=np.asarray(disorder_hopping).astype(
+                                                     config.type).flatten() / config.energy_scale)
                 else:
                     # hoppings
                     grp_dis_type.create_dataset('Hopping',
-                                                data=(np.asarray(disorder_hopping).real.astype(
-                                                    config.type).flatten()) / config.energy_scale)
+                                                data=np.asarray(disorder_hopping).real.astype(
+                                                     config.type).flatten() / config.energy_scale)
 
     # Calculation function defined with num_moments, num_random vectors, and num_disorder etc. realisations
     grpc = f.create_group('Calculation')
@@ -1461,25 +1572,29 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
     if calculation.get_ldos:
         grpc_p = grpc.create_group('ldos')
 
-        moments, energy, orbitals, dis, position, sublattice = [], [], [], [], [], []
-        for single_ldos in calculation.get_ldos:
-            moments.append(single_ldos['num_moments'])
-            energy.append(single_ldos['energy'])
-            position.append(single_ldos['position'])
-            sublattice.append(single_ldos['sublattice'])
-            dis.append(single_ldos['num_disorder'])
+        single_ldos = calculation.get_ldos[0]
+        moments = single_ldos['num_moments']
+        energy = single_ldos['energy']
+        position = single_ldos['position']
+        sublattice = single_ldos['sublattice']
+        dis = single_ldos['num_disorder']
 
+        if len(calculation.get_ldos) > 1:
+            raise SystemExit('Only a single function request of each type is currently allowed. Please use another '
+                             'configuration file for the same functionality.')
+
+        position = np.squeeze(position)
         len_pos = np.array(position).shape[0]
-        len_sub = len(sublattice)
 
-        if len_pos != len_sub and (len_pos != 1 or len_sub != 1):
+        if isinstance(sublattice, list):
+            len_sub = len(sublattice)
+        else:
+            len_sub = 1
+            sublattice = [sublattice]
+
+        if len_pos != len_sub and (len_pos != 1 and len_sub != 1):
             raise SystemExit('Number of sublattices and number of positions should either have the same '
                              'length or should be specified as a single value! Choose them accordingly.')
-
-        if len_sub == 1 and len_pos > 1:
-            sublattice = [sublattice] * len_pos
-        if len_pos == 1 and len_sub > 1:
-            position = [position] * len_sub
 
         # get the names and sublattices from the lattice
         names, sublattices_all = zip(*lattice.sublattices.items())
@@ -1494,9 +1609,39 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
         if len(system_l) == 2:
             Ly = system_l[1]
         elif len(system_l) == 3:
+            Ly = system_l[1]
             Lz = system_l[2]
 
-        for sub, pos in zip(sublattice, position):
+        for item in position:
+            if item.shape[1] != space_size:
+                raise SystemExit('The probing position for the LDOS should be selected with the '
+                                 'relative index of length {}'.format(space_size))
+
+        # Check if pos cell is valid
+        if space_size == 1:
+            if not all(0 <= np.squeeze(np.asarray(item))[0] < Lx for item in position):
+                raise SystemExit('The probing position for the LDOS should be selected within the relative '
+                                 'coordinates [[0, {}],[0, {}],[0, {}]] with the relative index '
+                                 'of length {}'.format(Lx - 1, Ly - 1, Lz - 1, space_size))
+        if space_size == 2:
+            if not all(0 <= np.squeeze(np.asarray(item))[0] < Lx and 0 <= np.squeeze(np.asarray(item))[1] < Ly
+                       for item in position):
+                raise SystemExit('The probing position for the LDOS should be selected within the relative '
+                                 'coordinates [[0, {}],[0, {}],[0, {}]] with the relative index '
+                                 'of length {}'.format(Lx - 1, Ly - 1, Lz - 1, space_size))
+
+        if space_size == 3:
+            if not all(0 <= np.squeeze(np.asarray(item))[0] < Lx and 0 <= np.squeeze(np.asarray(item))[1] < Ly
+                       and 0 <= np.squeeze(np.asarray(item))[2] < Lz for item in position):
+                raise SystemExit('The probing position for the LDOS should be selected within the relative '
+                                 'coordinates [[0, {}],[0, {}],[0, {}]] with the relative index '
+                                 'of length {}'.format(Lx - 1, Ly - 1, Lz - 1, space_size))
+
+        # fixed_positions_index = [i, j, k] x [1, Lx, Lx*Ly]
+        fixed_positions = np.asarray(np.dot(position, np.array([1, Lx, Lx * Ly], dtype=np.int32)[0:space_size]),
+                          dtype=np.int32).reshape(-1)
+        # num_positions_ldos = fixed_positions.shape[0]
+        for sub in sublattice:
 
             if sub not in names:
                 raise SystemExit('Desired sublattice for LDOS calculation doesn\'t exist in the chosen lattice! ')
@@ -1505,21 +1650,24 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
             lattice_sub = sublattices_all[indx]
             sub_id = lattice_sub.alias_id
             it = np.nditer(lattice_sub.energy, flags=['multi_index'])
+
             # orbit_idx = [i, j, k] x [1, Lx, Lx*Ly] + orbital * Lx*Ly*Lz
             while not it.finished:
                 orbit = int(orbitals_before[sub_id] + it.multi_index[0])
-                orbit_idx = np.dot(np.array(pos), np.array([1, Lx, Lx*Ly], dtype=np.int32)[0:space_size]) \
-                            + Lx * Ly * Lz * orbit
-                if orbit_idx not in orbitals:
-                    orbitals.append(orbit_idx)
+                orbitals.append(orbit)
                 it.iternext()
-
+        # num_orbitals = np.asarray(orbitals).shape[0]
         if len(calculation.get_ldos) > 1:
             raise SystemExit('Only a single function request of each type is currently allowed. Please use another '
                              'configuration file for the same functionality.')
         grpc_p.create_dataset('NumMoments', data=moments, dtype=np.int32)
         grpc_p.create_dataset('Energy', data=np.asarray(energy), dtype=np.float32)
-        grpc_p.create_dataset('Orbitals', data=np.asarray(orbitals), dtype=np.int32)
+        if len_sub != len_pos:
+            grpc_p.create_dataset('Orbitals', data=np.tile(np.asarray(orbitals),len_pos).reshape(-1), dtype=np.int32)
+            grpc_p.create_dataset('FixPosition', data=np.repeat(np.asarray(fixed_positions),len_sub), dtype=np.int32)
+        else:
+            grpc_p.create_dataset('Orbitals', data=np.asarray(orbitals), dtype=np.int32)
+            grpc_p.create_dataset('FixPosition', data=np.asarray(fixed_positions), dtype=np.int32)
         grpc_p.create_dataset('NumDisorder', data=dis, dtype=np.int32)
 
     if calculation.get_arpes:

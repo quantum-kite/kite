@@ -47,7 +47,6 @@ GlobalSimulation<T,D>::GlobalSimulation( char *name ) : rglobal(name)
   omp_set_num_threads(rglobal.n_threads);
   debug_message("Starting parallelization\n");
   int calculate_wavepacket = 0;
-  int calculate_ldos = 0;
 #pragma omp parallel default(shared)
   {
     Simulation<T,D> simul(name, Global);
@@ -120,7 +119,6 @@ GlobalSimulation<T,D>::GlobalSimulation( char *name ) : rglobal(name)
 
 
     // Check if the Gaussian_Wave_Packet needs to be calculated
-    //H5::Exception::dontPrint();
 #pragma omp master
     {
         H5::H5File * file = new H5::H5File(name, H5F_ACC_RDONLY);
@@ -139,50 +137,8 @@ GlobalSimulation<T,D>::GlobalSimulation( char *name ) : rglobal(name)
       simul.Gaussian_Wave_Packet();
 
 
-//Check if the local density of states needs to be calculated
-#pragma omp master
-{
-      file = new H5::H5File(name, H5F_ACC_RDONLY);
-      try{
-        int dummy_var;
-        get_hdf5<int>(&dummy_var, file, (char *) "/Calculation/ldos/NumDisorder");
-        calculate_ldos = 1;
-      } catch(H5::Exception& e) {debug_message("ldos: no need to calculate.\n");}
-        file->close();  
-        delete file;
-}
-      
-      // Now calculate it
-#pragma omp barrier
-      if(calculate_ldos){
-        unsigned ldos_NumMoments;
-        unsigned ldos_NumDisorder;
-        Eigen::Array<unsigned long, -1, 1> ldos_Orbitals;
-
-#pragma omp critical
-{
-        H5::DataSet * dataset;
-        H5::DataSpace * dataspace;
-        hsize_t dim[1];
-        H5::H5File * file = new H5::H5File(name, H5F_ACC_RDONLY);
-        dataset            = new H5::DataSet(file->openDataSet("/Calculation/ldos/Orbitals")  );
-        dataspace          = new H5::DataSpace(dataset->getSpace());
-        dataspace -> getSimpleExtentDims(dim, NULL);
-        dataspace->close(); delete dataspace;
-        dataset->close();   delete dataset;
-
-        ldos_Orbitals = Eigen::Array<unsigned long, -1, 1>::Zero(dim[0],1);
-
-        get_hdf5<unsigned>(&ldos_NumMoments, file, (char *) "/Calculation/ldos/NumMoments");
-        get_hdf5<unsigned>(&ldos_NumDisorder, file, (char *) "/Calculation/ldos/NumDisorder");
-        get_hdf5<unsigned long>(ldos_Orbitals.data(), file, (char *) "/Calculation/ldos/Orbitals");
-        file->close();  
-        delete file;
-}
-#pragma omp barrier
-
-        simul.LMU(ldos_NumDisorder, ldos_NumMoments, ldos_Orbitals);
-      }
+    simul.calc_LDOS(); 
+    simul.calc_ARPES(); // fetches parameters from .h5 file and calculates ARPES
 
   }
   debug_message("Left global_simulation\n");

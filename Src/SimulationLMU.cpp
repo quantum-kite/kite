@@ -45,21 +45,13 @@ void Simulation<T,D>::store_LMU(Eigen::Array<T, -1, -1> *gamma){
 
 template <typename T,unsigned D>
 void Simulation<T,D>::LMU(int NDisorder, int NMoments, Eigen::Array<unsigned long, -1, 1> positions){
+    debug_message("Entered Simulation::MU\n");
+
     typedef typename extract_value_type<T>::value_type value_type;
     Eigen::Matrix<T, 1, 2> tmp;
     int NPositions = positions.size();
     unsigned long pos;
 
-    unsigned long T_thread[D+1]; // index of the thread
-    unsigned long x_thread[D+1]; // position within the thread
-
-    Coordinates<unsigned long, D+1> thread_coords(r.ld);
-    Coordinates<unsigned long, D+1> thread_coords_gh(r.Ld);
-    Coordinates<unsigned long, D+1> thread(r.nd);
-    Coordinates<unsigned long, D+1> total_coords(r.Lt);
-    bool correct_thread;
-
-    
     KPM_Vector<T,D> kpm0(1, *this);      // initial random vector
     KPM_Vector<T,D> kpm1(2, *this); // left vector that will be Chebyshev-iterated on
 
@@ -80,43 +72,7 @@ void Simulation<T,D>::LMU(int NDisorder, int NMoments, Eigen::Array<unsigned lon
             // this position and the coordinates in that thread. Only THAT thread should
             // have a starting vector different from zero
             pos = positions(pos_index);
-#pragma omp critical
-{
-            //std::cout << "Thread id: " << r.thread_id << "\n";
-            total_coords.set_coord(pos);
-            //std::cout << "position: " << pos << "\n" << std::flush;
-            for(unsigned d = 0; d < D; d++){
-                //std::cout << "total_coord: " << total_coords.coord[d] << "\n";
-                T_thread[d] = total_coords.coord[d]/r.ld[d];
-                x_thread[d] = total_coords.coord[d]%r.ld[d];
-                //std::cout << "index: " << d << "\n";
-                //std::cout << "   thread in direction: " << T_thread[d] << "\n";
-                //std::cout << "   x in thread: " << x_thread[d] << "\n";
-            }
-            T_thread[D] = 0;
-            x_thread[D] = total_coords.coord[D];
-            thread_coords.set_index(x_thread);
-            thread.set_index(T_thread);
-
-            // convert to coordinates with ghosts
-            r.convertCoordinates(thread_coords_gh, thread_coords); 
-            //for(unsigned d = 0; d < D+1; d++){
-                //std::cout << thread_coords_gh.coord[d] << "\n"; 
-            //}
-            
-            // check if the site is in the current thread
-            correct_thread = thread.index == r.thread_id;
-
-
-            //std::cout << "thread_id: " << r.thread_id << "\n";
-            //std::cout << "index: " << thread.index << "\n";
-            //std::cout << "Is correct thread? " << T(correct_thread) << "\n";
-
-}
-#pragma omp barrier
-            kpm0.v.setZero();
-            kpm0.v(thread_coords_gh.index,0) = T(correct_thread);
-            kpm0.set_index(0);
+            kpm0.build_site(pos);
             kpm0.Exchange_Boundaries();
 
             kpm1.set_index(0);
@@ -139,7 +95,79 @@ void Simulation<T,D>::LMU(int NDisorder, int NMoments, Eigen::Array<unsigned lon
         } 
     }
     store_LMU(&gamma);
+    debug_message("Left Simulation::MU\n");
 }
+
+template <typename T,unsigned D>
+void Simulation<T,D>::calc_LDOS(){
+    debug_message("Entered Simulation::calc_LDOS\n");
+    //Check if the local density of states needs to be calculated
+
+  bool local_calculate_ldos = false;
+#pragma omp master
+  {
+        Global.calculate_ldos = false;
+        H5::H5File * file = new H5::H5File(name, H5F_ACC_RDONLY);
+        try{
+          int dummy_var;
+          get_hdf5<int>(&dummy_var, file, (char *) "/Calculation/ldos/NumDisorder");
+          Global.calculate_ldos = true;
+        } catch(H5::Exception& e) {
+          debug_message("ldos: no need to calculate.\n");
+          debug_message("calculate_ldos: "); 
+          debug_message(Global.calculate_ldos);
+          debug_message("\n");
+        }
+          file->close();  
+          delete file;
+  }
+#pragma omp barrier
+        
+        // Now calculate it
+          unsigned ldos_NumMoments;
+          unsigned ldos_NumDisorder;
+          Eigen::Array<unsigned long, -1, 1> ldos_Orbitals;
+          Eigen::Array<unsigned long, -1, 1> ldos_Positions;
+
+        local_calculate_ldos = Global.calculate_ldos;
+        if(local_calculate_ldos){
+#pragma omp critical
+  {
+
+          H5::DataSet * dataset;
+          H5::DataSpace * dataspace;
+          hsize_t dim[1];
+          H5::H5File * file = new H5::H5File(name, H5F_ACC_RDONLY);
+          dataset            = new H5::DataSet(file->openDataSet("/Calculation/ldos/Orbitals")  );
+          dataspace          = new H5::DataSpace(dataset->getSpace());
+          dataspace -> getSimpleExtentDims(dim, NULL);
+          dataspace->close(); delete dataspace;
+          dataset->close();   delete dataset;
+
+          ldos_Orbitals = Eigen::Array<unsigned long, -1, 1>::Zero(dim[0],1);
+          ldos_Positions = Eigen::Array<unsigned long, -1, 1>::Zero(dim[0],1);
+
+          get_hdf5<unsigned>(&ldos_NumMoments, file, (char *) "/Calculation/ldos/NumMoments");
+          get_hdf5<unsigned>(&ldos_NumDisorder, file, (char *) "/Calculation/ldos/NumDisorder");
+          get_hdf5<unsigned long>(ldos_Orbitals.data(), file, (char *) "/Calculation/ldos/Orbitals");
+          get_hdf5<unsigned long>(ldos_Positions.data(), file, (char *) "/Calculation/ldos/FixPosition");
+          file->close();  
+          delete file;
+  }
+#pragma omp barrier
+
+
+
+          
+          Eigen::Array<unsigned long, -1, 1> total_positions;
+          total_positions = ldos_Positions + ldos_Orbitals*r.Lt[0]*r.Lt[1];
+          LMU(ldos_NumDisorder, ldos_NumMoments, total_positions);
+        }
+    
+
+    debug_message("Left Simulation::calc_LDOS\n");
+}
+
 
 template class Simulation<float ,1u>;
 template class Simulation<double ,1u>;

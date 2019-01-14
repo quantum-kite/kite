@@ -13,7 +13,7 @@ class Simulation;
 #include "Simulation.hpp"
 
 template <typename T, unsigned D>
-KPM_Vector<T,D>::KPM_Vector(int mem, Simulation<T,D> & sim) : KPM_VectorBasis<T,D>(mem, sim), x(sim.r.Ld),std(x.basis[1]), r(sim.r),h(sim.h)  {
+KPM_Vector<T,D>::KPM_Vector(int mem, Simulation<T,D> & sim) : KPM_VectorBasis<T,D>(mem, sim), std(x.basis[1]), r(sim.r),h(sim.h),x(sim.r.Ld)  {
 };
 
 template <typename T, unsigned D>
@@ -30,6 +30,17 @@ void KPM_Vector<T,D>::build_wave_packet(Eigen::Matrix<double,-1,-1> & k, Eigen::
   (void) sigma;
   (void) k;
   (void) psi0;
+};
+
+template <typename T, unsigned D>
+void KPM_Vector<T,D>::build_site(unsigned long pos){
+  (void) pos;
+};
+
+template <typename T, unsigned D>
+void KPM_Vector <T, D>::build_planewave(Eigen::Matrix<double,-1,1> & k, Eigen::Matrix<T,-1,1> & weight){
+  (void) k;
+  (void) weight;
 };
 
 template <typename T, unsigned D>

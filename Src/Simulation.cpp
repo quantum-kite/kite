@@ -13,7 +13,6 @@ class KPM_Vector;
 #include "Hamiltonian.hpp"
 #include "KPM_VectorBasis.hpp"
 #include "KPM_Vector.hpp"
-#include "KPM_Vector2D.hpp"
 
 template<typename T,unsigned D>
 Simulation<T,D>::Simulation(char *filename, GLOBAL_VARIABLES <T> & Global1): r(filename),  Global(Global1), name(filename), h(name, r, Global1)  {
@@ -251,23 +250,21 @@ std::vector<std::vector<unsigned>> Simulation<T,D>::process_string(std::string i
 template <typename T,unsigned D>
 double Simulation<T,D>::time_kpm(int N_average){
   debug_message("Entered time_kpm");
-  //This function serves to provide an estimate of the time it takes for each kpm iteration
-      
+  //This function serves to provide an estimate of the time it takes for each kpm iteration      
 #pragma omp barrier
   KPM_Vector<T,D> kpm0(1, *this);
   KPM_Vector<T,D> kpm1(2, *this);
-		
-		
+
   kpm0.initiate_vector();
   kpm1.set_index(0);
   kpm1.v.col(0) = kpm0.v.col(0);
-  kpm1.template Multiply<0>(); 
-		
+  kpm1.template Multiply<0>();
+  
   auto t0 =  std::chrono::high_resolution_clock::now();
   for(int i = 0; i < N_average; i++)
     kpm1.template Multiply<1>(); 
   auto t1 =  std::chrono::high_resolution_clock::now();
-		
+  
   std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t1 - t0);
 
 		

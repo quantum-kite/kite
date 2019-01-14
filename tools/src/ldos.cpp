@@ -122,15 +122,27 @@ bool ldos<T, DIM>::fetch_parameters(){
     dataspace -> getSimpleExtentDims(dim, NULL);
     dataspace->close(); delete dataspace;
     dataset->close();   delete dataset;
-    NumEnergies = dim[1];
+    NumEnergies = dim[0];
 
     ldos_Orbitals = Eigen::Matrix<unsigned long, -1, -1>::Zero(NumPositions,1);
+    ldos_Positions = Eigen::Matrix<unsigned long, -1, -1>::Zero(NumPositions,1);
     energies = Eigen::Matrix<float, -1, -1>::Zero(NumEnergies,1);
 
      //Fetch the relevant parameters from the hdf file
     get_hdf5(&NumMoments, &file, (char*)(dirName+"NumMoments").c_str());	
     get_hdf5(ldos_Orbitals.data(), &file, (char*)"/Calculation/ldos/Orbitals");
+    get_hdf5(ldos_Positions.data(), &file, (char*)"/Calculation/ldos/FixPosition");
     get_hdf5(energies.data(), &file, (char*)"/Calculation/ldos/Energy");
+
+
+    global_positions = Eigen::Matrix<unsigned long, -1, -1>::Zero(NumPositions,3);
+    for(long i = 0; i < NumPositions; i++){
+      int L = systemInfo->size[0];
+      global_positions(i,0) = ldos_Positions(i)%L;
+      global_positions(i,1) = ldos_Positions(i)/L;
+      global_positions(i,2) = ldos_Orbitals(i);
+    }
+
 
 
   // Check whether the matrices we're going to retrieve are complex or not
@@ -204,10 +216,14 @@ void ldos<U, DIM>::calculate(){
   // Save the density of states to a file
   U mult = 1.0/systemInfo->energy_scale;
   std::ofstream myfile;
-  for(unsigned pos = 0; pos < NumPositions; pos++){
-    myfile.open(filename + std::to_string(pos) + ".dat");
-    for(int i=0; i < NumEnergies; i++){
-    myfile  << energies(i)*systemInfo->energy_scale << " " << LDOS(i).real()*mult << "\n";
+  for(int i=0; i < NumEnergies; i++){
+    myfile.open(filename + std::to_string(energies(i)*systemInfo->energy_scale) + ".dat");
+    for(unsigned pos = 0; pos < NumPositions; pos++){
+      int x, y, orb;
+      x = global_positions(pos,0);
+      y = global_positions(pos,1);
+      orb = global_positions(pos,2);
+      myfile  << x << " " << y << " " << orb << " " << LDOS(i,pos).real()*mult << "\n";
     }
   myfile.close();
   }
