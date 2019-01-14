@@ -14,10 +14,10 @@ echo "Compiling KITEx"
 cd build
 for i in ../Src/*.cpp; do
   echo "Compiling $i"
-  g++ -DCOMPILE_WAVEPACKET=$WAVEPACKET -std=gnu++11 $i  -I../Src/ $headers  -fopenmp -c
+  g++ -DCOMPILE_WAVEPACKET=$WAVEPACKET -std=gnu++11 -O2 $i  -I../Src/ $headers  -fopenmp -c
   done 
 echo "Linking"
-g++ -std=gnu++11 *.o $libraries -fopenmp -o ../KITEx
+g++ -std=gnu++11 -O2 *.o $libraries -fopenmp -o ../KITEx
 echo "Done."
 cd ..
 
@@ -26,16 +26,16 @@ echo "Compiling KITE-tools"
 cd tools/build
 for i in ../src/*.cpp; do
   echo "Compiling $i"
-  g++ -std=gnu++11 $i -I../src/ -I/../src/cond_2order $headers -fopenmp -c
+  g++ -std=gnu++11 -O2 $i -I../src/ -I/../src/cond_2order $headers -fopenmp -c
   done 
 
 for i in ../src/cond_2order/*.cpp; do
   echo "Compiling $i"
-  g++ -std=gnu++11 $i -I../src/ -I/../src/cond_2order $headers -fopenmp -c
+  g++ -std=gnu++11 -O2 $i -I../src/ -I/../src/cond_2order $headers -fopenmp -c
   done 
 
 echo "Linking"
-g++ -std=gnu++11 *.o $libraries -fopenmp -o ../../KITE-tools
+g++ -std=gnu++11 -O2 *.o $libraries -fopenmp -o ../../KITE-tools
 echo "Done."
 
 cd ..

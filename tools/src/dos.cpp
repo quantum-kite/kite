@@ -134,7 +134,7 @@ bool dos<T, DIM>::fetch_parameters(){
     // Fetch the number of Chebyshev Moments, temperature and number of points
 	get_hdf5(&NumMoments, &file, (char*)(dirName+"NumMoments").c_str());	
 	get_hdf5(&NEnergies, &file, (char*)(dirName+"NumPoints").c_str());	
-
+    default_NEnergies = false;
 
     // Check whether the matrices we're going to retrieve are complex or not
     int complex = systemInfo->isComplex;
