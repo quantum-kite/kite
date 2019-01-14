@@ -17,7 +17,7 @@ import kite
 def cube(onsite=(0, 0)):
 
     theta = np.pi / 3
-    t = 2.8  # eV
+    t = 1
     a1 = np.array([1, 0, 0] )
     a2 = np.array([0, 1, 0])
     a3 = np.array([0, 0, 1])
@@ -45,7 +45,7 @@ lattice = cube()
 # This divides the lattice into various sections, each of which is calculated in parallel
 nx = 1
 ny = 1
-nz = 2
+nz = 1
 # number of unit cells in each direction.
 lx = ly = lz = 256
 # make config object which caries info about
@@ -56,7 +56,7 @@ lx = ly = lz = 256
 # - info of the precision of the exported hopping and onsite data, 0 - float, 1 - double, and 2 - long double.
 # - scaling, if None it's automatic, if present select spectrum_bound=[e_min, e_max]
 configuration = kite.Configuration(divisions=[nx, ny, nz], length=[lx, ly, lz], boundaries=[True, True, True],
-                                   is_complex=False, precision=1)
+                                   is_complex=False, precision=1, spectrum_range=[-6.1,6.1])
 # require the calculation of DOS
 calculation = kite.Calculation(configuration)
 calculation.dos(num_points=1000, num_moments=256, num_random=1, num_disorder=1)
