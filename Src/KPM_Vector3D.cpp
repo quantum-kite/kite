@@ -702,7 +702,7 @@ void KPM_Vector <T, 3>::KPM_MOTOR(T * phi0a, T * phiM1a, T *phiM2a, unsigned axi
         for( i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0 += STRIDE )
           {
             
-            std::size_t istr = ((i2 - NGHOSTS) /STRIDE * r.lStr[1]*r.lStr[0] + (i1 - NGHOSTS) /STRIDE) * r.lStr[0] + (i0 - NGHOSTS)/ STRIDE;
+            std::size_t istr = ((i2 - NGHOSTS) /STRIDE * r.lStr[1] + (i1 - NGHOSTS) /STRIDE) * r.lStr[0] + (i0 - NGHOSTS)/ STRIDE;
             if(h.cross_mozaic.at(istr))
               initiate_stride<MULT>(istr);
             // These four lines pertrain only to the magnetic field
