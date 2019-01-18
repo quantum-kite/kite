@@ -15,7 +15,7 @@ def square_lattice(onsite=(0, 0)):
 
     return lat
 
-nx = ny = 1
+nx = ny = 2
 lx = ly = 256
 lattice = square_lattice()
 

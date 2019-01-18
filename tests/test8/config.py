@@ -48,9 +48,9 @@ def graphene_initial(onsite=(0, 0)):
 
 lattice, disorded_structural = graphene_initial()
 
-nx = ny = 4
-lx = 256
-ly = 256
+nx = ny = 2
+lx = 128
+ly = 128
 configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
                                  is_complex=True, precision=1, spectrum_range=[-EnergyScale, EnergyScale])
 
@@ -59,9 +59,9 @@ pos_matrix=[]
 sub_matrix=[]
 d1 = 32
 d2 = 32
-N = 128
-for i in range(-10,10):
-  for j in range(-10,10):
+N = 32
+for i in range(-2,2):
+  for j in range(-2,2):
     pos_matrix.append([d1+i,d2+j])
     pos_matrix.append([d1+i,d2+j])
     sub_matrix.append('A')

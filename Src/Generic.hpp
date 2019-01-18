@@ -6,6 +6,7 @@
 /****************************************************************/
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <omp.h>
 #include <time.h>
 #include <Eigen/Dense>
@@ -32,7 +33,7 @@
 // STRIDE is the size of the memory blocks used in the program
 // COMPILE_MAIN is a flag to prevent compilation of unnecessary parts of the code when testing
 #ifndef MEMORY
-#define MEMORY 64
+#define MEMORY 16
 #endif
 
 #ifndef STRIDE
@@ -48,7 +49,7 @@
 #endif
 
 #ifndef ESTIMATE_TIME
-#define ESTIMATE_TIME 1
+#define ESTIMATE_TIME 0
 #endif
 
 #ifndef COMPILE_WAVEPACKET

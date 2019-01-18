@@ -1,5 +1,4 @@
 L=256
-N=128
 S=1
 R=1
 W=0.1
@@ -54,5 +53,5 @@ configuration = kite.Configuration(divisions=[nx, ny], length=[L, L], boundaries
 
 
 calculation = kite.Calculation(configuration) 
-calculation.singleshot_conductivity_dc(energy=[(n/100.0 - 0.5)*2 for n in range(101)], num_moments=256, num_random=1, num_disorder=1,direction='xx', eta=0.02)
+calculation.singleshot_conductivity_dc(energy=[(n/100.0 - 0.5)*2 for n in range(11)], num_moments=64, num_random=1, num_disorder=1,direction='xx', eta=0.02)
 kite.config_system(lattice, configuration, calculation, disorder=disorder, filename='config.h5')
