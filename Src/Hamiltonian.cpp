@@ -175,11 +175,11 @@ void Hamiltonian<T,D>::build_Anderson_disorder() {
             }
           sum++;
         }
-	
+      
       if(model.at(i) == 3) // Deterministic
         {
           int count = 0;
-          while( vv(i, count) != -1 )
+          while(count < vv.cols() &&  vv(i, count) != -1 )
             {
               int io = vv(i, count);
               Anderson_orb_address.at(io) = -1;

@@ -41,7 +41,7 @@ def graphene_initial(onsite=(1.673819, -1.673819)):
 
 
 nx = ny = 2
-N=128
+N=32
 B=0
 Lx=256
 Ly=256

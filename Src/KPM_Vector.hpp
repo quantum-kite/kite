@@ -17,15 +17,15 @@ private:
   std::size_t      transf_max[D]; // [d][edged]
   std::size_t transf_bound[D][2]; // [d][edged]
   T          ***mult_t1_ghost_cor;
-  Coordinates<std::size_t,D+1>  x;
   T                         *phi0;
   T                        *phiM1;
   T                        *phiM2;
   const std::size_t           std;
-
 public:
-  LatticeStructure<D>        & r;
-  Hamiltonian<T,D>           & h;
+  LatticeStructure<D>         & r;
+  Hamiltonian<T,D>            & h;
+  Coordinates<std::size_t,D+1>  x;
+
   typedef typename extract_value_type<T>::value_type value_type;
   using KPM_VectorBasis<T,D>::simul;
   using KPM_VectorBasis<T,D>::index;
@@ -68,6 +68,9 @@ public:
 
 };
 
+
+#include "KPM_Vector2D.hpp"
+#include "KPM_Vector3D.hpp"
 
 
 

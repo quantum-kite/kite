@@ -6,15 +6,27 @@ template <typename T>
 KPMRandom<T>::KPMRandom() {
   init_random();
 };
+
 template <typename T>
 void KPMRandom<T>::init_random()
 {
-  std::random_device r;
-  std::array<int, 624> seed_data;
-  std::generate(seed_data.begin(), seed_data.end(), std::ref(r));
-  std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
-  rng.seed(seq); 
+
+  char *env;
+  env = getenv("SEED");
+    if(env==NULL){
+      // Didn't find the seed
+      std::random_device r;
+      std::array<int, 624> seed_data;
+      std::generate(seed_data.begin(), seed_data.end(), std::ref(r));
+      std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
+      rng.seed(seq); 
+    }
+    else {
+      // Found the seed
+      rng.seed(atoi(env)); 
+    }
 };
+
 template <typename T>
 double  KPMRandom<T>::get() {
   return dist(rng);

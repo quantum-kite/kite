@@ -6,6 +6,7 @@
 /****************************************************************/
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <omp.h>
 #include <time.h>
 #include <Eigen/Dense>
@@ -48,7 +49,7 @@
 #endif
 
 #ifndef ESTIMATE_TIME
-#define ESTIMATE_TIME 1
+#define ESTIMATE_TIME 0
 #endif
 
 #ifndef COMPILE_WAVEPACKET

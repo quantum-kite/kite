@@ -100,7 +100,7 @@ unsigned LatticeStructure<D>::get_BorderSize() {
     size = 2 * std::max(Ld[0],ld[1]) * Orb * n_threads * NGHOSTS;
     break;
   case 3:
-    size = (2 * std::max(Ld[0] * Ld[1], std::max(Ld[0] * ld[2] , ld[1]*ld[2]) ) * Orb * n_threads) * NGHOSTS;
+    size = 2 * std::max(Ld[0] * Ld[1], std::max(Ld[0] * ld[2] , ld[1]*ld[2]) ) * Orb * n_threads * NGHOSTS;
     break;
   default:
     std::cout << "Error in LatticeBuilding.hpp. Exiting.\n";

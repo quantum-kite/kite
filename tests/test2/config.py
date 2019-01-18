@@ -27,9 +27,9 @@ def graphene(onsite=(0, 0)):
 
 lattice = graphene()
 nx = ny = 2
-lx = ly = 1024
+lx = ly = 256
 configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True], is_complex=False, precision=1, spectrum_range=[-3.1, 3.1])
 calculation = kite.Calculation(configuration)
 # calculation.dos(num_points=1000, num_moments=512, num_random=1, num_disorder=1)
-calculation.conductivity_optical(num_points=1024, num_disorder=1, num_random=1, num_moments=256, direction='yy')
+calculation.conductivity_optical(num_points=1024, num_disorder=1, num_random=1, num_moments=64, direction='yy')
 kite.config_system(lattice, configuration, calculation, filename='config.h5')

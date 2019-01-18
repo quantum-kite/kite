@@ -3,6 +3,10 @@
 # This script will compare the .h5 files of all the tests
 
 
+S=3  # the seed that will be used by KITE
+
+
+
 echo "Objects:    dif_norm    max_dif      norm1      norm2       %"
 for i in test*; do
     cat $i/description
@@ -10,7 +14,7 @@ for i in test*; do
         cd $i
         python config.py > /dev/null
         cd ..
-        ./KITEx $i/config.h5 > /dev/null
+        SEED=$S ../build/KITEx $i/config.h5 > /dev/null
     fi
 
     while read line; do 

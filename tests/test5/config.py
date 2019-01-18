@@ -35,11 +35,11 @@ lattice = square_lattice([0])
 # each of which is calculated in parallel
 nx = ny = 2
 # number of unit cells in each direction.
-lx = 512
+lx = 256
 ly = 256
 configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
                                    is_complex=False, precision=1, spectrum_range=[-4.1,4.1])
 
 calculation_ldos = kite.Calculation(configuration)
-calculation_ldos.ldos(energy=np.linspace(-1, 1, 100), num_moments=128, num_disorder=1, position=[4,3], sublattice='A')
+calculation_ldos.ldos(energy=np.linspace(-1, 1, 100), num_moments=32, num_disorder=1, position=[4,3], sublattice='A')
 kite.config_system(lattice, configuration, calculation_ldos, filename='config.h5')
