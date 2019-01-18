@@ -67,4 +67,4 @@ template class KPMRandom<long double>;
 
 template class KPMRandom<std::complex<float>>;
 template class KPMRandom<std::complex<double>>;
-emplate class KPMRandom<std::complex<long double>>;
+template class KPMRandom<std::complex<long double>>;
