@@ -28,7 +28,7 @@ nx = ny = 1
 lx = ly = 256
 N = 2048
 configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
-                                   is_complex=True, precision=1)
+                                   is_complex=True, precision=1, spectrum_range=[-4.1,4.1])
 calculation = kite.Calculation(configuration)
 mod = kite.Modification(magnetic_field = 160)
 calculation.dos(num_points=4096, num_moments=N, num_random=1, num_disorder=1)

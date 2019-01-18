@@ -34,11 +34,11 @@ lattice = square_lattice()
 # each of which is calculated in parallel
 nx = ny = 1
 # number of unit cells in each direction.
-lx = ly = 64
+lx = ly = 256
 configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
                                    is_complex=False, precision=1, spectrum_range=[-4.2, 4.2])
 # require the calculation of DOS
 calculation = kite.Calculation(configuration)
-calculation.dos(num_points=4*8192, num_moments=4096*4, num_random=1, num_disorder=1)
+calculation.dos(num_points=1024, num_moments=1024, num_random=1, num_disorder=1)
 # configure the *.h5 file
 kite.config_system(lattice, configuration, calculation, filename='square_lattice.h5')
