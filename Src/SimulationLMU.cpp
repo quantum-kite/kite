@@ -114,9 +114,6 @@ void Simulation<T,D>::calc_LDOS(){
           Global.calculate_ldos = true;
         } catch(H5::Exception& e) {
           debug_message("ldos: no need to calculate.\n");
-          debug_message("calculate_ldos: "); 
-          debug_message(Global.calculate_ldos);
-          debug_message("\n");
         }
           file->close();  
           delete file;

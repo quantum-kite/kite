@@ -22,19 +22,135 @@ std::complex<double> green(int n, int sigma, std::complex<double> energy){
 }
 
 template <typename T, unsigned D>
-void Simulation<T,D>::Single_Shot(double EScale, singleshot_measurement_queue queue) {
+void Simulation<T,D>::calc_singleshot() {
+  Eigen::Array<double, -1, 1> energies;
+  Eigen::Array<double, -1, 1> gammas;
+  Eigen::Array<int, -1, 1> preserve_disorders;
+  Eigen::Array<int, -1, 1> moments;
+  int NDisorder, NRandom, direction;
+  std::string direction_string;
+
+    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
+  int calculate_singleshot_local = false;
+#pragma omp master
+{
+  H5::H5File * file1 = new H5::H5File(name, H5F_ACC_RDONLY);
+  Global.calculate_singleshot = false;
+  try{
+    debug_message("single_shot dc checking if we need to calculate it.\n");
+    get_hdf5<int>(&direction, file1, (char *)   "/Calculation/singleshot_conductivity_dc/Direction");
+    Global.calculate_singleshot = true;
+    
+    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
+  } catch(H5::Exception& e) {debug_message("singleshot dc: no need to calculate it.\n");}
+  file1->close();
+  delete file1;
+    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
+  
+}
+#pragma omp barrier
+    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
+#pragma omp critical
+  calculate_singleshot_local = Global.calculate_singleshot;
+#pragma omp barrier
+
+    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
+
+  if(calculate_singleshot_local){
+#pragma omp critical
+{
+      H5::H5File * file = new H5::H5File(name, H5F_ACC_RDONLY);
+    get_hdf5<int>(&direction, file, (char *)   "/Calculation/singleshot_conductivity_dc/Direction");
+    get_hdf5<int>(&NRandom, file, (char *)   "/Calculation/singleshot_conductivity_dc/NumRandoms");
+    get_hdf5<int>(&NDisorder, file, (char *)   "/Calculation/singleshot_conductivity_dc/NumDisorder");
+       
+    if(direction == 0)
+      direction_string = "x,x";
+    else if(direction == 1)
+      direction_string = "y,y";
+    else{
+      std::cout << "Invalid singleshot direction. Has to be xx or yy. Exiting.\n";
+      exit(1);
+    }
+       
+    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
+    // We also need to determine the number of energies that we need to calculate
+    H5::DataSet * dataset_energy     	= new H5::DataSet(file->openDataSet("/Calculation/singleshot_conductivity_dc/Energy"));
+    H5::DataSpace * dataspace_energy 	= new H5::DataSpace(dataset_energy->getSpace());
+    hsize_t dims_out[2];		
+    dataspace_energy->getSimpleExtentDims(dims_out, NULL);	
+    energies = Eigen::Array<double, -1, 1>::Zero(dims_out[0]*dims_out[1], 1);	
+    delete dataspace_energy;
+    delete dataset_energy;
+    get_hdf5<double>(energies.data(),  	file, (char *)   "/Calculation/singleshot_conductivity_dc/Energy");
+      
+    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
+    // We also need to determine the number of gammas that we need to calculate
+    H5::DataSet * dataset_gamma     	= new H5::DataSet(file->openDataSet("/Calculation/singleshot_conductivity_dc/Gamma"));
+    H5::DataSpace * dataspace_gamma 	= new H5::DataSpace(dataset_gamma->getSpace());
+    dataspace_gamma->getSimpleExtentDims(dims_out, NULL);	
+    gammas = Eigen::Array<double, -1, 1>::Zero(dims_out[0]*dims_out[1], 1);	
+    delete dataspace_gamma;
+    delete dataset_gamma;
+    get_hdf5<double>(gammas.data(),  	file, (char *)   "/Calculation/singleshot_conductivity_dc/Gamma");
+    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
+
+    // We also need to determine the number of preserve disorders that we need to calculate
+    H5::DataSet * dataset_preserve_disorder     	= new H5::DataSet(file->openDataSet("/Calculation/singleshot_conductivity_dc/PreserveDisorder"));
+    H5::DataSpace * dataspace_preserve_disorder 	= new H5::DataSpace(dataset_preserve_disorder->getSpace());
+    dataspace_preserve_disorder->getSimpleExtentDims(dims_out, NULL);	
+    preserve_disorders = Eigen::Array<int, -1, 1>::Zero(dims_out[0]*dims_out[1], 1);	
+    delete dataspace_preserve_disorder;
+    delete dataset_preserve_disorder;
+    get_hdf5<int>(preserve_disorders.data(),  	file, (char *)   "/Calculation/singleshot_conductivity_dc/PreserveDisorder");
+
+    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
+    // We also need to determine the number of moments that we need to calculate
+    H5::DataSet * dataset_moments     	= new H5::DataSet(file->openDataSet("/Calculation/singleshot_conductivity_dc/NumMoments"));
+    H5::DataSpace * dataspace_moments 	= new H5::DataSpace(dataset_moments->getSpace());
+    dataspace_moments->getSimpleExtentDims(dims_out, NULL);	
+    moments = Eigen::Array<int, -1, 1>::Zero(dims_out[0]*dims_out[1], 1);	
+    delete dataspace_moments;
+    delete dataset_moments;
+    get_hdf5<int>(moments.data(),  	file, (char *)   "/Calculation/singleshot_conductivity_dc/NumMoments");
+
+    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
+    file->close();
+  delete file;
+}
+
+    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
+  singleshot(energies, gammas, preserve_disorders, moments, NDisorder, NRandom, direction_string);
+    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
+  }
+}
+
+template <typename T, unsigned D>
+void Simulation<T,D>::singleshot(Eigen::Array<double, -1, 1> energies,
+  Eigen::Array<double, -1, 1> gammas,
+  Eigen::Array<int, -1, 1> preserve_disorders,
+  Eigen::Array<int, -1, 1> moments,
+  int NDisorder, int NRandomV, std::string direction_string){
   // Calculate the longitudinal dc conductivity for a single value of the energy
     
+    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
   T tmp = assign_value(0.,0.);
   debug_message("Entered Single_Shot\n");
     
   // Obtain the relevant quantities from the queue
-  int NRandomV = queue.NRandom;
-  int NDisorder = queue.NDisorder;
-  Eigen::Array<double, -1, -1> jobs = queue.singleshot_energiesgammas;
-  std::string indices_string = queue.direction_string;
-  std::string name_dataset = queue.label;
-  int N_energies = jobs.rows();
+  std::string indices_string = direction_string;
+  std::string name_dataset = "/Calculation/singleshot_conductivity_dc/SingleShot";
+  int N_energies = energies.rows();
+  double EnergyScale;
+    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
+
+  H5::H5File * fetchfile         = new H5::H5File(name, H5F_ACC_RDONLY);
+  get_hdf5<double>(&EnergyScale,  fetchfile, (char *)   "/EnergyScale");
+  delete fetchfile;
+  double EScale = EnergyScale;
+
+
+    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
     
   // Fixing the factor
   double unit_cell_area = fabs(r.rLat.determinant());
@@ -45,6 +161,7 @@ void Simulation<T,D>::Single_Shot(double EScale, singleshot_measurement_queue qu
     
   double factor = -2.0*spin_degeneracy*number_of_orbitals/unit_cell_area;	// This is in units of sigma_0, hence the 4
     
+    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
   // process the string with indices and verify if the demanded
   // calculation is meaningful. For that to be true, this has to be a 
   // longitudinal conductivity
@@ -58,6 +175,7 @@ void Simulation<T,D>::Single_Shot(double EScale, singleshot_measurement_queue qu
 
   // initialize the kpm vectors necessary for this calculation
   typedef typename extract_value_type<T>::value_type value_type;
+    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
 	
   // initialize the conductivity array
 
@@ -98,13 +216,13 @@ void Simulation<T,D>::Single_Shot(double EScale, singleshot_measurement_queue qu
 
     // iteration over each energy and gammma
     for(int job_index = 0; job_index < N_energies; job_index++){
-      job_energy = jobs(job_index, 0);
-      job_gamma = jobs(job_index, 1);
-      job_preserve_disorder = jobs(job_index, 2);
-      job_NMoments = int(jobs(job_index,3));
+      job_energy = energies(job_index);
+      job_gamma = gammas(job_index);
+      job_preserve_disorder = preserve_disorders(job_index);
+      job_NMoments = moments(job_index);
       std::complex<double> energy(job_energy, job_gamma);
         
-      if(job_preserve_disorder == 0.0){
+      if(job_preserve_disorder == 0){
         h.generate_disorder();
         h.build_velocity(indices.at(0),0u);
         h.build_velocity(indices.at(1),1u);
@@ -272,13 +390,13 @@ void Simulation<T,D>::Single_Shot(double EScale, singleshot_measurement_queue qu
       
     // Create array to store the data
     Eigen::Array<double, -1, -1> store_data;
-    store_data = Eigen::Array<double, -1, -1>::Zero(4, jobs.rows());
+    store_data = Eigen::Array<double, -1, -1>::Zero(4, energies.rows());
       
     for(int ener = 0; ener < N_energies; ener++)
       {
-        store_data(0, ener) = jobs.real()(ener, 0)*EScale;
-        store_data(1, ener) = jobs.real()(ener, 1)*EScale;
-        store_data(2, ener) = jobs(ener, 3);
+        store_data(0, ener) = energies(ener)*EScale;
+        store_data(1, ener) = gammas(ener)*EScale;
+        store_data(2, ener) = preserve_disorders(ener);
         store_data(3, ener) = Global.singleshot_cond.real()(ener);
       }
       

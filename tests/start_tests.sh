@@ -12,7 +12,7 @@ for i in test*; do
     cat $i/description
     if [[ "$1" == "redo" ]]; then
         cd $i
-        python config.py > /dev/null
+        #python config.py > /dev/null
         cd ..
         SEED=$S ../build/KITEx $i/config.h5 > /dev/null
     fi

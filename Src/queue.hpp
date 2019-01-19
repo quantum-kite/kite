@@ -34,6 +34,8 @@ public:
   void  embed_time(double avg_duration);
 };
 
+std::string num2str2(int dir_num);
+std::string num2str3(int dir_num);
 std::string print_time(double);
 std::vector<measurement_queue> fill_queue(char *);
 std::vector<singleshot_measurement_queue> fill_singleshot_queue(char *name);

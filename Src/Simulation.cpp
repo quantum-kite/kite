@@ -122,7 +122,8 @@ void Simulation<T,D>::Measure_Gamma(measurement_queue queue) {
     if(dim == 3){
       Gamma3D(NRandomV, NDisorder, N_moments, indices, name_dataset);
     } else {
-      GammaGeneral(NRandomV, NDisorder, N_moments, indices, name_dataset);
+      Gamma1D(NRandomV, NDisorder, N_moments.at(0), indices, name_dataset);
+      //GammaGeneral(NRandomV, NDisorder, N_moments, indices, name_dataset);
     }
   }
   

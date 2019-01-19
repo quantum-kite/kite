@@ -337,7 +337,7 @@ std::vector<singleshot_measurement_queue> fill_singleshot_queue(char *name){
     get_hdf5<int>(moments.data(),  	file, (char *)   "/Calculation/singleshot_conductivity_dc/NumMoments");
 
     queue.push_back(singleshot_measurement_queue(direction_string, moments,
-                                                 NDisorder, NRandom, "/Calculation/singleshot_conductivity_dc/SingleShot",
+           NDisorder, NRandom, "/Calculation/singleshot_conductivity_dc/SingleShot",
                                                  energies, gammas, preserve_disorders));
       
   } catch(H5::Exception& e) {debug_message("singleshot dc: no need to calculate it.\n");}

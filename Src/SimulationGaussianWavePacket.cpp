@@ -19,10 +19,32 @@ class KPM_Vector;
 #warning "Cannot compile SimulationGaussianWavepacket.cpp. This error is not fatal, but KITE will not be able to run GaussianWavepacket(). A more recent version of gcc (8.0) is required."
 #endif
 
+template <typename T, unsigned DIM>
+void Simulation<T, DIM>::calc_wavepacket(){
+    // Check if the Gaussian_Wave_Packet needs to be calculated
+    bool local_calculate_wavepacket;
+#pragma omp master
+    {
+        H5::H5File * file = new H5::H5File(name, H5F_ACC_RDONLY);
+      try{
+        int dummy_var;
+        get_hdf5<int>(&dummy_var, file, (char *) "/Calculation/gaussian_wave_packet/NumDisorder");
+        Global.calculate_wavepacket = 1;
+      } catch(H5::Exception& e) {debug_message("Wavepacket: no need to calculate.\n");}
+        file->close();  
+        delete file;
+    }
+#pragma omp critical
+    local_calculate_wavepacket = Global.calculate_wavepacket;
+      
+    // Now calculate it
+#pragma omp barrier
+    if(local_calculate_wavepacket)
+      Gaussian_Wave_Packet();
+}
 
 template <typename T, unsigned D>
-void Simulation<T,D>::Gaussian_Wave_Packet()
-{
+void Simulation<T,D>::Gaussian_Wave_Packet(){
 #if COMPILE_WAVEPACKET
   ComplexTraits<T> CT;
   KPM_Vector<T,D> phi (2, *this), sum_ket(1u,*this);

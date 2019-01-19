@@ -32,6 +32,11 @@ struct GLOBAL_VARIABLES {
   bool calculate_arpes;
   bool calculate_ldos;
   bool calculate_wavepacket;
+  bool calculate_dos;
+  bool calculate_conddc;
+  bool calculate_condopt;
+  bool calculate_condopt2;
+  bool calculate_singleshot;
 
   GLOBAL_VARIABLES();
   void addbond ( std::size_t, std::ptrdiff_t, T );
