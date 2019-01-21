@@ -49,9 +49,9 @@ void Simulation<T,D>::cheb_iteration(KPM_Vector<T,D>* kpm, long int current_iter
 };
 
 
-template <typename T,unsigned D>
-void Simulation<T,D>::Measure_Gamma(measurement_queue queue) {
-  debug_message("Entered Measure_Gamma.\n");
+//template <typename T,unsigned D>
+//void Simulation<T,D>::Measure_Gamma(measurement_queue queue) {
+  //debug_message("Entered Measure_Gamma.\n");
   /* Calculates the Gamma matrix of parameters given by 'indices_string'. These matrices
      are used to calculate various properties of the quantum system, such as the density
      of states and the optical conductivity. The Gamma matrix is a multi-dimensional matrix 
@@ -88,48 +88,48 @@ void Simulation<T,D>::Measure_Gamma(measurement_queue queue) {
 
 
   // Obtain the quantities needed for the simulation from the queue
-  int NRandomV = queue.NRandom;
-  int NDisorder = queue.NDisorder;
-  std::vector<int> N_moments = queue.NMoments;
-  std::string indices_string = queue.direction_string;
-  std::string name_dataset = queue.label;
+  //int NRandomV = queue.NRandom;
+  //int NDisorder = queue.NDisorder;
+  //std::vector<int> N_moments = queue.NMoments;
+  //std::string indices_string = queue.direction_string;
+  //std::string name_dataset = queue.label;
  
-  debug_message("Indices: "); debug_message(indices_string); debug_message(".\n");
+  //debug_message("Indices: "); debug_message(indices_string); debug_message(".\n");
 		
 
 
-  // First of all, we need to process the indices_string into something the program can use
-#pragma omp barrier
-  std::vector<std::vector<unsigned>> indices = process_string(indices_string);
-  int dim = indices.size();
+  //// First of all, we need to process the indices_string into something the program can use
+//#pragma omp barrier
+  //std::vector<std::vector<unsigned>> indices = process_string(indices_string);
+  //int dim = indices.size();
 		
 		
 		
-  // Check if the dimensions match
-  if(dim != int(N_moments.size())){
-    std::cout << "Dimension of the Gamma matrix does not match the number of chebyshev moments. Aborting.\n";
-    exit(1);
-  }
+  //// Check if the dimensions match
+  //if(dim != int(N_moments.size())){
+    //std::cout << "Dimension of the Gamma matrix does not match the number of chebyshev moments. Aborting.\n";
+    //exit(1);
+  //}
     
-  if(dim == 2 and MEMORY > 2){
-    if(N_moments.at(0)%MEMORY!=0 or N_moments.at(1)%MEMORY!=0){
-      std::cout << "The number of Chebyshev moments ("<< N_moments.at(0)<<","<< N_moments.at(1)<<")"; 
-      std::cout << "has to be a multiple of MEMORY ("<< MEMORY <<"). Exiting.\n";
-      exit(1);
-    }
-    Gamma2D(NRandomV, NDisorder, N_moments, indices, name_dataset);
-  } else {
-    if(dim == 3){
-      Gamma3D(NRandomV, NDisorder, N_moments, indices, name_dataset);
-    } else {
-      Gamma1D(NRandomV, NDisorder, N_moments.at(0), indices, name_dataset);
-      //GammaGeneral(NRandomV, NDisorder, N_moments, indices, name_dataset);
-    }
-  }
+  //if(dim == 2 and MEMORY > 2){
+    //if(N_moments.at(0)%MEMORY!=0 or N_moments.at(1)%MEMORY!=0){
+      //std::cout << "The number of Chebyshev moments ("<< N_moments.at(0)<<","<< N_moments.at(1)<<")"; 
+      //std::cout << "has to be a multiple of MEMORY ("<< MEMORY <<"). Exiting.\n";
+      //exit(1);
+    //}
+    //Gamma2D(NRandomV, NDisorder, N_moments, indices, name_dataset);
+  //} else {
+    //if(dim == 3){
+      //Gamma3D(NRandomV, NDisorder, N_moments, indices, name_dataset);
+    //} else {
+      //Gamma1D(NRandomV, NDisorder, N_moments.at(0), indices, name_dataset);
+      ////GammaGeneral(NRandomV, NDisorder, N_moments, indices, name_dataset);
+    //}
+  //}
   
   
-  debug_message("Left Measure_Gamma\n");
-};
+  //debug_message("Left Measure_Gamma\n");
+//};
 
 
 template <typename T,unsigned D>
