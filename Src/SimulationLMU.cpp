@@ -101,8 +101,13 @@ void Simulation<T,D>::LMU(int NDisorder, int NMoments, Eigen::Array<unsigned lon
 template <typename T,unsigned D>
 void Simulation<T,D>::calc_LDOS(){
     debug_message("Entered Simulation::calc_LDOS\n");
-    //Check if the local density of states needs to be calculated
 
+    // Make sure that all the threads are ready before opening any files
+    // Some threads could still be inside the Simulation constructor
+    // This barrier is essential
+#pragma omp barrier
+
+    //Check if the local density of states needs to be calculated
   bool local_calculate_ldos = false;
 #pragma omp master
   {

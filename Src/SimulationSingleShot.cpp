@@ -30,7 +30,10 @@ void Simulation<T,D>::calc_singleshot() {
   int NDisorder, NRandom, direction;
   std::string direction_string;
 
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
+    // Make sure that all the threads are ready before opening any files
+    // Some threads could still be inside the Simulation constructor
+    // This barrier is essential
+#pragma omp barrier
   int calculate_singleshot_local = false;
 #pragma omp master
 {
@@ -41,20 +44,16 @@ void Simulation<T,D>::calc_singleshot() {
     get_hdf5<int>(&direction, file1, (char *)   "/Calculation/singleshot_conductivity_dc/Direction");
     Global.calculate_singleshot = true;
     
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
   } catch(H5::Exception& e) {debug_message("singleshot dc: no need to calculate it.\n");}
   file1->close();
   delete file1;
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
   
 }
 #pragma omp barrier
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
 #pragma omp critical
   calculate_singleshot_local = Global.calculate_singleshot;
 #pragma omp barrier
 
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
 
   if(calculate_singleshot_local){
 #pragma omp critical
@@ -73,7 +72,6 @@ void Simulation<T,D>::calc_singleshot() {
       exit(1);
     }
        
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
     // We also need to determine the number of energies that we need to calculate
     H5::DataSet * dataset_energy     	= new H5::DataSet(file->openDataSet("/Calculation/singleshot_conductivity_dc/Energy"));
     H5::DataSpace * dataspace_energy 	= new H5::DataSpace(dataset_energy->getSpace());
@@ -84,7 +82,6 @@ void Simulation<T,D>::calc_singleshot() {
     delete dataset_energy;
     get_hdf5<double>(energies.data(),  	file, (char *)   "/Calculation/singleshot_conductivity_dc/Energy");
       
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
     // We also need to determine the number of gammas that we need to calculate
     H5::DataSet * dataset_gamma     	= new H5::DataSet(file->openDataSet("/Calculation/singleshot_conductivity_dc/Gamma"));
     H5::DataSpace * dataspace_gamma 	= new H5::DataSpace(dataset_gamma->getSpace());
@@ -93,7 +90,6 @@ void Simulation<T,D>::calc_singleshot() {
     delete dataspace_gamma;
     delete dataset_gamma;
     get_hdf5<double>(gammas.data(),  	file, (char *)   "/Calculation/singleshot_conductivity_dc/Gamma");
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
 
     // We also need to determine the number of preserve disorders that we need to calculate
     H5::DataSet * dataset_preserve_disorder     	= new H5::DataSet(file->openDataSet("/Calculation/singleshot_conductivity_dc/PreserveDisorder"));
@@ -104,7 +100,6 @@ void Simulation<T,D>::calc_singleshot() {
     delete dataset_preserve_disorder;
     get_hdf5<int>(preserve_disorders.data(),  	file, (char *)   "/Calculation/singleshot_conductivity_dc/PreserveDisorder");
 
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
     // We also need to determine the number of moments that we need to calculate
     H5::DataSet * dataset_moments     	= new H5::DataSet(file->openDataSet("/Calculation/singleshot_conductivity_dc/NumMoments"));
     H5::DataSpace * dataspace_moments 	= new H5::DataSpace(dataset_moments->getSpace());
@@ -114,14 +109,11 @@ void Simulation<T,D>::calc_singleshot() {
     delete dataset_moments;
     get_hdf5<int>(moments.data(),  	file, (char *)   "/Calculation/singleshot_conductivity_dc/NumMoments");
 
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
     file->close();
   delete file;
 }
 
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
   singleshot(energies, gammas, preserve_disorders, moments, NDisorder, NRandom, direction_string);
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
   }
 }
 
@@ -133,7 +125,6 @@ void Simulation<T,D>::singleshot(Eigen::Array<double, -1, 1> energies,
   int NDisorder, int NRandomV, std::string direction_string){
   // Calculate the longitudinal dc conductivity for a single value of the energy
     
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
   T tmp = assign_value(0.,0.);
   debug_message("Entered Single_Shot\n");
     
@@ -142,15 +133,18 @@ void Simulation<T,D>::singleshot(Eigen::Array<double, -1, 1> energies,
   std::string name_dataset = "/Calculation/singleshot_conductivity_dc/SingleShot";
   int N_energies = energies.rows();
   double EnergyScale;
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
 
+#pragma omp critical
+{
   H5::H5File * fetchfile         = new H5::H5File(name, H5F_ACC_RDONLY);
   get_hdf5<double>(&EnergyScale,  fetchfile, (char *)   "/EnergyScale");
+  fetchfile->close();
   delete fetchfile;
+}
+#pragma omp barrier
   double EScale = EnergyScale;
 
 
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
     
   // Fixing the factor
   double unit_cell_area = fabs(r.rLat.determinant());
@@ -161,7 +155,6 @@ void Simulation<T,D>::singleshot(Eigen::Array<double, -1, 1> energies,
     
   double factor = -2.0*spin_degeneracy*number_of_orbitals/unit_cell_area;	// This is in units of sigma_0, hence the 4
     
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
   // process the string with indices and verify if the demanded
   // calculation is meaningful. For that to be true, this has to be a 
   // longitudinal conductivity
@@ -175,7 +168,6 @@ void Simulation<T,D>::singleshot(Eigen::Array<double, -1, 1> energies,
 
   // initialize the kpm vectors necessary for this calculation
   typedef typename extract_value_type<T>::value_type value_type;
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
 	
   // initialize the conductivity array
 

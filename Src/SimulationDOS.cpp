@@ -46,6 +46,10 @@ template <typename T,unsigned D>
 void Simulation<T,D>::calc_DOS(){
     debug_message("Entered Simulation::calc_DOS\n");
 
+    // Make sure that all the threads are ready before opening any files
+    // Some threads could still be inside the Simulation constructor
+    // This barrier is essential
+#pragma omp barrier
 
   int NMoments, NRandom, NDisorder;
   bool local_calculate_dos = false;
@@ -76,11 +80,11 @@ if(local_calculate_dos){
     get_hdf5<int>(&NMoments,  file, (char *)   "/Calculation/dos/NumMoments");
     get_hdf5<int>(&NDisorder, file, (char *)   "/Calculation/dos/NumDisorder");
     get_hdf5<int>(&NRandom,   file, (char *)   "/Calculation/dos/NumRandoms");
-
     file->close();
     delete file;
 
 }
+#pragma omp barrier
   DOS(NMoments, NRandom, NDisorder);
   }
 

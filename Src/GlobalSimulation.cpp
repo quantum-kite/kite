@@ -22,44 +22,32 @@ class KPM_Vector;
 template <typename T,unsigned D>
 GlobalSimulation<T,D>::GlobalSimulation( char *name ) : rglobal(name)
 {
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
   debug_message("Entered global_simulation\n");
   Global.ghosts.resize( rglobal.get_BorderSize() );
   std::fill(Global.ghosts.begin(), Global.ghosts.end(), 0);
     
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
   // Regular quantities to calculate, such as DOS and CondXX
-  H5::H5File * file         = new H5::H5File(name, H5F_ACC_RDONLY);
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
+  H5::H5File * file12         = new H5::H5File(name, H5F_ACC_RDONLY);
 
   // Fetch the energy scale and the magnetic field, if it exists
-  get_hdf5<double>(&EnergyScale,  file, (char *)   "/EnergyScale");
-  delete file;
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
+  get_hdf5<double>(&EnergyScale,  file12, (char *)   "/EnergyScale");
+  file12->close();
+  delete file12;
   
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
   omp_set_num_threads(rglobal.n_threads);
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
   debug_message("Starting parallelization\n");
 #pragma omp parallel default(shared)
   {
     Simulation<T,D> simul(name, Global);
+  //std::cout << "got to line " << __LINE__ << " in file " << __FILE__ << "\n" << std::flush;
 
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
-    //simul.calc_conddc();
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
-    //simul.calc_condopt();
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
-    //simul.calc_condopt2();
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
-    //simul.calc_singleshot();
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
+    simul.calc_conddc();
+    simul.calc_condopt();
+    simul.calc_condopt2();
+    simul.calc_singleshot();
     simul.calc_DOS();
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
     simul.calc_wavepacket();
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
     simul.calc_LDOS(); 
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
     simul.calc_ARPES(); // fetches parameters from .h5 file and calculates ARPES
 
   }

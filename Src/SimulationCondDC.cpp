@@ -19,78 +19,56 @@ template <typename T,unsigned D>
 void Simulation<T,D>::calc_conddc(){
     debug_message("Entered Simulation::calc_conddc\n");
 
+    // Make sure that all the threads are ready before opening any files
+    // Some threads could still be inside the Simulation constructor
+    // This barrier is essential
+#pragma omp barrier
 
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
-    //std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
-  //int NMoments, NRandom, NDisorder, direction;
-    //std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n" << std::flush;
-  //bool local_calculate_conddc = false;
-    //std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n" << std::flush;
-//#pragma omp master
-//{
-    //std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
-  //H5::H5File * file = new H5::H5File(name, H5F_ACC_RDONLY);
-    //std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
-  //Global.calculate_conddc = false;
-  //try{
-    //int dummy_variable;
-    //std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n" << std::flush;
-    //get_hdf5<int>(&dummy_variable,  file, (char *)   "/Calculation/conductivity_dc/NumMoments");
-    //std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n" << std::flush;
-    //Global.calculate_conddc = true;
-    //std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n" << std::flush;
-  //} catch(H5::Exception& e) {debug_message("CondDC: no need to calculate CondDC.\n");}
-  //file->close();
-    //std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n" << std::flush;
-  //delete file;
-    //std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n" << std::flush;
-//}
-//#pragma omp barrier
-//#pragma omp critical
-  //local_calculate_conddc = Global.calculate_conddc;
-    //std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n" << std::flush;
+  int NMoments, NRandom, NDisorder, direction;
+  bool local_calculate_conddc = false;
+#pragma omp master
+{
+  H5::H5File * file = new H5::H5File(name, H5F_ACC_RDONLY);
+  Global.calculate_conddc = false;
+  try{
+    int dummy_variable;
+    get_hdf5<int>(&dummy_variable,  file, (char *)   "/Calculation/conductivity_dc/NumMoments");
+    Global.calculate_conddc = true;
+  } catch(H5::Exception& e) {debug_message("CondDC: no need to calculate CondDC.\n");}
+  file->close();
+  delete file;
+}
+#pragma omp barrier
+#pragma omp critical
+  local_calculate_conddc = Global.calculate_conddc;
 
-//#pragma omp barrier
+#pragma omp barrier
 
-    //std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n" << std::flush;
-//if(local_calculate_conddc){
-    //std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n" << std::flush;
-//#pragma omp critical
-//{
-    //std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
-    //H5::H5File * file = new H5::H5File(name, H5F_ACC_RDONLY);
+if(local_calculate_conddc){
+#pragma omp critical
+{
+    H5::H5File * file = new H5::H5File(name, H5F_ACC_RDONLY);
 
-    //debug_message("DC conductivity: checking if we need to calculate DC conductivity.\n");
-    //get_hdf5<int>(&direction, file, (char *) "/Calculation/conductivity_dc/Direction");
-    //std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
-    //get_hdf5<int>(&NMoments, file, (char *)  "/Calculation/conductivity_dc/NumMoments");
-    //std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
-    //get_hdf5<int>(&NRandom, file, (char *)   "/Calculation/conductivity_dc/NumRandoms");
-    //std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
-    //get_hdf5<int>(&NDisorder, file, (char *) "/Calculation/conductivity_dc/NumDisorder");
-    //std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
+    debug_message("DC conductivity: checking if we need to calculate DC conductivity.\n");
+    get_hdf5<int>(&direction, file, (char *) "/Calculation/conductivity_dc/Direction");
+    get_hdf5<int>(&NMoments, file, (char *)  "/Calculation/conductivity_dc/NumMoments");
+    get_hdf5<int>(&NRandom, file, (char *)   "/Calculation/conductivity_dc/NumRandoms");
+    get_hdf5<int>(&NDisorder, file, (char *) "/Calculation/conductivity_dc/NumDisorder");
 
-    //std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
-    //file->close();
-    //delete file;
+    file->close();
+    delete file;
 
-//}
-    //std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
-  //CondDC(NMoments, NRandom, NDisorder, direction);
-    //std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
-  //}
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
+}
+  CondDC(NMoments, NRandom, NDisorder, direction);
+  }
 
 }
 template <typename T,unsigned D>
 
 void Simulation<T,D>::CondDC(int NMoments, int NRandom, int NDisorder, int direction){
   std::string dir(num2str2(direction));
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
   std::string dirc = dir.substr(0,1)+","+dir.substr(1,2);
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
   Gamma2D(NRandom, NDisorder, {NMoments,NMoments}, process_string(dirc), "/Calculation/conductivity_dc/Gamma"+dir);
-    std::cout << "line: " << __LINE__ << " in file " << __FILE__ << "\n";
 }
 
 

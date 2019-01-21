@@ -19,6 +19,11 @@ template <typename T,unsigned D>
 void Simulation<T,D>::store_ARPES(Eigen::Array<T, -1, -1> *gamma){
     debug_message("Entered store_ARPES\n");
 
+    // Make sure that all the threads are ready before opening any files
+    // Some threads could still be inside the Simulation constructor
+    // This barrier is essential
+#pragma omp barrier
+
     long int nMoments   = gamma->rows();
     long int nPositions = gamma->cols();
 

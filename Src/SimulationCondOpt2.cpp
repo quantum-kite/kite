@@ -19,6 +19,10 @@ template <typename T,unsigned D>
 void Simulation<T,D>::calc_condopt2(){
     debug_message("Entered Simulation::calc_condopt\n");
 
+    // Make sure that all the threads are ready before opening any files
+    // Some threads could still be inside the Simulation constructor
+    // This barrier is essential
+#pragma omp barrier
 
   int NMoments, NRandom, NDisorder, direction, special;
   bool local_calculate_condopt2 = false;
