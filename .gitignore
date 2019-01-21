@@ -89,6 +89,8 @@ build/
 # except the test folders
 !tests/*/*REF.h5
 !tools/tests/*/*REF.h5
+!tests/*/*ORIG.h5
+!tools/tests/*/*ORIG.h5
 
 
 # add .pdf files
