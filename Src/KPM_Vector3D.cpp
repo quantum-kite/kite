@@ -604,14 +604,14 @@ void inline KPM_Vector <T, 3>::mult_local_disorder(const  std::size_t & ind_i, c
   if( h.Anderson_orb_address[io] >= 0)
     {
       for(std::size_t j2 = ind_i; j2 < ind_f; j2 += stride[2] )
-        for(std::size_t j1 = j2; j1 < j1 + stride[1]*STRIDE; j1 += stride[1] )
+        for(std::size_t j1 = j2; j1 < j2 + stride[1]*STRIDE; j1 += stride[1] )
           for(std::size_t j0 = j1; j0 < j1 + STRIDE ; j0++)
             phi0[j0] += value_type(MULT + 1) * phiM1[j0] * h.U_Anderson.at(j0 + dd);
     }
   else if (h.Anderson_orb_address[io] == - 1)
     {
       for(std::size_t j2 = ind_i; j2 < ind_f; j2 += stride[2] )
-        for(std::size_t j1 = j2; j1 < j1 + stride[1]*STRIDE; j1 += stride[1] )
+        for(std::size_t j1 = j2; j1 < j2 + stride[1]*STRIDE; j1 += stride[1] )
           for(std::size_t j0 = j1; j0 < j1 + STRIDE ; j0++)
             phi0[j0] += value_type(MULT + 1) * phiM1[j0] * h.U_Orbital.at(io);
     }
