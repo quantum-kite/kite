@@ -133,7 +133,7 @@ void dos<T, DIM>::override_parameters(){
 
     if(kernel == "green"){
       if(variables.DOS_kernel_parameter != -8888.8){
-        kernel_parameter = variables.DOS_kernel_parameter;
+        kernel_parameter = variables.DOS_kernel_parameter/systemInfo->energy_scale;
         default_kernel_parameter = false;
       }
     }

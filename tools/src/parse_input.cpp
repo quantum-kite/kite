@@ -88,18 +88,27 @@ void shell_input::printHelp(){
     std::cout << "--CondDC     DC conductivity\n";
     std::cout << "--CondOpt    Optical conductivity\n";
     std::cout << "--CondOpt2   Second-order optical conductivity (photoconductivity)\n\n";
+
     std::cout << "After each of these keywords, the program will be expecting the subparameters associated with that word (always separated by spaces):\n\n";
+
     std::cout << "--LDOS     -N              Name of the output file\n";
+    std::cout << "           -M              Number of Chebyshev moments\n";
+    std::cout << "           -K              Kernel to use (jackson/green). green requires broadening parameter. Example: -K green 0.01\n";
     std::cout << "           -X              Exclusive. Only calculate this quantity\n\n";
+
     std::cout << "--DOS      -E              Number of energy points\n";
     std::cout << "           -N              Name of the output file\n";
+    std::cout << "           -M              Number of Chebyshev moments\n";
+    std::cout << "           -K              Kernel to use (jackson/green). green requires broadening parameter. Example: -K green 0.01\n";
     std::cout << "           -X              Exclusive. Only calculate this quantity\n\n";
+
     std::cout << "--CondDC   -E              Number of energy points used in the integration\n";
     std::cout << "           -T              Temperature\n";
     std::cout << "           -S              Broadening parameter of the Green's functions\n";
     std::cout << "           -F min max num  Fermi energies. min and max may be ommited.\n";
     std::cout << "           -N              Name of the output file\n";
     std::cout << "           -X              Exclusive. Only calculate this quantity\n\n";
+
     std::cout << "--CondOpt  -E              Number of energy points used in the integration\n";
     std::cout << "           -T              Temperature\n";
     std::cout << "           -S              Broadening parameter of the Green's functions\n";
@@ -107,6 +116,7 @@ void shell_input::printHelp(){
     std::cout << "           -F              Fermi energy\n";
     std::cout << "           -N              Name of the output file\n";
     std::cout << "           -X              Exclusive. Only calculate this quantity\n\n";
+
     std::cout << "--CondOpt2 -E              Number of energy points used in the integration\n";
     std::cout << "           -R              Ratio of the second frequency relative to the first: w2 = R*w1\n";
     std::cout << "           -P              if set to 1: writes all the terms to separate files\n";
@@ -116,7 +126,9 @@ void shell_input::printHelp(){
     std::cout << "           -F              Fermi energy\n";
     std::cout << "           -N              Name of the output file\n";
     std::cout << "           -X              Exclusive. Only calculate this quantity\n\n";
+
     std::cout << "All the quantities are in the same units as the ones in the python configuration script. All quantities are double-precision numbers except for the ones representing integers, such as the numbers of points.\n\n";
+
     std::cout << "Examples:\n\n";
     std::cout << "Example 1\n";
     std::cout << "    ./KITE-tools h5_file.h5 --DOS -E 1024\n";
@@ -421,6 +433,7 @@ void shell_input::parse_lDOS(int argc, char* argv[]){
     
     lDOS_Name = "";
     lDOS_Exclusive = false;
+    lDOS_kernel_parameter = -8888.8;
     int pos = keys_pos.at(4);
     if(pos != -1){
         for(int k = 1; k < keys_len.at(4); k++){
@@ -428,10 +441,23 @@ void shell_input::parse_lDOS(int argc, char* argv[]){
             std::string n1 = argv[k + pos + 1];
             if(name == "-N")
                 lDOS_Name = n1;
+            if(name == "-M")
+                lDOS_NumMoments = atoi(n1.c_str());
+            if(name == "-K"){
+                lDOS_kernel = n1;
+                if(n1 == "green"){
+                  std::string n2 = argv[k + pos + 2];
+                  lDOS_kernel_parameter = atof(n2.c_str());
+                }
+            }
             if(name == "-X" or n1 == "-X")
                 lDOS_Exclusive = true;
         }
     }
-    lDOS_Name = lDOS_Name;
-    lDOS_Exclusive = lDOS_Exclusive;
+
+    if(DOS_kernel != "green" && DOS_kernel != "jackson"){
+      std::cout << "Invalid kernel specified.\n";
+      std::cout << "Please use -K green or -K jackson for the density of states. Exiting.\n";
+      exit(1);
+    }
 }

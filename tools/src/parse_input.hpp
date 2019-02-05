@@ -40,6 +40,9 @@ class shell_input{
         std::string lDOS_Name;
         bool lDOS_Exclusive;
         bool lDOS_is_required;
+        int lDOS_NumMoments;
+        std::string lDOS_kernel;
+        double lDOS_kernel_parameter;
 
         // 2nd order optical conductivity
         double CondOpt2_Temp; 
