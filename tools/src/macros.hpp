@@ -4,7 +4,6 @@
 #ifndef DEBUG
 #define DEBUG 0
 #endif
-#define debug1 0
 
 #ifndef VERBOSE
 #define VERBOSE 1

@@ -417,7 +417,7 @@ void shell_input::parse_DOS(int argc, char* argv[]){
         }
     }
 
-    if(DOS_kernel != "green" && DOS_kernel != "jackson"){
+    if(DOS_kernel != "green" && DOS_kernel != "jackson" && DOS_kernel != ""){
       std::cout << "Invalid kernel specified.\n";
       std::cout << "Please use -K green or -K jackson for the density of states. Exiting.\n";
       exit(1);
@@ -433,6 +433,7 @@ void shell_input::parse_lDOS(int argc, char* argv[]){
     
     lDOS_Name = "";
     lDOS_Exclusive = false;
+    lDOS_kernel = "";
     lDOS_kernel_parameter = -8888.8;
     int pos = keys_pos.at(4);
     if(pos != -1){
@@ -455,9 +456,9 @@ void shell_input::parse_lDOS(int argc, char* argv[]){
         }
     }
 
-    if(DOS_kernel != "green" && DOS_kernel != "jackson"){
-      std::cout << "Invalid kernel specified.\n";
-      std::cout << "Please use -K green or -K jackson for the density of states. Exiting.\n";
+    if(lDOS_kernel != "green" && lDOS_kernel != "jackson" && lDOS_kernel != ""){
+      std::cout << "lDOS: Invalid kernel specified.\n";
+      std::cout << "Please use -K green or -K jackson for the local density of states. Exiting.\n";
       exit(1);
     }
 }

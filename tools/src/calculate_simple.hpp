@@ -107,14 +107,12 @@ void choose_simulation_type(char *name, shell_input & variables){
     get_hdf5(&complex, &file, (char *) "/IS_COMPLEX");
     get_hdf5(&precision,  &file, (char *) "/PRECISION");
     get_hdf5(&dim,        &file, (char *) "/DIM");
-    
+    debug_message("IS_COMPLEX "); debug_message(complex); debug_message("\n");
+    debug_message("precision "); debug_message(precision); debug_message("\n");
+    debug_message("dim "); debug_message(dim); debug_message("\n");
+
     file.close();
     
-    //if(dim < 1 || dim > 2){
-    //std::cout << "Invalid value for the dimension of the system. Exiting.\n";
-        //exit(0);
-    //}
-  
     if(precision < 0 || precision > 2){
     std::cout << "Invalid value for the precision of the data values. Exiting. \n";
         exit(0);
@@ -125,57 +123,64 @@ void choose_simulation_type(char *name, shell_input & variables){
 
     int index = dim - 1 + 3 * precision;
     switch (index ) {
-#ifdef debug1
         case 0:
         {
+            debug_message("case ");debug_message(0); debug_message("\n");
             calculate_simple<float, 1u>(name, variables);
             break;
         }
         case 1:
         {
+            debug_message("case ");debug_message(1); debug_message("\n");
             calculate_simple<float, 2u>(name, variables);
             break;
         }
         case 2:
         {
+            debug_message("case ");debug_message(2); debug_message("\n");
             calculate_simple<float, 3u>(name, variables);
+            debug_message("left case ");debug_message(2); debug_message("\n");
             break;			
         }
         case 3:
         {
+            debug_message("case ");debug_message(3); debug_message("\n");
             calculate_simple<double, 1u>(name, variables);
             break;
         }
-#endif
         case 4:
         {
+            debug_message("case ");debug_message(4); debug_message("\n");
             calculate_simple<double, 2u>(name, variables);
             break;
         }
         case 5:
         {
+            debug_message("case ");debug_message(5); debug_message("\n");
             calculate_simple<double, 3u>(name, variables);
             break;
         }
-#ifdef debug1
         case 6:
         {
+            debug_message("case ");debug_message(6); debug_message("\n");
             calculate_simple<long double, 1u>(name, variables);
             break;
         }
         case 7:
         {
+            debug_message("case ");debug_message(7); debug_message("\n");
             calculate_simple<long double, 2u>(name, variables);
             break;
         }
         case 8:
         {
+            debug_message("case ");debug_message(8); debug_message("\n");
             calculate_simple<long double, 3u>(name, variables);
             break;
         }
-#endif
         default:
         {
+            debug_message("case default"); debug_message("\n");
             std::cout << "Please enter a valid data type: float, double or long double and a valid dimension: 2. Exiting.\n" << std::flush;
             exit(1);
             break;
