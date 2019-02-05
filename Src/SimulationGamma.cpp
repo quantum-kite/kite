@@ -292,13 +292,11 @@ void Simulation<T,D>::Gamma3D(int NRandomV, int NDisorder, std::vector<int> N_mo
 template <typename T,unsigned D>
 void Simulation<T,D>::Gamma1D(int NRandomV, int NDisorder, int N_moments,
     std::vector<std::vector<unsigned>> indices, std::string name_dataset){
-  std::cout << "got to line " << __LINE__ << " in file " << __FILE__ << "\n" << std::flush;
 
   int num_velocities = 0;
   for(int i = 0; i < int(indices.size()); i++)
     num_velocities += indices.at(i).size();
   int factor = 1 - (num_velocities % 2)*2;
-  std::cout << "got to line " << __LINE__ << " in file " << __FILE__ << "\n" << std::flush;
     
   // Initialize the KPM vectors that will be needed to run the 1D Gamma matrix
   KPM_Vector<T,D> kpm0(1, *this);
@@ -319,7 +317,6 @@ void Simulation<T,D>::Gamma1D(int NRandomV, int NDisorder, int N_moments,
     for(int randV = 0; randV < NRandomV; randV++){
         
       kpm0.initiate_vector();			// original random vector
-  std::cout << "got to line " << __LINE__ << " in file " << __FILE__ << "\n" << std::flush;
       kpm1.set_index(0);
       kpm1.v.col(0) = kpm0.v.col(0);
       kpm1.Exchange_Boundaries();
@@ -331,17 +328,12 @@ void Simulation<T,D>::Gamma1D(int NRandomV, int NDisorder, int N_moments,
       kpm0.empty_ghosts(0);
 
 			
-  std::cout << "got to line " << __LINE__ << " in file " << __FILE__ << "\n" << std::flush;
       kpm1.template Multiply<0>();		
-  std::cout << "got to line " << __LINE__ << " in file " << __FILE__ << "\n" << std::flush;
       tmp.setZero();
-  std::cout << "got to line " << __LINE__ << " in file " << __FILE__ << "\n" << std::flush;
       for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
         tmp += kpm0.v.block(ii,0, r.Ld[0], 1).adjoint() * kpm1.v.block(ii, 0, r.Ld[0], 2);
-  std::cout << "got to line " << __LINE__ << " in file " << __FILE__ << "\n" << std::flush;
 
       gamma.matrix().block(0,0,1,2) += (tmp - gamma.matrix().block(0,0,1,2))/value_type(average + 1);			
-  std::cout << "got to line " << __LINE__ << " in file " << __FILE__ << "\n" << std::flush;
 	
       for(int m = 2; m < N_moments; m += 2){
         kpm1.template Multiply<1>();
@@ -353,13 +345,12 @@ void Simulation<T,D>::Gamma1D(int NRandomV, int NDisorder, int N_moments,
         gamma.matrix().block(0, m,1,2) += (tmp - gamma.matrix().block(0,m,1,2))/value_type(average + 1);
 
       }
-  std::cout << "got to line " << __LINE__ << " in file " << __FILE__ << "\n" << std::flush;
+  //std::cout << "got to line " << __LINE__ << " in file " << __FILE__ << "\n" << std::flush;
 
       average++;
     }
   } 
 
-  std::cout << "got to line " << __LINE__ << " in file " << __FILE__ << "\n" << std::flush;
   store_gamma1D(&gamma, name_dataset);
 }
 

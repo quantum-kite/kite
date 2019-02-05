@@ -22,7 +22,6 @@ class KPM_Vector;
 template <typename T,unsigned D>
 GlobalSimulation<T,D>::GlobalSimulation( char *name ) : rglobal(name)
 {
-  std::cout << "got to line " << __LINE__ << " in file " << __FILE__ << "\n" << std::flush;
   debug_message("Entered global_simulation\n");
   Global.ghosts.resize( rglobal.get_BorderSize() );
   std::fill(Global.ghosts.begin(), Global.ghosts.end(), 0);
@@ -40,7 +39,6 @@ GlobalSimulation<T,D>::GlobalSimulation( char *name ) : rglobal(name)
 #pragma omp parallel default(shared)
   {
     Simulation<T,D> simul(name, Global);
-  std::cout << "got to line " << __LINE__ << " in file " << __FILE__ << "\n" << std::flush;
 
     simul.calc_conddc();
     simul.calc_condopt();
@@ -51,7 +49,6 @@ GlobalSimulation<T,D>::GlobalSimulation( char *name ) : rglobal(name)
     simul.calc_LDOS(); 
     simul.calc_ARPES(); // fetches parameters from .h5 file and calculates ARPES
 
-  std::cout << "got to line " << __LINE__ << " in file " << __FILE__ << "\n" << std::flush;
   }
   debug_message("Left global_simulation\n");
 };
