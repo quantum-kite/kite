@@ -377,8 +377,11 @@ void shell_input::parse_DOS(int argc, char* argv[]){
     // scattering parameter "S" and Fermi energy min, max and num "F"
     
     DOS_NumEnergies = -1;
+    DOS_NumMoments = -1;
+    DOS_kernel = "";
     DOS_Name = "";
     DOS_Exclusive = false;
+    DOS_kernel_parameter = -8888.8;
     int pos = keys_pos.at(0);
     if(pos != -1){
         for(int k = 1; k < keys_len.at(0); k++){
@@ -388,13 +391,26 @@ void shell_input::parse_DOS(int argc, char* argv[]){
                 DOS_NumEnergies = atoi(n1.c_str());
             if(name == "-N")
                 DOS_Name = n1;
+            if(name == "-M")
+                DOS_NumMoments = atoi(n1.c_str());
+            if(name == "-K"){
+                DOS_kernel = n1;
+                if(n1 == "green"){
+                  std::string n2 = argv[k + pos + 2];
+                  DOS_kernel_parameter = atof(n2.c_str());
+                }
+            }
             if(name == "-X" or n1 == "-X")
                 DOS_Exclusive = true;
         }
     }
-    DOS_NumEnergies = DOS_NumEnergies; 
-    DOS_Name = DOS_Name;
-    DOS_Exclusive = DOS_Exclusive;
+
+    if(DOS_kernel != "green" && DOS_kernel != "jackson"){
+      std::cout << "Invalid kernel specified.\n";
+      std::cout << "Please use -K green or -K jackson for the density of states. Exiting.\n";
+      exit(1);
+    }
+      
 };
 
 

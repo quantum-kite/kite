@@ -30,6 +30,7 @@ dos<T, DIM>::dos(system_info<T, DIM>& sysinfo, shell_input & vari){
     variables = vari;       // retrieve the shell input
 
     dos_finished = false;
+    MaxMoments = -1;
     isPossible = false;         // do we have all we need to calculate the density of states?
     isRequired = is_required(); // check whether the DOS  was asked for
     if(isRequired){
@@ -96,6 +97,10 @@ void dos<T, DIM>::set_default_parameters(){
     default_Emin = true;
     default_Emax = true;
 
+    kernel = "jackson";
+    default_kernel = true;
+    default_kernel_parameter = true;
+
 }
 	
 template <typename T, unsigned DIM>
@@ -110,6 +115,28 @@ void dos<T, DIM>::override_parameters(){
         default_NEnergies   = false;
     }
 
+    if(variables.DOS_NumMoments != -1){
+        NumMoments         = variables.DOS_NumMoments;
+        default_NumMoments = false;
+        if(variables.DOS_NumMoments > MaxMoments){
+          std::cout << "DOS: The number of Chebyshev moments specified"
+            " cannot be larger than the number of moments calculated by KITEx."
+            " Please specify a smaller number. Exiting.\n";
+          exit(1);
+        }
+    }
+
+    if(variables.DOS_kernel != ""){
+        kernel         = variables.DOS_kernel;
+        default_kernel = false;
+    }
+
+    if(kernel == "green"){
+      if(variables.DOS_kernel_parameter != -8888.8){
+        kernel_parameter = variables.DOS_kernel_parameter;
+        default_kernel_parameter = false;
+      }
+    }
 
     if(variables.DOS_Name != ""){
         filename            = variables.DOS_Name;
@@ -132,8 +159,8 @@ bool dos<T, DIM>::fetch_parameters(){
     dirName = "/Calculation/dos/";
     
     // Fetch the number of Chebyshev Moments, temperature and number of points
-	get_hdf5(&NumMoments, &file, (char*)(dirName+"NumMoments").c_str());	
-	get_hdf5(&NEnergies, &file, (char*)(dirName+"NumPoints").c_str());	
+    get_hdf5(&MaxMoments, &file, (char*)(dirName+"NumMoments").c_str());	
+    get_hdf5(&NEnergies, &file, (char*)(dirName+"NumPoints").c_str());	
     default_NEnergies = false;
 
     // Check whether the matrices we're going to retrieve are complex or not
@@ -144,14 +171,14 @@ bool dos<T, DIM>::fetch_parameters(){
     std::string MatrixName = dirName + "MU";
     try{
 		debug_message("Filling the MU matrix.\n");
-		MU = Eigen::Array<std::complex<T>,-1,-1>::Zero(1, NumMoments);
+		MU = Eigen::Array<std::complex<T>,-1,-1>::Zero(1, MaxMoments);
 		
 		if(complex)
 			get_hdf5(MU.data(), &file, (char*)MatrixName.c_str());
 		
 		if(!complex){
 			Eigen::Array<T,-1,-1> MUReal;
-			MUReal = Eigen::Array<T,-1,-1>::Zero(1, NumMoments);
+			MUReal = Eigen::Array<T,-1,-1>::Zero(1, MaxMoments);
 			get_hdf5(MUReal.data(), &file, (char*)MatrixName.c_str());
 			
 			MU = MUReal.template cast<std::complex<T>>();
@@ -161,6 +188,7 @@ bool dos<T, DIM>::fetch_parameters(){
   } catch(H5::Exception& e) {debug_message("DOS: There is no MU matrix.\n");}
 	
 
+  NumMoments = MaxMoments;
 
 
 	file.close();
@@ -177,19 +205,21 @@ void dos<U, DIM>::printDOS(){
     bool default_energy_limits = default_Emin && default_Emax;
 
     std::cout << "The density of states will be calculated with these parameters: (eV)\n"
-        "   Energy range: "         << energy_range << ((default_energy_limits)?" (default)":"") << "\n"
-        "   Number of energies: "   << NEnergies    << ((default_NEnergies)?    " (default)":"") << "\n"
-        "   Filename: "             << filename     << ((default_filename)?     " (default)":"") << "\n"
-        "   Using Jackson kernel\n";
-
-
+        "   Energy range: "         << energy_range     << ((default_energy_limits)?    " (default)":"") << "\n"
+        "   Number of energies: "   << NEnergies        << ((default_NEnergies)?        " (default)":"") << "\n"
+        "   Filename: "             << filename         << ((default_filename)?         " (default)":"") << "\n"
+        "   Number of moments: "    << NumMoments       << ((default_NumMoments)?       " (default)":"") << "\n"
+        "   Kernel: "               << kernel           << ((default_kernel)?           " (default)":"") << "\n";
+    if(kernel == "green"){
+        std::cout << "   Kernel parameter: "     << kernel_parameter << ((default_kernel_parameter)? " (default)":"") << "\n";
+    }
 }
 
 template <typename U, unsigned DIM>
 void dos<U, DIM>::calculate(){
 
-
-
+  using namespace std::placeholders;  // for _1, _2, _3...
+  
 
 
   // First perform the part of the product that only depends on the
@@ -197,14 +227,31 @@ void dos<U, DIM>::calculate(){
   GammaE = Eigen::Array<std::complex<U>, -1, -1>::Zero(NEnergies, 1);
 
   U mult = 1.0/systemInfo->energy_scale;
-
   U factor;
-  for(int i = 0; i < NEnergies; i++){
-    for(int m = 0; m < NumMoments; m++){
-      factor = 1.0/(1.0 + U(m==0));
-      GammaE(i) += MU(m)*delta(m,energies(i))*kernel_jackson<U>(m, NumMoments)*factor*mult;
+
+  // Choosing the kernel/exact green expansion
+
+  if(kernel == "jackson"){
+    for(int i = 0; i < NEnergies; i++){
+      for(int m = 0; m < NumMoments; m++){
+        factor = 1.0/(1.0 + U(m==0));
+        GammaE(i) += MU(m)*delta(m,energies(i))*kernel_jackson<U>(m, NumMoments)*factor*mult;
+      }
     }
   }
+
+  std::complex<U> c_energy;
+  if(kernel == "green"){
+    for(int i = 0; i < NEnergies; i++){
+      c_energy = std::complex<U>(energies(i), kernel_parameter);
+      for(int m = 0; m < NumMoments; m++){
+        factor = 1.0/(1.0 + U(m==0))/M_PI;
+        GammaE(i) += -MU(m)*factor*mult*green<std::complex<U>>(m, 1, c_energy).imag();
+      }
+    }
+  }
+
+
 
   // Save the density of states to a file and find its maximum value
   std::ofstream myfile;

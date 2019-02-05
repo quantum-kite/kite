@@ -29,6 +29,9 @@ class shell_input{
 
         // Density of states
         int DOS_NumEnergies;
+        int DOS_NumMoments;
+        std::string DOS_kernel;
+        double DOS_kernel_parameter;
         std::string DOS_Name;
         bool DOS_Exclusive;
         bool DOS_is_required;

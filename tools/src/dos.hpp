@@ -22,6 +22,14 @@ class dos{
             // Functions to calculate. They will require the objects present in
         // the configuration file
         int NumMoments;
+        int MaxMoments;
+        bool default_NumMoments;
+
+        std::string kernel;
+        double kernel_parameter;
+        bool default_kernel;
+        bool default_kernel_parameter;
+        
         std::string filename;
         bool default_filename;
 
