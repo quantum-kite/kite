@@ -38,15 +38,17 @@ ldos<T, DIM>::ldos(system_info<T, DIM>& sysinfo, shell_input & vari){
         set_default_parameters();
         isPossible = fetch_parameters();
         override_parameters();
-        printLDOS();
     }
 
+    if(isPossible and isRequired){
+        printLDOS();                  // Print all the parameters used
+    }
     if(isRequired and !isPossible){
-        std::cout << "Local density of states was requested but the necessary data to calculate it was not found in the input file. Make sure the input file has been processed by KITEx first. Exiting.\n";
+        std::cout << "ERROR. The LDOS was requested but the data "
+            "needed for its computation was not found in the input .h5 file. "
+            "Make sure KITEx has processed the file first. Exiting.";
         exit(1);
     }
-
-
 }
 
 template <typename T, unsigned DIM>

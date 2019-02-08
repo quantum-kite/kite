@@ -32,13 +32,17 @@ dos<T, DIM>::dos(system_info<T, DIM>& sysinfo, shell_input & vari){
     dos_finished = false;
     MaxMoments = -1;
     isPossible = false;         // do we have all we need to calculate the density of states?
-    isRequired = is_required(); // check whether the DOS  was asked for
+    isRequired = is_required(); // check whether the DOS was requested
+
     if(isRequired){
         set_default_parameters();
         isPossible = fetch_parameters();
         override_parameters();      // overrides parameters with the ones from the shell input
-        printDOS();
         energies = Eigen::Matrix<T, -1, 1>::LinSpaced(NEnergies, Emin, Emax);
+    }
+
+    if(isPossible and isRequired){
+        printDOS();
     }
 
     if(!isPossible and isRequired){

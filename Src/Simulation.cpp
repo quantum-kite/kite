@@ -231,9 +231,12 @@ std::vector<std::vector<unsigned>> Simulation<T,D>::process_string(std::string i
         if(single_char == 'y'){
           single_digit = 1;
         } else {
-          // This block should never run
-          std::cout << "Please enter a valid expression.\n";
-          exit(1);
+          if(single_char == 'z'){
+            single_digit = 2;
+          } else {
+            // This block should never run
+            std::cout << "Please enter a valid expression.\n";
+            exit(1);
         }
       } 
       temp.push_back(single_digit);

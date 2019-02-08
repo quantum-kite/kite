@@ -28,39 +28,114 @@
 
 template <typename T, unsigned DIM>
 conductivity_optical<T, DIM>::conductivity_optical(system_info<T, DIM>& info, shell_input & vari){
-  std::string name = info.filename;
-	file = H5::H5File(name.c_str(), H5F_ACC_RDONLY);
-
-    isRequired = false; // was this quantity (conductivity_optical) asked for?
-    isPossible = false; // do we have all we need to calculate the conductivity?
-
+    name = info.filename;
 
 		// Functions to calculate. They will require the objects present in
     // the configuration file
-    NumPoints = -1;
-    temperature = -1;
     units = unit_scale;
-    filename = "optical_cond.dat";
+    systemInfo = info;   // retrieve the information about the Hamiltonian
+    variables = vari;    // location of the information about the conductivity
+    
+    isRequired = is_required();  // was this quantity (conductivity_optical) asked for?
+    isPossible = false;          // do we have all we need to calculate the conductivity?
 
-  // retrieve the information about the Hamiltonian
-  systemInfo = info;
+    if(isRequired){
+        set_default_parameters();   // sets a default set of paramters for the calculation
+        fetch_parameters();         // finds all the paramters in the .h5 file
+        override_parameters();      // overrides parameters with the ones from the shell input
+    }
 
-  // location of the information about the conductivity
-  variables = vari;
+    if(isPossible and isRequired){
+        printOpt();                  // Print all the parameters used
+    }
 
-  // location of the information about the conductivity
-  dirName = "/Calculation/conductivity_optical/";
-  
-  // check whether the conductivity_optical was asked for
-  try{
-    H5::Exception::dontPrint();
-    get_hdf5(&direction, &file, (char*)(dirName+"Direction").c_str());									
-    isRequired = true;
-  } catch(H5::Exception& e){}
-  
+    // needs fetch_parameters() to evaluate isPossible
+    if(!isPossible and isRequired){
+        std::cout << "ERROR. The optical conductivity was requested but the data "
+            "needed for its computation was not found in the input .h5 file. "
+            "Make sure KITEx has processed the file first. Exiting.";
+        exit(1);
+    }
+}
 
+template <typename T, unsigned DIM>
+void conductivity_optical<T, DIM>::printOpt(){
+  double scale = systemInfo.energy_scale;
+  std::cout << "The optical conductivity will be calculated with these parameters: (eV)\n"
+    "   Temperature: "            << temperature*scale  << ((default_temperature)?  " (default)":"") << "\n"
+    "   Broadening: "             << scat*scale         << ((default_scat)?         " (default)":"") << "\n"
+    "   Fermi energy: "           << e_fermi*scale      << ((default_efermi)?       " (default)":"") << "\n"
+    "   Min frequency: "          << minFreq*scale      << ((default_minfreqs)?     " (default)":"") << "\n"
+    "   Max frequency: "          << maxFreq*scale      << ((default_maxfreqs)?     " (default)":"") << "\n"
+    "   Number of frequencies: "  << N_omegas           << ((default_Nfreqs)?       " (default)":"") << "\n"
+    "   Num integration points: " << N_energies         << ((default_NEnergies)?    " (default)":"") << "\n"
+    //"   Integration range: "       << energy_range             << ((default_energy_limits)?" (default)":" (Estimated from DoS)") << "\n"
+    "   Kernel for Dirac deltas: "<< "jackson"          << " (default)\n"
+    "   Filename: "               << filename           << ((default_filename)?     " (default)":"") << "\n";
 }
 	
+template <typename T, unsigned DIM>
+void conductivity_optical<T, DIM>::set_default_parameters(){
+    // Sets default values for the parameters used in the 
+    // calculation of the density of stats. These are the parameters
+    // that will be overwritten by the config file and the
+    // shell input parameters. 
+
+    double scale = systemInfo.energy_scale;
+
+    // Temperature
+    temperature = 0.001/scale;
+    beta = 1.0/8.6173303*pow(10,5)/temperature;
+    default_temperature = true;
+
+    e_fermi = 0.2/scale;
+    default_efermi = true;
+
+    scat = 0.0166/scale;
+    default_scat = true;
+
+    N_energies = 512;
+    default_NEnergies = true;
+
+    N_omegas = 512;
+    minFreq = 0.001;
+    maxFreq = 1.5;
+    default_minfreqs = true;
+    default_maxfreqs = true;
+    default_Nfreqs = true;
+
+    filename  = "optcond.dat";      // Filename to save final result
+    default_filename = true;
+
+    lim = 0.99;
+}
+
+template <typename T, unsigned DIM>
+bool conductivity_optical<T, DIM>::is_required(){
+    // Checks whether the optical conductivity has been requested
+    // by analysing the .h5 config file. If it has been requested, 
+    // some fields have to exist, such as "Direction"
+
+    // Make sure the config filename has been initialized
+    if(name == ""){
+        std::cout << "ERROR: Filename uninitialized. Exiting.\n";
+        exit(1);
+    }
+
+    H5::H5File file = H5::H5File(name.c_str(), H5F_ACC_RDONLY);
+
+    std::string dirName = "/Calculation/conductivity_optical/";
+    bool result = false;
+    try{
+        get_hdf5(&NumMoments, &file, (char*)(dirName+"NumMoments").c_str());
+        result = true;
+    } catch(H5::Exception& e){}
+
+
+    file.close();
+    return result;
+}
+
 
 template <typename T, unsigned DIM>
 void conductivity_optical<T, DIM>::fetch_parameters(){
@@ -69,7 +144,8 @@ void conductivity_optical<T, DIM>::fetch_parameters(){
   //calculate the optical conductivity
 	 
 
-  // Check if the data for the optical conductivity exists
+  H5::H5File file = H5::H5File(name.c_str(), H5F_ACC_RDONLY);
+
   // Check if the data for the optical conductivity exists
   if(!isRequired){
     std::cout << "Data for optical conductivity does not exist. Exiting.\n";
@@ -77,6 +153,7 @@ void conductivity_optical<T, DIM>::fetch_parameters(){
   }
   
   // Fetch the direction of the conductivity and convert it to a string
+    std::string dirName = "/Calculation/conductivity_optical/";
   get_hdf5(&direction, &file, (char*)(dirName+"Direction").c_str());									
   std::string dirString = num2str2(direction);
 
@@ -84,6 +161,10 @@ void conductivity_optical<T, DIM>::fetch_parameters(){
 	get_hdf5(&NumMoments, &file, (char*)(dirName+"NumMoments").c_str());	
 	get_hdf5(&temperature, &file, (char*)(dirName+"Temperature").c_str());	
 	get_hdf5(&NumPoints, &file, (char*)(dirName+"NumPoints").c_str());	
+  N_omegas = NumPoints;
+  default_Nfreqs = false;
+  default_temperature = false;
+  
 
 
   // Check whether the matrices we're going to retrieve are complex or not
@@ -141,19 +222,6 @@ void conductivity_optical<T, DIM>::fetch_parameters(){
   }
 
 	
-  temperature = 0.001/systemInfo.energy_scale;
-  beta = 1.0/8.6173303*pow(10,5)/temperature;
-  e_fermi = 0.2/systemInfo.energy_scale;
-  scat = 0.0166/systemInfo.energy_scale;
-
-
-  N_energies = 512;
-
-  N_omegas = NumPoints;
-  minFreq = 0.001;
-  maxFreq = 1.5;
-
-  lim = 0.99;
 
 	file.close();
 	debug_message("Left conductivity_optical::read.\n");
@@ -162,24 +230,58 @@ void conductivity_optical<T, DIM>::fetch_parameters(){
 
 template <typename U, unsigned DIM>
 void conductivity_optical<U, DIM>::override_parameters(){
-    if(variables.CondOpt_Temp != -8888)     temperature = variables.CondOpt_Temp/systemInfo.energy_scale;
-    if(variables.CondOpt_NumEnergies != -1) N_energies  = variables.CondOpt_NumEnergies;
-    if(variables.CondOpt_FreqMax != -8888)  maxFreq     = variables.CondOpt_FreqMax/systemInfo.energy_scale;
-    if(variables.CondOpt_FreqMin != -8888)  minFreq     = variables.CondOpt_FreqMin/systemInfo.energy_scale;
-    if(variables.CondOpt_NumFreq != -1)     N_omegas    = variables.CondOpt_NumFreq;
-    if(variables.CondOpt_Fermi != -8888)    e_fermi     = variables.CondOpt_Fermi/systemInfo.energy_scale;
-    if(variables.CondOpt_Scat != -8888)     scat        = variables.CondOpt_Scat/systemInfo.energy_scale;
-    if(variables.CondOpt_Name != "")        filename    = variables.CondOpt_Name;
-    beta = 1.0/8.6173303*pow(10,5)/temperature;
-	//Calculates the optical conductivity for a set of frequencies in the range [-sigma, sigma].
+  double scale = systemInfo.energy_scale;
+
+    if(variables.CondOpt_Temp != -8888){
+      temperature = variables.CondOpt_Temp/scale;
+      beta = 1.0/8.6173303*pow(10,5)/temperature;
+      default_temperature = false;
+    }
+
+    if(variables.CondOpt_NumEnergies != -1){
+      N_energies  = variables.CondOpt_NumEnergies;
+      default_NEnergies = false;
+    }
+
+    if(variables.CondOpt_FreqMax != -8888){
+      maxFreq     = variables.CondOpt_FreqMax/scale;
+      default_maxfreqs = false;
+    }
+
+    if(variables.CondOpt_FreqMin != -8888){
+      minFreq     = variables.CondOpt_FreqMin/scale;
+      default_minfreqs = false;
+    }
+
+    if(variables.CondOpt_NumFreq != -1){
+      N_omegas    = variables.CondOpt_NumFreq;
+      default_Nfreqs = false;
+    }
+
+    if(variables.CondOpt_Fermi != -8888){
+      e_fermi     = variables.CondOpt_Fermi/scale;
+      default_efermi = false;
+    }
+
+    if(variables.CondOpt_Scat != -8888){
+      scat        = variables.CondOpt_Scat/scale;
+      default_scat = false;
+    }
+
+    if(variables.CondOpt_Name != ""){
+      filename    = variables.CondOpt_Name;
+      default_filename = false;
+    }
 };
-	//These frequencies are in the KPM scale, that is, the scale where the energy is in the range ]-1,1[.
+
+
+
+
 template <typename U, unsigned DIM>
-void conductivity_optical<U, DIM>::calculate_efficient(){
+void conductivity_optical<U, DIM>::calculate(){
 	debug_message("Entered calc_optical_cond.\n");
 	//the temperature is already in the KPM scale, but not the broadening or the Fermi Energy
 
-  // ########################################################
   if(!isPossible){
     std::cout << "Cannot calculate the conductivity because there is no matching Gamma matrix"
       "Exiting\n";
@@ -187,21 +289,7 @@ void conductivity_optical<U, DIM>::calculate_efficient(){
   }
 
 
-  // Print out some useful information
-  verbose_message("  Energy in rescaled units: [-1,1]\n");
-  verbose_message("  Beta (1/kT): "); verbose_message(beta); verbose_message("\n");
-  verbose_message("  Fermi energy: "); verbose_message(e_fermi); verbose_message("\n");
-  verbose_message("  Using kernel for delta function: Jackson\n");
-  verbose_message("  Broadening parameter for Green's function: ");
-    verbose_message(scat); verbose_message("\n");
-  verbose_message("  Number of energies: "); verbose_message(N_energies); verbose_message("\n");
-  verbose_message("  Energy range: ["); verbose_message(-lim); verbose_message(",");
-    verbose_message(lim); verbose_message("]\n");
-  verbose_message("  Number of frequencies: "); verbose_message(N_omegas); verbose_message("\n");
-  verbose_message("  Frequency range: ["); verbose_message(minFreq); verbose_message(",");
-    verbose_message(maxFreq); verbose_message("]\n");
-  verbose_message("  File name: optical_cond.dat\n");
-
+  std::cout << "\nlim" << lim << " " << N_energies << "\n\n\n";
 
   Eigen::Matrix<U, -1, 1> energies;
   energies  = Eigen::Matrix<U, -1, 1>::LinSpaced(N_energies, -lim, lim);
@@ -225,12 +313,14 @@ void conductivity_optical<U, DIM>::calculate_efficient(){
   cond = Eigen::Matrix<std::complex<U>, -1, 1>::Zero(N_omegas, 1);
   std::complex<U> temp3 = 0; 
 
+
   // Delta matrix of chebyshev moments and energies
   Eigen::Matrix<std::complex<U>,-1, -1> DeltaMatrix;
   DeltaMatrix = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, NumMoments);
   for(int n = 0; n < NumMoments; n++)
     for(int e = 0; e < N_energies; e++)
       DeltaMatrix(e,n) = deltaF(n, energies(e)); 
+
 
   int N_threads;
   int thread_num;
@@ -306,6 +396,7 @@ void conductivity_optical<U, DIM>::calculate_efficient(){
   
   temp3 = contract1<U>(deltaF, NumMoments, Lambda, energies);
 
+  
 
   std::complex<U> freq;
   for(int i = 0; i < N_omegas; i++){

@@ -36,29 +36,14 @@ template <typename U, unsigned DIM>
 void calculate_conductivity_optical(system_info<U, DIM>& sysinfo, shell_input & variables){
   conductivity_optical<U, DIM> info(sysinfo, variables);
   if(info.isRequired and variables.CondOpt_is_required){
-    verbose_message("Retrieving optical conductivity...\n");
-    variables.printOpt();
-    info.fetch_parameters();
-    info.override_parameters();
-    info.calculate_efficient();
-  }
-};
-
-template <typename U, unsigned DIM>
-void calculate_dos(system_info<U, DIM>& sysinfo, shell_input & variables){
-  dos<U, DIM> info(sysinfo, variables); // The constructor checks whether this quantity is required
-  if(info.isRequired and variables.DOS_is_required){
+    //verbose_message("Retrieving optical conductivity...\n");
+    //info.set_default_parameters();
+    //info.fetch_parameters();
+    //info.override_parameters();
     info.calculate();
   }
 };
 
-template <typename U, unsigned DIM>
-void calculate_ldos(system_info<U, DIM>& sysinfo, shell_input & variables){
-  ldos<U, DIM> info(sysinfo, variables); // The constructor checks whether this quantity is required
-  if(info.isRequired and variables.lDOS_is_required){
-    info.calculate();
-  }
-};
 
 template <typename U, unsigned DIM>
 void calculate_simple(char *name, shell_input & variables){
@@ -73,10 +58,12 @@ void calculate_simple(char *name, shell_input & variables){
   info.read();
 
   verbose_message("----------------- CALCULATIONS ----------------- \n");
-  calculate_dos<U, DIM>(info, variables);
-  calculate_ldos<U, DIM>(info, variables);
-
+  ldos<U, DIM> lDOS(info, variables); 
+  dos<U, DIM> DOS(info, variables); 
   conductivity_dc<U, DIM> condDC(info, variables);
+
+  if(lDOS.isRequired and variables.lDOS_is_required)     lDOS.calculate();
+  if(DOS.isRequired and variables.DOS_is_required)       DOS.calculate();
   if(condDC.isRequired and variables.CondDC_is_required) condDC.calculate();
 
   calculate_conductivity_optical<U, DIM>(info, variables);

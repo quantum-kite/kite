@@ -50,10 +50,11 @@ conductivity_dc<T, DIM>::conductivity_dc(system_info<T, DIM>& info, shell_input 
         fetch_parameters();         // finds all the paramters in the .h5 file
         override_parameters();      // overrides parameters with the ones from the shell input
         set_energy_limits();        // sets the energy limits used in the integration
-        printDC();                  // Print all the parameters used
     }
 
-
+    if(isPossible and isRequired){
+        printDC();                  // Print all the parameters used
+    }
 
     // needs fetch_parameters() to evaluate isPossible
     if(!isPossible and isRequired){

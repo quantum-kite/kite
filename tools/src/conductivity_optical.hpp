@@ -7,7 +7,6 @@
 
 template <typename T, unsigned DIM>
 class conductivity_optical{
-	H5::H5File file;
 	public:
 
 
@@ -22,19 +21,34 @@ class conductivity_optical{
     int NumMoments;
     int NumPoints;
     int NumRandoms;
-    double temperature;
     double units;
-    std::string filename;
 
+    double temperature;
+    bool default_temperature;
     T beta;
+
+    bool default_efermi;
     T e_fermi; 
+
+    bool default_scat;
     T scat; 
-	int N_energies; 
-	int N_omegas; 
-    double minFreq; 
-    double maxFreq; 
+
+    bool default_lim;
     T lim;
 
+    int N_energies; 
+    bool default_NEnergies;
+
+    int N_omegas; 
+    double minFreq; 
+    double maxFreq; 
+    bool default_Nfreqs;
+    bool default_minfreqs;
+    bool default_maxfreqs;
+
+    std::string name;
+    std::string filename;
+    bool default_filename;
 
     // information about the Hamiltonian
     system_info<T, DIM> systemInfo;
@@ -43,16 +57,15 @@ class conductivity_optical{
     shell_input variables;
 
     // Objects required to successfully calculate the conductivity
-	Eigen::Array<std::complex<T>, -1, -1> Gamma;
-	Eigen::Array<std::complex<T>, -1, -1> Lambda;
-
-	std::string dirName;
-
+    Eigen::Array<std::complex<T>, -1, -1> Gamma;
+    Eigen::Array<std::complex<T>, -1, -1> Lambda;
 
     conductivity_optical(system_info<T, DIM>&, shell_input &);
-	void fetch_parameters();
+    bool is_required();
+    void set_default_parameters();
+    void fetch_parameters();
     void override_parameters();
+    void printOpt();
     void calculate();
-    void calculate_efficient();
 	
 };
