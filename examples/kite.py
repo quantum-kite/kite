@@ -250,7 +250,7 @@ class StructuralDisorder:
                 nodes_to.append(nodes_map[orb_from])
 
                 orbital_hop.append(h[0])
-                orbital_hop.append(np.conj(h[0]))
+                orbital_hop.append(np.conj(np.transpose(h[0])))
 
             else:
                 orb_from = int(relative_move_from + self._num_orbitals_before[from_sub_id] * 3 ** self._space_size)
@@ -1227,12 +1227,12 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
             # if the unit cell is [0, 0]
             if np.linalg.norm(term.relative_index[0:space_size]) == 0:
                 hopping = {'relative_index': term.relative_index[0:space_size], 'from_id': term.to_id,
-                           'to_id': term.from_id, 'hopping_energy': np.conj(hopping_energy)}
+                           'to_id': term.from_id, 'hopping_energy': np.conj(np.transpose(hopping_energy))}
                 hoppings.append(hopping)
             # if the unit cell [i, j] is different than [0, 0] and also -[i, j] hoppings with opposite direction
             if np.linalg.norm(term.relative_index[0:space_size]):
                 hopping = {'relative_index': -term.relative_index[0:space_size], 'from_id': term.to_id,
-                           'to_id': term.from_id, 'hopping_energy': np.conj(hopping_energy)}
+                           'to_id': term.from_id, 'hopping_energy': np.conj(np.transpose(hopping_energy))}
                 hoppings.append(hopping)
 
     orbital_from = []
