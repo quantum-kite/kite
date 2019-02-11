@@ -24,6 +24,8 @@ void Simulation<T, DIM>::calc_wavepacket(){
     // Make sure that all the threads are ready before opening any files
     // Some threads could still be inside the Simulation constructor
     // This barrier is essential
+    //
+
 #pragma omp barrier
 
     // Check if the Gaussian_Wave_Packet needs to be calculated
