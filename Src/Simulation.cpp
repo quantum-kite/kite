@@ -237,11 +237,13 @@ std::vector<std::vector<unsigned>> Simulation<T,D>::process_string(std::string i
             // This block should never run
             std::cout << "Please enter a valid expression.\n";
             exit(1);
-        }
-      } 
+          }
+        } 
+      }
       temp.push_back(single_digit);
-    }
 				
+    }
+    	
     indices.push_back(temp);
 			   
   }
