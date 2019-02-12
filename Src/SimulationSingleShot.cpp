@@ -67,8 +67,10 @@ void Simulation<T,D>::calc_singleshot() {
       direction_string = "x,x";
     else if(direction == 1)
       direction_string = "y,y";
+    else if(direction == 2)
+      direction_string = "z,z";
     else{
-      std::cout << "Invalid singleshot direction. Has to be xx or yy. Exiting.\n";
+      std::cout << "Invalid singleshot direction. Has to be xx, yy or zz. Exiting.\n";
       exit(1);
     }
        
