@@ -163,7 +163,7 @@ void Simulation<T,D>::singleshot(Eigen::Array<double, -1, 1> energies,
   std::vector<std::vector<unsigned>> indices = process_string(indices_string);
   if(indices.at(0).at(0) != indices.at(1).at(0)){
     std::cout << "SingleShot is only meaningful for the longitudinal conductivity.";
-    std::cout << "Please use directions 'x,x' or 'y,y'. Exiting.\n";
+    std::cout << "Please use directions 'x,x', 'y,y' or 'z,z'. Exiting.\n";
     exit(1);
   }
 
