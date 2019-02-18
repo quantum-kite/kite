@@ -17,6 +17,7 @@ class shell_input{
         // Optical Conductivity
         double CondOpt_Temp; 
         int CondOpt_NumEnergies; 
+        int CondOpt_NumMoments;
         double CondOpt_Scat; 
         double CondOpt_Fermi; 
         double CondOpt_FreqMin; 

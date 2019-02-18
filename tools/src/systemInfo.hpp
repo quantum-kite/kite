@@ -11,7 +11,7 @@ class system_info{
 	public:
 		int dim;
 		int num_orbitals;
-        int isComplex;
+    int isComplex;
 		Eigen::Array<int,1,-1> size;
 		Eigen::Array<double,-1,-1> vectors;
 		Eigen::Array<double, -1, -1> orbital_positions;
@@ -19,15 +19,16 @@ class system_info{
 		double unit_cell_area;
 		double spin_degeneracy;
 		double energy_scale;
-        std::string filename;
-        int NumThreads;
+		double energy_shift;
+    std::string filename;
+    int NumThreads;
         
-        // These two quantities may only be known after the DOS is calculated
-        bool EnergyLimitsKnown;
-        T minEnergy, maxEnergy;
+    // These two quantities may only be known after the DOS is calculated
+    bool EnergyLimitsKnown;
+    T minEnergy, maxEnergy;
 
 		system_info(std::string);
-        system_info();
+    system_info();
 		void read();
 	
 };

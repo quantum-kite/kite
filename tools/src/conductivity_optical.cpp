@@ -36,25 +36,23 @@ conductivity_optical<T, DIM>::conductivity_optical(system_info<T, DIM>& info, sh
     systemInfo = info;   // retrieve the information about the Hamiltonian
     variables = vari;    // location of the information about the conductivity
     
-    isRequired = is_required();  // was this quantity (conductivity_optical) asked for?
+    isRequired = is_required() && variables.CondOpt_is_required;  // was this quantity (conductivity_optical) asked for?
     isPossible = false;          // do we have all we need to calculate the conductivity?
 
     if(isRequired){
         set_default_parameters();   // sets a default set of paramters for the calculation
-        fetch_parameters();         // finds all the paramters in the .h5 file
+        isPossible = fetch_parameters();         // finds all the paramters in the .h5 file
         override_parameters();      // overrides parameters with the ones from the shell input
-    }
 
-    if(isPossible and isRequired){
-        printOpt();                  // Print all the parameters used
-    }
+        if(isPossible){
+            printOpt();                  // Print all the parameters used
+            calculate();
+        } else {
+          std::cout << "ERROR. The optical conductivity was requested but the data " "needed for its computation was not found in the input .h5 file. "
+              "Make sure KITEx has processed the file first. Exiting.";
+          exit(1);
 
-    // needs fetch_parameters() to evaluate isPossible
-    if(!isPossible and isRequired){
-        std::cout << "ERROR. The optical conductivity was requested but the data "
-            "needed for its computation was not found in the input .h5 file. "
-            "Make sure KITEx has processed the file first. Exiting.";
-        exit(1);
+        }
     }
 }
 
@@ -82,13 +80,15 @@ void conductivity_optical<T, DIM>::set_default_parameters(){
     // shell input parameters. 
 
     double scale = systemInfo.energy_scale;
+    double shift = systemInfo.energy_shift;
 
     // Temperature
     temperature = 0.001/scale;
     beta = 1.0/8.6173303*pow(10,5)/temperature;
     default_temperature = true;
 
-    e_fermi = 0.2/scale;
+
+    e_fermi = (0.2 - shift)/scale;
     default_efermi = true;
 
     scat = 0.0166/scale;
@@ -138,7 +138,7 @@ bool conductivity_optical<T, DIM>::is_required(){
 
 
 template <typename T, unsigned DIM>
-void conductivity_optical<T, DIM>::fetch_parameters(){
+bool conductivity_optical<T, DIM>::fetch_parameters(){
 	debug_message("Entered conductivity_optical::read.\n");
 	//This function reads all the data from the hdf5 file that's needed to 
   //calculate the optical conductivity
@@ -158,9 +158,13 @@ void conductivity_optical<T, DIM>::fetch_parameters(){
   std::string dirString = num2str2(direction);
 
   // Fetch the number of Chebyshev Moments, temperature and number of points
-	get_hdf5(&NumMoments, &file, (char*)(dirName+"NumMoments").c_str());	
+	get_hdf5(&MaxMoments, &file, (char*)(dirName+"NumMoments").c_str());	
 	get_hdf5(&temperature, &file, (char*)(dirName+"Temperature").c_str());	
 	get_hdf5(&NumPoints, &file, (char*)(dirName+"NumPoints").c_str());	
+
+  NumMoments = MaxMoments;
+  default_NumMoments = true;
+
   N_omegas = NumPoints;
   default_Nfreqs = false;
   default_temperature = false;
@@ -175,6 +179,7 @@ void conductivity_optical<T, DIM>::fetch_parameters(){
 
   // Retrieve the Gamma Matrix
   std::string MatrixName = dirName + "Gamma" + dirString;
+  bool possibleGamma = false;
   try{
 		debug_message("Filling the Gamma matrix.\n");
 		Gamma = Eigen::Array<std::complex<T>,-1,-1>::Zero(NumMoments, NumMoments);
@@ -190,16 +195,16 @@ void conductivity_optical<T, DIM>::fetch_parameters(){
 			Gamma = GammaReal.template cast<std::complex<T>>();
 		}				
 
-    isPossible = true;
+    possibleGamma = true;
   } catch(H5::Exception& e) {
     debug_message("Conductivity optical: There is no Gamma matrix.\n");
-    isPossible = false;
   }
 
 
 
 
   MatrixName = dirName + "Lambda" + dirString;
+  bool possibleLambda = false;
   try{
 		debug_message("Filling the Lambda matrix.\n");
 		Lambda = Eigen::Array<std::complex<T>,-1,-1>::Zero(1, NumMoments);
@@ -215,22 +220,23 @@ void conductivity_optical<T, DIM>::fetch_parameters(){
 			Lambda = LambdaReal.template cast<std::complex<T>>();
 		}				
 
-    isPossible = true;
+    possibleLambda = true;
   } catch(H5::Exception& e) {
     debug_message("Conductivity optical: There is no Lambda matrix.\n");
-    isPossible = false;
   }
 
 	
 
 	file.close();
 	debug_message("Left conductivity_optical::read.\n");
+  return possibleLambda and possibleGamma;
 }
 
 
 template <typename U, unsigned DIM>
 void conductivity_optical<U, DIM>::override_parameters(){
   double scale = systemInfo.energy_scale;
+  double shift = systemInfo.energy_shift;
 
     if(variables.CondOpt_Temp != -8888){
       temperature = variables.CondOpt_Temp/scale;
@@ -241,6 +247,17 @@ void conductivity_optical<U, DIM>::override_parameters(){
     if(variables.CondOpt_NumEnergies != -1){
       N_energies  = variables.CondOpt_NumEnergies;
       default_NEnergies = false;
+    }
+
+    if(variables.CondOpt_NumMoments != -1){
+      if(variables.CondOpt_NumMoments > MaxMoments){
+        std::cout << "CondOpt: The numbe of Chebyshev moments specified"
+          " cannot be larger than the number of moments calculated by KITEx."
+          " Please specify a smaller number. Exiting.\n";
+        exit(1);
+      }
+      NumMoments  = variables.CondOpt_NumMoments;
+      default_NumMoments = false;
     }
 
     if(variables.CondOpt_FreqMax != -8888){
@@ -259,7 +276,7 @@ void conductivity_optical<U, DIM>::override_parameters(){
     }
 
     if(variables.CondOpt_Fermi != -8888){
-      e_fermi     = variables.CondOpt_Fermi/scale;
+      e_fermi     = (variables.CondOpt_Fermi - shift)/scale;
       default_efermi = false;
     }
 
@@ -274,6 +291,150 @@ void conductivity_optical<U, DIM>::override_parameters(){
     }
 };
 
+template <typename U, unsigned DIM>
+void conductivity_optical<U, DIM>::calculateBlocks(){
+	debug_message("Entered calc_optical_cond.\n");
+	//the temperature is already in the KPM scale, but not the broadening or the Fermi Energy
+
+  if(!isPossible){
+    std::cout << "Cannot calculate the conductivity because there is no matching Gamma matrix"
+      "Exiting\n";
+    exit(0);
+  }
+
+
+  //std::cout << "\nlim" << lim << " " << N_energies << "\n\n\n";
+
+  Eigen::Matrix<U, -1, 1> energies;
+  energies  = Eigen::Matrix<U, -1, 1>::LinSpaced(N_energies, -lim, lim);
+  Eigen::Matrix<U, -1, 1> frequencies;
+  frequencies = Eigen::Matrix<U, -1, 1>::LinSpaced(N_omegas, minFreq, maxFreq);
+
+	std::complex<U> imaginary(0.0, 1.0);
+
+
+  
+  // Functions that are going to be used by the contractor
+  int NumMoments1 = NumMoments;
+  U beta1 = beta;
+  U e_fermi1 = e_fermi;
+  std::function<U(int, U)> deltaF = [beta1, e_fermi1, NumMoments1](int n, U energy)->U{
+    return delta(n, energy)*U(1.0/(1.0 + U(n==0)))*fermi_function(energy, e_fermi1, beta1)*kernel_jackson<U>(n, NumMoments1);
+  };
+
+
+  Eigen::Matrix<std::complex<U>, -1, 1> cond; 
+  cond = Eigen::Matrix<std::complex<U>, -1, 1>::Zero(N_omegas, 1);
+  std::complex<U> temp3 = 0; 
+
+
+  // Delta matrix of chebyshev moments and energies
+  Eigen::Matrix<std::complex<U>,-1, -1> DeltaMatrix;
+  DeltaMatrix = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, NumMoments);
+  for(int n = 0; n < NumMoments; n++)
+    for(int e = 0; e < N_energies; e++)
+      DeltaMatrix(e,n) = deltaF(n, energies(e)); 
+
+
+  int N_threads;
+  int thread_num;
+  int local_NumMoments;
+  omp_set_num_threads(systemInfo.NumThreads);
+#pragma omp parallel shared(N_threads) private(thread_num)
+{
+#pragma omp master
+{
+  N_threads = omp_get_num_threads();
+  // check if each thread will get the same number of moments
+  if(NumMoments%N_threads != 0){
+    std::cout << "The number of Chebyshev moments in the optical conductivity must"
+      "be a multiple of the number of threads\n" << std::flush;
+    exit(1);
+  }
+}
+#pragma omp barrier
+
+
+#pragma omp for schedule(static, 1) nowait
+  for(int i = 0; i < N_threads; i++){
+    local_NumMoments = NumMoments/N_threads;
+    thread_num = omp_get_thread_num();
+
+    // The Gamma matrix has been divided among the threads
+    // Each thread has one section of that matrix, called local_Gamma
+    Eigen::Matrix<std::complex<U>, -1, -1> local_Gamma;
+    local_Gamma = Gamma.matrix().block(0, local_NumMoments*thread_num, 
+        NumMoments, local_NumMoments);
+
+    // Result of contracting the indices with the delta function
+    Eigen::Matrix<std::complex<U>, -1, -1> GammaEM;
+    GammaEM = DeltaMatrix*local_Gamma;
+
+    Eigen::Matrix<std::complex<U>,-1, 1> GammaEp;
+    Eigen::Matrix<std::complex<U>,-1, 1> GammaEn;
+    Eigen::Matrix<std::complex<U>,-1, 1> GammaE;
+    Eigen::Matrix<std::complex<U>, -1, 1> local_cond; 
+    GammaEp = Eigen::Matrix<std::complex<U>,-1, 1>::Zero(N_energies, 1);
+    GammaEn = Eigen::Matrix<std::complex<U>,-1, 1>::Zero(N_energies, 1);
+    GammaE  = Eigen::Matrix<std::complex<U>,-1, 1>::Zero(N_energies, 1);
+    local_cond = Eigen::Matrix<std::complex<U>, -1, 1>::Zero(N_omegas, 1);
+
+    // Loop over the frequencies
+    U freq_p, freq_n;
+    for(int w = 0; w < N_omegas; w++){
+      freq_p =  frequencies(w);
+      freq_n = -frequencies(w);
+
+      for(int e = 0; e < N_energies; e++){
+        GammaEp(e) = 0;
+        GammaEn(e) = 0;
+        for(int m = 0; m < local_NumMoments; m++){
+          GammaEp(e) += GammaEM(e, m)*greenAscat<U>(scat)(local_NumMoments*thread_num + m, energies(e) - freq_p);      // contracting with the positive frequencies
+          GammaEn(e) += GammaEM(e, m)*greenAscat<U>(scat)(local_NumMoments*thread_num + m, energies(e) - freq_n);      // contracting with the negative frequencies
+        }
+      }
+    
+      GammaE = GammaEp + GammaEn.conjugate();                                            // This is equivalent to the two frequency-dependent terms in the formula
+      local_cond(w) = integrate(energies, GammaE);
+    }
+
+    
+#pragma omp critical
+    {
+      cond += local_cond;
+    }
+  }
+#pragma omp barrier
+}
+
+  
+  temp3 = contract1<U>(deltaF, NumMoments, Lambda, energies);
+
+  
+
+  std::complex<U> freq;
+  for(int i = 0; i < N_omegas; i++){
+    freq = std::complex<U>(frequencies(i), scat);  
+    cond(i) += temp3;
+    cond(i) /= freq;
+  }
+  cond *= imaginary*U(systemInfo.num_orbitals*systemInfo.spin_degeneracy/systemInfo.unit_cell_area/units);
+
+	
+  
+  //Output to a file
+  std::ofstream myfile;
+  myfile.open(filename);
+  for(int i=0; i < N_omegas; i++){
+    freq = std::complex<U>(frequencies(i), scat);  
+    myfile << frequencies.real()(i)*systemInfo.energy_scale << " " << cond.real()(i) << " " << cond.imag()(i) << "\n";
+  }
+  myfile.close();
+  debug_message("Left calc_optical_cond.\n");
+
+
+
+};
 
 
 
@@ -289,7 +450,7 @@ void conductivity_optical<U, DIM>::calculate(){
   }
 
 
-  std::cout << "\nlim" << lim << " " << N_energies << "\n\n\n";
+  //std::cout << "\nlim" << lim << " " << N_energies << "\n\n\n";
 
   Eigen::Matrix<U, -1, 1> energies;
   energies  = Eigen::Matrix<U, -1, 1>::LinSpaced(N_energies, -lim, lim);

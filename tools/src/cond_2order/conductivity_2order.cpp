@@ -151,7 +151,6 @@ conductivity_nonlinear<T, DIM>::conductivity_nonlinear(system_info<T, DIM>& info
 
 
     isRequired = false; // was this quantity (conductivity_dc) asked for?
-    isPossible = false; // do we have all we need to calculate the conductivity?
 
     // KPM parameters
     NumPoints = -1;
@@ -172,48 +171,101 @@ conductivity_nonlinear<T, DIM>::conductivity_nonlinear(system_info<T, DIM>& info
     isRequired = true;
   } catch(H5::Exception& e){}
   
-
+  if(isRequired and variables.CondOpt2_is_required){
+    set_default_parameters();
+    isPossible = fetch_parameters(); // do we have all we need to calculate the conductivity?
+    override_parameters();
+    
+    if(isPossible){
+      printOpt2();
+      calculate();
+    } else {
+      std::cout << "ERROR. The nonlinear optical conductivity was requested but the data "
+        "needed for its computation was not found in the input .h5 file. "
+        "Make sure KITEx has processed the file first. Exiting.";
+      exit(1);
+    }
+  }
 }
 	
 template <typename T, unsigned DIM>
 void conductivity_nonlinear<T, DIM>::override_parameters(){
-    if(variables.CondOpt2_Temp != -8888)     temperature = variables.CondOpt2_Temp/systemInfo.energy_scale;
+  double scale = systemInfo.energy_scale;
+  double shift = systemInfo.energy_shift;
+
+    if(variables.CondOpt2_Temp != -8888)     temperature = variables.CondOpt2_Temp/scale;
     if(variables.CondOpt2_NumEnergies != -1) N_energies  = variables.CondOpt2_NumEnergies;
     if(variables.CondOpt2_ratio != 8.8888)   ratio       = variables.CondOpt2_ratio;
     if(variables.CondOpt2_print_all != -2)   print_all   = variables.CondOpt2_print_all;
-    if(variables.CondOpt2_FreqMax != -8888)  maxFreq     = variables.CondOpt2_FreqMax/systemInfo.energy_scale;
-    if(variables.CondOpt2_FreqMin != -8888)  minFreq     = variables.CondOpt2_FreqMin/systemInfo.energy_scale;
+    if(variables.CondOpt2_FreqMax != -8888)  maxFreq     = variables.CondOpt2_FreqMax/scale;
+    if(variables.CondOpt2_FreqMin != -8888)  minFreq     = variables.CondOpt2_FreqMin/scale;
     if(variables.CondOpt2_NumFreq != -1)     N_omegas    = variables.CondOpt2_NumFreq;
-    if(variables.CondOpt2_Fermi != -8888)    e_fermi     = variables.CondOpt2_Fermi/systemInfo.energy_scale;
-    if(variables.CondOpt2_Scat != -8888)     scat        = variables.CondOpt2_Scat/systemInfo.energy_scale;
+    if(variables.CondOpt2_Fermi != -8888)    e_fermi     = (variables.CondOpt2_Fermi - shift)/scale;
+    if(variables.CondOpt2_Scat != -8888)     scat        = variables.CondOpt2_Scat/scale;
     if(variables.CondOpt2_Name != "")        filename    = variables.CondOpt2_Name;
     beta = 1.0/8.6173303*pow(10,5)/temperature;
 };
 
 template <typename T, unsigned DIM>
 void conductivity_nonlinear<T, DIM>::set_default_parameters(){
-    temperature = 0.01/systemInfo.energy_scale; 
-    ratio       = 1.0;
-    print_all   = 0;
-    N_energies  = 512; 
-    lim         = 0.995;
-    maxFreq     = 7.0/systemInfo.energy_scale; 
-    minFreq     = 0.0/systemInfo.energy_scale;
-    N_omegas    = 512;
-    e_fermi     = 0.0/systemInfo.energy_scale;
-    scat        = 0.0166/systemInfo.energy_scale;
-    filename    = "nonlinear_cond.dat";  
-    beta        = 1.0/8.6173303*pow(10,5)/temperature;
+    
+  double scale = systemInfo.energy_scale;
+  double shift = systemInfo.energy_shift;
+  temperature = 0.01/scale;
+  beta        = 1.0/8.6173303*pow(10,5)/temperature;
+  default_temperature = true;
+
+
+  print_all   = 0;
+  N_energies  = 512; 
+  default_NEnergies = true;
+
+  lim         = 0.995;
+
+  maxFreq     = 7.0/systemInfo.energy_scale; 
+  minFreq     = 0.0/systemInfo.energy_scale;
+  N_omegas    = 512;
+  ratio       = 1.0;
+
+  default_minfreq = true;
+  default_maxfreq = true;
+  default_Nfreqs = true;
+  default_ratio = true;
+
+  e_fermi     = (0.0 - shift)/scale;
+  scat        = 0.0166/scale;
+  filename    = "nonlinear_cond.dat";  
+  
+  default_efermi = true;
+  default_scat = true;
+  default_filename = true;
 };
 
 template <typename T, unsigned DIM>
-void conductivity_nonlinear<T, DIM>::fetch_parameters(){
+void conductivity_nonlinear<T, DIM>::printOpt2(){
+  double scale = systemInfo.energy_scale;
+  double shift = systemInfo.energy_shift;
+  std::cout << "The second-order optical conductivity will be calculated with these parameters: (eV)\n"
+    "   Temperature: "            << temperature*scale      << ((default_temperature)?  " (default)":"") << "\n"
+    "   Broadening: "             << scat*scale             << ((default_scat)?         " (default)":"") << "\n"
+    "   Fermi energy: "           << e_fermi*scale + shift  << ((default_efermi)?       " (default)":"") << "\n"
+    "   Min frequency: "          << minFreq*scale          << ((default_minfreq)?     " (default)":"") << "\n"
+    "   Max frequency: "          << maxFreq*scale          << ((default_maxfreq)?     " (default)":"") << "\n"
+    "   Number of frequencies: "  << N_omegas               << ((default_Nfreqs)?       " (default)":"") << "\n"
+    "   Ratio: "                  << ratio                  << ((default_ratio)?        " (default)":"") << "\n"
+    "   Num integration points: " << N_energies             << ((default_NEnergies)?    " (default)":"") << "\n"
+    //"   Integration range: "       << energy_range             << ((default_energy_limits)?" (default)":" (Estimated from DoS)") << "\n"
+    "   Kernel for Dirac deltas: "<< "jackson"              << " (default)\n"
+    "   Filename: "               << filename               << ((default_filename)?     " (default)":"") << "\n";
+}
+
+template <typename T, unsigned DIM>
+bool conductivity_nonlinear<T, DIM>::fetch_parameters(){
   debug_message("Entered conductivity_nonlinear::read.\n");
   // This function reads all the relevant
   // information from the hdf5 configuration file and uses it to evaluate the parameters
   // needed to calculate the nonlinear conductivity
 	 
-  variables.printOpt2();
 
   // This function should not run if the conductivity is not needed. If, for some reason
   // it is run anyway, the user should be notified that there is not enough data to
@@ -242,10 +294,10 @@ void conductivity_nonlinear<T, DIM>::fetch_parameters(){
   // Check whether the matrices we're going to retrieve are complex or not
   complex = systemInfo.isComplex;
 
-  int hasGamma0 = 0;
-  int hasGamma1 = 0;
-  int hasGamma2 = 0;
-  int hasGamma3 = 0;
+  bool hasGamma0 = false;
+  bool hasGamma1 = false;
+  bool hasGamma2 = false;
+  bool hasGamma3 = false;
 
   // Fetch the Gamma matrices from the hdf file and return the success value
   if(not special) hasGamma0 = fetch_gamma0(); 
@@ -254,32 +306,15 @@ void conductivity_nonlinear<T, DIM>::fetch_parameters(){
   if(not special) hasGamma3 = fetch_gamma3();
 
   // check if we have all the objects that we need
-  if(special)     isPossible = hasGamma1 and hasGamma2;
-  if(not special) isPossible = hasGamma0 and hasGamma1 and hasGamma2 and hasGamma3;
+  bool possible = false;
+  if(special)     possible = hasGamma1 and hasGamma2;
+  if(not special) possible = hasGamma0 and hasGamma1 and hasGamma2 and hasGamma3;
 
   file.close();
   debug_message("Left conductivity_nonlinear::read.\n");
+  return possible;
 }
 
-
-template <typename U, unsigned DIM>
-void conductivity_nonlinear<U, DIM>::print_parameters(){
-  // Print out some useful information
-  verbose_message("  Energy in rescaled units: [-1,1]\n");
-  verbose_message("  Beta (1/kT): "); verbose_message(beta); verbose_message("\n");
-  verbose_message("  Fermi energy: "); verbose_message(e_fermi); verbose_message("\n");
-  verbose_message("  Using kernel for delta function: Jackson\n");
-  verbose_message("  Broadening parameter for Green's function: ");
-    verbose_message(scat); verbose_message("\n");
-  verbose_message("  Number of energies: "); verbose_message(N_energies); verbose_message("\n");
-  verbose_message("  Energy range: ["); verbose_message(-lim); verbose_message(",");
-    verbose_message(lim); verbose_message("]\n");
-  verbose_message("  Number of frequencies: "); verbose_message(N_omegas); verbose_message("\n");
-  verbose_message("  Frequency range: ["); verbose_message(minFreq); verbose_message(",");
-    verbose_message(maxFreq); verbose_message("]\n");
-  verbose_message("  File name: ");verbose_message(filename); verbose_message("\n");
-
-}
 
 template <typename U, unsigned DIM>
 void conductivity_nonlinear<U, DIM>::calculate_photo(){
@@ -491,7 +526,6 @@ void conductivity_nonlinear<U, DIM>::calculate(){
   //These frequencies are in the KPM scale, that is, the scale where the energy is in the range ]-1,1[.
   //the temperature is already in the KPM scale, but not the broadening or the Fermi Energy
 
-  print_parameters();
   int photo = 0;
   if(ratio == -1.0) photo = 1;
 

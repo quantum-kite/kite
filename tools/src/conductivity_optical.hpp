@@ -19,6 +19,8 @@ class conductivity_optical{
     int direction;
     int NumDisorder;
     int NumMoments;
+    int MaxMoments;
+    bool default_NumMoments;
     int NumPoints;
     int NumRandoms;
     double units;
@@ -63,9 +65,10 @@ class conductivity_optical{
     conductivity_optical(system_info<T, DIM>&, shell_input &);
     bool is_required();
     void set_default_parameters();
-    void fetch_parameters();
+    bool fetch_parameters();
     void override_parameters();
     void printOpt();
     void calculate();
+    void calculateBlocks();
 	
 };

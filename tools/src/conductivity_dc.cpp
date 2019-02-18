@@ -40,28 +40,27 @@ conductivity_dc<T, DIM>::conductivity_dc(system_info<T, DIM>& info, shell_input 
     variables = vari;       // retrieve the shell input
 
     isPossible = false;         // do we have all we need to calculate the conductivity?
-    isRequired = is_required(); // was this quantity (conductivity_dc) asked for?
+    isRequired = is_required() && variables.CondDC_is_required; // was this quantity (conductivity_dc) asked for?
 
 
     // If the DC conductivity was requested, all the necessary parameters for its
     // computation will be set and printed out to std::cout
     if(isRequired){
-        set_default_parameters();   // sets a default set of paramters for the calculation
-        fetch_parameters();         // finds all the paramters in the .h5 file
-        override_parameters();      // overrides parameters with the ones from the shell input
-        set_energy_limits();        // sets the energy limits used in the integration
-    }
+        set_default_parameters();        // sets a default set of paramters for the calculation
+        isPossible = fetch_parameters(); // finds all the paramters in the .h5 file
+        override_parameters();           // overrides parameters with the ones from the shell input
+        set_energy_limits();             // sets the energy limits used in the integration
 
-    if(isPossible and isRequired){
-        printDC();                  // Print all the parameters used
-    }
 
-    // needs fetch_parameters() to evaluate isPossible
-    if(!isPossible and isRequired){
-        std::cout << "ERROR. The DC conductivity was requested but the data "
-            "needed for its computation was not found in the input .h5 file. "
-            "Make sure KITEx has processed the file first. Exiting.";
-        exit(1);
+        if(isPossible){
+          printDC();                  // Print all the parameters used
+          calculate();
+        } else {
+          std::cout << "ERROR. The DC conductivity was requested but the data "
+              "needed for its computation was not found in the input .h5 file. "
+              "Make sure KITEx has processed the file first. Exiting.";
+          exit(1);
+        }
     }
 }
 
@@ -103,10 +102,11 @@ void conductivity_dc<T, DIM>::set_default_parameters(){
     // shell input parameters. 
 
     double scale = systemInfo.energy_scale;
+    double shift = systemInfo.energy_shift;
 
     NFermiEnergies      = 100;
-    minFermiEnergy      = -1.0/scale;       // -1eV in KPM reduced units [-1,1]
-    maxFermiEnergy      = 1.0/scale;        //  1eV in KPM reduced units [-1,1]
+    minFermiEnergy      = (-1.0 - shift)/scale;        // -1eV in KPM reduced units [-1,1]
+    maxFermiEnergy      = ( 1.0 - shift)/scale;        //  1eV in KPM reduced units [-1,1]
     default_NFermi      = true;
     default_mFermi      = true;
     default_MFermi      = true;
@@ -144,61 +144,63 @@ void conductivity_dc<T, DIM>::set_energy_limits(){
 }
 
 template <typename T, unsigned DIM>
-void conductivity_dc<T, DIM>::fetch_parameters(){
+bool conductivity_dc<T, DIM>::fetch_parameters(){
 	debug_message("Entered conductivit_dc::read.\n");
 	//This function reads all the data from the hdf5 file that's needed to 
     //calculate the dc conductivity
 	 
 	H5::H5File file;
-    std::string dirName = "/Calculation/conductivity_dc/";  // location of the information about the conductivity
+  std::string dirName = "/Calculation/conductivity_dc/";  // location of the information about the conductivity
 	file = H5::H5File(systemInfo.filename.c_str(), H5F_ACC_RDONLY);
 
-    // Fetch the direction of the conductivity and convert it to a string
-    get_hdf5(&direction, &file, (char*)(dirName+"Direction").c_str());
-    std::string dirString = num2str2(direction);
+  // Fetch the direction of the conductivity and convert it to a string
+  get_hdf5(&direction, &file, (char*)(dirName+"Direction").c_str());
+  std::string dirString = num2str2(direction);
 
-    // Fetch the number of Chebyshev Moments
+  // Fetch the number of Chebyshev Moments
 	get_hdf5(&NumMoments, &file, (char*)(dirName+"NumMoments").c_str());	
 
-    // Fetch the temperature from the .h5 file
-    // The temperature is already in KPM reduced units
+  // Fetch the temperature from the .h5 file
+  // The temperature is already in KPM reduced units
 	get_hdf5(&temperature, &file, (char*)(dirName+"Temperature").c_str());	
-    beta = 1.0/8.6173303*pow(10,5)/temperature;
-    default_temp = false;
+  beta = 1.0/8.6173303*pow(10,5)/temperature;
+  default_temp = false;
 
-    // Fetch the number of Fermi energies from the .h5 file
+  // Fetch the number of Fermi energies from the .h5 file
 	get_hdf5(&NFermiEnergies, &file, (char*)(dirName+"NumPoints").c_str());	
-    default_NFermi = false;
+  default_NFermi = false;
 
 
-    // Check whether the matrices we're going to retrieve are complex or not
-    int complex = systemInfo.isComplex;
+  // Check whether the matrices we're going to retrieve are complex or not
+  int complex = systemInfo.isComplex;
 
-    // Retrieve the Gamma Matrix
-    std::string MatrixName = dirName + "Gamma" + dirString;
-    try{
-        debug_message("Filling the Gamma matrix.\n");
-        Gamma = Eigen::Array<std::complex<T>,-1,-1>::Zero(NumMoments, NumMoments);
-		
-		if(complex)
-			get_hdf5(Gamma.data(), &file, (char*)MatrixName.c_str());
-		
-		if(!complex){
-			Eigen::Array<T,-1,-1> GammaReal;
-            GammaReal = Eigen::Array<T,-1,-1>::Zero(NumMoments, NumMoments);
-            get_hdf5(GammaReal.data(), &file, (char*)MatrixName.c_str());
-			
-			Gamma = GammaReal.template cast<std::complex<T>>();
-		}				
+  // Retrieve the Gamma Matrix
+  std::string MatrixName = dirName + "Gamma" + dirString;
+  bool possible = false;
+  try{
+    debug_message("Filling the Gamma matrix.\n");
+    Gamma = Eigen::Array<std::complex<T>,-1,-1>::Zero(NumMoments, NumMoments);
+  
+    if(complex)
+      get_hdf5(Gamma.data(), &file, (char*)MatrixName.c_str());
+    
+    if(!complex){
+      Eigen::Array<T,-1,-1> GammaReal;
+      GammaReal = Eigen::Array<T,-1,-1>::Zero(NumMoments, NumMoments);
+      get_hdf5(GammaReal.data(), &file, (char*)MatrixName.c_str());
+      
+      Gamma = GammaReal.template cast<std::complex<T>>();
+    }				
 
-        isPossible = true;
-    } catch(H5::Exception& e) {
-        debug_message("Conductivity DC: There is no Gamma matrix.\n");
-    }
+    possible = true;
+  } catch(H5::Exception& e) {
+      debug_message("Conductivity DC: There is no Gamma matrix.\n");
+  }
 	
 
-    file.close();
+  file.close();
 	debug_message("Left conductivity_dc::read.\n");
+  return possible;
 }
 
 template <typename U, unsigned DIM>
@@ -207,8 +209,11 @@ void conductivity_dc<U, DIM>::override_parameters(){
     // These parameters are in eV or Kelvin, so they must scaled down
     // to the KPM units. This includes the temperature
 
+    double scale = systemInfo.energy_scale;
+    double shift = systemInfo.energy_shift;
+
     if(variables.CondDC_Temp != -1){
-        temperature     = variables.CondDC_Temp/systemInfo.energy_scale;
+        temperature     = variables.CondDC_Temp/scale;
         beta            = 1.0/8.6173303*pow(10,5)/temperature;
         default_temp    = false;
     }
@@ -219,17 +224,17 @@ void conductivity_dc<U, DIM>::override_parameters(){
     }
 
     if(variables.CondDC_Scat != -8888){
-        scat            = variables.CondDC_Scat/systemInfo.energy_scale;
+        scat            = variables.CondDC_Scat/scale;
         default_scat    = false;
     }
 
     if(variables.CondDC_FermiMin != -8888){
-        minFermiEnergy  = variables.CondDC_FermiMin/systemInfo.energy_scale;
+        minFermiEnergy  = (variables.CondDC_FermiMin - shift)/scale;
         default_mFermi   = false;
     }
 
     if(variables.CondDC_FermiMax != -8888){  
-        maxFermiEnergy  = variables.CondDC_FermiMax/systemInfo.energy_scale;
+        maxFermiEnergy  = (variables.CondDC_FermiMax - shift)/scale;
         default_MFermi   = false;
     }
 
@@ -248,18 +253,19 @@ void conductivity_dc<U, DIM>::override_parameters(){
 template <typename U, unsigned DIM>
 void conductivity_dc<U, DIM>::printDC(){
     double scale = systemInfo.energy_scale;
-    std::string energy_range = "[" + std::to_string(minEnergy*scale) + ", " + std::to_string(maxEnergy*scale) + "]";
+    double shift = systemInfo.energy_shift;
+    std::string energy_range = "[" + std::to_string(minEnergy*scale + shift) + ", " + std::to_string(maxEnergy*scale + shift) + "]";
 
     // Prints all the information about the parameters
     std::cout << "The DC conductivity will be calculated with these parameters: (eV, Kelvin)\n"
-        "   Temperature: "             << temperature*scale        << ((default_temp)?         " (default)":"") << "\n"
-        "   Broadening: "              << scat*scale               << ((default_scat)?         " (default)":"") << "\n"
-        "   Max Fermi energy: "        << maxFermiEnergy*scale     << ((default_MFermi)?       " (default)":"") << "\n"
-        "   Min Fermi energy: "        << minFermiEnergy*scale     << ((default_mFermi)?       " (default)":"") << "\n"
-        "   Number Fermi energies: "   << NFermiEnergies           << ((default_NFermi)?       " (default)":"") << "\n"
-        "   Filename: "                << filename                 << ((default_filename)?     " (default)":"") << "\n"
-        "   Integration range: "       << energy_range             << ((default_energy_limits)?" (default)":" (Estimated from DoS)") << "\n"
-        "   Num integration points: "  << NEnergies                << ((default_NEnergies)?    " (default)":"") << "\n"; 
+        "   Temperature: "             << temperature*scale             << ((default_temp)?         " (default)":"") << "\n"
+        "   Broadening: "              << scat*scale                    << ((default_scat)?         " (default)":"") << "\n"
+        "   Max Fermi energy: "        << maxFermiEnergy*scale + shift  << ((default_MFermi)?       " (default)":"") << "\n"
+        "   Min Fermi energy: "        << minFermiEnergy*scale + shift  << ((default_mFermi)?       " (default)":"") << "\n"
+        "   Number Fermi energies: "   << NFermiEnergies                << ((default_NFermi)?       " (default)":"") << "\n"
+        "   Filename: "                << filename                      << ((default_filename)?     " (default)":"") << "\n"
+        "   Integration range: "       << energy_range                  << ((default_energy_limits)?" (default)":" (Estimated from DoS)") << "\n"
+        "   Num integration points: "  << NEnergies                     << ((default_NEnergies)?    " (default)":"") << "\n"; 
 }
 
 template <typename U, unsigned DIM>
@@ -369,8 +375,12 @@ void conductivity_dc<U, DIM>::calculate(){
 
   std::ofstream myfile;
   myfile.open(filename);
-  for(int i=0; i < NFermiEnergies; i++)
-    myfile  << fermiEnergies(i)*systemInfo.energy_scale << " " << condDC.real()(i) << " " << condDC.imag()(i) << "\n";
+  std::complex<U> cond;
+  for(int i=0; i < NFermiEnergies; i++){
+    energy = fermiEnergies(i)*systemInfo.energy_scale + systemInfo.energy_shift;
+    cond = condDC(i);
+    myfile  << energy << " " << cond.real() << " " << cond.imag() << "\n";
+  }
   
   myfile.close();
 

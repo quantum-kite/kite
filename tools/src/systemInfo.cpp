@@ -54,10 +54,12 @@ void system_info<T, DIM>::read(){
 	
   debug_message("Reading the energy scale, number of orbitals NOrbitals and their positions OrbPositions\n");
   get_hdf5(&energy_scale, &file, (char*)"EnergyScale");								// energy scale
+  get_hdf5(&energy_shift, &file, (char*)"EnergyShift");								// energy shift
   get_hdf5(&num_orbitals, &file, (char*)"NOrbitals");									// number of orbitals in each unit cell	
   orbital_positions = Eigen::Array<double,-1,-1>::Zero(num_orbitals, dim);	// position of each of those orbitals
   get_hdf5(orbital_positions.data(), &file, (char*)"OrbPositions");
   debug_message("energy_scale: "); debug_message(energy_scale); debug_message("\n");
+  debug_message("energy_shift: "); debug_message(energy_shift); debug_message("\n");
   debug_message("num_orbitals: "); debug_message(num_orbitals); debug_message("\n");
 
 	

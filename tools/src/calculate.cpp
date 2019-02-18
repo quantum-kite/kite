@@ -5,6 +5,20 @@
 /*                                                              */
 /****************************************************************/
 
+
+#include <iostream>
+#include <fstream>
+#include <Eigen/Dense>
+#include <complex>
+#include <vector>
+#include <string>
+#include <omp.h>
+
+#include "H5Cpp.h"
+#include "ComplexTraits.hpp"
+#include "myHDF5.hpp"
+
+#include "parse_input.hpp"
 #include "systemInfo.hpp"
 #include "dos.hpp"
 #include "ldos.hpp"
@@ -12,41 +26,12 @@
 #include "conductivity_optical.hpp"
 #include "functions.hpp"
 #include "cond_2order/conductivity_2order.hpp"
+#include "calculate.hpp"
 
-
-void choose_simulation_type(char, shell_input &);
-
-
-template <typename U, unsigned DIM>
-void calculate_conductivity_nonlinear(system_info<U, DIM>& sysinfo, shell_input & variables){
-  conductivity_nonlinear<U, DIM> info(sysinfo, variables);
-  if(info.isRequired and variables.CondOpt2_is_required){
-    verbose_message(
-        "Retrieving nonlinear conductivity...\n "
-        );
-    variables.printOpt2();
-    info.set_default_parameters();
-    info.fetch_parameters();
-    info.override_parameters();
-    info.calculate();
-  }
-};
+#include "macros.hpp"
 
 template <typename U, unsigned DIM>
-void calculate_conductivity_optical(system_info<U, DIM>& sysinfo, shell_input & variables){
-  conductivity_optical<U, DIM> info(sysinfo, variables);
-  if(info.isRequired and variables.CondOpt_is_required){
-    //verbose_message("Retrieving optical conductivity...\n");
-    //info.set_default_parameters();
-    //info.fetch_parameters();
-    //info.override_parameters();
-    info.calculate();
-  }
-};
-
-
-template <typename U, unsigned DIM>
-void calculate_simple(char *name, shell_input & variables){
+void calculate(char *name, shell_input & variables){
 	debug_message("Entered calculate_simple.\n");
   // Attempts to calculate all quantities implemented.
   // For each of those functions, KITE will attempt to retrieve the relevant quantities
@@ -58,16 +43,11 @@ void calculate_simple(char *name, shell_input & variables){
   info.read();
 
   verbose_message("----------------- CALCULATIONS ----------------- \n");
-  ldos<U, DIM> lDOS(info, variables); 
-  dos<U, DIM> DOS(info, variables); 
-  conductivity_dc<U, DIM> condDC(info, variables);
-
-  if(lDOS.isRequired and variables.lDOS_is_required)     lDOS.calculate();
-  if(DOS.isRequired and variables.DOS_is_required)       DOS.calculate();
-  if(condDC.isRequired and variables.CondDC_is_required) condDC.calculate();
-
-  calculate_conductivity_optical<U, DIM>(info, variables);
-  calculate_conductivity_nonlinear<U, DIM>(info, variables);
+  ldos<U, DIM>                    lDOS(info, variables); 
+  dos<U, DIM>                     DOS(info, variables); 
+  conductivity_dc<U, DIM>         condDC(info, variables);
+  conductivity_optical<U, DIM>    condOpt(info, variables);
+  conductivity_nonlinear<U, DIM>  condOpt2(info, variables);
   verbose_message("------------------------------------------------ \n\n");
 
 
@@ -113,56 +93,56 @@ void choose_simulation_type(char *name, shell_input & variables){
         case 0:
         {
             debug_message("case ");debug_message(0); debug_message("\n");
-            calculate_simple<float, 1u>(name, variables);
+            calculate<float, 1u>(name, variables);
             break;
         }
         case 1:
         {
             debug_message("case ");debug_message(1); debug_message("\n");
-            calculate_simple<float, 2u>(name, variables);
+            calculate<float, 2u>(name, variables);
             break;
         }
         case 2:
         {
             debug_message("case ");debug_message(2); debug_message("\n");
-            calculate_simple<float, 3u>(name, variables);
+            calculate<float, 3u>(name, variables);
             debug_message("left case ");debug_message(2); debug_message("\n");
             break;			
         }
         case 3:
         {
             debug_message("case ");debug_message(3); debug_message("\n");
-            calculate_simple<double, 1u>(name, variables);
+            calculate<double, 1u>(name, variables);
             break;
         }
         case 4:
         {
             debug_message("case ");debug_message(4); debug_message("\n");
-            calculate_simple<double, 2u>(name, variables);
+            calculate<double, 2u>(name, variables);
             break;
         }
         case 5:
         {
             debug_message("case ");debug_message(5); debug_message("\n");
-            calculate_simple<double, 3u>(name, variables);
+            calculate<double, 3u>(name, variables);
             break;
         }
         case 6:
         {
             debug_message("case ");debug_message(6); debug_message("\n");
-            calculate_simple<long double, 1u>(name, variables);
+            calculate<long double, 1u>(name, variables);
             break;
         }
         case 7:
         {
             debug_message("case ");debug_message(7); debug_message("\n");
-            calculate_simple<long double, 2u>(name, variables);
+            calculate<long double, 2u>(name, variables);
             break;
         }
         case 8:
         {
             debug_message("case ");debug_message(8); debug_message("\n");
-            calculate_simple<long double, 3u>(name, variables);
+            calculate<long double, 3u>(name, variables);
             break;
         }
         default:

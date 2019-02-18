@@ -32,22 +32,22 @@ ldos<T, DIM>::ldos(system_info<T, DIM>& sysinfo, shell_input & vari){
     variables   = vari;                   // retrieve the shell input
     dirName     = "/Calculation/ldos/";     // location of the information about the conductivity
     
-    isRequired = is_required();         // was the local density of states requested?
+    isRequired = is_required() && variables.lDOS_is_required;         // was the local density of states requested?
     isPossible = false;                 // do we have all we need to calculate the density of states?
     if(isRequired){
         set_default_parameters();
         isPossible = fetch_parameters();
         override_parameters();
-    }
 
-    if(isPossible and isRequired){
-        printLDOS();                  // Print all the parameters used
-    }
-    if(isRequired and !isPossible){
+      if(isPossible){
+          printLDOS();                  // Print all the parameters used
+          calculate();
+      } else {
         std::cout << "ERROR. The LDOS was requested but the data "
             "needed for its computation was not found in the input .h5 file. "
             "Make sure KITEx has processed the file first. Exiting.";
         exit(1);
+      }
     }
 }
 
@@ -218,8 +218,10 @@ void ldos<U, DIM>::calculate(){
   // Save the density of states to a file
   U mult = 1.0/systemInfo->energy_scale;
   std::ofstream myfile;
+  double scale = systemInfo->energy_scale;
+  double shift = systemInfo->energy_shift;
   for(int i=0; i < NumEnergies; i++){
-    myfile.open(filename + std::to_string(energies(i)*systemInfo->energy_scale) + ".dat");
+    myfile.open(filename + std::to_string(energies(i)*scale + shift) + ".dat");
     for(unsigned pos = 0; pos < NumPositions; pos++){
       int x, y, orb;
       x = global_positions(pos,0);

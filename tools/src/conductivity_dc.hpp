@@ -64,8 +64,8 @@ class conductivity_dc{
     void set_energy_limits();
     bool is_required();
     void set_default_parameters();
-	void fetch_parameters();
-	void override_parameters();
+	  bool fetch_parameters();
+	  void override_parameters();
     void calculate();
 	
 };

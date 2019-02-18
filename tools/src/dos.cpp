@@ -32,27 +32,22 @@ dos<T, DIM>::dos(system_info<T, DIM>& sysinfo, shell_input & vari){
     dos_finished = false;
     MaxMoments = -1;
     isPossible = false;         // do we have all we need to calculate the density of states?
-    isRequired = is_required(); // check whether the DOS was requested
-
+    isRequired = is_required() && variables.DOS_is_required; // check whether the DOS was requested
     if(isRequired){
         set_default_parameters();
         isPossible = fetch_parameters();
         override_parameters();      // overrides parameters with the ones from the shell input
         energies = Eigen::Matrix<T, -1, 1>::LinSpaced(NEnergies, Emin, Emax);
-    }
-
-    if(isPossible and isRequired){
-        printDOS();
-    }
-
-    if(!isPossible and isRequired){
+      if(isPossible){
+          printDOS();
+          calculate();
+      } else {
         std::cout << "ERROR. The density of states was requested but the data "
             "needed for its computation was not found in the input .h5 file. "
             "Make sure KITEx has processed the file first. Exiting.";
         exit(1);
+      }
     }
-
-
 }
 
 template <typename T, unsigned DIM>
@@ -205,7 +200,8 @@ void dos<U, DIM>::printDOS(){
     // Prints all the information about the parameters
     
     double scale = systemInfo->energy_scale;
-    std::string energy_range = "[" + std::to_string(Emin*scale) + ", " + std::to_string(Emax*scale) + "]";
+    double shift = systemInfo->energy_shift;
+    std::string energy_range = "[" + std::to_string(Emin*scale + shift) + ", " + std::to_string(Emax*scale + shift) + "]";
     bool default_energy_limits = default_Emin && default_Emax;
 
     std::cout << "The density of states will be calculated with these parameters: (eV)\n"
@@ -215,7 +211,7 @@ void dos<U, DIM>::printDOS(){
         "   Number of moments: "    << NumMoments       << ((default_NumMoments)?       " (default)":"") << "\n"
         "   Kernel: "               << kernel           << ((default_kernel)?           " (default)":"") << "\n";
     if(kernel == "green"){
-        std::cout << "   Kernel parameter: "     << kernel_parameter << ((default_kernel_parameter)? " (default)":"") << "\n";
+        std::cout << "   Kernel parameter: "     << kernel_parameter*scale << ((default_kernel_parameter)? " (default)":"") << "\n";
     }
 }
 
@@ -230,8 +226,10 @@ void dos<U, DIM>::calculate(){
   // chebyshev polynomial of the first kind
   GammaE = Eigen::Array<std::complex<U>, -1, -1>::Zero(NEnergies, 1);
 
-  U mult = 1.0/systemInfo->energy_scale;
+  U scale = systemInfo->energy_scale;
+  U mult = 1.0/scale;
   U factor;
+  U shift = systemInfo->energy_shift;
 
   // Choosing the kernel/exact green expansion
 
@@ -261,7 +259,7 @@ void dos<U, DIM>::calculate(){
   std::ofstream myfile;
   myfile.open(filename);
   for(int i=0; i < NEnergies; i++){
-    myfile  << energies(i)*systemInfo->energy_scale << " " << GammaE.real()(i) << " " << GammaE.imag()(i) << "\n";
+    myfile  << energies(i)*scale + shift << " " << GammaE.real()(i) << " " << GammaE.imag()(i) << "\n";
   }
 
   myfile.close();

@@ -33,6 +33,16 @@ class conductivity_nonlinear{
     T beta;
     T e_fermi;
     T scat;
+
+    bool default_temperature;
+    bool default_scat;
+    bool default_efermi;
+    bool default_minfreq;
+    bool default_maxfreq;
+    bool default_Nfreqs;
+    bool default_ratio;
+    bool default_NEnergies;
+    bool default_filename;
     
     // Energy parameters needed to run the simulation
     int N_energies;
@@ -61,14 +71,14 @@ class conductivity_nonlinear{
 
     // Functions
     conductivity_nonlinear(system_info<T, DIM>&, shell_input &);
-    void print_parameters();
     
     int fetch_gamma0();
     int fetch_gamma1();
     int fetch_gamma2();
     int fetch_gamma3();
 
-    void fetch_parameters();
+    void printOpt2();
+    bool fetch_parameters();
     void override_parameters();
     void set_default_parameters();
     void calculate();

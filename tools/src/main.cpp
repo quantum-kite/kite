@@ -15,7 +15,7 @@
 
 #include "myHDF5.hpp"
 #include "parse_input.hpp"
-#include "calculate_simple.hpp"
+#include "calculate.hpp"
 #include "macros.hpp"
 #include "messages.hpp"
 

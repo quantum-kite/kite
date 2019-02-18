@@ -115,6 +115,7 @@ void shell_input::printHelp(){
     std::cout << "           -O min max num  Frequencies\n";
     std::cout << "           -F              Fermi energy\n";
     std::cout << "           -N              Name of the output file\n";
+    std::cout << "           -M              Number of Chebyshev moments\n";
     std::cout << "           -X              Exclusive. Only calculate this quantity\n\n";
 
     std::cout << "--CondOpt2 -E              Number of energy points used in the integration\n";
@@ -201,6 +202,7 @@ shell_input::shell_input(int argc, char *argv[]){
     lDOS_is_required = false;
 
     int num_exclusives = get_num_exclusives();
+    std::cout <<"NUM_EXCL" << num_exclusives << "\n";
     if(num_exclusives > 1){
         std::cout << "There can be only one exclusive function. Exiting.\n";
         exit(1);
@@ -236,7 +238,7 @@ int shell_input::get_num_exclusives(){
 
 void shell_input::parse_CondDC(int argc, char *argv[]){
     // This function looks at the command-line input pertaining to CondDC and
-    // finds the parameters for the temperature "t", number of energy points "E", 
+    // finds the parameters for the temperature "T", number of energy points "E", 
     // scattering parameter "S" and Fermi energy min, max and num "F"
     
     CondDC_Temp = -1;
@@ -282,6 +284,11 @@ void shell_input::parse_CondDC(int argc, char *argv[]){
                 }
             }
         }
+        if(keys_len.at(j) == 1){
+          std::string name = argv[1 + pos];
+          if(name == "-X")
+            CondDC_Exclusive = true;
+        }
     }
 }
 
@@ -292,6 +299,7 @@ void shell_input::parse_CondOpt(int argc, char* argv[]){
     
     CondOpt_Temp = -8888;
     CondOpt_NumEnergies = -1;
+    CondOpt_NumMoments = -1;
     CondOpt_FreqMin = -8888; // Some stupid values that I hope no-one will every pick
     CondOpt_FreqMax = -8888;
     CondOpt_NumFreq = -1;
@@ -316,6 +324,8 @@ void shell_input::parse_CondOpt(int argc, char* argv[]){
                 CondOpt_Scat = atof(n1.c_str());
             if(name == "-N")
                 CondOpt_Name = n1;
+            if(name == "-M")
+                CondOpt_NumMoments = atoi(n1.c_str());
             if(name == "-F")
                 CondOpt_Fermi = atof(n1.c_str());
             if(name == "-X" or n1 == "-X")
@@ -327,6 +337,11 @@ void shell_input::parse_CondOpt(int argc, char* argv[]){
                 CondOpt_FreqMax = atof(n2.c_str());
                 CondOpt_NumFreq = atoi(n3.c_str());
             }
+        }
+        if(keys_len.at(j) == 1){
+          std::string name = argv[1 + pos];
+          if(name == "-X")
+            CondOpt_Exclusive = true;
         }
     }
 }
@@ -380,6 +395,11 @@ void shell_input::parse_CondOpt2(int argc, char* argv[]){
                 CondOpt2_NumFreq = atoi(n3.c_str());
             }
         }
+        if(keys_len.at(j) == 1){
+          std::string name = argv[1 + pos];
+          if(name == "-X")
+            CondOpt2_Exclusive = true;
+        }
     }
 }
 
@@ -414,6 +434,11 @@ void shell_input::parse_DOS(int argc, char* argv[]){
             }
             if(name == "-X" or n1 == "-X")
                 DOS_Exclusive = true;
+        }
+        if(keys_len.at(0) == 1){
+          std::string name = argv[1 + pos];
+          if(name == "-X")
+            DOS_Exclusive = true;
         }
     }
 
@@ -453,6 +478,11 @@ void shell_input::parse_lDOS(int argc, char* argv[]){
             }
             if(name == "-X" or n1 == "-X")
                 lDOS_Exclusive = true;
+        }
+        if(keys_len.at(4) == 1){
+          std::string name = argv[1 + pos];
+          if(name == "-X")
+            lDOS_Exclusive = true;
         }
     }
 
