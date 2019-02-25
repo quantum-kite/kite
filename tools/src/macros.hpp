@@ -2,7 +2,7 @@
 #define outres "\033[0m"
 
 #ifndef DEBUG
-#define DEBUG 0
+#define DEBUG 1
 #endif
 
 #ifndef VERBOSE

@@ -92,6 +92,10 @@ build/
 !tests/*/*ORIG.h5
 !tools/tests/*/*ORIG.h5
 
+# .dat files
+tools/tests/test6/*.dat
+tools/tests/test*/log*
+
 
 # add .pdf files
 *.pdf

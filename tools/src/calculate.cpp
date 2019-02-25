@@ -41,6 +41,7 @@ void calculate(char *name, shell_input & variables){
   system_info<U, DIM> info;
   info = system_info<U, DIM>(std::string(name));
   info.read();
+  info.print_info();
 
   verbose_message("----------------- CALCULATIONS ----------------- \n");
   ldos<U, DIM>                    lDOS(info, variables); 

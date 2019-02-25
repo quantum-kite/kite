@@ -18,6 +18,8 @@ class shell_input{
         double CondOpt_Temp; 
         int CondOpt_NumEnergies; 
         int CondOpt_NumMoments;
+        int CondOpt_Convergence_D;
+        int CondOpt_Convergence_G;
         double CondOpt_Scat; 
         double CondOpt_Fermi; 
         double CondOpt_FreqMin; 

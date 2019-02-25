@@ -18,9 +18,17 @@ class conductivity_optical{
     // the configuration file
     int direction;
     int NumDisorder;
+
     int NumMoments;
+    int Moments_D, Moments_G;
+    int Convergence_D, Convergence_G;
+    bool default_Convergence_D, default_Convergence_G;
+    //unsigned Nmax, Mmax;
+    //unsigned nmax, mmax;
+    bool Moments_divisible;
     int MaxMoments;
     bool default_NumMoments;
+
     int NumPoints;
     int NumRandoms;
     double units;
@@ -60,7 +68,9 @@ class conductivity_optical{
 
     // Objects required to successfully calculate the conductivity
     Eigen::Array<std::complex<T>, -1, -1> Gamma;
+    Eigen::Array<std::complex<T>, -1, -1> Gamma_Padded;
     Eigen::Array<std::complex<T>, -1, -1> Lambda;
+    Eigen::Array<std::complex<T>, -1, -1> Lambda_Padded;
 
     conductivity_optical(system_info<T, DIM>&, shell_input &);
     bool is_required();

@@ -116,6 +116,7 @@ void shell_input::printHelp(){
     std::cout << "           -F              Fermi energy\n";
     std::cout << "           -N              Name of the output file\n";
     std::cout << "           -M              Number of Chebyshev moments\n";
+    std::cout << "           -C num_d num_g  Output CondOpt at num_d moments of the Dirac delta and num_g moments of the Green's function.\n";
     std::cout << "           -X              Exclusive. Only calculate this quantity\n\n";
 
     std::cout << "--CondOpt2 -E              Number of energy points used in the integration\n";
@@ -202,7 +203,6 @@ shell_input::shell_input(int argc, char *argv[]){
     lDOS_is_required = false;
 
     int num_exclusives = get_num_exclusives();
-    std::cout <<"NUM_EXCL" << num_exclusives << "\n";
     if(num_exclusives > 1){
         std::cout << "There can be only one exclusive function. Exiting.\n";
         exit(1);
@@ -296,11 +296,14 @@ void shell_input::parse_CondOpt(int argc, char* argv[]){
     // This function looks at the command-line input pertaining to CondOpt and
     // finds the parameters for the temperature "t", number of energy points "E", 
     // scattering parameter "S", Fermi energy "F" and min_freq, max_freq, num_freqs "O"
-    
+
+    // Some stupid values that I hope no-one will every pick
     CondOpt_Temp = -8888;
     CondOpt_NumEnergies = -1;
     CondOpt_NumMoments = -1;
-    CondOpt_FreqMin = -8888; // Some stupid values that I hope no-one will every pick
+    CondOpt_Convergence_D = -1;
+    CondOpt_Convergence_G = -1;
+    CondOpt_FreqMin = -8888;
     CondOpt_FreqMax = -8888;
     CondOpt_NumFreq = -1;
     CondOpt_Fermi = -8888;
@@ -326,6 +329,11 @@ void shell_input::parse_CondOpt(int argc, char* argv[]){
                 CondOpt_Name = n1;
             if(name == "-M")
                 CondOpt_NumMoments = atoi(n1.c_str());
+            if(name == "-C"){
+                std::string n2 = argv[k + pos + 2];
+                CondOpt_Convergence_D = atoi(n1.c_str());
+                CondOpt_Convergence_G = atoi(n2.c_str());
+            }
             if(name == "-F")
                 CondOpt_Fermi = atof(n1.c_str());
             if(name == "-X" or n1 == "-X")

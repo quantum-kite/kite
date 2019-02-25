@@ -29,6 +29,7 @@ class system_info{
 
 		system_info(std::string);
     system_info();
+    void print_info();
 		void read();
 	
 };
