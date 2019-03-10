@@ -1661,7 +1661,7 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
             raise SystemExit('Only a single function request of each type is currently allowed. Please use another '
                              'configuration file for the same functionality.')
         grpc_p.create_dataset('NumMoments', data=moments, dtype=np.int32)
-        grpc_p.create_dataset('Energy', data=np.asarray(energy), dtype=np.float32)
+        grpc_p.create_dataset('Energy', data=(np.asarray(energy) - config.energy_shift) / config.energy_scale, dtype=np.float32)
         if len_sub != len_pos:
             grpc_p.create_dataset('Orbitals', data=np.tile(np.asarray(orbitals),len_pos).reshape(-1), dtype=np.int32)
             grpc_p.create_dataset('FixPosition', data=np.repeat(np.asarray(fixed_positions),len_sub), dtype=np.int32)
