@@ -9,7 +9,7 @@ class Simulation;
 #include "Hamiltonian.hpp"
 #include "KPM_VectorBasis.hpp"
 #include "KPM_Vector.hpp"
-#include "queue.hpp"
+//#include "queue.hpp"
 #include "Simulation.hpp"
 
 template <typename T, unsigned D>

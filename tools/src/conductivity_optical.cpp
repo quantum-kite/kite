@@ -99,8 +99,8 @@ void conductivity_optical<T, DIM>::set_default_parameters(){
     beta = 1.0/8.6173303*pow(10,5)/temperature;
     default_temperature = true;
 
-    Convergence_D = systemInfo.NumThreads;
-    Convergence_G = 1;
+    Convergence_G = systemInfo.NumThreads;
+    Convergence_D = 1;
     default_Convergence_D = true;
     default_Convergence_G = true;
 
@@ -615,7 +615,7 @@ void conductivity_optical<U, DIM>::calculate(){
 
   
   // Functions that are going to be used by the contractor
-  int NumMoments1 = NumMoments;
+  int NumMoments1 = Moments_D;
   U beta1 = beta;
   U e_fermi1 = e_fermi;
   std::function<U(int, U)> deltaF = [beta1, e_fermi1, NumMoments1](int n, U energy)->U{
@@ -630,8 +630,8 @@ void conductivity_optical<U, DIM>::calculate(){
 
   // Delta matrix of chebyshev moments and energies
   Eigen::Matrix<std::complex<U>,-1, -1> DeltaMatrix;
-  DeltaMatrix = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, NumMoments);
-  for(int n = 0; n < NumMoments; n++)
+  DeltaMatrix = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, Moments_D);
+  for(int n = 0; n < Moments_D; n++)
     for(int e = 0; e < N_energies; e++)
       DeltaMatrix(e,n) = deltaF(n, energies(e)); 
 
@@ -646,25 +646,25 @@ void conductivity_optical<U, DIM>::calculate(){
 {
   N_threads = omp_get_num_threads();
   // check if each thread will get the same number of moments
-  if(NumMoments%N_threads != 0){
-    std::cout << "The number of Chebyshev moments in the optical conductivity must"
-      "be a multiple of the number of threads\n" << std::flush;
-    exit(1);
-  }
+  //if(NumMoments%N_threads != 0){
+    //std::cout << "The number of Chebyshev moments in the optical conductivity must"
+      //"be a multiple of the number of threads\n" << std::flush;
+    //exit(1);
+  //}
 }
 #pragma omp barrier
 
 
 #pragma omp for schedule(static, 1) nowait
   for(int i = 0; i < N_threads; i++){
-    local_NumMoments = NumMoments/N_threads;
+    local_NumMoments = Moments_G/N_threads;
     thread_num = omp_get_thread_num();
 
     // The Gamma matrix has been divided among the threads
     // Each thread has one section of that matrix, called local_Gamma
     Eigen::Matrix<std::complex<U>, -1, -1> local_Gamma;
     local_Gamma = Gamma.matrix().block(0, local_NumMoments*thread_num, 
-        NumMoments, local_NumMoments);
+        Moments_D, local_NumMoments);
 
     // Result of contracting the indices with the delta function
     Eigen::Matrix<std::complex<U>, -1, -1> GammaEM;
@@ -708,7 +708,7 @@ void conductivity_optical<U, DIM>::calculate(){
 }
 
   
-  temp3 = contract1<U>(deltaF, NumMoments, Lambda, energies);
+  temp3 = contract1<U>(deltaF, Moments_D, Lambda, energies);
 
   
   //std::cout << "temp3 regular:" << temp3 << "\n";

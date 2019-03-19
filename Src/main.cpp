@@ -91,7 +91,7 @@ int main(int argc, char *argv[]){
     std::cout << "Please use a valid value for the numerical precision. Accepted values: 0, 1, 2. Exiting.\n";
     exit(1);
   }
-  if(is_complex < 0 || is_complex > 1){
+  if(is_complex != 0 || is_complex != 1){
     std::cout << "Bad complex flag. It has to be either 0 or 1. Exiting.\n";
     exit(1);
   }
@@ -99,8 +99,6 @@ int main(int argc, char *argv[]){
 
   // Decide which version of the program should run. This depends on the
   // precision, the dimension and whether or not we want complex functions.
-  // When COMPILE_MAIN is 1, only a small portion of the code is compiled.
-  // This speeds up the compilation time considerably, while only support
   int index =   dim - 1 + 3 * precision + is_complex * 3 * 3; 
   switch (index ) {
   case 0:

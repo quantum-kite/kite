@@ -83,6 +83,19 @@ if(local_calculate_dos){
     file->close();
     delete file;
 
+    if(NDisorder <= 0){
+      std::cout << "Cannot calculate Density of states with nonpositive NDisorder\n";
+      exit(0);
+    }
+    if(NMoments <= 0){
+      std::cout << "Cannot calculate Density of states with nonpositive NMoments\n";
+      exit(0);
+    }
+    if(NRandom <= 0){
+      std::cout << "Cannot calculate Density of states with nonpositive NRandom\n";
+      exit(0);
+    }
+
 }
 #pragma omp barrier
   DOS(NMoments, NRandom, NDisorder);
@@ -92,8 +105,10 @@ if(local_calculate_dos){
 template <typename T,unsigned D>
 
 void Simulation<T,D>::DOS(int NMoments, int NRandom, int NDisorder){
+  debug_message("Entered Simulation::DOS\n");
   std::vector<std::vector<unsigned>> indices = process_string("");
   Gamma1D(NRandom, NDisorder, NMoments, indices, "/Calculation/dos/MU");
+  debug_message("Left Simulation::DOS\n");
 }
 
 
