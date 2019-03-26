@@ -91,7 +91,7 @@ int main(int argc, char *argv[]){
     std::cout << "Please use a valid value for the numerical precision. Accepted values: 0, 1, 2. Exiting.\n";
     exit(1);
   }
-  if(is_complex != 0 || is_complex != 1){
+  if(is_complex != 0 && is_complex != 1){
     std::cout << "Bad complex flag. It has to be either 0 or 1. Exiting.\n";
     exit(1);
   }

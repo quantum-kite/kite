@@ -15,7 +15,7 @@ def square_lattice(onsite=(0, 0)):
 
     return lat
 
-nx = ny = 2
+nx = ny = 4
 lx = ly = 256
 lattice = square_lattice()
 
@@ -27,8 +27,8 @@ Gamma = [0, 0]
 K1 = b1[0:2] + b2[0:2]
 points = [Gamma, K1]
 
-k_path = pb.results.make_path(*points, step=1.0)
+k_path = pb.results.make_path(*points, step=0.010)
 
 calculation_arpes = kite.Calculation(configuration)
-calculation_arpes.arpes(k_vector=k_path, num_moments=16, num_disorder=1)
+calculation_arpes.arpes(k_vector=k_path, num_moments=256, num_disorder=1)
 kite.config_system(lattice, configuration, calculation_arpes, filename='config.h5')

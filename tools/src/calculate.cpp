@@ -22,6 +22,7 @@
 #include "systemInfo.hpp"
 #include "dos.hpp"
 #include "ldos.hpp"
+#include "arpes.hpp"
 #include "conductivity_dc.hpp"
 #include "conductivity_optical.hpp"
 #include "functions.hpp"
@@ -44,6 +45,7 @@ void calculate(char *name, shell_input & variables){
   info.print_info();
 
   verbose_message("----------------- CALCULATIONS ----------------- \n");
+  arpes<U, DIM>                   arpes(info, variables); 
   ldos<U, DIM>                    lDOS(info, variables); 
   dos<U, DIM>                     DOS(info, variables); 
   conductivity_dc<U, DIM>         condDC(info, variables);
