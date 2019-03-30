@@ -47,6 +47,21 @@ class shell_input{
         std::string lDOS_kernel;
         double lDOS_kernel_parameter;
 
+        // ARPES
+        std::string ARPES_Name;
+        bool ARPES_Exclusive;
+        bool ARPES_is_required;
+        //int ARPES_NumMoments;
+        //std::string lDOS_kernel;
+        //double lDOS_kernel_parameter;
+        double ARPES_Emin;
+        double ARPES_Emax;
+        double ARPES_NumEnergies;
+        double ARPES_Temp;
+        double ARPES_Fermi;
+        double ARPES_freq;
+        Eigen::Array<double, -1, 1> ARPES_vec;
+
         // 2nd order optical conductivity
         double CondOpt2_Temp; 
         int CondOpt2_NumEnergies; 
@@ -78,12 +93,14 @@ class shell_input{
         void printOpt2();
         void printDOS();
         void printlDOS();
+        void printARPES();
 
         void parse_CondDC(int argc, char *argv[]);
         void parse_CondOpt(int argc, char *argv[]);
         void parse_CondOpt2(int argc, char *argv[]);
         void parse_DOS(int argc, char *argv[]);
         void parse_lDOS(int argc, char *argv[]);
+        void parse_ARPES(int argc, char *argv[]);
         int get_num_exclusives();
 
 };

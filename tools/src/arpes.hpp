@@ -28,10 +28,13 @@ class arpes{
 
     double freq;
     bool default_freq;
-    Eigen::Matrix<T, DIM, 1> incident_vector;
+
+    Eigen::Array<double, -1, -1> incident_vector;
     bool default_incident;
+
     double fermi;
     bool default_fermi;
+
     double temperature;
     double beta;
     bool default_temp;

@@ -77,6 +77,13 @@ void shell_input::printlDOS(){
     std::cout << "\n";
 }
 
+void shell_input::printARPES(){
+    std::cout << "Printing parameters for ARPES obtained from the shell:\n";
+    if(ARPES_Name != "")              std::cout << "    name of the output file: "    << ARPES_Name << "\n";
+    if(ARPES_Exclusive == true)       std::cout << "    Exclusive.\n";
+    std::cout << "\n";
+}
+
 void shell_input::printHelp(){
     std::cout << "KITE-Tools command-line configuration guide. Basic usage:\n\n";
     std::cout << ".KITE-tools h5_file.h5 [options]\n";
@@ -94,6 +101,16 @@ void shell_input::printHelp(){
     std::cout << "--LDOS     -N              Name of the output file\n";
     std::cout << "           -M              Number of Chebyshev moments\n";
     std::cout << "           -K              Kernel to use (jackson/green). green requires broadening parameter. Example: -K green 0.01\n";
+    std::cout << "           -X              Exclusive. Only calculate this quantity\n\n";
+
+    std::cout << "--ARPES    -N              Name of the output file\n";
+    std::cout << "           -E min max num  Number of energy points\n";
+    std::cout << "           -F              Fermi energy\n";
+    std::cout << "           -T              Temperature\n";
+    std::cout << "           -V              Wave vector of the incident wave\n";
+    std::cout << "           -O              Frequency of the incident wave\n";
+    //std::cout << "           -M              Number of Chebyshev moments\n";
+    //std::cout << "           -K              Kernel to use (jackson/green). green requires broadening parameter. Example: -K green 0.01\n";
     std::cout << "           -X              Exclusive. Only calculate this quantity\n\n";
 
     std::cout << "--DOS      -E              Number of energy points\n";
@@ -159,7 +176,7 @@ shell_input::shell_input(int argc, char *argv[]){
 	// Processes the input that this program recieves from the command line	
 
     // First, find the position of each of the following functions:
-    valid_keys = std::vector<std::string>{"--DOS", "--CondOpt","--CondDC", "--CondOpt2", "--LDOS"};
+    valid_keys = std::vector<std::string>{"--DOS", "--CondOpt","--CondDC", "--CondOpt2", "--LDOS", "--ARPES"};
     len = valid_keys.size();   // length of valid_keys?
     keys_pos = std::vector<int>(len, -1);
     keys_len = std::vector<int>(len, -1);
@@ -189,6 +206,7 @@ shell_input::shell_input(int argc, char *argv[]){
     parse_CondDC(argc, argv);
     parse_DOS(argc, argv);
     parse_lDOS(argc, argv);
+    parse_ARPES(argc, argv);
     parse_CondOpt(argc, argv);
     parse_CondOpt2(argc, argv);
 
@@ -201,6 +219,7 @@ shell_input::shell_input(int argc, char *argv[]){
     CondOpt2_is_required = false;
     DOS_is_required = false;
     lDOS_is_required = false;
+    ARPES_is_required = false;
 
     int num_exclusives = get_num_exclusives();
     if(num_exclusives > 1){
@@ -213,6 +232,7 @@ shell_input::shell_input(int argc, char *argv[]){
             if(CondOpt2_Exclusive) CondOpt2_is_required = true;
             if(DOS_Exclusive) DOS_is_required = true;
             if(lDOS_Exclusive) lDOS_is_required = true;
+            if(ARPES_Exclusive) ARPES_is_required = true;
 
         } else {
             CondDC_is_required = true;
@@ -220,6 +240,7 @@ shell_input::shell_input(int argc, char *argv[]){
             CondOpt2_is_required = true;
             DOS_is_required = true;
             lDOS_is_required = true;
+            ARPES_is_required = true;
             }
     }
 
@@ -500,3 +521,116 @@ void shell_input::parse_lDOS(int argc, char* argv[]){
       exit(1);
     }
 }
+
+
+bool is_key(std::string n){
+  return n == "-T" or n == "-O" or n == "-F" or n == "-N" or n == "-X" or n == "-V" or n == "-E";
+}
+
+void shell_input::parse_ARPES(int argc, char* argv[]){
+    // This function looks at the command-line input pertaining to CondDC and
+    // finds the parameters for the temperature "t", number of energy points "E", 
+    // scattering parameter "S" and Fermi energy min, max and num "F"
+    debug_message("Entered parse_ARPES\n");
+    
+    ARPES_Name = "";
+    ARPES_Exclusive = false;
+    ARPES_NumEnergies = -1;
+    ARPES_Emin = 8888;
+    ARPES_Emax = -8888;
+    ARPES_Temp = -8888;
+    ARPES_Fermi = -8888;
+    ARPES_freq = -8888;
+    double v1, v2, v3;
+
+    int j = 5;
+    int pos = keys_pos.at(j);
+    if(pos != -1){
+        for(int k = 1; k < keys_len.at(j); k++){
+            std::string name = argv[k + pos];
+            std::string n1 = argv[k + pos + 1];
+            if(name == "-T")
+                ARPES_Temp = atof(n1.c_str());
+            if(name == "-O")
+                ARPES_freq = atof(n1.c_str());
+            if(name == "-F")
+                ARPES_Fermi = atof(n1.c_str());
+            if(name == "-N")
+                ARPES_Name = n1;
+            if(name == "-X" or n1 == "-X")
+                ARPES_Exclusive = true;
+            if(name == "-E"){
+                // Find how many numbers are inside this parameter
+                int n_args = 0;
+                for(int ii = 1; ii < std::min(keys_len.at(j), argc-k-pos); ii++){
+                    if(is_key(argv[k + pos + ii]))
+                        break;
+                    n_args = ii;
+                }
+                
+                if(n_args != 3){
+                  std::cout << "Please insert three parametes inside -E for the --ARPES"
+                    " functionality. The parameters should be Emin, Emax, NumEnergies, where"
+                    " Emin is the minimum energy at which to evaluate the spectral function,"
+                    " Emax is the maximum and NumEnergies in the number of energy points."
+                    " Exiting.\n";
+                  exit(1);
+                }
+
+
+                std::string n2 = argv[k + pos + 2];
+                std::string n3 = argv[k + pos + 3];
+                ARPES_Emin = atof(n1.c_str());
+                ARPES_Emax = atof(n2.c_str());
+                ARPES_NumEnergies = atoi(n3.c_str());
+            }
+
+            if(name == "-V"){
+
+              // Find how many numbers are inside this parameter
+              int n_args = 0;
+              for(int ii = 1; ii < std::min(keys_len.at(j), argc-k-pos); ii++){
+                  if(is_key(argv[k + pos + ii]))
+                      break;
+                  n_args = ii;
+              }
+              ARPES_vec = Eigen::Array<double, -1, 1>::Zero(n_args, 1);
+
+              if(n_args == 1){
+                v1 = atof(argv[k + pos + 1]);
+                ARPES_vec << v1;
+              }
+              if(n_args == 2){
+                v1 = atof(argv[k + pos + 1]);
+                v2 = atof(argv[k + pos + 2]);
+                ARPES_vec << v1, v2;
+              }
+              if(n_args == 3){
+                v1 = atof(argv[k + pos + 1]);
+                v2 = atof(argv[k + pos + 2]);
+                v3 = atof(argv[k + pos + 3]);
+                ARPES_vec << v1, v2, v3;
+              }
+              if(n_args != 1 and n_args != 2 and n_args != 3){
+                std::cout << "The number of arguments inside -V for the --ARPES functionality has to be"
+                  "either 1, 2 or 3. Please put a reasonable number of arguments. Exiting\n";
+                exit(1);
+              }
+
+              //std::cout << ARPES_vec << "\n";
+
+            }
+        }
+    }
+    debug_message("Left parse_ARPES\n");
+}
+
+    //std::cout << "--ARPES    -N              Name of the output file\n";
+    //std::cout << "           -E min max num  Number of energy points\n";
+    //std::cout << "           -F              Fermi energy\n";
+    //std::cout << "           -T              Temperature\n";
+    //std::cout << "           -V              Wave vector of the incident wave\n";
+    //std::cout << "           -O              Frequency of the incident wave\n";
+    ////std::cout << "           -M              Number of Chebyshev moments\n";
+    ////std::cout << "           -K              Kernel to use (jackson/green). green requires broadening parameter. Example: -K green 0.01\n";
+    //std::cout << "           -X              Exclusive. Only calculate this quantity\n\n";
