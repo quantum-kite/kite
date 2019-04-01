@@ -1,34 +1,29 @@
 #!/bin/bash
  
 # This script will compare the .h5 files of all the tests
+printall=0
 
 
-S=3  # the seed that will be used by KITE
-
-
-
-echo "Objects:    dif_norm    max_dif      norm1      norm2       %"
+echo -e "Testing \e[1mKITEx\e[0m functionalities. \e[1m\e[32mOK\e[0m means the test passed perfectly."
 for i in test*; do
     cd $i
-    cat description
-    if [[ "$1" == "redo" ]]; then
-        cp configORIG.h5 config.h5
-        chmod 755 config.h5
+    echo -n "  "
+    cat description | tr '\n' ' '
+    result=$(./test.sh script | awk 'BEGIN {sum=0} {sum+=$5} END {print sum}')
+    if [[ "$result" == "0" ]]; then 
+      echo -e "\e[1m\e[32mOK\e[0m"
     else 
-        if [[ "$1" == "script" ]]; then
-            python config.py > /dev/null
-        fi
+      echo -e "\e[1m\e[91m$result\e[0m"
     fi
     cd ..
-    SEED=$S ../build/KITEx $i/config.h5 > /dev/null
+done
+echo -e "\n"
 
-    while read line; do 
-        file=$line
-        a=$(basename $line)
-        printf "%-12s" "$a"
-
-
-        python compare.py $i/configREF.h5 $file $i/config.h5 $file
-    done < $i/function
-
+echo -e "Testing \e[1mKITE-tools\e[0m functionalities. \e[1m\e[32mOK\e[0m means the test passed."
+for i in tools_test*; do
+    cd $i
+    echo -n "  "
+    cat description | tr '\n' ' '
+    ./test.sh script 
+    cd ..
 done

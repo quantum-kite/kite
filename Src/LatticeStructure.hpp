@@ -44,6 +44,7 @@ public:
   unsigned domain_number (long index);
   void     print_coordinates(std::size_t pos1, std::size_t pos2);
   bool     test_ghosts(  Coordinates<std::size_t, D + 1> & Latt);
+  void     test_divisibility();
   
 };
 

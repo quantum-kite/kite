@@ -34,7 +34,7 @@ void Simulation<T,D>::calc_condopt(){
     int dummy_variable;
     get_hdf5<int>(&dummy_variable,  file, (char *)   "/Calculation/conductivity_optical/NumMoments");
     Global.calculate_condopt = true;
-  } catch(H5::Exception& e) {debug_message("DOS: no need to calculate DOS.\n");}
+  } catch(H5::Exception& e) {debug_message("CondOpt: no need to calculate CondOpt.\n");}
   file->close();
   delete file;
 }

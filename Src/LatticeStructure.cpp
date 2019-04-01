@@ -20,19 +20,7 @@ LatticeStructure<D>::LatticeStructure(char *name )
     get_hdf5<unsigned>(Bd, file, (char *) "/Boundaries");
     get_hdf5<unsigned>(nd, file, (char *) "/Divisions");      
     
-    // verify if the number of boundaries divides the length
-    if(Lt[0]%nd[0] != 0){
-      std::cout << "The number of divisions in the x direction ("<< nd[0] <<") must ";
-      std::cout << "be a divisor of the length of that side ("<< Lt[0] <<"). Exiting.\n";
-      exit(1);
-    }
-    
-    if(Lt[1]%nd[1] != 0){
-      std::cout << "The number of divisions in the y direction ("<< nd[1] <<") must ";
-      std::cout << "be a divisor of the length of that side ("<< Lt[1] <<"). Exiting.\n";
-      exit(1);
-    }
-      
+
     try {
       H5::Exception::dontPrint();
       get_hdf5<int>(&MagneticField, file, (char *) "/Hamiltonian/MagneticFieldMul");
@@ -44,6 +32,8 @@ LatticeStructure<D>::LatticeStructure(char *name )
   // Set the ghost_correlation potential and normalize it to the size of the system
   ghost_pot.setZero();
   ghost_pot(0,1) = MagneticField * 1.0 /Lt[1]*2.0*M_PI;
+
+  test_divisibility();
     
   Nd = 1;
   N = 1;
@@ -108,6 +98,25 @@ unsigned LatticeStructure<D>::get_BorderSize() {
   }
   return size;
 };
+
+
+template <unsigned D>
+void LatticeStructure<D>::test_divisibility() {
+  debug_message("Entered LatticeStructure::test_divisibility.\n");
+  // Test if STRIDE x nd divides the length
+
+  for(unsigned i = 0; i < D; i++){
+    if(Lt[i]%(nd[i]*STRIDE) != 0){
+      std::cout << "The system size in direction " << i << " (" << Lt[i] <<  ") ";
+      std::cout << "must be a multiple of the number of divisions in that ";
+      std::cout << "direction (" << nd[i] << ") times STRIDE (" << STRIDE << "). ";
+      std::cout << "Exiting.\n";
+      exit(1);
+    }
+  } 
+
+  debug_message("Left LatticeStructure::test_divisibility.\n");
+}
 
 template <unsigned D>
 template <typename T1>

@@ -15,21 +15,26 @@ template <typename T, unsigned D>
 class Hamiltonian;
 template <typename T, unsigned D>
 class KPM_Vector;
-#include "queue.hpp"
+//#include "queue.hpp"
 #include "Simulation.hpp"
 #include "SimulationGlobal.hpp"
 #include "Hamiltonian.hpp"
 template <typename T,unsigned D>
-GlobalSimulation<T,D>::GlobalSimulation( char *name ) : rglobal(name)
-{
+GlobalSimulation<T,D>::GlobalSimulation( char *name ) : rglobal(name){
   debug_message("Entered global_simulation\n");
+
+  // rglobal is an instance of Lattice Structure which contains all the information
+  // about the periodic part of the lattice and the unit cell. It contains the
+  // lattice vectors, the number of threads, the size of the lattice inside each
+  // thread, thread id, orbital positions, etc
+
+  // Global is an instance of GLOBAL_VARIABLES which contains global objects to be
+  // shared among all threads
+
   Global.ghosts.resize( rglobal.get_BorderSize() );
   std::fill(Global.ghosts.begin(), Global.ghosts.end(), 0);
     
-  // Regular quantities to calculate, such as DOS and CondXX
   H5::H5File * file12         = new H5::H5File(name, H5F_ACC_RDONLY);
-
-  // Fetch the energy scale and the magnetic field, if it exists
   get_hdf5<double>(&EnergyScale,  file12, (char *)   "/EnergyScale");
   file12->close();
   delete file12;

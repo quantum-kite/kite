@@ -138,31 +138,57 @@ void Simulation<T, DIM>::calc_ARPES(){
 
       H5::DataSet * dataset;
       H5::DataSpace * dataspace;
-      hsize_t dim[2];
+      hsize_t dim_k[2], dim_w[2];
       H5::H5File * file  = new H5::H5File(name, H5F_ACC_RDONLY);
       dataset            = new H5::DataSet(file->openDataSet("/Calculation/arpes/k_vector")  );
       dataspace          = new H5::DataSpace(dataset->getSpace());
-      dataspace -> getSimpleExtentDims(dim, NULL);
+      dataspace -> getSimpleExtentDims(dim_k, NULL);
+      dataspace->close(); delete dataspace;
+      dataset->close();   delete dataset;
+      
+      dataset            = new H5::DataSet(file->openDataSet("/Calculation/arpes/OrbitalWeights")  );
+      dataspace          = new H5::DataSpace(dataset->getSpace());
+      dataspace -> getSimpleExtentDims(dim_w, NULL);
       dataspace->close(); delete dataspace;
       dataset->close();   delete dataset;
 
-      k_vectors  = Eigen::Array<double,-1, -1>::Zero(dim[1],dim[0]);
-      //weight    = Eigen::Matrix<     T,-1, -1>::Zero(r.Orb,1);
-        
+      // Make sure the number of entries in the weight vector is consistent with the
+      // number of orbitals
+      if(dim_w[1]*dim_w[0] != r.Orb){
+        std::cout << "Error in Simulation::calc_ARPES. The number of entries in the orbital "
+          "weight vector (" << dim_w[1]*dim_w[0] << ") has to be the same as the number of "
+          "orbitals (" << r.Orb << "). Exiting.\n";
+        exit(1);
+      }
+
+      
+      k_vectors = Eigen::Array<double,-1, -1>::Zero(dim_k[1], dim_k[0]);
+      weight    = Eigen::Matrix<    T,-1,  1>::Zero(dim_w[1], dim_w[0]);
+
+      //std::cout << "dim_k: " << dim_k[0] << " " << dim_k[1] << "\n";
+      //std::cout << "dim_w: " << dim_w[0] << " " << dim_w[1] << "\n";
+
+      // The weights have to be read in doubles before being cast into type T
+      Eigen::Matrix<double, -1, 1> weight_test;
+      weight_test = Eigen::Matrix<double, -1, 1>::Zero(r.Orb, 1);
+      
       get_hdf5    <int>(&NumDisorder,    file, (char *) "/Calculation/arpes/NumDisorder");
       get_hdf5    <int>(&NumMoments,     file, (char *) "/Calculation/arpes/NumMoments" );
-      //get_hdf5      <T>(weight.data(),   file, (char *) "/Calculation/arpes/weight");
+      get_hdf5 <double>(weight_test.data(),   file, (char *) "/Calculation/arpes/OrbitalWeights");
       get_hdf5 <double>(k_vectors.data(), file, (char *) "/Calculation/arpes/k_vector");
 
-      file->close();  delete file;
+      file->close();  
+      delete file;
+
+      for(unsigned i = 0; i < r.Orb; i++)
+        weight(i) = T(weight_test(i));
+      
+      //std::cout << "weights: " << weight << "\n";
 
 }
 #pragma omp barrier
 
 
-      weight = Eigen::Matrix<     T,-1, 1>::Zero(r.Orb,1);
-      for(unsigned i = 0; i < r.Orb; i++)
-        weight(i) = 1.0;
 
 
      Eigen::Array<double, -1, -1> k_transposed;

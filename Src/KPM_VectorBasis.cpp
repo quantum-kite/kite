@@ -8,7 +8,7 @@ template <typename T, unsigned D>
 class Hamiltonian;
 template <typename T, unsigned D>
 class KPM_Vector;
-#include "queue.hpp"
+//#include "queue.hpp"
 #include "Simulation.hpp"
 #include "Hamiltonian.hpp"
 #include "KPM_VectorBasis.hpp"

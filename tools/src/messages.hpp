@@ -13,7 +13,7 @@ void print_header_message(){
       "|        Misa Andelkovic, Lucian Covaci (University of Antwerp)          | \n"
       "|                and Aires Ferreira (University of York)                 | \n"
       "|                                                                        | \n"                                            
-      "|            Funded by The Royal Society| royalsociety.org               | \n"
+      "|            Funded by The Royal Society | royalsociety.org              | \n"
       "|                                                                        | \n"
       "|  Copyright (C) 2018, M. Andelkovic, L. Covaci, A. Ferreira,            | \n"
       "|                      S. M. Joao, J. V. Lopes, T. G. Rappoport          | \n"

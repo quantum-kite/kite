@@ -1,0 +1,92 @@
+[1;31mEntered parse_ARPES
+[0m[1;31mLeft parse_ARPES
+[0m
++------------------------------------------------------------------------+
+|            Chebyshev Polynomial Green's Function Approach              | 
+|             to Real-Space Quantum Transport Simulations                | 
+|                                                                        | 
+|                     KITE | Pre-Release Beta 0.1                        | 
+|                     Kite home: quantum-kite.com                        | 
+|                                                                        | 
+|    Created by Simao M. Joao, Joao V. Lopes (Universidade do Porto),    | 
+|      Tatiana G. Rappoport (Universidade Federal Rio de Janeiro),       | 
+|        Misa Andelkovic, Lucian Covaci (University of Antwerp)          | 
+|                and Aires Ferreira (University of York)                 | 
+|                                                                        | 
+|            Funded by The Royal Society | royalsociety.org              | 
+|                                                                        | 
+|  Copyright (C) 2018, M. Andelkovic, L. Covaci, A. Ferreira,            | 
+|                      S. M. Joao, J. V. Lopes, T. G. Rappoport          | 
+|                                                                        | 
+|  This program is free software: you can redistribute it and/or modify  | 
+|  it under the terms of the GNU General Public License as published by  | 
+|  the Free Software Foundation, either version 3 of the License, or     | 
+|  (at your option) any later version.                                   | 
+|                                                                        | 
+|  This program is distributed in the hope that it will be useful,       | 
+|  but WITHOUT ANY WARRANTY; without even the implied warranty of        | 
+|  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                  | 
+|  See the GNU General Public License for more details.                  | 
++------------------------------------------------------------------------+
+
+------------------------------ INFORMATION ------------------------------
+Linear response functions in units of e^2/h.                              
+To stop these messages, set VERBOSE to 0 in the Makefile.                 
+To see debug messages, set DEBUG to 1 in the Makefile.                    
+------------------------------------------------------------------------- 
+
+------- FLAGS SET -------
+DEBUG: 1
+VERBOSE: 1
+-------------------------
+
+
+Starting program...
+
+[1;31mEntered choose_simulation.
+[0m[1;31mIS_COMPLEX [0m[1;31m0[0m[1;31m
+[0m[1;31mprecision [0m[1;31m1[0m[1;31m
+[0m[1;31mdim [0m[1;31m2[0m[1;31m
+[0m[1;31mcase [0m[1;31m4[0m[1;31m
+[0m[1;31mEntered calculate_simple.
+[0m[1;31mEntered info::read.
+[0m[1;31mReading basic information about the lattice: Dimension DIM, Length L and primitive lattice vectors LattVectors
+[0m[1;31mReading the energy scale, number of orbitals NOrbitals and their positions OrbPositions
+[0m[1;31mNumThreads: [0m[1;31m4[0m[1;31m
+[0m[1;31mLeft info::read.
+[0mInformation about the lattice obtained from the configuration file:
+Dimension:           2
+Linear dimension:    256 256
+Complex:             0
+Unit cell volume:    2.59808
+Energy scale:        3.1
+Energy shift:        0
+Number of threads:   4
+----------------- CALCULATIONS ----------------- 
+[1;31mEntered conductivity_optical::fetch_parameters.
+[0m[1;31mFetching direction.
+[0m[1;31mFetching NumMoments, Temperature and NumPoints.
+[0m[1;31mFilling the Gamma matrix.
+[0m[1;31mFilling the Lambda matrix.
+[0m[1;31mLeft conductivity_optical::fetch_parameters.
+[0m[1;31mEntered override_parameters[0m[1;31mOverriding N_energies[0m[1;31mOverriding FreqMax[0m[1;31mOverriding FreqMin[0m[1;31mOverriding NumFreq[0m[1;31mOverriding filename[0m[1;31mPadding Gamma[0m[1;31mPadding Lambda[0m[1;31mLeft override_parameters[0mThe optical conductivity will be calculated with these parameters: (eV, Kelvin)
+   Temperature: 0
+   Broadening: 0.0166 (default)
+   Fermi energy: 0.2 (default)
+   Min frequency: 0
+   Max frequency: 10
+   Number of frequencies: 16
+   Number of polynomials: 64 (from file)
+   Number of delta blocks: 1 (default)
+   Number of green blocks: 4 (default)
+   Num integration points: 16
+   Kernel for Dirac deltas: jackson (default)
+   Filename: opt.dat
+[1;31mEntered calc_optical_cond.
+[0m[1;31mEntered contract1
+[0m[1;31mLeft contract1[0m[1;31mLeft calc_optical_cond.
+[0m------------------------------------------------ 
+
+[1;31mLeft calculate_simple.
+[0m[1;31mLeft choose_simulation.
+[0mComplete.
