@@ -32,8 +32,7 @@ arpes<T, DIM>::arpes(system_info<T, DIM>& sysinfo, shell_input & vari){
     variables   = vari;                   // retrieve the shell input
     dirName     = "/Calculation/arpes/";     // location of the information about ARPES
     
-    //isRequired = is_required() && variables.ARPES_is_required;         // was ARPES requested?
-    isRequired = true;
+    isRequired = is_required() && variables.ARPES_is_required;         // was ARPES requested?
     isPossible = false;                 // do we have all we need to calculate ARPES?
     if(isRequired){
         set_default_parameters();
@@ -209,7 +208,7 @@ bool arpes<T, DIM>::fetch_parameters(){
 
   
   arpes_k_vectors = Eigen::Matrix<double, -1, -1>::Zero(DIM,NumVectors);
-  std::cout << "Energies: " << Emin << " " << Emax << "\n";
+  //std::cout << "Energies: " << Emin << " " << Emax << "\n";
   energies = Eigen::Matrix<float, -1, 1>::LinSpaced(NumEnergies, Emin, Emax);
 
   

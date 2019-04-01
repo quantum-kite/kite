@@ -1,0 +1,65 @@
+##############################################################################
+#                        KITE | Pre-Release Beta 0.1                         #
+#                                                                            #
+#                        Kite home: quantum-kite.com                         #
+#                                                                            #
+#                                                                            #
+#                                                                            #
+#  Developed by: Simao M. Joao, Joao V. Lopes, Tatiana G. Rappoport,         #
+#                                                                            #
+#  Misa Andelkovic, Lucian Covaci, Aires Ferreira, 2018                      #
+#                                                                            #
+#                                                                            #
+##############################################################################
+Magnetic field is added but is_complex identifier is 0. Automatically turning is_complex to 1!
+
+##############################################################################
+
+SCALING:
+
+
+Manual scaling is chosen. 
+
+
+##############################################################################
+
+BOUNDARY CONDITIONS:
+
+
+Periodic boundary conditions along the direction of lattice vectors 
+respectively are set to:  [1 1] 
+
+
+##############################################################################
+
+DECOMPOSITION:
+
+
+Chosen number of decomposition parts is: [2, 2] .
+INFO: this product will correspond to the total number of threads. 
+You should choose at most the number of processor cores you have.
+WARNING: System size need's to be an integer multiple of 
+[STRIDE *  [2, 2] ] 
+where STRIDE is selected when compiling the C++ code. 
+
+
+##############################################################################
+
+MAGNETIC FIELD:
+
+For a selected system size, minimum field is:  16.1549505188
+Closest_field to the one you selected is 32.31 T
+
+##############################################################################
+
+
+##############################################################################
+
+OUTPUT:
+
+
+Exporting of KITE configuration to config.h5 finished.
+
+
+##############################################################################
+

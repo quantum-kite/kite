@@ -573,7 +573,7 @@ class Calculation:
         self._ldos.append({'energy': energy, 'num_moments': num_moments, 'position': np.asmatrix(position),
                            'sublattice': sublattice, 'num_disorder': num_disorder})
 
-    def arpes(self, k_vector, num_moments, num_disorder=1):
+    def arpes(self, k_vector, weight, num_moments, num_disorder=1):
         """Calculate the density of states as a function of energy
 
         Parameters
@@ -586,7 +586,7 @@ class Calculation:
             Number of different disorder realisations.
         """
 
-        self._arpes.append({'k_vector': k_vector, 'num_moments': num_moments, 'num_disorder': num_disorder})
+        self._arpes.append({'k_vector': k_vector, 'weight': weight, 'num_moments': num_moments, 'num_disorder': num_disorder})
 
     def gaussian_wave_packet(self, num_points, num_moments, timestep, k_vector, spinor, width, mean_value,
                              num_disorder=1, **kwargs):
@@ -1673,11 +1673,12 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
     if calculation.get_arpes:
         grpc_p = grpc.create_group('arpes')
 
-        moments, k_vector, dis = [], [], []
+        moments, k_vector, dis, spinor = [], [], [], []
         for single_arpes in calculation.get_arpes:
             moments.append(single_arpes['num_moments'])
             k_vector.append(single_arpes['k_vector'])
             dis.append(single_arpes['num_disorder'])
+            spinor.append(single_arpes['weight'])
 
         # convert to values with respect to b1 and b2 in 2D
         k_vector = np.asmatrix(np.asarray(k_vector))
@@ -1694,6 +1695,7 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
         grpc_p.create_dataset('NumMoments', data=moments, dtype=np.int32)
         grpc_p.create_dataset('k_vector', data=np.asmatrix(np.asarray(k_vector_rel)), dtype=np.float32)
         grpc_p.create_dataset('NumDisorder', data=dis, dtype=np.int32)
+        grpc_p.create_dataset('OrbitalWeights', data=np.asmatrix(np.asarray(spinor)))
 
     if calculation.get_gaussian_wave_packet:
         grpc_p = grpc.create_group('gaussian_wave_packet')

@@ -1,6 +1,6 @@
+
 void print_header_message(){
-#if VERBOSE
-    std::cout << 
+  verbose_message(
       "\n+------------------------------------------------------------------------+\n"
       "|            Chebyshev Polynomial Green's Function Approach              | \n"
       "|             to Real-Space Quantum Transport Simulations                | \n"    
@@ -27,27 +27,26 @@ void print_header_message(){
       "|  but WITHOUT ANY WARRANTY; without even the implied warranty of        | \n"
       "|  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                  | \n"
       "|  See the GNU General Public License for more details.                  | \n"
-      "+------------------------------------------------------------------------+\n";
-#endif
+      "+------------------------------------------------------------------------+\n"
+      );
 }
 
 void print_flags_message(){
-#if VERBOSE
-    std::cout <<
-        "------- FLAGS SET -------\n"
-        "DEBUG: "     << DEBUG    <<"\n"
-        "VERBOSE: "   << VERBOSE  << "\n"
-        "-------------------------\n\n";
-#endif
+  verbose_message("------- FLAGS SET -------\n");
+  verbose_message("Flags set at compilation:\n");
+  verbose_message("DEBUG: "); verbose_message(DEBUG); verbose_message("\n");
+  verbose_message("VERBOSE: "); verbose_message(VERBOSE); verbose_message("\n");
+  verbose_message("ESTIMATE_TIME: "); verbose_message(ESTIMATE_TIME); verbose_message("\n");
+  verbose_message("-------------------------\n");
 }
 
 void print_info_message(){
-#if VERBOSE
-    std::cout << 
-        "\n------------------------------ INFORMATION ------------------------------\n"
-        "Linear response functions in units of e^2/h.                              \n"
-        "To stop these messages, set VERBOSE to 0 in the Makefile.                 \n"
-        "To see debug messages, set DEBUG to 1 in the Makefile.                    \n"
-        "------------------------------------------------------------------------- \n\n";
-#endif
+  verbose_message(
+      "\n------------------------------ INFORMATION ------------------------------\n"
+      "Linear response functions in units of e^2/h.                              \n"
+      "To stop these messages, set VERBOSE to 0 in the Makefile.                 \n"
+      "To see debug messages, set DEBUG to 1 in the Makefile.                    \n"
+      "To estimate the calculation time, set ESTIMATE_TIME to 1 in the Makefile. \n"
+      "------------------------------------------------------------------------- \n\n"
+      );
 }

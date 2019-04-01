@@ -14,61 +14,27 @@ class Simulation;
 #include "queue.hpp"
 #include "Simulation.hpp"
 #include "SimulationGlobal.hpp"
+#include "messages.hpp"
 
 typedef int indextype;
 
 
 
 int main(int argc, char *argv[]){  
-  (void) argc;
-  verbose_message(
-      "\n+------------------------------------------------------------------------+\n"
-      "|            Chebyshev Polynomial Green's Function Approach              | \n"
-      "|             to Real-Space Quantum Transport Simulations                | \n"    
-      "|                                                                        | \n"                                              
-      "|                     KITE | Pre-Release Beta 0.1                        | \n"         
-      "|                     Kite home: quantum-kite.com                        | \n"
-      "|                                                                        | \n"
-      "|    Created by Simao M. Joao, Joao V. Lopes (Universidade do Porto),    | \n"
-      "|      Tatiana G. Rappoport (Universidade Federal Rio de Janeiro),       | \n"
-      "|        Misa Andelkovic, Lucian Covaci (University of Antwerp)          | \n"
-      "|                and Aires Ferreira (University of York)                 | \n"
-      "|                                                                        | \n"                                            
-      "|            Funded by The Royal Society| royalsociety.org               | \n"
-      "|                                                                        | \n"
-      "|  Copyright (C) 2018, M. Andelkovic, L. Covaci, A. Ferreira,            | \n"
-      "|                      S. M. Joao, J. V. Lopes, T. G. Rappoport          | \n"
-      "|                                                                        | \n"
-      "|  This program is free software: you can redistribute it and/or modify  | \n"
-      "|  it under the terms of the GNU General Public License as published by  | \n"
-      "|  the Free Software Foundation, either version 3 of the License, or     | \n"
-      "|  (at your option) any later version.                                   | \n"
-      "|                                                                        | \n"
-      "|  This program is distributed in the hope that it will be useful,       | \n"
-      "|  but WITHOUT ANY WARRANTY; without even the implied warranty of        | \n"
-      "|  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                  | \n"
-      "|  See the GNU General Public License for more details.                  | \n"
-      "+------------------------------------------------------------------------+\n"
-      );
+  //(void) argc;
+    
+  print_header_message();
+  print_info_message();
+  print_flags_message();
 
-  verbose_message(
-      "\n------------------------------ INFORMATION ------------------------------\n"
-      "Linear response functions in units of e^2/h.                              \n"
-      "To stop these messages, set VERBOSE to 0 in the Makefile.                 \n"
-      "To see debug messages, set DEBUG to 1 in the Makefile.                    \n"
-      "To estimate the calculation time, set ESTIMATE_TIME to 1 in the Makefile. \n"
-      "------------------------------------------------------------------------- \n\n"
-      );
 
-  verbose_message("------- FLAGS SET -------\n");
-  verbose_message("Flags set at compilation:\n");
-  verbose_message("DEBUG: "); verbose_message(DEBUG); verbose_message("\n");
-  verbose_message("VERBOSE: "); verbose_message(VERBOSE); verbose_message("\n");
-  verbose_message("ESTIMATE_TIME: "); verbose_message(ESTIMATE_TIME); verbose_message("\n");
-  verbose_message("-------------------------\n");
 
   verbose_message("\nStarting program...\n\n");
   debug_message("Starting program. The messages in red are debug messages. They may be turned off by setting DEBUG 0 in main.cpp\n");
+  if(argc < 2){
+    std::cout << "No configuration file found. Exiting.\n";
+    exit(1);
+  }
 
   /* Define General characteristics of the data */  
   int precision = 1, dim, is_complex;
@@ -84,7 +50,7 @@ int main(int argc, char *argv[]){
   // Verify if the values passed to the program are valid. If they aren't
   // the program should notify the user and exit with error 1.
   if(dim < 1 || dim > 3){
-    std::cout << "Invalid number of dimensions. The code is only valid for 2D. Exiting.\n";
+    std::cout << "Invalid number of dimensions. The code is only valid for 2D or 3D. Exiting.\n";
     exit(1);
   }
   if(precision < 0 || precision > 2){
@@ -195,11 +161,10 @@ int main(int argc, char *argv[]){
       { 
       std::cout << "Unexpected parameters. Please use valid values for the precision, dimension and 'complex' flag.";
       std::cout << "Check if the code has been compiled with support for complex functions. Exiting.\n";
-      exit(0);
+      exit(1);
       }
   }
   
-  debug_message("Program ended with success!\n");
   verbose_message("Done.\n");
   return 0;
 }
