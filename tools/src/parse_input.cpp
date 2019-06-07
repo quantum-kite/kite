@@ -406,8 +406,10 @@ void shell_input::parse_CondOpt2(int argc, char* argv[]){
                 CondOpt2_NumEnergies = atoi(n1.c_str());
             if(name == "-R")
                 CondOpt2_ratio = atof(n1.c_str());
-            if(name == "-P")
-                CondOpt2_print_all = atoi(n1.c_str());
+            if(name == "-P" or n1 == "-P")
+                CondOpt2_print_all = 1;
+            //if(name == "-P")
+                //CondOpt2_print_all = atoi(n1.c_str());
             if(name == "-S")
                 CondOpt2_Scat = atof(n1.c_str());
             if(name == "-F")
@@ -487,6 +489,7 @@ void shell_input::parse_lDOS(int argc, char* argv[]){
     
     lDOS_Name = "";
     lDOS_Exclusive = false;
+    lDOS_NumMoments = -1;
     lDOS_kernel = "";
     lDOS_kernel_parameter = -8888.8;
     int pos = keys_pos.at(4);

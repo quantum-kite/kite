@@ -53,11 +53,15 @@ ldos<T, DIM>::ldos(system_info<T, DIM>& sysinfo, shell_input & vari){
 
 template <typename T, unsigned DIM>
 void ldos<T, DIM>::printLDOS(){
+  double scale = systemInfo->energy_scale;
     std::cout << "The local density of states will be calculated with the following parameters:\n"
         "   Number of energies: " << NumEnergies << "\n"
         "   Number of positions: " << NumPositions << "\n"
         "   Filename: " << filename  << "X.dat" << ((default_filename)?" (default)":"") << "\n"
-        "   Using Jackson kernel\n";
+        "   Kernel: "               << kernel           << ((default_kernel)?           " (default)":"") << "\n";
+    if(kernel == "green"){
+        std::cout << "   Kernel parameter: "     << kernel_parameter*scale << ((default_kernel_parameter)? " (default)":"") << "\n";
+    }
 }
 
 template <typename T, unsigned DIM>
@@ -86,12 +90,45 @@ void ldos<T, DIM>::override_parameters(){
         filename         = variables.lDOS_Name;
         default_filename = false;
     }
+
+    if(variables.lDOS_NumMoments != -1){
+        NumMoments         = variables.lDOS_NumMoments;
+        default_NumMoments = false;
+        if(variables.lDOS_NumMoments > MaxMoments){
+          std::cout << "lDOS: The number of Chebyshev moments specified"
+            " cannot be larger than the number of moments calculated by KITEx."
+            " Please specify a smaller number. Exiting.\n";
+          exit(1);
+        }
+    }
+
+    //std::cout << "variables kernel:" << variables.lDOS_kernel << "\n";
+    if(variables.lDOS_kernel != ""){
+      //std::cout << "entered if \n";
+        kernel         = variables.lDOS_kernel;
+        default_kernel = false;
+    }
+    //std::cout << "kernel: " << kernel << "\n";
+
+    if(kernel == "green"){
+      if(variables.lDOS_kernel_parameter != -8888.8){
+        kernel_parameter = variables.lDOS_kernel_parameter/systemInfo->energy_scale;
+        default_kernel_parameter = false;
+      }
+    }
 };
 
 template <typename T, unsigned DIM>
 void ldos<T, DIM>::set_default_parameters(){
     filename = "ldos";
     default_filename = true;
+    MaxMoments = -1;
+
+    // kernel options
+    kernel = "jackson";
+    default_kernel = true;
+    default_kernel_parameter = true;
+
 };
 
 
@@ -131,7 +168,7 @@ bool ldos<T, DIM>::fetch_parameters(){
     energies = Eigen::Matrix<float, -1, -1>::Zero(NumEnergies,1);
 
      //Fetch the relevant parameters from the hdf file
-    get_hdf5(&NumMoments, &file, (char*)(dirName+"NumMoments").c_str());	
+    get_hdf5(&MaxMoments, &file, (char*)(dirName+"NumMoments").c_str());	
     get_hdf5(ldos_Orbitals.data(), &file, (char*)"/Calculation/ldos/Orbitals");
     get_hdf5(ldos_Positions.data(), &file, (char*)"/Calculation/ldos/FixPosition");
     get_hdf5(energies.data(), &file, (char*)"/Calculation/ldos/Energy");
@@ -155,25 +192,28 @@ bool ldos<T, DIM>::fetch_parameters(){
   std::string MatrixName = dirName + "lMU";
   try{
 		debug_message("Filling the lMU matrix.\n");
-		lMU = Eigen::Matrix<std::complex<T>,-1,-1>::Zero(NumMoments, NumPositions);
+		lMU = Eigen::Matrix<std::complex<T>,-1,-1>::Zero(MaxMoments, NumPositions);
 		
 		if(complex)
 			get_hdf5(lMU.data(), &file, (char*)MatrixName.c_str());
 		if(!complex){
 			Eigen::Matrix<T,-1,-1> lMUReal; 
-			lMUReal = Eigen::Matrix<T,-1,-1>::Zero(NumMoments, NumPositions); 
+			lMUReal = Eigen::Matrix<T,-1,-1>::Zero(MaxMoments, NumPositions); 
 			get_hdf5(lMUReal.data(), &file, (char*)MatrixName.c_str()); 
 
-			
-            lMU = lMUReal.template cast<std::complex<T>>();
+      lMU = lMUReal.template cast<std::complex<T>>();
 		}				
 
     result = true;
-  } catch(H5::Exception& e) {debug_message("DOS: There is no lMU matrix.\n");}
+  } catch(H5::Exception& e) {debug_message("lDOS: There is no lMU matrix.\n");}
 	
-    file.close();
+
+  NumMoments = MaxMoments;
+  //std::cout << "NumMoments: " << NumMoments << "\n";
+
+  file.close();
 	debug_message("Left lDOS::fetch_parameters.\n");
-    return result;
+  return result;
 }
 
 template <typename U, unsigned DIM>
@@ -181,38 +221,70 @@ void ldos<U, DIM>::calculate(){
 
   Eigen::Matrix<std::complex<U>, -1, -1> LDOS;
   LDOS = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(NumEnergies, NumPositions);
-  omp_set_num_threads(systemInfo->NumThreads);
 
   Eigen::Matrix<std::complex<U>, -1, -1, Eigen::RowMajor> OrderedMU;
   OrderedMU = Eigen::Matrix<std::complex<U>, -1, -1, Eigen::RowMajor>::Zero(NumEnergies, NumPositions);
   OrderedMU = lMU;
+  //std::cout << "lMU: \n" << OrderedMU << "\n";
 
+  omp_set_num_threads(systemInfo->NumThreads);
+  //omp_set_num_threads(1);
 #pragma omp parallel 
 {
+#pragma omp critical
+{
   int localN = NumMoments/systemInfo->NumThreads;
+  //int localN = NumMoments;
   int thread_id = omp_get_thread_num();
+  //std::cout << "thread_id: " << thread_id << "\n";
+  //std::cout << "NumMoments: " << localN << "\n";
+  //thread_id = 0;
   long offset = thread_id*localN*NumPositions;
   Eigen::Map<Eigen::Matrix<std::complex<U>, -1, -1, Eigen::RowMajor>> locallMU(OrderedMU.data() + offset, localN, NumPositions);
 
+  //std::cout << "locallMU: \n" << locallMU << "\n";
 
-  // chebyshev polynomial of the first kind
   Eigen::Matrix<std::complex<U>, -1, -1> GammaE;
   GammaE = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(NumEnergies, localN);
 
-
   U factor;
-  for(int m = 0; m < localN; m++){
-    factor = 1.0/(1.0 + U(m==0));
+
+  if(kernel == "jackson"){
+    std::cout << "Entered jackson kernel\n";
     for(int i = 0; i < NumEnergies; i++){
-      GammaE(i,m) = delta(m + thread_id*localN, energies(i))*kernel_jackson<U>(m + thread_id*localN, NumMoments)*factor;
+      for(int m = 0; m < localN; m++){
+        factor = 1.0/(1.0 + U((m + thread_id*localN)==0));
+        GammaE(i,m) += delta(m + thread_id*localN,energies(i))*kernel_jackson<U>(m + thread_id*localN, NumMoments)*factor;
+      }
     }
   }
+
+
+  if(kernel == "green"){
+    std::complex<U> c_energy;
+    for(int i = 0; i < NumEnergies; i++){
+      c_energy = std::complex<U>(energies(i), kernel_parameter);
+      for(int m = 0; m < localN; m++){
+        factor = 1.0/(1.0 + U((m + thread_id*localN)==0));
+        GammaE(i,m) += -factor*green<std::complex<U>>(m, 1, c_energy).imag();
+      }
+    }
+  }
+
+  //std::cout << "GammaE: \n" << GammaE << "\n";
+  //for(int m = 0; m < ; m++){
+    //factor = 1.0/(1.0 + U(m==0));
+    //for(int i = 0; i < NumEnergies; i++){
+      //GammaE(i,m) = delta(m + thread_id*localN, energies(i))*kernel_jackson<U>(m + thread_id*localN, NumMoments)*factor;
+    //}
+  //}
 
   Eigen::Matrix<std::complex<U>, -1, -1> localLDOS;
   localLDOS = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(NumEnergies, NumPositions);
   localLDOS = GammaE*locallMU;
-#pragma omp critical
-    LDOS += localLDOS;
+//#pragma omp critical
+  LDOS += localLDOS;
+}
 }
 
   // Save the density of states to a file

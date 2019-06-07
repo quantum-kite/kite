@@ -275,7 +275,7 @@ void arpes<U, DIM>::calculate(){
   GammaE = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(NumEnergies, localN);
   U factor, kern, ferm, del;
   for(int m = 0; m < localN; m++){
-    factor = 1.0/(1.0 + U(m==0));
+    factor = 1.0/(1.0 + U((m + thread_id*localN)==0));
     kern   = kernel_jackson<U>(m + thread_id*localN, NumMoments)*factor;
     for(int i = 0; i < NumEnergies; i++){
       ferm        = fermi_function(energies(i) - freq, fermi, beta);

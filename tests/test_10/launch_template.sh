@@ -1,0 +1,1 @@
+/homes/cfp-smjoao/launch_template.sh
