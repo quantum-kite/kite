@@ -574,7 +574,7 @@ void inline KPM_Vector <T, 3>::mult_regular_hoppings(const  std::size_t & ind_i,
 {
   
   std::size_t count;
-  const std::size_t ind_f = ind_i + STRIDE * stride[1] + STRIDE*stride[2];
+  const std::size_t ind_f = ind_i + STRIDE*stride[2];
   // Hoppings
   for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
     {
@@ -598,7 +598,7 @@ template < unsigned MULT>
 void inline KPM_Vector <T, 3>::mult_local_disorder(const  std::size_t & ind_i, const  std::size_t & io)
 {
   
-  const std::size_t ind_f = ind_i + STRIDE * stride[1] + STRIDE * stride[2];
+  const std::size_t ind_f = ind_i  + STRIDE * stride[2];
   const std::ptrdiff_t dd = (h.Anderson_orb_address[io] - std::ptrdiff_t(io))*r.Nd;
   // Anderson disorder
   if( h.Anderson_orb_address[io] >= 0)
