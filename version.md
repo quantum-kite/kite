@@ -1,3 +1,3 @@
-Version 0.1 (June 12 2018)
+Version 1.0 (October 12 2019)
 ************
-Initial beta release.
+

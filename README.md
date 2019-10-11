@@ -1,21 +1,19 @@
 <img src=https://user-images.githubusercontent.com/39924384/41094707-9e4ead6e-6a25-11e8-9e16-070a3236c8da.png width="100">
 
-Welcome to the BETA pre-release version of **KITE**. Our first release version is scheduled for October 2018.
+Welcome to the **KITE** v1.0.
 
 **KITE** is an open-source Python/C++ software suitable for Large-Scale Tight-Binding (TB) quantum transport calculations.
 The code is shipped with the following capabilities:
 
 * Quantum Transport: longitudinal and transverse DC conductivities at zero and finite temperature;
 * Optical Properties: AC longitudinal conductivity;
-* Optical Properties: nonlinear optical susceptibility [\*];
+* Optical Properties: nonlinear optical susceptibility;
 * Electronic Structure: high-resolution density of states (DoS) in clean and disordered systems;
-* Special Features: automated magnetic field in 2D [\*];
+* Special Features: automated magnetic field in 2D;
 * Special Features: lattice perturbations (e.g., strain) and ‘disorder cell’ concept for implementation of multi-orbital/-bond impurities;
 * Algorithms: ultra-high-resolution CPGF full spectral (DoS);
 * Algorithms: high-resolution CPGF full spectral (finite temperature response functions);
 * Algorithms: ultra-high-resolution CPGF single-shot (zero temperature DC conductivity)
-
-[\*] not available in the beta pre-release
 
 ## Getting Started
 
@@ -40,7 +38,7 @@ Before installing the code, following prerequisites need to be satisfied:
 
 ### Installing
 
-After meeting prerequisites and downloading the repository you can compile the KITE code using the already available Makefiles. Please check the Makefiles first, and if required libraries/packages are installed elsewhere, edit them accordingly. For the full installation procedure, go to the [Installation](https://quantum-kite.com/installation/) section.
+After meeting prerequisites and downloading the repository you can compile the KITE code using the already available Cmake files. Please check the Cmake files first, and if required libraries/packages are installed elsewhere, edit them accordingly. For the full installation procedure, go to the [Installation](https://quantum-kite.com/installation/) section.
 
 ## Contributors
 
