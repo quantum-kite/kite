@@ -12,8 +12,8 @@ private:
   std::size_t 	*MemIndBeg[D][2];
   std::size_t 	*MemIndEnd[D][2];
   std::size_t        block[D][2];
-  std::size_t          stride[D];
-  std::size_t   stride_ghosts[D];
+  std::size_t          tile[D];
+  std::size_t   tile_ghosts[D];
   std::size_t      transf_max[D]; // [d][edged]
   std::size_t transf_bound[D][2]; // [d][edged]
   T          ***mult_t1_ghost_cor;

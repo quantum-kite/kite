@@ -350,8 +350,8 @@ void Defect_Operator<T,D>::generate_disorder()  {
         {
           std::size_t node_pos =  *it + node_position.at(node);
           Latt.set_coord(node_pos);
-          r.convertCoordinates(latStr, Latt ); // Get stride index
-          // Tests if the node is in a higher stride,
+          r.convertCoordinates(latStr, Latt ); // Get tile index
+          // Tests if the node is in a higher tile,
 	    
           if(r.test_ghosts(Latt) == 1 && h.cross_mozaic[latStr.index] &&  latStr.index > istr )
             {	    

@@ -10,7 +10,7 @@ struct Vacancy_Operator {
   LatticeStructure <D>                   & r;
   KPMRandom <T>                        & rnd;
   char*                                 name;
-  // vector of vectors with positions in the lattice of Vacancies for each stride block
+  // vector of vectors with positions in the lattice of Vacancies for each tile block
   std::vector <std::vector<std::size_t>> position;                   
   std::vector <double>                   concentration;
   std::vector <std::vector<int>>         orbitals;

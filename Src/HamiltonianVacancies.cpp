@@ -37,7 +37,7 @@ void Vacancy_Operator<T,D>::generate_disorder()
             i = rnd.get()*r.N;
           
           latt.set_coord(i + orbitals.at(k).at(0) * r.N );
-          r.convertCoordinates(latStr,latt);                  // Get stride position
+          r.convertCoordinates(latStr,latt);                  // Get tile position
           r.convertCoordinates(Latt,latt);                    // Get Domain coordinates
           auto & pos = position.at(latStr.index);
           if(!any_of(pos.begin(), pos.end(), std::bind2nd(std::equal_to<std::size_t>(), Latt.index )))

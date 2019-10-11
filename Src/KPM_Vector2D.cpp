@@ -20,8 +20,8 @@ template <typename T>
 KPM_Vector<T,2u>::KPM_Vector(int mem, Simulation<T,2> & sim) :
   KPM_VectorBasis<T,2>(mem, sim),
   r(sim.r),
-  stride{r.Ld[0], 1},
-  stride_ghosts{1,r.Ld[0]},
+  tile{r.Ld[0], 1},
+  tile_ghosts{1, r.Ld[0]},
   transf_max{r.ld[1], r.Ld[0]},
   h(sim.h),
   x(r.Ld),
@@ -36,7 +36,7 @@ KPM_Vector<T,2u>::KPM_Vector(int mem, Simulation<T,2> & sim) :
     {
       mult_t1_ghost_cor[io] = new T*[h.hr.NHoppings(io)];
       for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
-        mult_t1_ghost_cor[io][ib] = new T[STRIDE];
+        mult_t1_ghost_cor[io][ib] = new T[TILE];
     }
 
   for(unsigned d = 0; d < 2; d++)
@@ -325,7 +325,7 @@ void KPM_Vector <T, 2>::build_regular_phases(int i1, unsigned axis)
     {
       const std::size_t ip = io * x.basis[2] ;
       const std::size_t j0 = ip + 0 + i1 * std;
-      const std::size_t j1 = j0 + STRIDE * std;
+      const std::size_t j1 = j0 + TILE * std;
 
       for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
         {
@@ -352,18 +352,18 @@ void KPM_Vector <T, 2>::initiate_stride(std::size_t & istr)
   std::size_t i0, i1;
   const std::size_t std = x.basis[1];
   // Periodic component of the Hamiltonian + Anderson disorder
-  i0 = ((istr) % (r.lStr[0]) ) * STRIDE + NGHOSTS;
-  i1 = ((istr) / r.lStr[0] ) * STRIDE + NGHOSTS;
+  i0 = ((istr) % (r.lStr[0]) ) * TILE + NGHOSTS;
+  i1 = ((istr) / r.lStr[0] ) * TILE + NGHOSTS;
   
   for(std::size_t io = 0; io < r.Orb; io++)
     {
       const std::size_t ip = io * x.basis[2];
       const std::size_t j0 = ip + i0 + i1 * std;
-      const std::size_t j1 = j0 + STRIDE * std; //j0 and j1 define the limits of the for cycle
+      const std::size_t j1 = j0 + TILE * std; //j0 and j1 define the limits of the for cycle
 
 
       for(std::size_t j = j0; j < j1; j += std )
-        for(std::size_t i = j; i < j + STRIDE ; i++)
+        for(std::size_t i = j; i < j + TILE ; i++)
           phi0[i] = - value_type(MULT) * phiM2[i];
     }
 }
@@ -372,19 +372,19 @@ template <typename T>
 template < unsigned MULT> 
 void inline KPM_Vector <T, 2>::mult_local_disorder(const  std::size_t & j0, const  std::size_t & io)
 {
-  const std::size_t j1 = j0 + STRIDE * std;
+  const std::size_t j1 = j0 + TILE * std;
   const std::ptrdiff_t dd = (h.Anderson_orb_address[io] - std::ptrdiff_t(io))*r.Nd;
   // Anderson disorder
   if( h.Anderson_orb_address[io] >= 0)
     {
       for(std::size_t j = j0; j < j1; j += std )
-        for(std::size_t i = j; i < j + STRIDE ; i++)
+        for(std::size_t i = j; i < j + TILE ; i++)
           phi0[i] += value_type(MULT + 1) * phiM1[i] * h.U_Anderson.at(i + dd);
     }
   else if (h.Anderson_orb_address[io] == - 1)
     {
       for(std::size_t j = j0; j < j1; j += std )
-        for(std::size_t i = j; i < j + STRIDE ; i++)
+        for(std::size_t i = j; i < j + TILE ; i++)
           phi0[i] += value_type(MULT + 1) * phiM1[i] * h.U_Orbital.at(io);
     }
 }
@@ -393,7 +393,7 @@ template <typename T>
 void inline KPM_Vector <T, 2>::mult_regular_hoppings(const  std::size_t & j0, const  std::size_t & io)
 {
   std::size_t count;
-  const std::size_t j1 = j0 + STRIDE * std;
+  const std::size_t j1 = j0 + TILE * std;
   // Hoppings
   for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
     {
@@ -402,7 +402,7 @@ void inline KPM_Vector <T, 2>::mult_regular_hoppings(const  std::size_t & j0, co
       for(std::size_t j = j0; j < j1; j += std )
         {
           const T t1 = mult_t1_ghost_cor[io][ib][count++];
-          for(std::size_t i = j; i < j + STRIDE ; i++)
+          for(std::size_t i = j; i < j + TILE ; i++)
             phi0[i] += t1 * phiM1[i + d1];								
         }
     }
@@ -433,14 +433,14 @@ void KPM_Vector <T, 2>::KPM_MOTOR(T * phi0a, T * phiM1a, T *phiM2a, unsigned axi
   for(auto istr = h.cross_mozaic_indexes.begin(); istr != h.cross_mozaic_indexes.end() ; istr++)
     initiate_stride<MULT>(*istr);
     
-  for( i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1 += STRIDE  )
+  for( i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1 += TILE  )
     {
       build_regular_phases<MULT,VELOCITY>(i1, axis);
 		
-      for( i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0 += STRIDE )
+      for( i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0 += TILE )
         {
 		    
-          std::size_t istr = (i1 - NGHOSTS) /STRIDE * r.lStr[0] + (i0 - NGHOSTS)/ STRIDE;
+          std::size_t istr = (i1 - NGHOSTS) / TILE * r.lStr[0] + (i0 - NGHOSTS) / TILE;
           if(h.cross_mozaic.at(istr))
             initiate_stride<MULT>(istr);
           // These four lines pertrain only to the magnetic field
@@ -554,15 +554,15 @@ void KPM_Vector <T, 2>::Exchange_Boundaries() {
           for(std::size_t i = 0; i < transf_bound[d][0]; i++)
             {
               for(unsigned ig = 0; ig < NGHOSTS; ig++)
-                ghosts_left [i + (ig + NGHOSTS*io) * transf_bound[d][0] ] = phi[il + ig*stride_ghosts[d]];
-              il += stride[d];
+                ghosts_left [i + (ig + NGHOSTS*io) * transf_bound[d][0] ] = phi[il + ig * tile_ghosts[d]];
+              il += tile[d];
             }
 	    
           for(std::size_t i = 0; i < transf_bound[d][1]; i++)
             {
               for(unsigned ig = 0; ig < NGHOSTS; ig++)
-                ghosts_right[i + (ig + NGHOSTS*io) * transf_bound[d][1] ] = phi[ir + ig*stride_ghosts[d]];
-              ir += stride[d];
+                ghosts_right[i + (ig + NGHOSTS*io) * transf_bound[d][1] ] = phi[ir + ig * tile_ghosts[d]];
+              ir += tile[d];
             }
         }
 	
@@ -583,15 +583,15 @@ void KPM_Vector <T, 2>::Exchange_Boundaries() {
           for(std::size_t i = 0; i < transf_bound[d][0]; i++)
             {
               for(int ig = 0; ig < NGHOSTS; ig++)
-                phi[il + ig*stride_ghosts[d]] = ghosts_left [i + (ig + NGHOSTS*io) * transf_bound[d][0]];
-              il += stride[d];
+                phi[il + ig * tile_ghosts[d]] = ghosts_left [i + (ig + NGHOSTS * io) * transf_bound[d][0]];
+              il += tile[d];
             }
 	    
           for(std::size_t i = 0; i < transf_bound[d][1]; i++)
             {
               for(int ig = 0; ig < NGHOSTS; ig++)
-                phi[ir + ig*stride_ghosts[d]] = ghosts_right[i + (ig + NGHOSTS*io) * transf_bound[d][1]];
-              ir += stride[d];
+                phi[ir + ig * tile_ghosts[d]] = ghosts_right[i + (ig + NGHOSTS * io) * transf_bound[d][1]];
+              ir += tile[d];
             }
         }
     }
@@ -687,8 +687,8 @@ void KPM_Vector<T,2>::Multiply() {
   
   unsigned i = 0;
   /*
-    Mosaic Multiplication using a TILE of STRIDE x STRIDE 
-    Right Now We expect that both ld[0] and ld[1]  are multiple of STRIDE
+    Mosaic Multiplication using a TILE of TILE x TILE
+    Right Now We expect that both ld[0] and ld[1]  are multiple of TILE
     MULT = 0 : For the case of the Velocity/Hamiltonian
     MULT = 1 : For the case of the KPM_iteration
   */

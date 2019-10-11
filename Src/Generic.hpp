@@ -30,14 +30,14 @@
 
 // Set of compilation parameters chosen in the Makefile
 // MEMORY is the number of KPM vectors stored in the memory while calculating Gamma2D
-// STRIDE is the size of the memory blocks used in the program
+// TILE is the size of the memory blocks used in the program
 // COMPILE_MAIN is a flag to prevent compilation of unnecessary parts of the code when testing
 #ifndef MEMORY
 #define MEMORY 16
 #endif
 
-#ifndef STRIDE
-#define STRIDE 64
+#ifndef TILE
+#define TILE 64
 #endif
 
 #ifndef DEBUG
@@ -57,7 +57,7 @@
 #endif
 
 // other compilation parameters not set in the Makefile
-// NGHOSTS is the extra length in each direction, to be used with the blocks of size STRIDE
+// NGHOSTS is the extra length in each direction, to be used with the blocks of size TILE
 #define PATTERNS  4
 #define NGHOSTS   2
 #define VVERBOSE 0

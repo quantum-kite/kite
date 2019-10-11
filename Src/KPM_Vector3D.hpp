@@ -14,8 +14,8 @@ private:
   std::size_t  	        *MemIndBeg[3][2];   // Corner from the postion read the boundary for each Orbital
   std::size_t  	        *MemIndEnd[3][2];   // Corner from the position to write the boundary for each Orbital
   std::size_t                block[3][2];
-  std::size_t                  stride[3];  
-  std::size_t           stride_ghosts[3];
+  std::size_t                  tile[3];
+  std::size_t           tile_ghosts[3];
   std::size_t           transf_max[3][3]; // [d][Maximum lateral bondary lengh]
   std::size_t      transf_bound[3][2][3]; // [d][edged][Lateral boundary lengh]
   T                 ***mult_t1_ghost_cor;

@@ -29,7 +29,7 @@ struct Defect_Operator: public ComplexTraits<T> {
   Hamiltonian<T,D>                       & h;
   LatticeStructure <D>                   & r;
   GLOBAL_VARIABLES <T>              & Global;
-  std::vector <std::vector<std::size_t>> position;                   // vector of vectors with positions in the lattice of the Orbital 0 of the defects for each stride block
+  std::vector <std::vector<std::size_t>> position;                   // vector of vectors with positions in the lattice of the Orbital 0 of the defects for each tile block
   Eigen::Array<T, -1, -1>        new_hopping;
   KPMRandom <T>                        & rnd;
   std::vector <int>          positions_fixed;

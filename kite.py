@@ -1323,8 +1323,8 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
           '\nINFO: this product will correspond to the total number of threads. '
           '\nYou should choose at most the number of processor cores you have.'
           '\nWARNING: System size need\'s to be an integer multiple of \n'
-          '[STRIDE * ', domain_dec, '] '
-          '\nwhere STRIDE is selected when compiling the C++ code. \n')
+          '[TILE * ', domain_dec, '] '
+          '\nwhere TILE is selected when compiling the C++ code. \n')
 
     f.create_dataset('Divisions', data=domain_dec[0:space_size], dtype='u4')
     # space dimension of the lattice 1D, 2D, 3D

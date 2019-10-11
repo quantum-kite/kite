@@ -45,7 +45,7 @@ LatticeStructure<D>::LatticeStructure(char *name )
     {
       ld[i] = Lt[i]/nd[i];
       Ld[i] = ld[i] + 2*NGHOSTS;
-      lStr[i] = ld[i]/STRIDE;
+      lStr[i] = ld[i] / TILE;
       Nd *= Ld[i];
       N  *= ld[i];
       Nt *= Lt[i] ;
@@ -103,13 +103,13 @@ unsigned LatticeStructure<D>::get_BorderSize() {
 template <unsigned D>
 void LatticeStructure<D>::test_divisibility() {
   debug_message("Entered LatticeStructure::test_divisibility.\n");
-  // Test if STRIDE x nd divides the length
+  // Test if TILE x nd divides the length
 
   for(unsigned i = 0; i < D; i++){
-    if(Lt[i]%(nd[i]*STRIDE) != 0){
+    if(Lt[i]%(nd[i] * TILE) != 0){
       std::cout << "The system size in direction " << i << " (" << Lt[i] <<  ") ";
       std::cout << "must be a multiple of the number of divisions in that ";
-      std::cout << "direction (" << nd[i] << ") times STRIDE (" << STRIDE << "). ";
+      std::cout << "direction (" << nd[i] << ") times TILE (" << TILE << "). ";
       std::cout << "Exiting.\n";
       exit(1);
     }
@@ -175,7 +175,7 @@ void  LatticeStructure<D>::convertCoordinates(Coordinates<T1, D + 1> & dest, Coo
   if( std::equal(std::begin(source.L), std::end(source.L), std::begin(Ld)) && std::equal(std::begin(dest.L), std::end(dest.L), std::begin(lStr)))
     {
       for(unsigned i = 0; i < D; i++)
-        dest.coord[i] =  (source.coord[i] -NGHOSTS)/STRIDE;
+        dest.coord[i] = (source.coord[i] -NGHOSTS) / TILE;
       dest.coord[D] = 0;
       dest.set_index(dest.coord);
     }
@@ -185,7 +185,7 @@ void  LatticeStructure<D>::convertCoordinates(Coordinates<T1, D + 1> & dest, Coo
   if( std::equal(std::begin(source.L), std::end(source.L), std::begin(ld)) && std::equal(std::begin(dest.L), std::end(dest.L), std::begin(lStr)))
     {
       for(unsigned i = 0; i < D; i++)
-        dest.coord[i] =  source.coord[i]/STRIDE; 
+        dest.coord[i] = source.coord[i] / TILE; 
       dest.coord[D] = 0;
       dest.set_index(dest.coord);
     }

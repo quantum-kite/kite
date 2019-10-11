@@ -38,8 +38,8 @@ Chosen number of decomposition parts is: [2, 2] .
 INFO: this product will correspond to the total number of threads. 
 You should choose at most the number of processor cores you have.
 WARNING: System size need's to be an integer multiple of 
-[STRIDE *  [2, 2] ] 
-where STRIDE is selected when compiling the C++ code. 
+[TILE *  [2, 2] ]
+where TILE is selected when compiling the C++ code.
 
 
 ##############################################################################
