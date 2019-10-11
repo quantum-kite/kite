@@ -30,3 +30,5 @@ if [[ "$acceptable" == "1" ]]; then
 else 
   echo -e "\e[1m\e[91m$printable_result\e[0m"
 fi
+
+rm dos_sym.dat dos.dat
