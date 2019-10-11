@@ -39,15 +39,15 @@ Chosen number of decomposition parts is: [2, 2] .
 INFO: this product will correspond to the total number of threads. 
 You should choose at most the number of processor cores you have.
 WARNING: System size need's to be an integer multiple of 
-[TILE *  [2, 2] ]
-where TILE is selected when compiling the C++ code.
+[TILE *  [2, 2] ] 
+where TILE is selected when compiling the C++ code. 
 
 
 ##############################################################################
 
 MAGNETIC FIELD:
 
-For a selected system size, minimum field is:  16.1549505188
+For a selected system size, minimum field is:  16.154950518779582
 Closest_field to the one you selected is 32.31 T
 
 ##############################################################################

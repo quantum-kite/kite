@@ -70,7 +70,7 @@ Number of threads:   16
    Energy range: [-4.950000, 4.950000] (default)
    Number of energies: 1000
    Filename: dos_sym.dat
-   Number of moments: 2048 (default)
+   Number of moments: 2048
    Kernel: jackson (default)
 ------------------------------------------------ 
 
@@ -149,7 +149,7 @@ Number of threads:   16
    Energy range: [-3.959009, 5.940991] (default)
    Number of energies: 1000
    Filename: dos.dat
-   Number of moments: 2048 (default)
+   Number of moments: 2048
    Kernel: jackson (default)
 ------------------------------------------------ 
 
