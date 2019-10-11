@@ -42,7 +42,8 @@ public:
   ~KPM_Vector(void);
   void initiate_vector();
   T get_point();
-  void build_wave_packet(Eigen::Matrix<double,-1,-1> & k, Eigen::Matrix<T,-1,-1> & psi0, double & sigma);
+  void build_wave_packet(Eigen::Matrix<double,-1,-1> & k, Eigen::Matrix<T,-1,-1> & psi0, double & sigma,
+                         Eigen::Matrix<double,1,2> & vb);
   template < unsigned MULT,bool VELOCITY> 
   void build_regular_phases(int i1, unsigned axis);
   template < unsigned MULT> 

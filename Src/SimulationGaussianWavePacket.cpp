@@ -76,6 +76,7 @@ void Simulation<T,D>::Gaussian_Wave_Packet(){
   H5::DataSpace * dataspace;
   hsize_t dim[2];
   Eigen::Matrix <double,-1, -1> k_vector;
+  Eigen::Matrix <double ,1, 2> vb;
   Eigen::Matrix <T,-1, -1>        spinor;
 
   ident <<  one, zero,
@@ -102,13 +103,14 @@ void Simulation<T,D>::Gaussian_Wave_Packet(){
 
     k_vector  = Eigen::Matrix<double,-1, -1>::Zero(dim[1],dim[0]);
     spinor    = Eigen::Matrix<     T,-1, -1>::Zero(r.Orb,dim[0]);
-      
+    vb = Eigen::Matrix<     double,1, 2>::Zero(2);
     get_hdf5    <int>(&NumDisorder,    file, (char *) "/Calculation/gaussian_wave_packet/NumDisorder");
     get_hdf5    <int>(&NumMoments,     file, (char *) "/Calculation/gaussian_wave_packet/NumMoments" );
     get_hdf5    <int>(&NumPoints,      file, (char *) "/Calculation/gaussian_wave_packet/NumPoints"  );
     get_hdf5  <float>(&timestep,       file, (char *) "/Calculation/gaussian_wave_packet/timestep"   );
     get_hdf5 <double>(&width,          file, (char *) "/Calculation/gaussian_wave_packet/width"      );
     get_hdf5      <T>(spinor.data(),   file, (char *) "/Calculation/gaussian_wave_packet/spinor");
+    get_hdf5     <double>(vb.data(),   file, (char *) "/Calculation/gaussian_wave_packet/mean_value");
     get_hdf5 <double>(k_vector.data(), file, (char *) "/Calculation/gaussian_wave_packet/k_vector");
 
     file->close();  delete file;
@@ -139,7 +141,7 @@ void Simulation<T,D>::Gaussian_Wave_Packet(){
     {
       sum_ket.set_index(0);
       sum_ket.v.setZero();
-      sum_ket.build_wave_packet(k_vector, spinor, width);
+      sum_ket.build_wave_packet(k_vector, spinor, width, vb);
       h.generate_disorder();	
       sum_ket.empty_ghosts(0);
       for(unsigned t = 0; t < unsigned(NumPoints); t++)

@@ -189,22 +189,23 @@ T KPM_Vector <T, 3>::get_point()
 
 
 template <typename T>
-void KPM_Vector <T, 3>::build_wave_packet(Eigen::Matrix<double,-1,-1> & k, Eigen::Matrix<T,-1,-1> & psi0, double & sigma)
+void KPM_Vector <T, 3>::build_wave_packet(Eigen::Matrix<double,-1,-1> & k, Eigen::Matrix<T,-1,-1> & psi0, double & sigma,
+                                          Eigen::Matrix<double,1,2> & vb)
 {
   index = 0;
   Coordinates<std::size_t, 4> x(r.Ld), z(r.Lt);
   Eigen::Matrix<T,-1,-1>  sum(r.Orb, 1);
   Eigen::Map<Eigen::Matrix<std::size_t,3, 1>> vv(z.coord);
-  Eigen::Matrix<double, 1, 3> va , vb;
+  Eigen::Matrix<double, 1, 3> va;
   Eigen::Matrix<double, -1,-1> phase(1, psi0.cols());
   T soma = assign_value(0,0);
   auto bbs = r.rLat.inverse(); // each row is a bi / 2*M_PI 
   auto vOrb = bbs * r.rOrb;    // each columns is a vector in a1 basis
     
 
-  vb(0,0) = r.Lt[0]/2;
-  vb(0,1) = r.Lt[1]/2;
-  vb(0,2) = r.Lt[2]/2;
+//  vb(0,0) = r.Lt[0]/2;
+//  vb(0,1) = r.Lt[1]/2;
+//  vb(0,2) = r.Lt[2]/2;
     
   double a00 = r.rLat.col(0).transpose()*r.rLat.col(0);
   double a11 = r.rLat.col(1).transpose()*r.rLat.col(1);
@@ -231,9 +232,9 @@ void KPM_Vector <T, 3>::build_wave_packet(Eigen::Matrix<double,-1,-1> & k, Eigen
         {
           x.set({i0,i1,std::size_t(0)});
           r.convertCoordinates(z,x);
-          double n2 = (double(z.coord[2]) - double(r.Lt[2])/2.)/sigma;
-          double n1 = (double(z.coord[1]) - double(r.Lt[1])/2.)/sigma;
-          double n0 = (double(z.coord[0]) - double(r.Lt[0])/2.)/sigma;
+          double n2 = (double(z.coord[2]) - double(vb(0,2)))/sigma;
+          double n1 = (double(z.coord[1]) - double(vb(0,1)))/sigma;
+          double n0 = (double(z.coord[0]) - double(vb(0,0)))/sigma;
           double gauss = n0*n0 * a00 + n1*n1 * a11 + n2*n2*a22 + 2*n0*n1*a01 + 2*n0*n2*a02 + 2*n1*n2*a12;
           sum.setZero();
           va = vv.cast<double>().transpose();

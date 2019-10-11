@@ -43,7 +43,8 @@ public:
   void initiate_vector();
   T get_point();
 
-  void build_wave_packet(Eigen::Matrix<double,-1,-1> & k, Eigen::Matrix<T,-1,-1> & psi0, double & sigma);
+  void build_wave_packet(Eigen::Matrix<double,-1,-1> & k, Eigen::Matrix<T,-1,-1> & psi0, double & sigma,
+                         Eigen::Matrix<double, 1, 2> & vb);
   void build_planewave(Eigen::Matrix<double,-1,1> & k, Eigen::Matrix<T,-1,1> & weight);
   void build_site(unsigned long R);
 
