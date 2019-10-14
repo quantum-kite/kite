@@ -32,7 +32,9 @@ Before installing the code, following prerequisites need to be satisfied:
 
 * Pybinding ([see](https://github.com/dean0x7d/pybinding) the requirements)
 
-* GCC compiler (version 4.8.1 or newer)
+* GCC compiler (version 4.8.1 or newer, for the wavepacket functionality gcc 8.0 is needed)
+
+* CMake
 
 * Make.
 
