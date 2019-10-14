@@ -1,7 +1,5 @@
 <img src=https://user-images.githubusercontent.com/39924384/41094707-9e4ead6e-6a25-11e8-9e16-070a3236c8da.png width="100">
 
-Welcome to the **KITE** v1.0.
-
 **KITE** is an open-source Python/C++ software suitable for Large-Scale Tight-Binding (TB) quantum transport calculations.
 The code is shipped with the following capabilities:
 
@@ -9,11 +7,14 @@ The code is shipped with the following capabilities:
 * Optical Properties: AC longitudinal conductivity;
 * Optical Properties: nonlinear optical susceptibility;
 * Electronic Structure: high-resolution density of states (DoS) in clean and disordered systems;
+* Electronic Structure: local density of states and ARPES;
 * Special Features: automated magnetic field in 2D;
 * Special Features: lattice perturbations (e.g., strain) and ‘disorder cell’ concept for implementation of multi-orbital/-bond impurities;
 * Algorithms: ultra-high-resolution CPGF full spectral (DoS);
 * Algorithms: high-resolution CPGF full spectral (finite temperature response functions);
 * Algorithms: ultra-high-resolution CPGF single-shot (zero temperature DC conductivity)
+
+For further details on the algorithms and the implementation please consult [ArXiv:1910.05194](https://arxiv.org/abs/1910.05194).
 
 ## Getting Started
 
