@@ -1,11 +1,10 @@
-
 void print_header_message(){
   verbose_message(
       "\n+------------------------------------------------------------------------+\n"
       "|            Chebyshev Polynomial Green's Function Approach              | \n"
       "|             to Real-Space Quantum Transport Simulations                | \n"    
       "|                                                                        | \n"                                              
-      "|                     KITE | Pre-Release Beta 0.1                        | \n"         
+      "|                     KITE | Release 1.0                                 | \n"         
       "|                     Kite home: quantum-kite.com                        | \n"
       "|                                                                        | \n"
       "|    Created by Simao M. Joao, Joao V. Lopes (Universidade do Porto),    | \n"
@@ -15,7 +14,7 @@ void print_header_message(){
       "|                                                                        | \n"                                            
       "|            Funded by The Royal Society | royalsociety.org              | \n"
       "|                                                                        | \n"
-      "|  Copyright (C) 2018, M. Andelkovic, L. Covaci, A. Ferreira,            | \n"
+      "|  Copyright (C) 2018, 2019, M. Andelkovic, L. Covaci, A. Ferreira,      | \n"
       "|                      S. M. Joao, J. V. Lopes, T. G. Rappoport          | \n"
       "|                                                                        | \n"
       "|  This program is free software: you can redistribute it and/or modify  | \n"
