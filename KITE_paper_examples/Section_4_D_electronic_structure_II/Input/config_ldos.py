@@ -1,3 +1,14 @@
+"""       
+        ##############################################################################      
+        #                        KITE | Release  1.0                                 #      
+        #                                                                            #      
+        #                        Kite home: quantum-kite.com                         #           
+        #                                                                            #      
+        #  Developed by: Simao M. Joao, Joao V. Lopes, Tatiana G. Rappoport,         #       
+        #  Misa Andelkovic, Lucian Covaci, Aires Ferreira, 2018-2019                 #      
+        #                                                                            #      
+        ##############################################################################      
+"""
 import pybinding as pb
 import sys
 import kite
