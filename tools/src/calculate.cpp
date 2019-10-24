@@ -23,9 +23,9 @@
 #include "dos.hpp"
 #include "ldos.hpp"
 #include "arpes.hpp"
-#include "conductivity_dc.hpp"
+#include "cond_dc/conductivity_dc.hpp"
 #include "conductivity_optical.hpp"
-#include "functions.hpp"
+//#include "functions.hpp"
 #include "cond_2order/conductivity_2order.hpp"
 #include "calculate.hpp"
 

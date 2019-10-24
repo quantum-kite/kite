@@ -23,13 +23,23 @@ class conductivity_dc{
     int direction;
     int NumDisorder;
     int NumMoments;
+    int MaxMoments;
+    int Moments_D;
+    int Moments_G;
+    bool default_NumMoments;
+    int full_range;
+    bool default_full_range;
     double units;
+
+    int NumThreads;
+    bool default_NumThreads;
     
     std::string filename;
     bool default_filename;
 
-    T scat;
+    T scat, deltascat;
     bool default_scat;
+    bool default_deltascat;
 
     int NEnergies; 
     bool default_NEnergies;
@@ -42,6 +52,7 @@ class conductivity_dc{
     int NFermiEnergies;
     double minFermiEnergy;
     double maxFermiEnergy;
+    Eigen::Matrix<T, -1, 1> fermiEnergies;
     bool default_NFermi;
     bool default_mFermi;
     bool default_MFermi;
@@ -55,6 +66,7 @@ class conductivity_dc{
     // Objects required to successfully calculate the conductivity
     //Eigen::Array<std::complex<T>, -1, -1, Eigen::RowMajor> Gamma;
     Eigen::Array<std::complex<T>, -1, -1> Gamma;
+    Eigen::Array<std::complex<T>, -1, -1> Gamma_Padded;
 
 
 
@@ -67,5 +79,18 @@ class conductivity_dc{
 	  bool fetch_parameters();
 	  void override_parameters();
     void calculate();
-	
+    void calculate2();
+    void calculate_imag();
+    Eigen::Matrix<std::complex<T>, -1, -1, Eigen::ColMajor> fill_delta();
+    Eigen::Matrix<std::complex<T>, -1, -1, Eigen::RowMajor> fill_dgreenR();
+    Eigen::Matrix<std::complex<T>, -1, -1> triple_product(
+      Eigen::Matrix<std::complex<T>, -1, -1, Eigen::ColMajor>,
+      Eigen::Matrix<std::complex<T>, -1, -1, Eigen::RowMajor>);
+
+    Eigen::Matrix<std::complex<T>, -1, 1> calc_cond(
+        Eigen::Matrix<std::complex<T>, -1, -1>);
+
+    void save_to_file(Eigen::Matrix<std::complex<T>, -1, -1>);
+
+
 };

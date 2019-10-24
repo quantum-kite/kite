@@ -191,8 +191,8 @@ bool dos<T, DIM>::fetch_parameters(){
 
 
 	file.close();
-	debug_message("Left DOS::read.\n");
-    return result;
+	debug_message("Left DOS::fetch_parameters.\n");
+  return result;
 }
 
 template <typename U, unsigned DIM>

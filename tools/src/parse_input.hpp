@@ -6,7 +6,11 @@ class shell_input{
         // DC conductivity
         double CondDC_Temp; 
         int CondDC_NumEnergies; 
+        int CondDC_NumMoments; 
+        int CondDC_integrate;
+        int CondDC_nthreads;
         double CondDC_Scat; 
+        double CondDC_deltaScat;
         double CondDC_FermiMin; 
         double CondDC_FermiMax; 
         int CondDC_NumFermi; 
@@ -88,6 +92,7 @@ class shell_input{
         shell_input(int, char**);
         shell_input();
         void printHelp();
+        void printInfo();
         void printDC();
         void printOpt();
         void printOpt2();
