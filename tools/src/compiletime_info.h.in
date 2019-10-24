@@ -1,0 +1,3 @@
+#define MACHINE_NAME "@MACHINE_NAME@"
+#define SYSTEM_NAME "@SYSTEM_NAME@"
+#define TODAY "@TODAY@"
