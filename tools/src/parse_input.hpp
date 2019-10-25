@@ -55,9 +55,10 @@ class shell_input{
         std::string ARPES_Name;
         bool ARPES_Exclusive;
         bool ARPES_is_required;
-        //int ARPES_NumMoments;
-        //std::string lDOS_kernel;
-        //double lDOS_kernel_parameter;
+        bool ARPES_calculate_full_arpes;
+        int ARPES_NumMoments;
+        std::string ARPES_kernel;
+        double ARPES_kernel_parameter;
         double ARPES_Emin;
         double ARPES_Emax;
         double ARPES_NumEnergies;
@@ -65,6 +66,7 @@ class shell_input{
         double ARPES_Fermi;
         double ARPES_freq;
         Eigen::Array<double, -1, 1> ARPES_vec;
+
 
         // 2nd order optical conductivity
         double CondOpt2_Temp; 

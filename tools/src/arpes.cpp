@@ -59,12 +59,24 @@ void arpes<T, DIM>::printARPES(){
         "   Min energy: "           << Emin*scale + shift << ((default_energies)?" (default)":"") << "\n"
         "   Max energy: "           << Emax*scale + shift << ((default_energies)?" (default)":"") << "\n"
         "   Number of energies: "   << NumEnergies        << ((default_energies)?" (default)":"") << "\n"
+        "   Number of moments: "    << NumMoments         << ((default_NumMoments)?       " (default)":"") << "\n";
+
+        if(calculate_full_arpes){
+          std::cout << 
         "   Incident vector: "      << incident_vector.transpose()    << ((default_incident)?" (default)":"") << "\n"
         "   Incident frequency: "   << freq               << ((default_freq)?" (default)":"") << "\n"
-        "   Fermi energy: "         << fermi               << ((default_fermi)?" (default)":"") << "\n"
+        "   Fermi energy: "         << fermi               << ((default_fermi)?" (default)":"") << "\n";
+        } else {
+          std::cout << "Calculating spectral function instead of ARPES\n";
+        }
+
+          std::cout << 
         "   Number of k-vectors: "  << NumVectors         << "\n"
         "   Filename: "             << filename           << ".dat" << ((default_filename)?" (default)":"") << "\n"
-        "   Using Jackson kernel\n";
+        "   Kernel: "               << kernel           << ((default_kernel)?           " (default)":"") << "\n";
+    if(kernel == "green"){
+        std::cout << "   Kernel parameter: "     << kernel_parameter*scale << ((default_kernel_parameter)? " (default)":"") << "\n";
+    }
 }
 
 template <typename T, unsigned DIM>
@@ -131,8 +143,29 @@ void arpes<T, DIM>::override_parameters(){
         NumEnergies      = variables.ARPES_NumEnergies;
         default_energies = false;
     }
+    if(variables.ARPES_NumMoments != -1){
+        NumMoments      = variables.ARPES_NumMoments;
+        default_NumMoments = false;
+    }
+
+    if(variables.ARPES_kernel != ""){
+        kernel         = variables.ARPES_kernel;
+        default_kernel = false;
+    }
+    if(kernel == "green"){
+      if(variables.ARPES_kernel_parameter != -8888.8){
+        kernel_parameter = variables.ARPES_kernel_parameter/systemInfo->energy_scale;
+        default_kernel_parameter = false;
+      }
+    }
+
     if(default_energies == false)
       energies = Eigen::Matrix<float, -1, 1>::LinSpaced(NumEnergies, Emin, Emax);
+
+    if(variables.ARPES_calculate_full_arpes == false){
+      calculate_full_arpes = false;
+    }
+
 
   debug_message("Left override_parameters.\n");
 };
@@ -174,9 +207,15 @@ void arpes<T, DIM>::set_default_parameters(){
   default_incident  = true;
 
   // default frequency of the incident wave
-  freq = 0.0;
-  default_freq      = true;
+  freq          = 0.0;
+  default_freq  = true;
 
+  // The user may want to only calculate the spectral function
+  calculate_full_arpes = true;
+
+  kernel = "jackson";
+  default_kernel = true;
+  default_kernel_parameter = true;
 };
 
 
@@ -274,16 +313,40 @@ void arpes<U, DIM>::calculate(){
   Eigen::Matrix<std::complex<U>, -1, -1> GammaE;
   GammaE = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(NumEnergies, localN);
   U factor, kern, ferm, del;
-  for(int m = 0; m < localN; m++){
-    factor = 1.0/(1.0 + U((m + thread_id*localN)==0));
-    kern   = kernel_jackson<U>(m + thread_id*localN, NumMoments)*factor;
-    for(int i = 0; i < NumEnergies; i++){
-      ferm        = fermi_function(energies(i) - freq, fermi, beta);
-      del         = delta(m + thread_id*localN, energies(i) - freq);
-      GammaE(i,m) = del*ferm*kern; 
-    }
+  if(kernel =="jackson"){
+      for(int m = 0; m < localN; m++){
+        factor = 1.0/(1.0 + U((m + thread_id*localN)==0));
+        kern   = kernel_jackson<U>(m + thread_id*localN, NumMoments)*factor;
+        for(int i = 0; i < NumEnergies; i++){
+          
+          ferm = 1.0;
+          if(calculate_full_arpes){
+            ferm      = fermi_function(energies(i) - freq, fermi, beta);
+          }
+
+          del         = delta(m + thread_id*localN, energies(i) - freq);
+          GammaE(i,m) = del*ferm*kern; 
+        }
+      }
   }
 
+  if(kernel == "green"){
+      std::complex<U> c_energy;
+      for(int m = 0; m < localN; m++){
+        factor = 1.0/(1.0 + U((m + thread_id*localN)==0));
+        for(int i = 0; i < NumEnergies; i++){
+
+          ferm = 1.0;
+          if(calculate_full_arpes){
+            ferm      = fermi_function(energies(i) - freq, fermi, beta);
+          }
+
+          c_energy    = std::complex<U>(energies(i) - freq, kernel_parameter);
+          del         = -green<std::complex<U>>(m + thread_id*localN, 1, c_energy).imag()/M_PI;
+          GammaE(i,m) = del*factor;
+        }
+      }
+  }
     
 #pragma omp critical
   ARPES += GammaE*localkMU;
@@ -299,26 +362,30 @@ void arpes<U, DIM>::calculate(){
     shifts(ii) = shift;
   }
 
-  Eigen::Matrix<double, -1, -1> incidents = Eigen::Matrix<double, -1, -1>::Zero(DIM, NumVectors);
-  for(int ii = 0; ii < NumVectors; ii++){
-    incidents.col(ii) = incident_vector;
-  }
-  Eigen::Matrix<double, -1, -1> modulation = Eigen::Matrix<double, -1, -1>::Zero(1, NumVectors);
-  modulation = incident_vector.matrix().transpose()*(incidents + arpes_k_vectors.matrix())/incident_vector.matrix().norm();
-  //std::cout << modulation.transpose() << "\n";
+
+  if(calculate_full_arpes){
+
+    Eigen::Matrix<double, -1, -1> incidents = Eigen::Matrix<double, -1, -1>::Zero(DIM, NumVectors);
+    for(int ii = 0; ii < NumVectors; ii++){
+      incidents.col(ii) = incident_vector;
+    }
+
+    Eigen::Matrix<double, -1, -1> modulation = Eigen::Matrix<double, -1, -1>::Zero(1, NumVectors);
+    modulation = incident_vector.matrix().transpose()*(incidents + arpes_k_vectors.matrix())/incident_vector.matrix().norm();
 
 
-  for(int ii = 0; ii < NumVectors; ii++){
-    ARPES.col(ii) *= modulation(ii)*modulation(ii);
+    for(int ii = 0; ii < NumVectors; ii++){
+      ARPES.col(ii) *= modulation(ii)*modulation(ii);
+    }
   }
 
 
 
   std::ofstream myfile;
   myfile.open(filename + ".dat");
-  myfile << "k-vectors: \n";
+  myfile << "k-vectors:\n";
   for(unsigned int i = 0; i < NumVectors; i++)  myfile << arpes_k_vectors(0,i) << " " << arpes_k_vectors(1,i) << "\n";
-  myfile << "Energies: \n";
+  myfile << "Energies:\n";
   myfile << energies*scale + shifts << "\n";
   myfile << "ARPES:\n";
   myfile << ARPES.real() << "\n";

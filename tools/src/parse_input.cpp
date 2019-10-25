@@ -121,8 +121,8 @@ void shell_input::printHelp(){
     std::cout << "           -T              Temperature\n";
     std::cout << "           -V              Wave vector of the incident wave\n";
     std::cout << "           -O              Frequency of the incident wave\n";
-    //std::cout << "           -M              Number of Chebyshev moments\n";
-    //std::cout << "           -K              Kernel to use (jackson/green). green requires broadening parameter. Example: -K green 0.01\n";
+    std::cout << "           -M              Number of Chebyshev moments\n";
+    std::cout << "           -K              Kernel to use (jackson/green). green requires broadening parameter. Example: -K green 0.01\n";
     std::cout << "           -X              Exclusive. Only calculate this quantity\n\n";
 
     std::cout << "--DOS      -E              Number of energy points\n";
@@ -576,6 +576,10 @@ void shell_input::parse_ARPES(int argc, char* argv[]){
     ARPES_Temp = -8888;
     ARPES_Fermi = -8888;
     ARPES_freq = -8888;
+    ARPES_NumMoments = -1;
+    ARPES_kernel = "";
+    ARPES_kernel_parameter = -8888.8;
+    ARPES_calculate_full_arpes = true;
     double v1, v2, v3;
 
     int j = 5;
@@ -592,8 +596,29 @@ void shell_input::parse_ARPES(int argc, char* argv[]){
                 ARPES_Fermi = atof(n1.c_str());
             if(name == "-N")
                 ARPES_Name = n1;
+
+            //only calculate the spectral function
+            if(name == "-S" or n1 == "-S")
+                ARPES_calculate_full_arpes = false;
+
             if(name == "-X" or n1 == "-X")
                 ARPES_Exclusive = true;
+            if(name == "-M")
+                ARPES_NumMoments = atoi(n1.c_str());
+            if(name == "-K"){
+                ARPES_kernel = n1;
+                if(n1 == "green"){
+                  std::string n2 = argv[k + pos + 2];
+                  ARPES_kernel_parameter = atof(n2.c_str());
+                }
+            }
+
+            if(DOS_kernel != "green" && DOS_kernel != "jackson" && DOS_kernel != ""){
+              std::cout << "Invalid kernel specified.\n";
+              std::cout << "Please use -K green or -K jackson for the density of states. Exiting.\n";
+              exit(1);
+            }
+
             if(name == "-E"){
                 // Find how many numbers are inside this parameter
                 int n_args = 0;
@@ -659,13 +684,3 @@ void shell_input::parse_ARPES(int argc, char* argv[]){
     }
     debug_message("Left parse_ARPES\n");
 }
-
-    //std::cout << "--ARPES    -N              Name of the output file\n";
-    //std::cout << "           -E min max num  Number of energy points\n";
-    //std::cout << "           -F              Fermi energy\n";
-    //std::cout << "           -T              Temperature\n";
-    //std::cout << "           -V              Wave vector of the incident wave\n";
-    //std::cout << "           -O              Frequency of the incident wave\n";
-    ////std::cout << "           -M              Number of Chebyshev moments\n";
-    ////std::cout << "           -K              Kernel to use (jackson/green). green requires broadening parameter. Example: -K green 0.01\n";
-    //std::cout << "           -X              Exclusive. Only calculate this quantity\n\n";
