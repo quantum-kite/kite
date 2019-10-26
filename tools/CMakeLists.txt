@@ -12,9 +12,14 @@ project(KITE-tools)
 
 FILE(GLOB SRCFILES src/*.cpp)
 FILE(GLOB SRCFILES2 src/cond_2order/*.cpp)
-add_executable(KITE-tools ${SRCFILES} ${SRCFILES2})
+add_executable(${PROJECT_NAME} ${SRCFILES} ${SRCFILES2})
 
 find_package(HDF5 COMPONENTS CXX C HL)
+if(${HDF5_FOUND})
+  include_directories(${HDF5_INCLUDE_DIR})
+else()
+  MESSAGE(FATAL_ERROR  "Couldn't find hdf5")
+endif()
 set(HDF5_USE_STATIC_LIBRARIES ON)
 MESSAGE(STATUS "Hdf5 Library:  ${HDF5_CXX_HL_LIBRARIES}")
 MESSAGE(STATUS "Hdf5Hl Library:  ${HDF5_CXX_LIBRARIES}")
@@ -35,8 +40,9 @@ endif()
 find_package(OpenMP)
 MESSAGE(STATUS "OPENMP:  ${OPENMP_FOUND}")      
 if (OPENMP_FOUND)
-    set (CMAKE_C_FLAGS "-g -O3 ${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set (CMAKE_CXX_FLAGS "-g -O3 ${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set (CORRECT_CODING_FLAGS "-Wall -Wextra -Wpedantic")
+    set (CMAKE_C_FLAGS "${CORRECT_CODING_FLAGS} -g -O3 ${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set (CMAKE_CXX_FLAGS "${CORRECT_CODING_FLAGS} -g -O3 ${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
     set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_C_FLAGS}")
   else()
     set(CMAKE_CXX_FLAGS_DEBUG "-g")
@@ -45,8 +51,6 @@ endif()
 
 
 include_directories(${Src})
-target_link_libraries(KITE-tools ${HDF5_CXX_LIBRARIES} )
+target_link_libraries(${PROJECT_NAME} ${HDF5_CXX_LIBRARIES} )
 
-
-
-
+install (TARGETS ${PROJECT_NAME} DESTINATION bin)
