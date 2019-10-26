@@ -16,7 +16,7 @@ Hamiltonian<T,D>::Hamiltonian(char *filename,  LatticeStructure<D> & rr, GLOBAL_
   build_Anderson_disorder();
   build_vacancies_disorder();
   build_structural_disorder();
-};
+}
 
 template <typename T, unsigned D>
 void Hamiltonian<T,D>::generate_disorder()
@@ -31,7 +31,7 @@ void Hamiltonian<T,D>::generate_disorder()
     id->generate_disorder();
     
 
-};
+}
 
 
 

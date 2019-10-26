@@ -41,7 +41,7 @@ void Simulation<T,D>::store_LMU(Eigen::Array<T, -1, -1> *gamma){
 }
 #pragma omp barrier    
     debug_message("Left store_lmu\n");
-  };
+  }
 
 template <typename T,unsigned D>
 void Simulation<T,D>::LMU(int NDisorder, int NMoments, Eigen::Array<unsigned long, -1, 1> positions){

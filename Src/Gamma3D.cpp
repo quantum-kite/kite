@@ -165,7 +165,7 @@ void Simulation<T,D>::Gamma3D(int NRandomV, int NDisorder, std::vector<int> N_mo
     
   }
 #pragma omp barrier
-};
+}
 
 template <typename T,unsigned D>
 void Simulation<T,D>::store_gamma3D(Eigen::Array<T, -1, -1> *gamma, std::vector<int> N_moments, 
@@ -275,7 +275,7 @@ void Simulation<T,D>::store_gamma3D(Eigen::Array<T, -1, -1> *gamma, std::vector<
 
       
   debug_message("Left store_gamma\n");
-};
+}
 
 template void Simulation<float ,1u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
 template void Simulation<double ,1u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);

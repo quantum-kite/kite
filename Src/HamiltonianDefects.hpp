@@ -97,5 +97,5 @@ struct Defect_Operator: public ComplexTraits<T> {
           std::size_t i1 = border_element[i];
           phi0[i1] += value_type(MULT + 1) * border_U[i] * phiM1[i1];
         }
-  };
+  }
 };

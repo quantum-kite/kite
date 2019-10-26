@@ -236,7 +236,7 @@ void Simulation<T,D>::Gaussian_Wave_Packet(){
   }
 #pragma omp barrier
 #endif
-};
+}
 
 template class Simulation<float ,1u>;
 template class Simulation<double ,1u>;

@@ -405,7 +405,7 @@ void Simulation<T,D>::singleshot(Eigen::Array<double, -1, 1> energies,
     debug_message("Left single_shot");
   }
 #pragma omp barrier
-};
+}
 
 template class Simulation<float ,1u>;
 template class Simulation<double ,1u>;

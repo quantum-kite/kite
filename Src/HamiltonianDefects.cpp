@@ -154,7 +154,7 @@ Defect_Operator<T,D>::Defect_Operator( Hamiltonian<T,D> & h1,  std::string & def
     }
     
   debug_message("Left Defect_Operator constructor.\n");
-};
+}
 
 template <typename T,unsigned D>
 void Defect_Operator<T,D>::generate_disorder()  {

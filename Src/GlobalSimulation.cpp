@@ -56,7 +56,7 @@ GlobalSimulation<T,D>::GlobalSimulation( char *name ) : rglobal(name){
 
   }
   debug_message("Left global_simulation\n");
-};
+}
 
 template class GlobalSimulation<float ,1u>;
 template class GlobalSimulation<double ,1u>;
