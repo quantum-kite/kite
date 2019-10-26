@@ -170,7 +170,7 @@ void shell_input::printHelp(){
 
 
 
-shell_input::shell_input(){};
+shell_input::shell_input(){}
 
 shell_input::shell_input(int argc, char *argv[]){
 	// Processes the input that this program recieves from the command line	
@@ -244,7 +244,7 @@ shell_input::shell_input(int argc, char *argv[]){
             }
     }
 
-};
+}
 
 int shell_input::get_num_exclusives(){
     int N_exclusives = 0;
@@ -255,7 +255,7 @@ int shell_input::get_num_exclusives(){
     if(lDOS_Exclusive)        N_exclusives++;
 
     return N_exclusives;
-};
+}
 
 void shell_input::parse_CondDC(int argc, char *argv[]){
     // This function looks at the command-line input pertaining to CondDC and
@@ -477,7 +477,7 @@ void shell_input::parse_DOS(int argc, char* argv[]){
       exit(1);
     }
       
-};
+}
 
 
 void shell_input::parse_lDOS(int argc, char* argv[]){

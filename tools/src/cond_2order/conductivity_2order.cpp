@@ -52,7 +52,7 @@ int conductivity_nonlinear<T, DIM>::fetch_gamma0(){
     debug_message("Conductivity nonlinear: There is no Gamma0 matrix.\n");
   }
   return hasGamma0;
-};
+}
 
 
 
@@ -83,7 +83,7 @@ int conductivity_nonlinear<T, DIM>::fetch_gamma1(){
   }
 
   return hasGamma1;
-};
+}
 
 
 template <typename T, unsigned DIM>
@@ -111,7 +111,7 @@ int conductivity_nonlinear<T, DIM>::fetch_gamma2(){
   }
 
   return hasGamma2;
-};
+}
 
   
 template <typename T, unsigned DIM>
@@ -142,7 +142,7 @@ int conductivity_nonlinear<T, DIM>::fetch_gamma3(){
   }
 
   return hasGamma3;
-};
+}
 
 template <typename T, unsigned DIM>
 conductivity_nonlinear<T, DIM>::conductivity_nonlinear(system_info<T, DIM>& info, shell_input & vari){
@@ -204,7 +204,7 @@ void conductivity_nonlinear<T, DIM>::override_parameters(){
     if(variables.CondOpt2_Scat != -8888)     scat        = variables.CondOpt2_Scat/scale;
     if(variables.CondOpt2_Name != "")        filename    = variables.CondOpt2_Name;
     beta = 1.0/8.6173303*pow(10,5)/temperature;
-};
+}
 
 template <typename T, unsigned DIM>
 void conductivity_nonlinear<T, DIM>::set_default_parameters(){
@@ -239,7 +239,7 @@ void conductivity_nonlinear<T, DIM>::set_default_parameters(){
   default_efermi = true;
   default_scat = true;
   default_filename = true;
-};
+}
 
 template <typename T, unsigned DIM>
 void conductivity_nonlinear<T, DIM>::printOpt2(){
@@ -410,7 +410,7 @@ void conductivity_nonlinear<U, DIM>::calculate_photo(){
   myfile2.close();
   myfile3.close();
   myfile4.close();
-};
+}
 
 template <typename U, unsigned DIM>
 void conductivity_nonlinear<U, DIM>::calculate_general(){
@@ -517,7 +517,7 @@ void conductivity_nonlinear<U, DIM>::calculate_general(){
   myfile3shg3.close();
   myfile2shg.close();
   myfile1shg.close();
-};
+}
 
 template <typename U, unsigned DIM>
 void conductivity_nonlinear<U, DIM>::calculate(){
@@ -544,7 +544,7 @@ void conductivity_nonlinear<U, DIM>::calculate(){
   if(not photo) calculate_general();
   
   debug_message("Left calc_nonlinear_cond.\n");
-};
+}
 
 // Instantiations
 template class conductivity_nonlinear<float, 1u>;
