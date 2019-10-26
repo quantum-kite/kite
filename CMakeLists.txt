@@ -10,13 +10,18 @@ endif()
 
 project(KITEx)
 
-FILE(GLOB SRCFILES *.cpp)
-add_executable(KITEx ${SRCFILES})
+FILE(GLOB SRCFILES Src/*.cpp)
+add_executable(${PROJECT_NAME} ${SRCFILES})
 
 find_package(HDF5 COMPONENTS CXX C HL)
-set(HDF5_USE_STATIC_LIBRARIES ON)
-MESSAGE(STATUS "Hdf5 Library:  ${HDF5_CXX_HL_LIBRARIES}")
-MESSAGE(STATUS "Hdf5Hl Library:  ${HDF5_CXX_LIBRARIES}")
+if(${HDF5_FOUND})
+  include_directories(${HDF5_INCLUDE_DIR})
+  set(HDF5_USE_STATIC_LIBRARIES ON)
+  MESSAGE(STATUS "Hdf5 Library:  ${HDF5_CXX_HL_LIBRARIES}")
+  MESSAGE(STATUS "Hdf5Hl Library:  ${HDF5_CXX_LIBRARIES}")
+else()
+  MESSAGE(STATUS "Couldn't find HDF5")
+endif()
 MESSAGE(STATUS "Compiler:  ${CMAKE_CXX_COMPILER}")
 include_directories(~/include/)
 
@@ -31,16 +36,17 @@ else()
 endif()
 
 
+set (CORRECT_CODING_FLAGS "-Wall -Wextra -Wpedantic")
 find_package(OpenMP)
 MESSAGE(STATUS "OPENMP:  ${OPENMP_FOUND}")      
 if (OPENMP_FOUND)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set (CMAKE_CXX_FLAGS "-Wall -Wextra -O3 ${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_C_FLAGS}")
+    set (CMAKE_C_FLAGS "${CORRECT_CODING_FLAGS} ${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set (CMAKE_CXX_FLAGS "${CORRECT_CODING_FLAGS} -Wall -Wextra -O3 ${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set (CMAKE_EXE_LINKER_FLAGS "${CORRECT_CODING_FLAGS} ${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_C_FLAGS}")
   else()
-    set(CMAKE_CXX_FLAGS "-Wall -Wextra")
-    set(CMAKE_CXX_FLAGS_DEBUG "-g")
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+    set(CMAKE_CXX_FLAGS "${CORRECT_CODING_FLAGS} -Wall -Wextra")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CORRECT_CODING_FLAGS} -g")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CORRECT_CODING_FLAGS} -O3")
 endif()
 
 
@@ -55,8 +61,6 @@ add_definitions(-DCOMPILE_WAVEPACKET=${compile_wp})
 
 
 include_directories(${Src})
-target_link_libraries(KITEx ${HDF5_CXX_LIBRARIES} )
+target_link_libraries(${PROJECT_NAME} ${HDF5_CXX_LIBRARIES} )
 
-
-
-
+install (TARGETS ${PROJECT_NAME} DESTINATION bin)
