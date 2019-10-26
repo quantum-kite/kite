@@ -86,13 +86,13 @@ void ldos<T, DIM>::override_parameters(){
         filename         = variables.lDOS_Name;
         default_filename = false;
     }
-};
+}
 
 template <typename T, unsigned DIM>
 void ldos<T, DIM>::set_default_parameters(){
     filename = "ldos";
     default_filename = true;
-};
+}
 
 
 template <typename T, unsigned DIM>

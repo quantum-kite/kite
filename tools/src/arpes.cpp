@@ -135,7 +135,7 @@ void arpes<T, DIM>::override_parameters(){
       energies = Eigen::Matrix<float, -1, 1>::LinSpaced(NumEnergies, Emin, Emax);
 
   debug_message("Left override_parameters.\n");
-};
+}
 
 template <typename T, unsigned DIM>
 void arpes<T, DIM>::set_default_parameters(){
@@ -177,7 +177,7 @@ void arpes<T, DIM>::set_default_parameters(){
   freq = 0.0;
   default_freq      = true;
 
-};
+}
 
 
 template <typename T, unsigned DIM>
@@ -300,7 +300,7 @@ void arpes<U, DIM>::calculate(){
   }
 
   Eigen::Matrix<double, -1, -1> incidents = Eigen::Matrix<double, -1, -1>::Zero(DIM, NumVectors);
-  for(int ii = 0; ii < NumVectors; ii++){
+  for(unsigned ii = 0; ii < NumVectors; ii++){
     incidents.col(ii) = incident_vector;
   }
   Eigen::Matrix<double, -1, -1> modulation = Eigen::Matrix<double, -1, -1>::Zero(1, NumVectors);
@@ -308,7 +308,7 @@ void arpes<U, DIM>::calculate(){
   //std::cout << modulation.transpose() << "\n";
 
 
-  for(int ii = 0; ii < NumVectors; ii++){
+  for(unsigned ii = 0; ii < NumVectors; ii++){
     ARPES.col(ii) *= modulation(ii)*modulation(ii);
   }
 
@@ -317,7 +317,7 @@ void arpes<U, DIM>::calculate(){
   std::ofstream myfile;
   myfile.open(filename + ".dat");
   myfile << "k-vectors: \n";
-  for(unsigned int i = 0; i < NumVectors; i++)  myfile << arpes_k_vectors(0,i) << " " << arpes_k_vectors(1,i) << "\n";
+  for(unsigned i = 0; i < NumVectors; i++)  myfile << arpes_k_vectors(0,i) << " " << arpes_k_vectors(1,i) << "\n";
   myfile << "Energies: \n";
   myfile << energies*scale + shifts << "\n";
   myfile << "ARPES:\n";
