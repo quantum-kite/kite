@@ -45,6 +45,12 @@ void Simulation<T,D>::calc_condopt(){
 #pragma omp barrier
 
 if(local_calculate_condopt){
+#pragma omp master
+      {
+        std::cout << "Calculating the optical conductivity.\n";
+      }
+#pragma omp barrier
+
 #pragma omp critical
 {
     H5::H5File * file = new H5::H5File(name, H5F_ACC_RDONLY);

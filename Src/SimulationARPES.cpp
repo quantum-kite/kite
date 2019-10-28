@@ -133,6 +133,11 @@ void Simulation<T, DIM>::calc_ARPES(){
     // Fetch the data from the hdf file
     local_calculate_arpes = Global.calculate_arpes;
     if(local_calculate_arpes){
+#pragma omp master
+      {
+        std::cout << "Calculating ARPES.\n";
+      }
+#pragma omp barrier
 #pragma omp critical
 {
 

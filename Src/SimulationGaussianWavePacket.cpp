@@ -46,13 +46,19 @@ void Simulation<T, DIM>::calc_wavepacket(){
       
     // Now calculate it
 #pragma omp barrier
-    if(local_calculate_wavepacket)
+    if(local_calculate_wavepacket){
       Gaussian_Wave_Packet();
+    }
 }
 
 template <typename T, unsigned D>
 void Simulation<T,D>::Gaussian_Wave_Packet(){
 #if COMPILE_WAVEPACKET
+#pragma omp master
+      {
+        std::cout << "Calculating Wavepacket.\n";
+      }
+#pragma omp barrier
   ComplexTraits<T> CT;
   KPM_Vector<T,D> phi (2, *this), sum_ket(1u,*this);
   int NumDisorder, NumMoments, NumPoints;

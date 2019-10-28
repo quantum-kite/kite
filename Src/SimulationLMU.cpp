@@ -133,6 +133,12 @@ void Simulation<T,D>::calc_LDOS(){
 
         local_calculate_ldos = Global.calculate_ldos;
         if(local_calculate_ldos){
+#pragma omp master
+      {
+        std::cout << "Calculating LDoS.\n";
+      }
+#pragma omp barrier
+
 #pragma omp critical
   {
 

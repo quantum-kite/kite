@@ -72,6 +72,11 @@ void Simulation<T,D>::calc_DOS(){
 #pragma omp barrier
 
 if(local_calculate_dos){
+#pragma omp master
+      {
+        std::cout << "Calculating DOS.\n";
+      }
+#pragma omp barrier
 #pragma omp critical
 {
     H5::H5File * file = new H5::H5File(name, H5F_ACC_RDONLY);

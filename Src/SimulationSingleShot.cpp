@@ -56,6 +56,11 @@ void Simulation<T,D>::calc_singleshot() {
 
 
   if(calculate_singleshot_local){
+#pragma omp master
+      {
+        std::cout << "Calculating SingleShot.\n";
+      }
+#pragma omp barrier
 #pragma omp critical
 {
       H5::H5File * file = new H5::H5File(name, H5F_ACC_RDONLY);

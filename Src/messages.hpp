@@ -35,7 +35,7 @@ void print_flags_message(){
   verbose_message("Flags set at compilation:\n");
   verbose_message("DEBUG: "); verbose_message(DEBUG); verbose_message("\n");
   verbose_message("VERBOSE: "); verbose_message(VERBOSE); verbose_message("\n");
-  verbose_message("ESTIMATE_TIME: "); verbose_message(ESTIMATE_TIME); verbose_message("\n");
+  //verbose_message("ESTIMATE_TIME: "); verbose_message(ESTIMATE_TIME); verbose_message("\n");
   verbose_message("-------------------------\n");
 }
 
@@ -45,7 +45,7 @@ void print_info_message(){
       "Linear response functions in units of e^2/h.                              \n"
       "To stop these messages, set VERBOSE to 0 in the Makefile.                 \n"
       "To see debug messages, set DEBUG to 1 in the Makefile.                    \n"
-      "To estimate the calculation time, set ESTIMATE_TIME to 1 in the Makefile. \n"
+      //"To estimate the calculation time, set ESTIMATE_TIME to 1 in the Makefile. \n"
       "------------------------------------------------------------------------- \n\n"
       );
 }
