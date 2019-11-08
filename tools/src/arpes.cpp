@@ -168,7 +168,7 @@ void arpes<T, DIM>::override_parameters(){
 
 
   debug_message("Left override_parameters.\n");
-};
+}
 
 template <typename T, unsigned DIM>
 void arpes<T, DIM>::set_default_parameters(){
@@ -216,7 +216,7 @@ void arpes<T, DIM>::set_default_parameters(){
   kernel = "jackson";
   default_kernel = true;
   default_kernel_parameter = true;
-};
+}
 
 
 template <typename T, unsigned DIM>

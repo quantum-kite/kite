@@ -65,8 +65,8 @@ def haldane():
 lattice = haldane()
 # add Uniformly distributed disorder
 disorder = kite.Disorder(lattice)
-disorder.add_disorder('A', 'Uniform', +0.0, 0.6)
-disorder.add_disorder('B', 'Uniform', +0.0, 0.6)
+disorder.add_disorder('A', 'Uniform', +0.0, 0.4)
+disorder.add_disorder('B', 'Uniform', +0.0, 0.4)
 # number of decomposition parts in each direction of matrix.
 # This divides the lattice into various sections, each of which is calculated in parallel
 nx = ny = 1
@@ -89,3 +89,6 @@ calculation.conductivity_dc(num_points=1000, num_moments=256, num_random=50, num
 # configure the *.h5 file
 kite.config_system(lattice, configuration, calculation, filename='haldane.h5',
                    disorder=disorder)
+# ATTENTION: to generate  the conductivity data file for a desired window of Fermi energies, please use 
+#./KITE-tools h5_file.h --CondDC -F Emin Emax NumPoints 
+#See ./KITE-tools --help for more options

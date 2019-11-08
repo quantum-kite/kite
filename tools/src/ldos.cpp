@@ -116,7 +116,7 @@ void ldos<T, DIM>::override_parameters(){
         default_kernel_parameter = false;
       }
     }
-};
+}
 
 template <typename T, unsigned DIM>
 void ldos<T, DIM>::set_default_parameters(){
@@ -129,7 +129,7 @@ void ldos<T, DIM>::set_default_parameters(){
     default_kernel = true;
     default_kernel_parameter = true;
 
-};
+}
 
 
 template <typename T, unsigned DIM>

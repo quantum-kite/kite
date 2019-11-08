@@ -354,7 +354,7 @@ void conductivity_optical<U, DIM>::override_parameters(){
   Lambda_Padded = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(Moments_D, 1);
   Lambda_Padded.block(0,0,NumMoments,1) = Lambda.block(0,0,NumMoments,1);
   debug_message("Left override_parameters");
-};
+}
 
 template <typename U, unsigned DIM>
 void conductivity_optical<U, DIM>::calculateBlocks(){
@@ -467,7 +467,7 @@ void conductivity_optical<U, DIM>::calculateBlocks(){
       for(int e = 0; e < N_energies; e++){
         GammaEp = 0;
         GammaEn = 0;
-        for(int p = 0; p < mmax; p++){
+        for(unsigned int p = 0; p < mmax; p++){
           GammaEp += (*gammas_EN[j])(e, p)*greenAscat<U>(scat)(m*mmax + p, energies(e) - freq_p);      // contracting with the positive frequencies
           GammaEn += (*gammas_EN[j])(e, p)*greenAscat<U>(scat)(m*mmax + p, energies(e) - freq_n);      // contracting with the negative frequencies
         }
@@ -567,7 +567,7 @@ void conductivity_optical<U, DIM>::calculateBlocks(){
   for(unsigned n = 0; n < Nmax; n++){
     for(unsigned m = 0; m < Mmax; m++){
       myfile.open("g" + std::to_string(mmax*(m+1)) + "_d" + std::to_string(nmax*(n+1)) + "_" + filename);
-      for(int i=0; i < N_omegas; i++){
+      for(unsigned int i=0; i < N_omegas; i++){
         freq = std::complex<U>(frequencies(i), scat);  
         cn = (*partial_cond[n + m*Nmax])(i);
         myfile << frequencies.real()(i)*systemInfo.energy_scale << " " << cn.real() << " " << cn.imag() << "\n";
@@ -587,7 +587,7 @@ void conductivity_optical<U, DIM>::calculateBlocks(){
   delete partial_cond;
 
 
-};
+}
 
 
 
@@ -681,7 +681,7 @@ void conductivity_optical<U, DIM>::calculate(){
 
     // Loop over the frequencies
     U freq_p, freq_n;
-    for(int w = 0; w < N_omegas; w++){
+    for(unsigned int w = 0; w < N_omegas; w++){
       freq_p =  frequencies(w);
       freq_n = -frequencies(w);
 
@@ -714,7 +714,7 @@ void conductivity_optical<U, DIM>::calculate(){
   //std::cout << "temp3 regular:" << temp3 << "\n";
 
   std::complex<U> freq;
-  for(int i = 0; i < N_omegas; i++){
+  for(unsigned int i = 0; i < N_omegas; i++){
     freq = std::complex<U>(frequencies(i), scat);  
     cond(i) += temp3;
     cond(i) /= freq;
@@ -726,7 +726,7 @@ void conductivity_optical<U, DIM>::calculate(){
   //Output to a file
   std::ofstream myfile;
   myfile.open(filename);
-  for(int i=0; i < N_omegas; i++){
+  for(unsigned int i=0; i < N_omegas; i++){
     freq = std::complex<U>(frequencies(i), scat);  
     myfile << frequencies.real()(i)*systemInfo.energy_scale << " " << cond.real()(i) << " " << cond.imag()(i) << "\n";
   }
@@ -735,7 +735,7 @@ void conductivity_optical<U, DIM>::calculate(){
 
 
 
-};
+}
 
 template class conductivity_optical<float, 1u>;
 template class conductivity_optical<float, 2u>;
