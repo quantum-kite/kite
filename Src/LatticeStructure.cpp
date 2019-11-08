@@ -77,7 +77,7 @@ LatticeStructure<D>::LatticeStructure(char *name )
       boundary[i][1] = (dist.coord[i] == nd[i] - 1 && Bd[i] == 0 ? false : true);	
     }
     
-};
+}
 
 template <unsigned D>
 unsigned LatticeStructure<D>::get_BorderSize() {
@@ -97,7 +97,7 @@ unsigned LatticeStructure<D>::get_BorderSize() {
     exit(1);
   }
   return size;
-};
+}
 
 
 template <unsigned D>
@@ -200,7 +200,7 @@ void  LatticeStructure<D>::convertCoordinates(Coordinates<T1, D + 1> & dest, Coo
     }
 
   
-};
+}
 
 template <unsigned D>
 unsigned LatticeStructure<D>::domain_number (long index) {

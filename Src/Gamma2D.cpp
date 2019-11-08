@@ -132,7 +132,7 @@ void Simulation<T,D>::Gamma2D(int NRandomV, int NDisorder, std::vector<int> N_mo
   gamma = gamma*factor;
             
   store_gamma(&gamma, N_moments, indices, name_dataset);
-};
+}
 
 
 

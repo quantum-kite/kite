@@ -384,7 +384,7 @@ void conductivity_dc<U, DIM>::calculate(){
   
   myfile.close();
 
-};
+}
 
 // Instantiations
 template class conductivity_dc<float, 1u>;

@@ -4,19 +4,19 @@ template <typename T, unsigned D>
 Coordinates<T,D>::Coordinates(T x, unsigned (&b)[D] ) : L(b) {
   buildBasis();
   set_coord(x);
-};
+}
   
 template <typename T, unsigned D>
 Coordinates<T,D>::Coordinates(T (&coord)[D], unsigned (&b)[D] ) : L(b) {
   buildBasis();
   set_index(coord);
-};
+}
   
 template <typename T, unsigned D>
 Coordinates<T,D>::Coordinates(unsigned (&b)[D] ) : L(b) {
   buildBasis();
   index = 0;
-};
+}
 
 template <typename T, unsigned D>
 void  Coordinates<T,D>::buildBasis() {
@@ -27,7 +27,7 @@ void  Coordinates<T,D>::buildBasis() {
       basis[i] = p;
       p *= T(L[i]);
     }
-};
+}
 
 template <typename T, unsigned D>
 void Coordinates<T,D>::print() {

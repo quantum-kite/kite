@@ -47,7 +47,7 @@ void Simulation<T,D>::store_ARPES(Eigen::Array<T, -1, -1> *gamma){
 }
 #pragma omp barrier    
     debug_message("Left store_lmu\n");
-  };
+  }
 
 template <typename T,unsigned D>
 void Simulation<T,D>::ARPES(int NDisorder, int NMoments, Eigen::Array<double, -1, -1> & k_vectors, Eigen::Matrix<T, -1, 1> & weight){

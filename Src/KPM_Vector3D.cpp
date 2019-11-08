@@ -125,7 +125,7 @@ KPM_Vector<T,3u>::KPM_Vector(int mem, Simulation<T,3u> & sim) :
 
     initiate_vector();
 
-  };
+  }
 
 
 template <typename T>
@@ -167,7 +167,7 @@ void KPM_Vector <T, 3u>::initiate_vector()
         v(vv.at(j), index ) = 0. ;
     }
   
-};
+}
 
 
 template <typename T>
@@ -322,7 +322,7 @@ void KPM_Vector <T, 3>::test_boundaries_system() {
 #pragma omp barrier
   exit(1);
   
-};
+}
 
 
 
@@ -375,7 +375,7 @@ void KPM_Vector <T, 3>::empty_ghosts(int mem_index) {
             v(x.set({i0,i1,i2,io}).index, mem_index) *= 0;
             v(x.set({i0,i1,r.Ld[2] - 1 - i2, io}).index, mem_index) *= 0;
           }
-};
+}
 
 
 template <typename T>
@@ -440,7 +440,7 @@ void KPM_Vector <T, 3>::measure_wave_packet(T * bra, T * ket, T * results)
     }
   // Periodic component of the Hamiltonian + Anderson disorder
   
-};
+}
 
 
 
@@ -464,17 +464,17 @@ void KPM_Vector <T, 3>::Multiply() {
   phiM2 = v.col((memory + index - 2) % memory ).data();
   KPM_MOTOR<MULT, false>(phi0, phiM1, phiM2, i);
 
-};
+}
 
 template <typename T>
 void KPM_Vector <T, 3>::Velocity(T * phi0,T * phiM1, unsigned axis) {
   KPM_MOTOR<0u, true>(phi0, phiM1, phiM1, axis);
-};
+}
 
 template <typename T>
 void KPM_Vector <T, 3>::Velocity(T * phi0,T * phiM1, int axis) {
   KPM_MOTOR<0u, true>(phi0, phiM1, phiM1, axis);
-};
+}
 
 
 
@@ -568,7 +568,7 @@ void KPM_Vector <T, 3>::Exchange_Boundaries() {
         }
     }
 
-}; 
+} 
 
 template <typename T>
 void inline KPM_Vector <T, 3>::mult_regular_hoppings(const  std::size_t & ind_i, const  std::size_t & io)
@@ -678,7 +678,7 @@ void KPM_Vector <T, 3>::build_regular_phases(int i2min, unsigned axis)
             }
         }
     }  
-};
+}
 
 
 
@@ -746,7 +746,7 @@ void KPM_Vector <T, 3>::KPM_MOTOR(T * phi0a, T * phiM1a, T *phiM2a, unsigned axi
   // These four lines pertrain only to the magnetic field
   Exchange_Boundaries();
   
-};
+}
 
 
 template <typename T>

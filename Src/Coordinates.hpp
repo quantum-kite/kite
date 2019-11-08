@@ -26,7 +26,7 @@ struct Coordinates {
         index += T(c[i]) * basis[i];
       }
     return *this;
-  };
+  }
 
   Coordinates<T,D> & set_coord(T x );
   Coordinates<T,D> & add( Coordinates<T,D> & x);
