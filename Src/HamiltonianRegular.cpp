@@ -34,7 +34,7 @@ Periodic_Operator<T,D>::Periodic_Operator (char * name, LatticeStructure<D> & rr
     Convert_Build(r);
   }
   debug_message("Left Periodic_Operator constructor.\n");
-};
+}
 
 template <typename T, unsigned D>
 void Periodic_Operator<T,D>::Convert_Build (  LatticeStructure <D> & r )
@@ -86,7 +86,7 @@ void Periodic_Operator<T,D>::Convert_Build (  LatticeStructure <D> & r )
         hopping(i,io) *= multEiphase(phase);    
       }
   debug_message("Left Convert_Build.\n");
-};
+}
 
 template <typename T, unsigned D>
 void Periodic_Operator<T,D>::build_velocity(std::vector<unsigned> & components, unsigned n)
@@ -122,7 +122,7 @@ void Periodic_Operator<T,D>::build_velocity(std::vector<unsigned> & components, 
             v1(ih,io) *= value_type(dr_R(components.at(i)));
         }
     }
-};
+}
 
 
 template struct Periodic_Operator<float, 1u>;

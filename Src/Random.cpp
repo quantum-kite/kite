@@ -5,7 +5,7 @@
 template <typename T>
 KPMRandom<T>::KPMRandom() {
   init_random();
-};
+}
 
 template <typename T>
 void KPMRandom<T>::init_random()
@@ -25,36 +25,36 @@ void KPMRandom<T>::init_random()
       // Found the seed
       rng.seed(atoi(env)); 
     }
-};
+}
 
 template <typename T>
 double  KPMRandom<T>::get() {
   return dist(rng);
-};
+}
 template <typename T>
 double KPMRandom<T>::uniform(double  mean, double  width) {
     // mean  : mean value
     // width : root mean square deviation
   return mean + sqrt(3.) * width * (2 * dist(rng)  - 1);
-};
+}
 template <typename T>
 double KPMRandom<T>::gaussian(double  mean, double  width) {
   // mean  : mean value
   // width : root mean square deviation
   return mean + width*gauss(rng);
-};
+}
 
 template <typename T>
 template <typename U>
 typename std::enable_if<is_tt<std::complex, U>::value, U>::type KPMRandom<T>::initA() {
   return exp(T(0., value_type(2*M_PI*dist(rng)) ));
-};
+}
 
 template <typename T>
 template <typename U>
 typename std::enable_if<!is_tt<std::complex, U>::value, U>::type KPMRandom<T>::initA() {
   return (2*dist(rng) - 1.)*sqrt(3);
-};
+}
 
 template <typename T>
 T KPMRandom<T>::init(){

@@ -8,7 +8,7 @@ template <typename T,unsigned D>
 Vacancy_Operator<T,D>::Vacancy_Operator(char * filename, LatticeStructure <D> & rr, KPMRandom <T> & rndB) : r(rr), rnd(rndB), name(filename), position(r.NStr)
 {
 
-};
+}
 
 template <typename T,unsigned D>
 void Vacancy_Operator<T,D>::generate_disorder()
@@ -55,7 +55,7 @@ void Vacancy_Operator<T,D>::generate_disorder()
   
   for(unsigned i = 0; i < r.NStr ; i++)
     std::sort (position.at(i).begin(), position.at(i).end());
-};
+}
 
 template <typename T,unsigned D>
 void Vacancy_Operator<T,D>::add_model(double p, std::vector <int> & orb, std::vector<int> & postmp)
@@ -80,7 +80,7 @@ void Vacancy_Operator<T,D>::add_model(double p, std::vector <int> & orb, std::ve
         }
     };
   positions_fixed.push_back(tmp);
-};
+}
 
 template <typename T,unsigned D>
 void Vacancy_Operator<T,D>::add_conflict_with_defect(std::size_t element, unsigned istride)

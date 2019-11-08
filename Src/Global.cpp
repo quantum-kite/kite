@@ -10,7 +10,7 @@
 #include "Global.hpp"
 
 template <typename T>
-GLOBAL_VARIABLES<T>::GLOBAL_VARIABLES() { };
+GLOBAL_VARIABLES<T>::GLOBAL_VARIABLES() { }
 
 template <typename T>
 void GLOBAL_VARIABLES<T>::addbond( std::size_t  ele1, std::ptrdiff_t ele2, T hop ) {

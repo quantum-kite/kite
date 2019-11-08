@@ -19,27 +19,27 @@ template<typename T, unsigned D>
 KPM_VectorBasis<T,D>::KPM_VectorBasis(int mem,  Simulation<T,D> & sim) : memory(mem), simul(sim) {
   index  = 0;
   v = Eigen::Matrix <T, Eigen::Dynamic,  Eigen::Dynamic >::Zero(simul.r.Sized, memory);
-};
+}
 
 template<typename T, unsigned D>
 void KPM_VectorBasis<T,D>::set_index(int i) {
   index = i;
-};
+}
 
 template<typename T, unsigned D>
 void KPM_VectorBasis<T,D>::inc_index() {
   index = (index + 1) % memory;
-};
+}
 
 template<typename T, unsigned D>
 unsigned KPM_VectorBasis<T,D>::get_index() {
   return index;
-};
+}
 
 template<typename T, unsigned D>
 bool KPM_VectorBasis<T,D>::aux_test(T & x, T & y ) {
   return (abs(x - y) > std::numeric_limits<double>::epsilon());
-};
+}
 
 
 // Instantiate KPM_VectorBasis

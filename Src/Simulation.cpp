@@ -19,7 +19,7 @@ Simulation<T,D>::Simulation(char *filename, GLOBAL_VARIABLES <T> & Global1): r(f
   // Initializes the Hamiltonian h, an instance of Lattice Structure r, 
   // and an instance of GLOBAL_VARIABLES Global1
   ghosts.resize(Global.ghosts.size()/r.n_threads);
-};
+}
 
 
 template <typename T,unsigned D>
@@ -37,7 +37,7 @@ void Simulation<T,D>::generalized_velocity(KPM_Vector<T,D>* kpm0, KPM_Vector<T,D
     kpm0->Velocity(kpm0data, kpm1data, pos); 											
     break;
   }
-};
+}
 
 
 template <typename T,unsigned D>
@@ -48,7 +48,7 @@ void Simulation<T,D>::cheb_iteration(KPM_Vector<T,D>* kpm, long int current_iter
   } else {
     kpm->template Multiply<1>(); 
   }
-};
+}
 
 
 
@@ -105,7 +105,7 @@ std::vector<std::vector<unsigned>> Simulation<T,D>::process_string(std::string i
 			
 			
   return indices;
-};
+}
 
 
 template <typename T,unsigned D>
@@ -132,7 +132,7 @@ double Simulation<T,D>::time_kpm(int N_average){
 #pragma omp barrier
   debug_message("Left time_kpm");
   return double(time_span.count())/N_average;
-};
+}
 
 
 template class Simulation<float ,1u>;

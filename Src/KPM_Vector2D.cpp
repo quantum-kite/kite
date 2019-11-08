@@ -94,7 +94,7 @@ KPM_Vector<T,2u>::KPM_Vector(int mem, Simulation<T,2> & sim) :
         block[d][b] = x.set_coord( int(r.thread_id) ).add(dist).index;
       }
   initiate_vector();
-};
+}
 
 template <typename T>
 KPM_Vector <T, 2>::~KPM_Vector(void){
@@ -130,7 +130,7 @@ void KPM_Vector <T, 2>::initiate_vector() {
         v(vv.at(j), index ) = 0. ;
     }
   
-};
+}
 
 template <typename T>
 T KPM_Vector <T, 2>::get_point()
@@ -414,11 +414,11 @@ void inline KPM_Vector <T, 2>::mult_regular_hoppings(const  std::size_t & j0, co
 template <typename T>
 void KPM_Vector <T, 2>::Velocity(T * phi0,T * phiM1, unsigned axis) {
   KPM_MOTOR<0u, true>(phi0, phiM1, phiM1, axis);
-};
+}
 template <typename T>
 void KPM_Vector <T, 2>::Velocity(T * phi0,T * phiM1, int axis) {
   KPM_MOTOR<0u, true>(phi0, phiM1, phiM1, axis);
-};
+}
 
 template <typename T>
 template <unsigned MULT, bool VELOCITY>
@@ -482,7 +482,7 @@ void KPM_Vector <T, 2>::KPM_MOTOR(T * phi0a, T * phiM1a, T *phiM2a, unsigned axi
 	  
   // These four lines pertrain only to the magnetic field
   Exchange_Boundaries();
-};
+}
 template <typename T>
 void KPM_Vector <T, 2>::measure_wave_packet(T * bra, T * ket, T * results)  
 {
@@ -528,7 +528,7 @@ void KPM_Vector <T, 2>::measure_wave_packet(T * bra, T * ket, T * results)
         }
     }
   // Periodic component of the Hamiltonian + Anderson disorder
-};
+}
 template <typename T>
 void KPM_Vector <T, 2>::Exchange_Boundaries() {
   /*
@@ -641,7 +641,7 @@ void KPM_Vector <T, 2>::test_boundaries_system() {
   std::cout << "Thread : " << r.thread_id << std::endl;
 #pragma omp barrier
   exit(1);
-};
+}
 template <typename T>
 void KPM_Vector <T, 2>::empty_ghosts(int mem_index) {
   /* This function takes the kpm vector that's being used, 'v' and sets to zero the part corresponding
@@ -676,7 +676,7 @@ void KPM_Vector <T, 2>::empty_ghosts(int mem_index) {
       for(int d = 0; d < NGHOSTS; d++)
         v(x.set({(long) (r.Ld[0] - 1 - d),i1,io}).index, mem_index) *= 0;
 
-};
+}
 
 
 // Structural disorder contribution - iterate over the disorder models
@@ -697,7 +697,7 @@ void KPM_Vector<T,2>::Multiply() {
   phiM1 = v.col((memory + index - 1) % memory ).data();
   phiM2 = v.col((memory + index - 2) % memory ).data();
   KPM_MOTOR<MULT, false>(phi0, phiM1, phiM2, i);
-};
+}
 
 
 

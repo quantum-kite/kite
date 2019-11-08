@@ -40,7 +40,7 @@ typename std::enable_if<!is_tt<std::complex, T>::value, void>::type write_hdf5(c
   }
   
   dataset.write(mu.data(), DataTypeFor<T>::value);
-};
+}
 
 
 template <typename T>
@@ -70,24 +70,24 @@ typename std::enable_if<is_tt<std::complex, T>::value, void>::type write_hdf5(co
     dataset = file->openDataSet( name);
   }  
   dataset.write(mu.data(), complex_datatype);
-};
+}
 
 
 
 template <typename T> 
 void instantiateHDF<T>:: get_hdf5A(T *l, H5::H5File *file,  std::string & name) {
   get_hdf5<T>(l, file, name);
-};
+}
 
 template <typename T> 
 void instantiateHDF<T>:: get_hdf5A(T * l, H5::H5File * file,  char *name) {
   get_hdf5<T>(l, file, name);
-};
+}
 
 template <typename T> 
 void instantiateHDF<T>:: write_hdf5A(const Eigen::Array<T, -1, -1 > & mu, H5::H5File * file, const std::string name) {
   write_hdf5<T>(mu, file, name);
-};
+}
 
 template struct instantiateHDF<int>;
 template struct instantiateHDF<unsigned>;
