@@ -49,7 +49,7 @@ class conductivity_optical{
     int N_energies; 
     bool default_NEnergies;
 
-    int N_omegas; 
+    unsigned int N_omegas;
     double minFreq; 
     double maxFreq; 
     bool default_Nfreqs;

@@ -3,6 +3,7 @@
 # Prerequisites
 *.d
 
+*.nfs*
 # Compiled Object files
 *.slo
 *.lo

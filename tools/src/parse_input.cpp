@@ -7,7 +7,6 @@
 
 #include <iostream>
 #include <Eigen/Dense>
-//#include <algorithm>
 #include <vector>
 #include <string>
 #include <complex>
@@ -16,6 +15,7 @@
 #include "myHDF5.hpp"
 #include "macros.hpp"
 #include "parse_input.hpp"
+#include "compiletime_info.h"
 
 
 void shell_input::printDC(){
@@ -24,7 +24,10 @@ void shell_input::printDC(){
     std::cout << "Printing parameters for the DC conductivity obtained from the shell:\n";
     if(CondDC_Temp != -1)           std::cout << "    temperature: "                << CondDC_Temp << "\n";
     if(CondDC_NumEnergies != -1)    std::cout << "    number of energy points: "    << CondDC_NumEnergies << "\n";
+    if(CondDC_NumMoments != -1)     std::cout << "    number of moments: "          << CondDC_NumMoments << "\n";
     if(CondDC_Scat != -8888)        std::cout << "    scattering parameter: "       << CondDC_Scat << "\n";
+    if(CondDC_deltaScat != -8888)   std::cout << "    delta scattering parameter: " << CondDC_deltaScat << "\n";
+    if(CondDC_integrate != -8888)   std::cout << "    default integration region? " << CondDC_integrate << "\n";
     if(CondDC_FermiMin != -8888)    std::cout << "    minimum Fermi energy: "       << CondDC_FermiMin << "\n";
     if(CondDC_FermiMax != -8888)    std::cout << "    maximum Fermi energy: "       << CondDC_FermiMax << "\n";
     if(CondDC_NumFermi != -1)       std::cout << "    number of Fermi energies: "   << CondDC_NumFermi << "\n";
@@ -84,10 +87,19 @@ void shell_input::printARPES(){
     std::cout << "\n";
 }
 
+void shell_input::printInfo(){
+
+  std::cout << "Information about the compilation process:\n"
+    "Host machine name: " << MACHINE_NAME << "\n"
+    "Host machine operating system: " << SYSTEM_NAME << "\n"
+    "Compilation date: " << TODAY << "\n";
+}
+
 void shell_input::printHelp(){
     std::cout << "KITE-Tools command-line configuration guide. Basic usage:\n\n";
     std::cout << ".KITE-tools h5_file.h5 [options]\n";
     std::cout << "--help -h    Prints this message\n\n";
+    std::cout << "--info -i    Prints information about the compilation process\n\n";
     std::cout << "When run without any more options, KITE-tools will simply read through the h5_file.h5 hdf5 file and find out what needs to be calculated. It will then proceed to calculate all the quantities present in that configuration file using the parameters in that same file, together with some defaults present in the source code. When given options, KITE-tools will still calculate all the quantities requested by the .h5 configuration file, but those parameters may be changed.\n\n";
     std::cout << "There are four main parameters which may be configured. Each of these has several subparameters associated with them. The main parameters are:\n\n";
     std::cout << "--DOS        Density of states\n";
@@ -109,8 +121,8 @@ void shell_input::printHelp(){
     std::cout << "           -T              Temperature\n";
     std::cout << "           -V              Wave vector of the incident wave\n";
     std::cout << "           -O              Frequency of the incident wave\n";
-    //std::cout << "           -M              Number of Chebyshev moments\n";
-    //std::cout << "           -K              Kernel to use (jackson/green). green requires broadening parameter. Example: -K green 0.01\n";
+    std::cout << "           -M              Number of Chebyshev moments\n";
+    std::cout << "           -K              Kernel to use (jackson/green). green requires broadening parameter. Example: -K green 0.01\n";
     std::cout << "           -X              Exclusive. Only calculate this quantity\n\n";
 
     std::cout << "--DOS      -E              Number of energy points\n";
@@ -121,9 +133,13 @@ void shell_input::printHelp(){
 
     std::cout << "--CondDC   -E              Number of energy points used in the integration\n";
     std::cout << "           -T              Temperature\n";
-    std::cout << "           -S              Broadening parameter of the Green's functions\n";
+    std::cout << "           -S              Broadening parameter of the Green's function\n";
+    std::cout << "           -d              Broadening parameter of the Dirac delta\n";
+    std::cout << "           -I              If 0, uses the DoS to estimate integration range\n";
     std::cout << "           -F min max num  Fermi energies. min and max may be ommited.\n";
     std::cout << "           -N              Name of the output file\n";
+    std::cout << "           -M              Number of Chebyshev moments to use in the calculation\n";
+    std::cout << "           -t              Number of threads\n";
     std::cout << "           -X              Exclusive. Only calculate this quantity\n\n";
 
     std::cout << "--CondOpt  -E              Number of energy points used in the integration\n";
@@ -170,7 +186,7 @@ void shell_input::printHelp(){
 
 
 
-shell_input::shell_input(){};
+shell_input::shell_input(){}
 
 shell_input::shell_input(int argc, char *argv[]){
 	// Processes the input that this program recieves from the command line	
@@ -188,6 +204,10 @@ shell_input::shell_input(int argc, char *argv[]){
         for(int j = 0; j < len; j++){
             if(arguments == "--help" or arguments == "-h"){
                 printHelp();
+                exit(0);
+            }
+            if(arguments == "--info" or arguments == "-i"){
+                printInfo();
                 exit(0);
             }
 
@@ -244,7 +264,7 @@ shell_input::shell_input(int argc, char *argv[]){
             }
     }
 
-};
+}
 
 int shell_input::get_num_exclusives(){
     int N_exclusives = 0;
@@ -255,7 +275,7 @@ int shell_input::get_num_exclusives(){
     if(lDOS_Exclusive)        N_exclusives++;
 
     return N_exclusives;
-};
+}
 
 void shell_input::parse_CondDC(int argc, char *argv[]){
     // This function looks at the command-line input pertaining to CondDC and
@@ -264,12 +284,16 @@ void shell_input::parse_CondDC(int argc, char *argv[]){
     
     CondDC_Temp = -1;
     CondDC_NumEnergies = -1;
+    CondDC_NumMoments = -1;
+    CondDC_integrate = -1;
     CondDC_FermiMin = -8888; // Some stupid values that I hope no-one will ever pick
     CondDC_FermiMax = -8888;
     CondDC_NumFermi = -1;
     CondDC_Scat = -8888;
+    CondDC_deltaScat = -8888;
     CondDC_Name = "";
     CondDC_Exclusive = false;
+    CondDC_nthreads = -1;
     // Process CondDC
     int j = 2;
     int pos = keys_pos.at(j);
@@ -284,6 +308,14 @@ void shell_input::parse_CondDC(int argc, char *argv[]){
                 CondDC_NumEnergies = atoi(n1.c_str());
             if(name == "-S")
                 CondDC_Scat = atof(n1.c_str());
+            if(name == "-d")
+                CondDC_deltaScat = atof(n1.c_str());
+            if(name == "-M")
+                CondDC_NumMoments = atoi(n1.c_str());
+            if(name == "-I")
+                CondDC_integrate = atoi(n1.c_str());
+            if(name == "-t")
+                CondDC_nthreads = atoi(n1.c_str());
             if(name == "-N")
                 CondDC_Name = n1;
             if(name == "-X" or n1 == "-X")
@@ -406,8 +438,10 @@ void shell_input::parse_CondOpt2(int argc, char* argv[]){
                 CondOpt2_NumEnergies = atoi(n1.c_str());
             if(name == "-R")
                 CondOpt2_ratio = atof(n1.c_str());
-            if(name == "-P")
-                CondOpt2_print_all = atoi(n1.c_str());
+            if(name == "-P" or n1 == "-P")
+                CondOpt2_print_all = 1;
+            //if(name == "-P")
+                //CondOpt2_print_all = atoi(n1.c_str());
             if(name == "-S")
                 CondOpt2_Scat = atof(n1.c_str());
             if(name == "-F")
@@ -477,7 +511,7 @@ void shell_input::parse_DOS(int argc, char* argv[]){
       exit(1);
     }
       
-};
+}
 
 
 void shell_input::parse_lDOS(int argc, char* argv[]){
@@ -487,6 +521,7 @@ void shell_input::parse_lDOS(int argc, char* argv[]){
     
     lDOS_Name = "";
     lDOS_Exclusive = false;
+    lDOS_NumMoments = -1;
     lDOS_kernel = "";
     lDOS_kernel_parameter = -8888.8;
     int pos = keys_pos.at(4);
@@ -541,6 +576,10 @@ void shell_input::parse_ARPES(int argc, char* argv[]){
     ARPES_Temp = -8888;
     ARPES_Fermi = -8888;
     ARPES_freq = -8888;
+    ARPES_NumMoments = -1;
+    ARPES_kernel = "";
+    ARPES_kernel_parameter = -8888.8;
+    ARPES_calculate_full_arpes = true;
     double v1, v2, v3;
 
     int j = 5;
@@ -557,8 +596,29 @@ void shell_input::parse_ARPES(int argc, char* argv[]){
                 ARPES_Fermi = atof(n1.c_str());
             if(name == "-N")
                 ARPES_Name = n1;
+
+            //only calculate the spectral function
+            if(name == "-S" or n1 == "-S")
+                ARPES_calculate_full_arpes = false;
+
             if(name == "-X" or n1 == "-X")
                 ARPES_Exclusive = true;
+            if(name == "-M")
+                ARPES_NumMoments = atoi(n1.c_str());
+            if(name == "-K"){
+                ARPES_kernel = n1;
+                if(n1 == "green"){
+                  std::string n2 = argv[k + pos + 2];
+                  ARPES_kernel_parameter = atof(n2.c_str());
+                }
+            }
+
+            if(DOS_kernel != "green" && DOS_kernel != "jackson" && DOS_kernel != ""){
+              std::cout << "Invalid kernel specified.\n";
+              std::cout << "Please use -K green or -K jackson for the density of states. Exiting.\n";
+              exit(1);
+            }
+
             if(name == "-E"){
                 // Find how many numbers are inside this parameter
                 int n_args = 0;
@@ -624,13 +684,3 @@ void shell_input::parse_ARPES(int argc, char* argv[]){
     }
     debug_message("Left parse_ARPES\n");
 }
-
-    //std::cout << "--ARPES    -N              Name of the output file\n";
-    //std::cout << "           -E min max num  Number of energy points\n";
-    //std::cout << "           -F              Fermi energy\n";
-    //std::cout << "           -T              Temperature\n";
-    //std::cout << "           -V              Wave vector of the incident wave\n";
-    //std::cout << "           -O              Frequency of the incident wave\n";
-    ////std::cout << "           -M              Number of Chebyshev moments\n";
-    ////std::cout << "           -K              Kernel to use (jackson/green). green requires broadening parameter. Example: -K green 0.01\n";
-    //std::cout << "           -X              Exclusive. Only calculate this quantity\n\n";

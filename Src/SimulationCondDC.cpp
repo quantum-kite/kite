@@ -45,6 +45,11 @@ void Simulation<T,D>::calc_conddc(){
 #pragma omp barrier
 
 if(local_calculate_conddc){
+#pragma omp master
+      {
+        std::cout << "Calculating CondDC.\n";
+      }
+#pragma omp barrier
 #pragma omp critical
 {
     H5::H5File * file = new H5::H5File(name, H5F_ACC_RDONLY);

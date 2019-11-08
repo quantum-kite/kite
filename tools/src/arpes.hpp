@@ -14,12 +14,15 @@ class arpes{
 
 
     // Flags that will be accessed from the other classes
-    bool isRequired;                        // was this quantity local density of states asked for?
-    bool isPossible;                        // do we have all we need to calculate the density of states?
+    bool isRequired;                        // was this quantity (ARPES) asked for?
+    bool isPossible;                        // do we have all we need to calculate ARPES?
     bool default_filename;
+
+    bool calculate_full_arpes;
 
     // Variables needed to compute the Local density of states
     int NumMoments;                                    // Number of Chebyshev moments
+    bool default_NumMoments;
     unsigned NumVectors;                                  // Number of lattice sites in which to compute the LDoS
 
     int NumEnergies;                                   // Number of energies
@@ -41,6 +44,11 @@ class arpes{
 
     double scale;
     double shift;
+
+    std::string kernel;
+    double kernel_parameter;
+    bool default_kernel;
+    bool default_kernel_parameter;
 
     std::string filename;                          // Saving results to file with this name
     Eigen::Matrix<double, -1, -1> arpes_k_vectors;     // Position of the lattice sites
