@@ -10,6 +10,7 @@ RUN apt-get -y install valgrind gdb strace
 RUN apt-get -y install libhdf5-dev libeigen3-dev
 
 RUN groupadd -g $GID -o $UNAME && useradd -m -u $UID -g $GID -o -s /bin/bash $UNAME
+RUN chown $UNAME /usr/local/bin
 
 USER $UNAME
 RUN mkdir /home/${UNAME}/kite
