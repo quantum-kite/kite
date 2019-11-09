@@ -102,11 +102,11 @@ class shell_input{
         void printlDOS();
         void printARPES();
 
-        void parse_CondDC(int argc, char *argv[]);
-        void parse_CondOpt(int argc, char *argv[]);
-        void parse_CondOpt2(int argc, char *argv[]);
-        void parse_DOS(int argc, char *argv[]);
-        void parse_lDOS(int argc, char *argv[]);
+        void parse_CondDC(char *argv[]);
+        void parse_CondOpt(char *argv[]);
+        void parse_CondOpt2(char *argv[]);
+        void parse_DOS(char *argv[]);
+        void parse_lDOS(char *argv[]);
         void parse_ARPES(int argc, char *argv[]);
         int get_num_exclusives();
 
