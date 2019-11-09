@@ -375,7 +375,7 @@ void conductivity_dc<U, DIM>::calculate2(){
 
   // save to a file
   save_to_file(condDC);
-};
+}
 
 
 // Instantiations
