@@ -189,7 +189,8 @@ void shell_input::printHelp(){
 shell_input::shell_input(){}
 
 shell_input::shell_input(int argc, char *argv[]){
-	// Processes the input that this program recieves from the command line	
+    // Processes the input that this program recieves from the command line
+
     if(argc < 2){
         std::cout << "No configuration file found. Exiting.\n";
         exit(1);
@@ -206,7 +207,7 @@ shell_input::shell_input(int argc, char *argv[]){
         std::string currentargument = std::string(argv[i]);
         if( i == 0 ) {
             //std::cout << "The name of the program is'" << currentargument << "', uncomment and change this line to use this fact." << std::endl;
-	    //Although you can leave this condition empty it has to be available or the program won't work if it's named "-h" (or similar)
+            //Although you can leave this condition empty it has to be available or the program won't work if it's named "-h" (or similar)
         } else if(currentargument == "--help" or currentargument == "-h") {
             printHelp();
             exit(0);
