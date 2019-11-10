@@ -193,33 +193,38 @@ shell_input::shell_input(int argc, char *argv[]){
 
     // First, find the position of each of the following functions:
     valid_keys = std::vector<std::string>{"--DOS", "--CondOpt","--CondDC", "--CondOpt2", "--LDOS", "--ARPES"};
-    len = valid_keys.size();   // length of valid_keys?
+    len = valid_keys.size();
     keys_pos = std::vector<int>(len, -1);
     keys_len = std::vector<int>(len, -1);
 
-    int m = 0;
-    for(int i = argc-1; i >= 0; i--){
-        m++;
-        std::string arguments = std::string(argv[i]);
-        for(int j = 0; j < len; j++){
-            if(arguments == "--help" or arguments == "-h"){
-                printHelp();
-                exit(0);
-            }
-            if(arguments == "--info" or arguments == "-i"){
-                printInfo();
-                exit(0);
-            }
-
-            if(arguments == valid_keys.at(j)){
-                keys_pos.at(j) = i;
-                keys_len.at(j) = m-1;
-                m = 0;
-                break;
-            }
+    std::vector<std::string>::iterator it;
+    int loc_last_found_key = -1;	//-1 means no keys found yet
+    for(int i = 0; i < argc; i++){
+        std::string currentargument = std::string(argv[i]);
+        if( i == 0 ) {
+            //std::cout << "The name of the program is'" << currentargument << "', uncomment and change this line to use this fact." << std::endl;
+	    //Although you can leave this condition empty it has to be available or the program won't work if it's named "-h" (or similar)
+        } else if(currentargument == "--help" or currentargument == "-h") {
+            printHelp();
+            exit(0);
+        } else if(currentargument == "--info" or currentargument == "-i") {
+            printInfo();
+            exit(0);
+        } else {
+            it = std::find(valid_keys.begin(), valid_keys.end(), currentargument);
+            if(it != std::end(valid_keys)) {
+               loc_last_found_key = std::distance(valid_keys.begin(), it);
+               keys_pos.at(loc_last_found_key) = i;
+               keys_len.at(loc_last_found_key) = 0;
+            } else if(loc_last_found_key != -1 ) {
+               keys_len.at(loc_last_found_key)++;
+            }/* else {
+               std::cout << "The arg '" << currentargument << "' doesn't belong to a key, uncomment and change this line to use this fact." << std::endl;
+            }*/
         }
     }
-
+    //if(loc_last_found_key == -1) std::cout << "No keys were found, uncomment and change this line to use this fact." << std::endl;
+    //if(argc == 1) std::cout << "No arguments were found, uncomment and change this line to use this fact." << std::endl;
 
     // Run the input through each of these functions to find the relevant 
     // parameters to each of them
