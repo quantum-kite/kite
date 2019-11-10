@@ -190,7 +190,10 @@ shell_input::shell_input(){}
 
 shell_input::shell_input(int argc, char *argv[]){
 	// Processes the input that this program recieves from the command line	
-
+    if(argc < 2){
+        std::cout << "No configuration file found. Exiting.\n";
+        exit(1);
+    }
     // First, find the position of each of the following functions:
     valid_keys = std::vector<std::string>{"--DOS", "--CondOpt","--CondDC", "--CondOpt2", "--LDOS", "--ARPES"};
     len = valid_keys.size();
@@ -224,7 +227,6 @@ shell_input::shell_input(int argc, char *argv[]){
         }
     }
     //if(loc_last_found_key == -1) std::cout << "No keys were found, uncomment and change this line to use this fact." << std::endl;
-    //if(argc == 1) std::cout << "No arguments were found, uncomment and change this line to use this fact." << std::endl;
 
     // Run the input through each of these functions to find the relevant 
     // parameters to each of them
