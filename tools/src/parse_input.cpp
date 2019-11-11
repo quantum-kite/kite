@@ -21,166 +21,181 @@
 void shell_input::printDC(){
 
     // DC Conductivity
-    std::cout << "Printing parameters for the DC conductivity obtained from the shell:\n";
-    if(CondDC_Temp != -1)           std::cout << "    temperature: "                << CondDC_Temp << "\n";
-    if(CondDC_NumEnergies != -1)    std::cout << "    number of energy points: "    << CondDC_NumEnergies << "\n";
-    if(CondDC_NumMoments != -1)     std::cout << "    number of moments: "          << CondDC_NumMoments << "\n";
-    if(CondDC_Scat != -8888)        std::cout << "    scattering parameter: "       << CondDC_Scat << "\n";
-    if(CondDC_deltaScat != -8888)   std::cout << "    delta scattering parameter: " << CondDC_deltaScat << "\n";
-    if(CondDC_integrate != -8888)   std::cout << "    default integration region? " << CondDC_integrate << "\n";
-    if(CondDC_FermiMin != -8888)    std::cout << "    minimum Fermi energy: "       << CondDC_FermiMin << "\n";
-    if(CondDC_FermiMax != -8888)    std::cout << "    maximum Fermi energy: "       << CondDC_FermiMax << "\n";
-    if(CondDC_NumFermi != -1)       std::cout << "    number of Fermi energies: "   << CondDC_NumFermi << "\n";
-    if(CondDC_Name != "")           std::cout << "    name of the output file: "    << CondDC_Name << "\n";
-    if(CondDC_Exclusive == true)    std::cout << "    Exclusive.\n";
-    std::cout << "\n";
+    std::cout << "Printing parameters for the DC conductivity obtained from the shell:" << std::endl;
+    if(CondDC_Temp != -1)           std::cout << "    temperature: "                << CondDC_Temp << "" << std::endl;
+    if(CondDC_NumEnergies != -1)    std::cout << "    number of energy points: "    << CondDC_NumEnergies << "" << std::endl;
+    if(CondDC_NumMoments != -1)     std::cout << "    number of moments: "          << CondDC_NumMoments << "" << std::endl;
+    if(CondDC_Scat != -8888)        std::cout << "    scattering parameter: "       << CondDC_Scat << "" << std::endl;
+    if(CondDC_deltaScat != -8888)   std::cout << "    delta scattering parameter: " << CondDC_deltaScat << "" << std::endl;
+    if(CondDC_integrate != -8888)   std::cout << "    default integration region? " << CondDC_integrate << "" << std::endl;
+    if(CondDC_FermiMin != -8888)    std::cout << "    minimum Fermi energy: "       << CondDC_FermiMin << "" << std::endl;
+    if(CondDC_FermiMax != -8888)    std::cout << "    maximum Fermi energy: "       << CondDC_FermiMax << "" << std::endl;
+    if(CondDC_NumFermi != -1)       std::cout << "    number of Fermi energies: "   << CondDC_NumFermi << "" << std::endl;
+    if(CondDC_Name != "")           std::cout << "    name of the output file: "    << CondDC_Name << "" << std::endl;
+    if(CondDC_Exclusive == true)    std::cout << "    Exclusive." << std::endl;
+    std::cout << "" << std::endl;
 } 
 void shell_input::printOpt(){
-    std::cout << "Printing parameters for the Optical Conductivity obtained from the shell:\n";
-    if(CondOpt_Temp != -8888)       std::cout << "    temperature: "                << CondOpt_Temp << "\n";
-    if(CondOpt_NumEnergies != -1)   std::cout << "    number of energy points: "    << CondOpt_NumEnergies << "\n";
-    if(CondOpt_Scat != -8888)       std::cout << "    scattering parameter: "       << CondOpt_Scat << "\n";
-    if(CondOpt_FreqMin != -8888)    std::cout << "    minimum frequency: "          << CondOpt_FreqMin << "\n";
-    if(CondOpt_FreqMax != -8888)    std::cout << "    maximum frequency: "          << CondOpt_FreqMax << "\n";
-    if(CondOpt_NumFreq != -1)       std::cout << "    number of frequencies: "      << CondOpt_NumFreq << "\n";
-    if(CondOpt_Fermi != -8888)      std::cout << "    number of Fermi energies: "   << CondOpt_Fermi << "\n";
-    if(CondOpt_Name != "")          std::cout << "    name of the output file: "    << CondOpt_Name << "\n";
-    if(CondOpt_Exclusive == true)   std::cout << "    Exclusive.\n";
-    std::cout << "\n";
+    std::cout << "Printing parameters for the Optical Conductivity obtained from the shell:" << std::endl;
+    if(CondOpt_Temp != -8888)       std::cout << "    temperature: "                << CondOpt_Temp << "" << std::endl;
+    if(CondOpt_NumEnergies != -1)   std::cout << "    number of energy points: "    << CondOpt_NumEnergies << "" << std::endl;
+    if(CondOpt_Scat != -8888)       std::cout << "    scattering parameter: "       << CondOpt_Scat << "" << std::endl;
+    if(CondOpt_FreqMin != -8888)    std::cout << "    minimum frequency: "          << CondOpt_FreqMin << "" << std::endl;
+    if(CondOpt_FreqMax != -8888)    std::cout << "    maximum frequency: "          << CondOpt_FreqMax << "" << std::endl;
+    if(CondOpt_NumFreq != -1)       std::cout << "    number of frequencies: "      << CondOpt_NumFreq << "" << std::endl;
+    if(CondOpt_Fermi != -8888)      std::cout << "    number of Fermi energies: "   << CondOpt_Fermi << "" << std::endl;
+    if(CondOpt_Name != "")          std::cout << "    name of the output file: "    << CondOpt_Name << "" << std::endl;
+    if(CondOpt_Exclusive == true)   std::cout << "    Exclusive." << std::endl;
+    std::cout << "" << std::endl;
 }
 
 void shell_input::printOpt2(){
-    std::cout << "Printing parameters for the Second-Order Optical conductivity obtained from the shell:\n";
-    if(CondOpt2_Temp != -8888)      std::cout << "    temperature: "                << CondOpt2_Temp << "\n";
-    if(CondOpt2_NumEnergies != -1)  std::cout << "    number of energy points: "    << CondOpt2_NumEnergies << "\n";
-    if(CondOpt2_ratio != -8.8888)   std::cout << "    ratio of frequencies: "       << CondOpt2_ratio << "\n";
-    if(CondOpt2_print_all != -2)    std::cout << "    Print all: "                  << CondOpt2_print_all << "\n";
-    if(CondOpt2_Scat != -8888)      std::cout << "    scattering parameter: "       << CondOpt2_Scat << "\n";
-    if(CondOpt2_FreqMin != -8888)   std::cout << "    minimum frequency: "          << CondOpt2_FreqMin << "\n";
-    if(CondOpt2_FreqMax != -8888)   std::cout << "    maximum frequency: "          << CondOpt2_FreqMax << "\n";
-    if(CondOpt2_NumFreq != -1)      std::cout << "    number of frequencies: "      << CondOpt2_NumFreq << "\n";
-    if(CondOpt2_Fermi != -8888)     std::cout << "    number of Fermi energies: "   << CondOpt2_Fermi << "\n";
-    if(CondOpt2_Name != "")         std::cout << "    name of the output file: "    << CondOpt2_Name << "\n";
-    if(CondOpt2_Exclusive == true)  std::cout << "    Exclusive.\n";
-    std::cout << "\n";
+    std::cout << "Printing parameters for the Second-Order Optical conductivity obtained from the shell:" << std::endl;
+    if(CondOpt2_Temp != -8888)      std::cout << "    temperature: "                << CondOpt2_Temp << "" << std::endl;
+    if(CondOpt2_NumEnergies != -1)  std::cout << "    number of energy points: "    << CondOpt2_NumEnergies << "" << std::endl;
+    if(CondOpt2_ratio != -8.8888)   std::cout << "    ratio of frequencies: "       << CondOpt2_ratio << "" << std::endl;
+    if(CondOpt2_print_all != -2)    std::cout << "    Print all: "                  << CondOpt2_print_all << "" << std::endl;
+    if(CondOpt2_Scat != -8888)      std::cout << "    scattering parameter: "       << CondOpt2_Scat << "" << std::endl;
+    if(CondOpt2_FreqMin != -8888)   std::cout << "    minimum frequency: "          << CondOpt2_FreqMin << "" << std::endl;
+    if(CondOpt2_FreqMax != -8888)   std::cout << "    maximum frequency: "          << CondOpt2_FreqMax << "" << std::endl;
+    if(CondOpt2_NumFreq != -1)      std::cout << "    number of frequencies: "      << CondOpt2_NumFreq << "" << std::endl;
+    if(CondOpt2_Fermi != -8888)     std::cout << "    number of Fermi energies: "   << CondOpt2_Fermi << "" << std::endl;
+    if(CondOpt2_Name != "")         std::cout << "    name of the output file: "    << CondOpt2_Name << "" << std::endl;
+    if(CondOpt2_Exclusive == true)  std::cout << "    Exclusive." << std::endl;
+    std::cout << "" << std::endl;
 }
 
 void shell_input::printDOS(){
-    std::cout << "Printing parameters for the Density of States obtained from the shell:\n";
-    if(DOS_NumEnergies != -1 )      std::cout << "    number of energy points: "    << DOS_NumEnergies << "\n";
-    if(DOS_Name != "")              std::cout << "    name of the output file: "    << DOS_Name << "\n";
-    if(DOS_Exclusive == true)       std::cout << "    Exclusive.\n";
-    std::cout << "\n";
+    std::cout << "Printing parameters for the Density of States obtained from the shell:" << std::endl;
+    if(DOS_NumEnergies != -1 )      std::cout << "    number of energy points: "    << DOS_NumEnergies << "" << std::endl;
+    if(DOS_Name != "")              std::cout << "    name of the output file: "    << DOS_Name << "" << std::endl;
+    if(DOS_Exclusive == true)       std::cout << "    Exclusive." << std::endl;
+    std::cout << "" << std::endl;
 }
 
 void shell_input::printlDOS(){
-    std::cout << "Printing parameters for the Local Density of States obtained from the shell:\n";
-    if(lDOS_Name != "")              std::cout << "    name of the output file: "    << lDOS_Name << "\n";
-    if(lDOS_Exclusive == true)       std::cout << "    Exclusive.\n";
-    std::cout << "\n";
+    std::cout << "Printing parameters for the Local Density of States obtained from the shell:" << std::endl;
+    if(lDOS_Name != "")              std::cout << "    name of the output file: "    << lDOS_Name << "" << std::endl;
+    if(lDOS_Exclusive == true)       std::cout << "    Exclusive." << std::endl;
+    std::cout << "" << std::endl;
 }
 
 void shell_input::printARPES(){
-    std::cout << "Printing parameters for ARPES obtained from the shell:\n";
-    if(ARPES_Name != "")              std::cout << "    name of the output file: "    << ARPES_Name << "\n";
-    if(ARPES_Exclusive == true)       std::cout << "    Exclusive.\n";
-    std::cout << "\n";
+    std::cout << "Printing parameters for ARPES obtained from the shell:" << std::endl;
+    if(ARPES_Name != "")              std::cout << "    name of the output file: "    << ARPES_Name << "" << std::endl;
+    if(ARPES_Exclusive == true)       std::cout << "    Exclusive." << std::endl;
+    std::cout << "" << std::endl;
 }
 
 void shell_input::printInfo(){
 
-  std::cout << "Information about the compilation process:\n"
-    "Host machine name: " << MACHINE_NAME << "\n"
-    "Host machine operating system: " << SYSTEM_NAME << "\n"
-    "Compilation date: " << TODAY << "\n";
+  std::cout << "Information about the compilation process:" << std::endl
+    "Host machine name: " << MACHINE_NAME << "" << std::endl
+    "Host machine operating system: " << SYSTEM_NAME << "" << std::endl
+    "Compilation date: " << TODAY << "" << std::endl;
 }
 
 void shell_input::printHelp(){
-    std::cout << "KITE-Tools command-line configuration guide. Basic usage:\n\n";
-    std::cout << ".KITE-tools h5_file.h5 [options]\n";
-    std::cout << "--help -h    Prints this message\n\n";
-    std::cout << "--info -i    Prints information about the compilation process\n\n";
-    std::cout << "When run without any more options, KITE-tools will simply read through the h5_file.h5 hdf5 file and find out what needs to be calculated. It will then proceed to calculate all the quantities present in that configuration file using the parameters in that same file, together with some defaults present in the source code. When given options, KITE-tools will still calculate all the quantities requested by the .h5 configuration file, but those parameters may be changed.\n\n";
-    std::cout << "There are four main parameters which may be configured. Each of these has several subparameters associated with them. The main parameters are:\n\n";
-    std::cout << "--DOS        Density of states\n";
-    std::cout << "--LDOS       Local density of states\n";
-    std::cout << "--CondDC     DC conductivity\n";
-    std::cout << "--CondOpt    Optical conductivity\n";
-    std::cout << "--CondOpt2   Second-order optical conductivity (photoconductivity)\n\n";
+    std::cout << R"ENDSTRING(
+KITE-Tools command-line configuration guide. Basic usage:
 
-    std::cout << "After each of these keywords, the program will be expecting the subparameters associated with that word (always separated by spaces):\n\n";
+KITE-Tools command-line configuration guide. Basic usage:
 
-    std::cout << "--LDOS     -N              Name of the output file\n";
-    std::cout << "           -M              Number of Chebyshev moments\n";
-    std::cout << "           -K              Kernel to use (jackson/green). green requires broadening parameter. Example: -K green 0.01\n";
-    std::cout << "           -X              Exclusive. Only calculate this quantity\n\n";
+.KITE-tools h5_file.h5 [options]
+--help -h    Prints this message
 
-    std::cout << "--ARPES    -N              Name of the output file\n";
-    std::cout << "           -E min max num  Number of energy points\n";
-    std::cout << "           -F              Fermi energy\n";
-    std::cout << "           -T              Temperature\n";
-    std::cout << "           -V              Wave vector of the incident wave\n";
-    std::cout << "           -O              Frequency of the incident wave\n";
-    std::cout << "           -M              Number of Chebyshev moments\n";
-    std::cout << "           -K              Kernel to use (jackson/green). green requires broadening parameter. Example: -K green 0.01\n";
-    std::cout << "           -X              Exclusive. Only calculate this quantity\n\n";
+--info -i    Prints information about the compilation process
 
-    std::cout << "--DOS      -E              Number of energy points\n";
-    std::cout << "           -N              Name of the output file\n";
-    std::cout << "           -M              Number of Chebyshev moments\n";
-    std::cout << "           -K              Kernel to use (jackson/green). green requires broadening parameter. Example: -K green 0.01\n";
-    std::cout << "           -X              Exclusive. Only calculate this quantity\n\n";
+When run without any more options, KITE-tools will simply read through the h5_file.h5 hdf5 file and find out what needs to be calculated. It will then proceed to calculate all the quantities present in that configuration file using the parameters in that same file, together with some defaults present in the source code. When given options, KITE-tools will still calculate all the quantities requested by the .h5 configuration file, but those parameters may be changed.
 
-    std::cout << "--CondDC   -E              Number of energy points used in the integration\n";
-    std::cout << "           -T              Temperature\n";
-    std::cout << "           -S              Broadening parameter of the Green's function\n";
-    std::cout << "           -d              Broadening parameter of the Dirac delta\n";
-    std::cout << "           -I              If 0, uses the DoS to estimate integration range\n";
-    std::cout << "           -F min max num  Fermi energies. min and max may be ommited.\n";
-    std::cout << "           -N              Name of the output file\n";
-    std::cout << "           -M              Number of Chebyshev moments to use in the calculation\n";
-    std::cout << "           -t              Number of threads\n";
-    std::cout << "           -X              Exclusive. Only calculate this quantity\n\n";
+There are four main parameters which may be configured. Each of these has several subparameters associated with them. The main parameters are:
 
-    std::cout << "--CondOpt  -E              Number of energy points used in the integration\n";
-    std::cout << "           -T              Temperature\n";
-    std::cout << "           -S              Broadening parameter of the Green's functions\n";
-    std::cout << "           -O min max num  Frequencies\n";
-    std::cout << "           -F              Fermi energy\n";
-    std::cout << "           -N              Name of the output file\n";
-    std::cout << "           -M              Number of Chebyshev moments\n";
-    std::cout << "           -C num_d num_g  Output CondOpt at num_d moments of the Dirac delta and num_g moments of the Green's function.\n";
-    std::cout << "           -X              Exclusive. Only calculate this quantity\n\n";
+--DOS        Density of states
+--LDOS       Local density of states
+--CondDC     DC conductivity
+--CondOpt    Optical conductivity
+--CondOpt2   Second-order optical conductivity (photoconductivity)
 
-    std::cout << "--CondOpt2 -E              Number of energy points used in the integration\n";
-    std::cout << "           -R              Ratio of the second frequency relative to the first: w2 = R*w1\n";
-    std::cout << "           -P              if set to 1: writes all the terms to separate files\n";
-    std::cout << "           -T              Temperature\n";
-    std::cout << "           -S              Broadening parameter of the Green's functions\n";
-    std::cout << "           -O min max num  Frequencies\n";
-    std::cout << "           -F              Fermi energy\n";
-    std::cout << "           -N              Name of the output file\n";
-    std::cout << "           -X              Exclusive. Only calculate this quantity\n\n";
+After each of these keywords, the program will be expecting the subparameters associated with that word (always separated by spaces):
 
-    std::cout << "All the quantities are in the same units as the ones in the python configuration script. All quantities are double-precision numbers except for the ones representing integers, such as the numbers of points.\n\n";
+--LDOS     -N              Name of the output file
+           -M              Number of Chebyshev moments
+           -K              Kernel to use (jackson/green). green requires broadening parameter. Example: -K green 0.01
+           -X              Exclusive. Only calculate this quantity
 
-    std::cout << "Examples:\n\n";
-    std::cout << "Example 1\n";
-    std::cout << "    ./KITE-tools h5_file.h5 --DOS -E 1024\n";
-    std::cout << "    Processes the .h5 file as usual but ignores the number of energy points in the density of states present there. Instead, KITE-tools will use the value 1024 as soecified in the example.\n\n";
-    std::cout << "Example 2\n";
-    std::cout << "    ./KITE-tools h5_file.h5 --CondDC -E 552 -S 0.01\n";
-    std::cout << "    Processes the .h5 file but uses 552 points for the energy integration and a broadening parameter of 0.01.\n\n";
-    std::cout << "Example 3\n";
-    std::cout << "    ./KITE-tools h5_file.h5 --CondDC -T 0.4 -F 500\n";
-    std::cout << "    Calculates the DC conductivity using a temperature of 0.4 and 500 equidistant Fermi energies spanning the spectrum of the Hamiltonian.\n\n";
-    std::cout << "Example 4\n";
-    std::cout << "    ./KITE-tools h5_file.h --CondDC -F -1.2 2.5 30 --CondOpt -T 93\n";
-    std::cout << "    Calculates the DC conductivity using 30 equidistant Fermi energies in the range [-1.2, 2.5] and the optical conductivity using a temperature of 93.\n";
-    std::cout << "\n";
-    std::cout << "Copyright (C) 2018, M. Andelkovic, L. Covaci, A. Ferreira, S. M. Joao, J. V. Lopes, T. G. Rappoport\n\n";
-    std::cout << "This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.\n\n";
-    std::cout << "This program is distributed in the hope that it will be useful but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.\n";
+--ARPES    -N              Name of the output file
+           -E min max num  Number of energy points
+           -F              Fermi energy
+           -T              Temperature
+           -V              Wave vector of the incident wave
+           -O              Frequency of the incident wave
+           -M              Number of Chebyshev moments
+           -K              Kernel to use (jackson/green). green requires broadening parameter. Example: -K green 0.01
+           -X              Exclusive. Only calculate this quantity
+
+--DOS      -E              Number of energy points
+           -N              Name of the output file
+           -M              Number of Chebyshev moments
+           -K              Kernel to use (jackson/green). green requires broadening parameter. Example: -K green 0.01
+           -X              Exclusive. Only calculate this quantity
+
+--CondDC   -E              Number of energy points used in the integration
+           -T              Temperature
+           -S              Broadening parameter of the Green's function
+           -d              Broadening parameter of the Dirac delta
+           -I              If 0, uses the DoS to estimate integration range
+           -F min max num  Fermi energies. min and max may be ommited.
+           -N              Name of the output file
+           -M              Number of Chebyshev moments to use in the calculation
+           -t              Number of threads
+           -X              Exclusive. Only calculate this quantity
+
+--CondOpt  -E              Number of energy points used in the integration
+           -T              Temperature
+           -S              Broadening parameter of the Green's functions
+           -O min max num  Frequencies
+           -F              Fermi energy
+           -N              Name of the output file
+           -M              Number of Chebyshev moments
+           -C num_d num_g  Output CondOpt at num_d moments of the Dirac delta and num_g moments of the Green's function.
+           -X              Exclusive. Only calculate this quantity
+
+--CondOpt2 -E              Number of energy points used in the integration
+           -R              Ratio of the second frequency relative to the first: w2 = R*w1
+           -P              if set to 1: writes all the terms to separate files
+           -T              Temperature
+           -S              Broadening parameter of the Green's functions
+           -O min max num  Frequencies
+           -F              Fermi energy
+           -N              Name of the output file
+           -X              Exclusive. Only calculate this quantity
+
+All the quantities are in the same units as the ones in the python configuration script. All quantities are double-precision numbers except for the ones representing integers, such as the numbers of points.
+
+Examples:
+
+Example 1
+    ./KITE-tools h5_file.h5 --DOS -E 1024
+    Processes the .h5 file as usual but ignores the number of energy points in the density of states present there. Instead, KITE-tools will use the value 1024 as soecified in the example.
+
+Example 2
+    ./KITE-tools h5_file.h5 --CondDC -E 552 -S 0.01
+    Processes the .h5 file but uses 552 points for the energy integration and a broadening parameter of 0.01.
+
+Example 3
+    ./KITE-tools h5_file.h5 --CondDC -T 0.4 -F 500
+    Calculates the DC conductivity using a temperature of 0.4 and 500 equidistant Fermi energies spanning the spectrum of the Hamiltonian.
+
+Example 4
+    ./KITE-tools h5_file.h --CondDC -F -1.2 2.5 30 --CondOpt -T 93
+    Calculates the DC conductivity using 30 equidistant Fermi energies in the range [-1.2, 2.5] and the optical conductivity using a temperature of 93.
+
+Copyright (C) 2018, M. Andelkovic, L. Covaci, A. Ferreira, S. M. Joao, J. V. Lopes, T. G. Rappoport
+
+This program is free software:
+You can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+This program is distributed in the hope that it will be useful but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+)ENDSTRING";
     }
 
 
@@ -192,7 +207,7 @@ shell_input::shell_input(int argc, char *argv[]){
     // Processes the input that this program recieves from the command line
 
     if(argc < 2){
-        std::cout << "No configuration file found. Exiting.\n";
+        std::cout << "No configuration file found. Exiting." << std::endl;
         exit(1);
     }
     // First, find the position of each of the following functions:
@@ -251,7 +266,7 @@ shell_input::shell_input(int argc, char *argv[]){
 
     int num_exclusives = get_num_exclusives();
     if(num_exclusives > 1){
-        std::cout << "There can be only one exclusive function. Exiting.\n";
+        std::cout << "There can be only one exclusive function. Exiting." << std::endl;
         exit(1);
     } else {
         if(num_exclusives == 1){
@@ -514,8 +529,8 @@ void shell_input::parse_DOS(char* argv[]){
     }
 
     if(DOS_kernel != "green" && DOS_kernel != "jackson" && DOS_kernel != ""){
-      std::cout << "Invalid kernel specified.\n";
-      std::cout << "Please use -K green or -K jackson for the density of states. Exiting.\n";
+      std::cout << "Invalid kernel specified." << std::endl;
+      std::cout << "Please use -K green or -K jackson for the density of states. Exiting." << std::endl;
       exit(1);
     }
       
@@ -559,8 +574,8 @@ void shell_input::parse_lDOS(char* argv[]){
     }
 
     if(lDOS_kernel != "green" && lDOS_kernel != "jackson" && lDOS_kernel != ""){
-      std::cout << "lDOS: Invalid kernel specified.\n";
-      std::cout << "Please use -K green or -K jackson for the local density of states. Exiting.\n";
+      std::cout << "lDOS: Invalid kernel specified." << std::endl;
+      std::cout << "Please use -K green or -K jackson for the local density of states. Exiting." << std::endl;
       exit(1);
     }
 }
@@ -622,8 +637,8 @@ void shell_input::parse_ARPES(int argc, char* argv[]){
             }
 
             if(DOS_kernel != "green" && DOS_kernel != "jackson" && DOS_kernel != ""){
-              std::cout << "Invalid kernel specified.\n";
-              std::cout << "Please use -K green or -K jackson for the density of states. Exiting.\n";
+              std::cout << "Invalid kernel specified." << std::endl;
+              std::cout << "Please use -K green or -K jackson for the density of states. Exiting." << std::endl;
               exit(1);
             }
 
@@ -641,7 +656,7 @@ void shell_input::parse_ARPES(int argc, char* argv[]){
                     " functionality. The parameters should be Emin, Emax, NumEnergies, where"
                     " Emin is the minimum energy at which to evaluate the spectral function,"
                     " Emax is the maximum and NumEnergies in the number of energy points."
-                    " Exiting.\n";
+                    " Exiting." << std::endl;
                   exit(1);
                 }
 
@@ -681,11 +696,11 @@ void shell_input::parse_ARPES(int argc, char* argv[]){
               }
               if(n_args != 1 and n_args != 2 and n_args != 3){
                 std::cout << "The number of arguments inside -V for the --ARPES functionality has to be"
-                  "either 1, 2 or 3. Please put a reasonable number of arguments. Exiting\n";
+                  "either 1, 2 or 3. Please put a reasonable number of arguments. Exiting" << std::endl;
                 exit(1);
               }
 
-              //std::cout << ARPES_vec << "\n";
+              //std::cout << ARPES_vec << "" << std::endl;
 
             }
         }
