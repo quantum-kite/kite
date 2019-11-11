@@ -90,9 +90,9 @@ void shell_input::printARPES(){
 void shell_input::printInfo(){
 
   std::cout << "Information about the compilation process:" << std::endl
-    "Host machine name: " << MACHINE_NAME << "" << std::endl
-    "Host machine operating system: " << SYSTEM_NAME << "" << std::endl
-    "Compilation date: " << TODAY << "" << std::endl;
+            << "Host machine name: " << MACHINE_NAME << "" << std::endl
+            << "Host machine operating system: " << SYSTEM_NAME << "" << std::endl
+            << "Compilation date: " << TODAY << "" << std::endl;
 }
 
 void shell_input::printHelp(){
