@@ -155,7 +155,6 @@ conductivity_nonlinear<T, DIM>::conductivity_nonlinear(system_info<T, DIM>& info
     // KPM parameters
     NumPoints = -1;
     special = 0;
-    dirString; 
 
   std::string name = info.filename;                           // name of the hdf5 file
   file = H5::H5File(name.c_str(), H5F_ACC_RDONLY);
@@ -347,11 +346,22 @@ void conductivity_nonlinear<U, DIM>::calculate_photo(){
   }
 
   U freq;
-  U w1, w2;
+/*
+ * Although frequencies2() was used to set w1 and w2 these values are never being used again.
+ * So i removed w1 and w2 from the code. To make sure that the program works exactly the same
+ * I still run the frequencies2() functions. This is needed because this function might do some
+ * things that influence other data, generate output, ...
+ *
+ * I assume that not using w1 and w2 was an oversight. If this is true I suggest uncommenting the
+ * code again and actually using it.
+ *
+ * -- Nikolas Garofil
+ */
+  //U w1, w2;
   for(int w = 0; w < N_omegas; w++){
     freq = frequencies(w);  
-    w1 = frequencies2(w,0);
-    w2 = frequencies2(w,1);
+    /*w1 =*/ frequencies2(w,0);
+    /*w2 =*/ frequencies2(w,1);
 
     // Energy integration
     cond0(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies0.col(w)));

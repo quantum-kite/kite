@@ -223,12 +223,12 @@ shell_input::shell_input(int argc, char *argv[]){
 
     // Run the input through each of these functions to find the relevant 
     // parameters to each of them
-    parse_CondDC(argc, argv);
-    parse_DOS(argc, argv);
-    parse_lDOS(argc, argv);
+    parse_CondDC(argv);
+    parse_DOS(argv);
+    parse_lDOS(argv);
     parse_ARPES(argc, argv);
-    parse_CondOpt(argc, argv);
-    parse_CondOpt2(argc, argv);
+    parse_CondOpt(argv);
+    parse_CondOpt2(argv);
 
     // Process the exclusive flag. If there are no exclusive functions, 
     // all will be calculated. If there's only one, that's the only one
@@ -277,7 +277,7 @@ int shell_input::get_num_exclusives(){
     return N_exclusives;
 }
 
-void shell_input::parse_CondDC(int argc, char *argv[]){
+void shell_input::parse_CondDC(char *argv[]){
     // This function looks at the command-line input pertaining to CondDC and
     // finds the parameters for the temperature "T", number of energy points "E", 
     // scattering parameter "S" and Fermi energy min, max and num "F"
@@ -345,7 +345,7 @@ void shell_input::parse_CondDC(int argc, char *argv[]){
     }
 }
 
-void shell_input::parse_CondOpt(int argc, char* argv[]){
+void shell_input::parse_CondOpt(char* argv[]){
     // This function looks at the command-line input pertaining to CondOpt and
     // finds the parameters for the temperature "t", number of energy points "E", 
     // scattering parameter "S", Fermi energy "F" and min_freq, max_freq, num_freqs "O"
@@ -407,7 +407,7 @@ void shell_input::parse_CondOpt(int argc, char* argv[]){
     }
 }
 
-void shell_input::parse_CondOpt2(int argc, char* argv[]){
+void shell_input::parse_CondOpt2(char* argv[]){
     // This function looks at the command-line input pertaining to CondOpt2 and
     // finds the parameters for the temperature "t", number of energy points "E", 
     // scattering parameter "S", Fermi energy "F" and min_freq, max_freq, num_freqs "O"
@@ -466,7 +466,7 @@ void shell_input::parse_CondOpt2(int argc, char* argv[]){
     }
 }
 
-void shell_input::parse_DOS(int argc, char* argv[]){
+void shell_input::parse_DOS(char* argv[]){
     // This function looks at the command-line input pertaining to CondDC and
     // finds the parameters for the temperature "t", number of energy points "E", 
     // scattering parameter "S" and Fermi energy min, max and num "F"
@@ -514,7 +514,7 @@ void shell_input::parse_DOS(int argc, char* argv[]){
 }
 
 
-void shell_input::parse_lDOS(int argc, char* argv[]){
+void shell_input::parse_lDOS(char* argv[]){
     // This function looks at the command-line input pertaining to CondDC and
     // finds the parameters for the temperature "t", number of energy points "E", 
     // scattering parameter "S" and Fermi energy min, max and num "F"

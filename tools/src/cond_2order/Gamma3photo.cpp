@@ -154,7 +154,6 @@ Eigen::Matrix<std::complex<U>, -1, -1> conductivity_nonlinear<U, DIM>::Gamma3Con
   // number of threads, thread number and number of moments alocated
   // to each thread. These have to be computed inside a threaded block
   int N_threads;
-  int thread_num;
   int local_NumMoments;
 
   // Functions that are going to be used by the contractor
