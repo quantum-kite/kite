@@ -37,7 +37,7 @@ Eigen::Matrix<std::complex<U>, -1, -1> conductivity_nonlinear<U, DIM>::Gamma2con
   int thread_num;
   int local_NumMoments;
   omp_set_num_threads(systemInfo.NumThreads);
-#pragma omp parallel shared(N_threads, cond) firstprivate(thread_num, DeltaMatrix)
+#pragma omp parallel shared(N_threads, cond) firstprivate(DeltaMatrix) private(thread_num)
 {
 #pragma omp master
 {

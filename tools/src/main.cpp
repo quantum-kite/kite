@@ -21,10 +21,6 @@
 #include "compiletime_info.h"
 
 int main(int argc, char *argv[]){
-  if(argc < 2){
-    std::cout << "No configuration file found. Exiting.\n";
-    exit(1);
-  }
   shell_input variables(argc, argv);
   print_header_message();
   print_info_message();
