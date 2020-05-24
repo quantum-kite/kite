@@ -32,6 +32,7 @@ void Simulation<T, DIM>::calc_wavepacket(){
     bool local_calculate_wavepacket;
 #pragma omp master
     {
+        Global.calculate_wavepacket = 0;
         H5::H5File * file = new H5::H5File(name, H5F_ACC_RDONLY);
       try{
         int dummy_var;
@@ -41,6 +42,7 @@ void Simulation<T, DIM>::calc_wavepacket(){
         file->close();  
         delete file;
     }
+#pragma omp barrier
 #pragma omp critical
     local_calculate_wavepacket = Global.calculate_wavepacket;
       
@@ -141,7 +143,7 @@ void Simulation<T,D>::Gaussian_Wave_Packet(){
   NumMoments = (NumMoments/2)*2;
   Eigen::Matrix<T,-1,1> m(NumMoments);
   for(unsigned n = 0; n < unsigned(NumMoments); n++)
-    m(n) = value_type((n == 0 ? 1 : 2 )*cyl_bessel_j(n, timestep )) * T(pow(-II,n));
+    m(n) = value_type((n == 0 ? 1 : 2 )*std::cyl_bessel_j(n, timestep )) * T(pow(-II,n));
     
   for(int id = 0; id < NumDisorder; id++)
     {

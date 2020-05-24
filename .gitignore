@@ -97,6 +97,7 @@ build/
 # .dat files
 tools/tests/test6/*.dat
 tools/tests/test*/log*
+tests/tools_test*/log*
 
 
 # add .pdf files
