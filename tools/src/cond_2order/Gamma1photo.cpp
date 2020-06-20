@@ -38,7 +38,7 @@ Eigen::Matrix<std::complex<U>, -1, -1> conductivity_nonlinear<U, DIM>::Gamma1con
   //cond = Eigen::Matrix<std::complex<U>, -1, 1>::Zero(N_omegas, 1);
   cond = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
   int N_threads;
-  int thread_num;
+  int thread_num = 0;
   int local_NumMoments;
 
   omp_set_num_threads(systemInfo.NumThreads);

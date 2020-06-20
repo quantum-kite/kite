@@ -155,7 +155,6 @@ conductivity_nonlinear<T, DIM>::conductivity_nonlinear(system_info<T, DIM>& info
     // KPM parameters
     NumPoints = -1;
     special = 0;
-    dirString; 
 
   std::string name = info.filename;                           // name of the hdf5 file
   file = H5::H5File(name.c_str(), H5F_ACC_RDONLY);
@@ -347,11 +346,8 @@ void conductivity_nonlinear<U, DIM>::calculate_photo(){
   }
 
   U freq;
-  U w1, w2;
   for(int w = 0; w < N_omegas; w++){
     freq = frequencies(w);  
-    w1 = frequencies2(w,0);
-    w2 = frequencies2(w,1);
 
     // Energy integration
     cond0(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies0.col(w)));

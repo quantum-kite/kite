@@ -366,7 +366,7 @@ void arpes<U, DIM>::calculate(){
   if(calculate_full_arpes){
 
     Eigen::Matrix<double, -1, -1> incidents = Eigen::Matrix<double, -1, -1>::Zero(DIM, NumVectors);
-    for(int ii = 0; ii < NumVectors; ii++){
+    for(unsigned ii = 0; ii < NumVectors; ii++){
       incidents.col(ii) = incident_vector;
     }
 
@@ -374,7 +374,7 @@ void arpes<U, DIM>::calculate(){
     modulation = incident_vector.matrix().transpose()*(incidents + arpes_k_vectors.matrix())/incident_vector.matrix().norm();
 
 
-    for(int ii = 0; ii < NumVectors; ii++){
+    for(unsigned ii = 0; ii < NumVectors; ii++){
       ARPES.col(ii) *= modulation(ii)*modulation(ii);
     }
   }
