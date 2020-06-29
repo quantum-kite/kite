@@ -1,3 +1,10 @@
+/***********************************************************/
+/*                                                         */
+/*   Copyright (C) 2018-2020, M. Andelkovic, L. Covaci,    */
+/*  A. Ferreira, S. M. Joao, J. V. Lopes, T. G. Rappoport  */
+/*                                                         */
+/***********************************************************/
+
 void print_header_message(){
 #if VERBOSE
     std::cout << 
@@ -8,6 +15,8 @@ void print_header_message(){
       "|                     KITE | Release 1.0                                 | \n"         
       "|                     Kite home: quantum-kite.com                        | \n"
       "|                                                                        | \n"
+      "|    Reference: S. M. Joao et al., R. Soc. Open Sci. 7, 191809 (2020)    | \n"
+      "|                                                                        | \n"
       "|    Created by Simao M. Joao, Joao V. Lopes (Universidade do Porto),    | \n"
       "|      Tatiana G. Rappoport (Universidade Federal Rio de Janeiro),       | \n"
       "|        Misa Andelkovic, Lucian Covaci (University of Antwerp)          | \n"
@@ -15,8 +24,8 @@ void print_header_message(){
       "|                                                                        | \n"                                            
       "|            Funded by The Royal Society | royalsociety.org              | \n"
       "|                                                                        | \n"
-      "|  Copyright (C) 2018, 2109, M. Andelkovic, L. Covaci, A. Ferreira,      | \n"
-      "|                      S. M. Joao, J. V. Lopes, T. G. Rappoport          | \n"
+      "|    Copyright (C) 2018-2020, M. Andelkovic, L. Covaci, A. Ferreira,     | \n"
+      "|                S. M. Joao, J. V. Lopes, T. G. Rappoport                | \n"
       "|                                                                        | \n"
       "|  This program is free software: you can redistribute it and/or modify  | \n"
       "|  it under the terms of the GNU General Public License as published by  | \n"

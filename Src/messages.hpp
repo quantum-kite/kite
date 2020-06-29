@@ -1,3 +1,13 @@
+/***********************************************************/
+/*                                                         */
+/*   Copyright (C) 2018-2020, M. Andelkovic, L. Covaci,    */
+/*  A. Ferreira, S. M. Joao, J. V. Lopes, T. G. Rappoport  */
+/*                                                         */
+/***********************************************************/
+
+
+
+
 void print_header_message(){
   verbose_message(
       "\n+------------------------------------------------------------------------+\n"
@@ -7,6 +17,8 @@ void print_header_message(){
       "|                     KITE | Release 1.0                                 | \n"         
       "|                     Kite home: quantum-kite.com                        | \n"
       "|                                                                        | \n"
+      "|    Reference: S. M. Joao et al., R. Soc. Open Sci. 7, 191809 (2020)    | \n"
+      "|                                                                        | \n"
       "|    Created by Simao M. Joao, Joao V. Lopes (Universidade do Porto),    | \n"
       "|      Tatiana G. Rappoport (Universidade Federal Rio de Janeiro),       | \n"
       "|        Misa Andelkovic, Lucian Covaci (University of Antwerp)          | \n"
@@ -14,8 +26,8 @@ void print_header_message(){
       "|                                                                        | \n"                                            
       "|            Funded by The Royal Society | royalsociety.org              | \n"
       "|                                                                        | \n"
-      "|  Copyright (C) 2018, 2019, M. Andelkovic, L. Covaci, A. Ferreira,      | \n"
-      "|                      S. M. Joao, J. V. Lopes, T. G. Rappoport          | \n"
+      "|    Copyright (C) 2018-2020, M. Andelkovic, L. Covaci, A. Ferreira,     | \n"
+      "|                S. M. Joao, J. V. Lopes, T. G. Rappoport                | \n"
       "|                                                                        | \n"
       "|  This program is free software: you can redistribute it and/or modify  | \n"
       "|  it under the terms of the GNU General Public License as published by  | \n"
@@ -45,7 +57,6 @@ void print_info_message(){
       "Linear response functions in units of e^2/h.                              \n"
       "To stop these messages, set VERBOSE to 0 in the Makefile.                 \n"
       "To see debug messages, set DEBUG to 1 in the Makefile.                    \n"
-      //"To estimate the calculation time, set ESTIMATE_TIME to 1 in the Makefile. \n"
       "------------------------------------------------------------------------- \n\n"
       );
 }

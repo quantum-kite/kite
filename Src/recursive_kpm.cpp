@@ -1,3 +1,11 @@
+/***********************************************************/
+/*                                                         */
+/*   Copyright (C) 2018-2020, M. Andelkovic, L. Covaci,    */
+/*  A. Ferreira, S. M. Joao, J. V. Lopes, T. G. Rappoport  */
+/*                                                         */
+/***********************************************************/
+
+
 
 //template <typename T,unsigned D>
 //void Simulation<T,D>::Measure_Gamma(measurement_queue queue) {

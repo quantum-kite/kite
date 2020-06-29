@@ -1,3 +1,11 @@
+/***********************************************************/
+/*                                                         */
+/*   Copyright (C) 2018-2020, M. Andelkovic, L. Covaci,    */
+/*  A. Ferreira, S. M. Joao, J. V. Lopes, T. G. Rappoport  */
+/*                                                         */
+/***********************************************************/
+
+
 #include <complex>
 #include <Eigen/Dense>
 #include "ComplexTraits.hpp"

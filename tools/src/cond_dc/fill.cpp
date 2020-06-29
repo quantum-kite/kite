@@ -1,7 +1,9 @@
-//Eigen::Matrix<std::complex<T>, -1, -1, Eigen::RowMajor> 
-//fill_dgreenR(int NEnergies, int NMoments, double scat){
-
-//}
+/***********************************************************/
+/*                                                         */
+/*   Copyright (C) 2018-2020, M. Andelkovic, L. Covaci,    */
+/*  A. Ferreira, S. M. Joao, J. V. Lopes, T. G. Rappoport  */
+/*                                                         */
+/***********************************************************/
 
 
 #include <Eigen/Dense>
