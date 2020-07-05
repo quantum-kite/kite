@@ -14,7 +14,7 @@ The code is shipped with the following capabilities:
 * Algorithms: high-resolution CPGF full spectral (finite temperature response functions);
 * Algorithms: ultra-high-resolution CPGF single-shot (zero temperature DC conductivity)
 
-For further details on the algorithms and the implementation please consult [ArXiv:1910.05194](https://arxiv.org/abs/1910.05194).
+For further details on the algorithms and the implementation please consult S. M. Joao et al., R. Soc. Open Sci. 7, 191809 (2020) [https://royalsocietypublishing.org/doi/full/10.1098/rsos.191809].
 
 ## Getting Started
 
