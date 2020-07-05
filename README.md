@@ -51,6 +51,14 @@ If you would like to collaborate with us on the KITE project fill free to send u
 
 **Simão M. João**, **João V. Lopes** (Universidade do Porto), **Tatiana G. Rappoport** (Universidade Federal Rio de Janeiro), **Miša Anđelković**, **Lucian Covaci** (University of Antwerp) and **Aires Ferreira** (University of York).
 
+## Citing KITE
+
+We provide KITE as free software under a GPL license. If you have used KITE for producing results in a scientific publication, please mention the fact that you used it explicitly in the main text. For example, you may use
+
+" the numerical calculations were performed using the KITE code"
+
+to the description of your numerical calculations. In addition, the KITE team would be thankful if you cite the main paper that introduces KITE: S. M. João, M. Anđelković, L.Covaci, T. G. Rappoport, J. M. V. P. Lopes and A.Ferreira. R. Soc. Open Sci. 7, 191809 (2020).
+
 ## License
 
 This project is licensed under the GPL v3 License - see the [LICENSE.md](LICENSE.md) file for details
