@@ -31,5 +31,5 @@ points = [Gamma, K1]
 k_path = pb.results.make_path(*points, step=0.01)
 
 calculation_arpes = kite.Calculation(configuration)
-calculation_arpes.arpes(k_vector=k_path, num_moments=moments, num_disorder=1)
+calculation_arpes.arpes(k_vector=k_path, weight=[], num_moments=moments, num_disorder=1)
 kite.config_system(lattice, configuration, calculation_arpes, filename='config.h5')
