@@ -4,4 +4,4 @@ tools=../../build/KITE-tools
 
 echo DC conductivity of the square lattice.
 $tools configREF.h5 --CondDC -X > log
-python ../compare.py condDC.dat condDCREF.dat
+python3 ../compare.py condDC.dat condDCREF.dat

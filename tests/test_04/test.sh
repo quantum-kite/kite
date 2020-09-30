@@ -13,14 +13,14 @@ if [[ "$1" == "redo" ]]; then
     cp configORIG.h5 config.h5
     chmod 755 config.h5
     SEED=$S ../KITEx config.h5 > log_KITEx
-    python ../compare.py configREF.h5 $file1 config.h5 $file1
+    python3 ../compare.py configREF.h5 $file1 config.h5 $file1
 fi
 
 if [[ "$1" == "script" ]]; then
     # Create the configuration file from scratch
-    python config.py > log_config
+    python3 config.py > log_config
     SEED=$S ../KITEx config.h5 > log_KITEx
-    python ../compare.py configREF.h5 $file1 config.h5 $file1
+    python3 ../compare.py configREF.h5 $file1 config.h5 $file1
     rm -r __pycache__
 fi
 
