@@ -1,3 +1,4 @@
+#!/bin/bash
 file1=
 
 # Search for the list of energies in one of the files. All of the files have the same list of energies
