@@ -41,7 +41,6 @@ def process_orb(ORB):
             count += 1
 
     # Now we have to find the points that are inside this window
-    total  = np.zeros([Ny, Nx])
     totalu = np.zeros([Ny, Nx])
     MAX = max(non_normalized_values)*2.0
     for i in range(count):

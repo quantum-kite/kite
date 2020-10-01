@@ -40,9 +40,6 @@ def load_ovito_lattice(name):
 
     load_f = open(os.path.join(__location__, name), 'r')
 
-    # read the atom number
-    num_atoms = load_f.readline()
-
     # read the lattice vectors
     vectors = load_f.readline()
     vec = re.findall(r"[-+]?\d*\.*\d+", vectors)

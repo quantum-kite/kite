@@ -22,9 +22,6 @@ def tmd(signsoc):
     """Return the lattice specification for monolayer graphene"""
     a = 0.32   # [nm] unit cell length
     a_cc = a/sqrt(3)  # [nm] site-site distance
-    t = -1      # [eV] nearest neighbour hopping
-    t2 = 0.2  # nest-nearest neighbour hopping
-    m=0.1  # sub-lattice symmetry breaking term
     # create a lattice with 2 primitive vectors
     lat = pb.Lattice(
         a1=[a, 0],
@@ -34,7 +31,6 @@ def tmd(signsoc):
     lambdaX =signsoc*0.057
 
     Delta0=-0.872
-    Delta1=0.067
     Delta2=-1.511
     Deltap=-3.468
     Deltaz=-3.913
@@ -89,7 +85,6 @@ def tmd(signsoc):
     t1x1x1 = 0.25 * (3 * Vpppi + Vppsigma)
     t1x1x2 = 0.25 * sqrt(3) * (Vpppi - Vppsigma)
     t1x2x2 = 0.25 * (Vpppi + 3 * Vppsigma)
-    t1x3x3 = 0.25 * (4 * Vpppi)
 
     t2x1x1=Vppsigma
     t2x2x2=Vpppi
