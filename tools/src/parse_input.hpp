@@ -88,9 +88,6 @@ class shell_input{
         double CondOpt2_ratio;
         int CondOpt2_print_all;
 
-        // Help menu
-        bool help;
-
         // function names
         std::vector<std::string> valid_keys;
         int len;

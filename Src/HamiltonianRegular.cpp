@@ -49,7 +49,6 @@ void Periodic_Operator<T,D>::Convert_Build (  LatticeStructure <D> & r )
 {
   debug_message("Entered Convert_Build\n");
 	  
-  Eigen::Matrix<double, D, 1> dr; 
   Eigen::Matrix<double, D, 1> dr_a; //difference vector in coordinates of the lattice
     
   // These quantities will be needed to calculate the phase due to the ghost_correlation
@@ -81,7 +80,6 @@ void Periodic_Operator<T,D>::Convert_Build (  LatticeStructure <D> & r )
         // difference vectors in real-space coordinates
         orbital_difference_R = r.rOrb.col(b3.coord[D] + io) - r.rOrb.col(io)  ;       // The D components of the vector difference in orbital positions in real space
         lattice_difference_R = r.rLat * v.template cast<double>();
-        dr = orbital_difference_R + lattice_difference_R;
 		  
         // difference vectors in lattice coordinates
         orbital_difference_a = r.rLat.inverse() * orbital_difference_R;       // vector difference in orbital positions, expressed in terms of the lattice vectors      

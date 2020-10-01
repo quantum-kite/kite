@@ -558,7 +558,7 @@ void shell_input::parse_lDOS(int argc, char* argv[]){
 }
 
 
-bool is_key(std::string n){
+bool is_key(const std::string & n){
   return n == "-T" or n == "-O" or n == "-F" or n == "-N" or n == "-X" or n == "-V" or n == "-E";
 }
 
