@@ -14,7 +14,7 @@ import sys
 import kite
 import numpy as np
 # import matplotlib.pyplot as plt
-from math import pi, sqrt
+from math import sqrt
 """Calculate the band structure of Haldane model with sublattice symmetry breaking"""
 # the gaps have different sizes in K and K'!
 

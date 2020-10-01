@@ -1,6 +1,5 @@
 import pybinding as pb
-import matplotlib.pyplot as plt
-from math import sqrt, pi
+from math import sqrt
 import kite
 import sys
 

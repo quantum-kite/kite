@@ -1,5 +1,4 @@
 import numpy as np
-from numpy import linalg as LA
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import sys

@@ -14,11 +14,9 @@ import pybinding as pb
 import numpy as np
 import re
 import copy
-import sys
 import kite
 
-from scipy.spatial import cKDTree
-from math import pi, sqrt
+from math import sqrt
 
 
 

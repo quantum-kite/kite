@@ -8,15 +8,11 @@ It was created by Jose Hugo Garcia  Aguilar during his post-doctoral fellowship,
 	
 """
 #IMPORTING THE NECESSARY MODULES
-import sys								#Used for sys.exit( "Error Message" ) 
 import argparse							#Used to parse parameters to the Python Script
 import numpy as np						#Nummerical library
 import matplotlib.pyplot as plt			#Plot library
 from scipy.interpolate import griddata	#Used for griddata interpolation method
-from matplotlib.widgets import CheckButtons ,  Cursor , MultiCursor , RadioButtons , RectangleSelector
 
-from matplotlib.widgets import LassoSelector
-from matplotlib.path import Path
 from matplotlib import rc
 rc('font',size=20)
 rc('axes',labelsize=20,linewidth=3)

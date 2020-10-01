@@ -19,7 +19,6 @@
 """
 
 import kite
-import numpy as np
 import pybinding as pb
 
 def checkboard_lattice(onsite=(0, 0)):

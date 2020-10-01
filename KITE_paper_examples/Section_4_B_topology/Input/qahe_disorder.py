@@ -13,11 +13,10 @@
 
 import numpy as np
 import pybinding as pb
-import matplotlib.pyplot as plt
 import kite
 from pybinding.repository.graphene import a_cc, a
 from pybinding.constants import hbar
-from math import sqrt, pi
+from math import sqrt
 
 el_charge = 1.602 * 10 ** -19  #: [C] electron charge
 t = -2.507  #: [eV] graphene nearest neighbor hopping

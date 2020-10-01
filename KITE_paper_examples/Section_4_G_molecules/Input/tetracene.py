@@ -20,7 +20,7 @@
 
 import kite
 import pybinding as pb
-from math import pi, sqrt
+from math import sqrt
 #from pybinding.repository import graphene
 
 
