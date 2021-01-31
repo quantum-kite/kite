@@ -1,6 +1,6 @@
 /***********************************************************/
 /*                                                         */
-/*   Copyright (C) 2018-2020, M. Andelkovic, L. Covaci,    */
+/*   Copyright (C) 2018-2021, M. Andelkovic, L. Covaci,    */
 /*  A. Ferreira, S. M. Joao, J. V. Lopes, T. G. Rappoport  */
 /*                                                         */
 /***********************************************************/
@@ -178,7 +178,7 @@ void shell_input::printHelp(){
     std::cout << "    ./KITE-tools h5_file.h --CondDC -F -1.2 2.5 30 --CondOpt -T 93\n";
     std::cout << "    Calculates the DC conductivity using 30 equidistant Fermi energies in the range [-1.2, 2.5] and the optical conductivity using a temperature of 93.\n";
     std::cout << "\n";
-    std::cout << "Copyright (C) 2018, M. Andelkovic, L. Covaci, A. Ferreira, S. M. Joao, J. V. Lopes, T. G. Rappoport\n\n";
+    std::cout << "Copyright (C) 2018-2021, M. Andelkovic, L. Covaci, A. Ferreira, S. M. Joao, J. V. Lopes, T. G. Rappoport\n\n";
     std::cout << "This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.\n\n";
     std::cout << "This program is distributed in the hope that it will be useful but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.\n";
     }
