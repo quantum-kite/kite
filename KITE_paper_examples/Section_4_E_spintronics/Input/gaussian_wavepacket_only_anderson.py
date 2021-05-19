@@ -15,18 +15,15 @@
 import kite
 import numpy as np
 import pybinding as pb
-import matplotlib.pyplot as plt
 import subprocess
 import sys
 import os
-import h5py
 import shutil
-import multiprocessing
 from numpy import linalg as LA
 
 from pybinding.repository.graphene import a_cc, a
 from pybinding.constants import hbar
-from math import sqrt, pi
+from math import sqrt
 
 el_charge = 1.602 * 10 ** -19  #: [C] electron charge
 t = -2.507  #: [eV] graphene nearest neighbor hopping

@@ -13,7 +13,6 @@
 import numpy as np
 import pybinding as pb
 import kite
-import sys
 
 
 def graphene_initial(onsite=(0.0, 0.0)):

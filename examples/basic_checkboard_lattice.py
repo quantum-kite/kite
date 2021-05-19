@@ -19,14 +19,12 @@
 """
 
 import kite
-import numpy as np
 import pybinding as pb
 
 def checkboard_lattice(onsite=(0, 0)):
     """Return the lattice specification for monolayer graphene"""
     a = 1   # [nm] unit cell length
     t = 1      # [eV] nearest neighbour hopping
-    delta=0
     # create a lattice with 2 primitive vectors
     lat = pb.Lattice(
         a1=[a, 0],

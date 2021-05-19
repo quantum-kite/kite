@@ -25,7 +25,7 @@ class KPM_Vector;
 
 template <typename T,unsigned D>
 void Simulation<T,D>::Gamma3D(int NRandomV, int NDisorder, std::vector<int> N_moments, 
-                              std::vector<std::vector<unsigned>> indices, std::string name_dataset){
+                              std::vector<std::vector<unsigned>> indices, const std::string & name_dataset){
   Eigen::Matrix<T, MEMORY, MEMORY> tmp;
   // This calculates all the kinds of three-dimensional gamma matrices
   // such as Tr[v^a Tn v^b Tm v^c Tp] = G_nmp. The output is a 2D matrix 
@@ -178,7 +178,7 @@ void Simulation<T,D>::Gamma3D(int NRandomV, int NDisorder, std::vector<int> N_mo
 
 template <typename T,unsigned D>
 void Simulation<T,D>::store_gamma3D(Eigen::Array<T, -1, -1> *gamma, std::vector<int> N_moments, 
-                                    std::vector<std::vector<unsigned>> indices, std::string name_dataset){
+                                    std::vector<std::vector<unsigned>> indices, const std::string & name_dataset){
   debug_message("Entered store_gamma3d\n");
   // The whole purpose of this function is to take the Gamma matrix calculated by
   // Gamma3D, check if there are any symmetries among the 
@@ -286,49 +286,49 @@ void Simulation<T,D>::store_gamma3D(Eigen::Array<T, -1, -1> *gamma, std::vector<
   debug_message("Left store_gamma\n");
 }
 
-template void Simulation<float ,1u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<double ,1u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<long double ,1u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<float> ,1u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<double> ,1u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<long double> ,1u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
+template void Simulation<float ,1u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
+template void Simulation<double ,1u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
+template void Simulation<long double ,1u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
+template void Simulation<std::complex<float> ,1u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
+template void Simulation<std::complex<double> ,1u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
+template void Simulation<std::complex<long double> ,1u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
 
-template void Simulation<float ,3u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<double ,3u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<long double ,3u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<float> ,3u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<double> ,3u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<long double> ,3u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
+template void Simulation<float ,3u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
+template void Simulation<double ,3u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
+template void Simulation<long double ,3u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
+template void Simulation<std::complex<float> ,3u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
+template void Simulation<std::complex<double> ,3u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
+template void Simulation<std::complex<long double> ,3u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
 
-template void Simulation<float ,2u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<double ,2u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<long double ,2u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<float> ,2u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<double> ,2u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<long double> ,2u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
+template void Simulation<float ,2u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
+template void Simulation<double ,2u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
+template void Simulation<long double ,2u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
+template void Simulation<std::complex<float> ,2u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
+template void Simulation<std::complex<double> ,2u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
+template void Simulation<std::complex<long double> ,2u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
 
 
 
 //void Simulation<T,D>::store_gamma3D(Eigen::Array<T, -1, -1> *gamma, std::vector<int> N_moments, 
-                                    //std::vector<std::vector<unsigned>> indices, std::string name_dataset){
+                                    //std::vector<std::vector<unsigned>> indices, const std::string & name_dataset){
 
-template void Simulation<float ,1u>::store_gamma3D(Eigen::Array<float, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<double ,1u>::store_gamma3D(Eigen::Array<double, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<long double ,1u>::store_gamma3D(Eigen::Array<long double, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<float> ,1u>::store_gamma3D(Eigen::Array<std::complex<float>, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<double> ,1u>::store_gamma3D(Eigen::Array<std::complex<double>, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<long double> ,1u>::store_gamma3D(Eigen::Array<std::complex<long double>, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
+template void Simulation<float ,1u>::store_gamma3D(Eigen::Array<float, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
+template void Simulation<double ,1u>::store_gamma3D(Eigen::Array<double, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
+template void Simulation<long double ,1u>::store_gamma3D(Eigen::Array<long double, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
+template void Simulation<std::complex<float> ,1u>::store_gamma3D(Eigen::Array<std::complex<float>, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
+template void Simulation<std::complex<double> ,1u>::store_gamma3D(Eigen::Array<std::complex<double>, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
+template void Simulation<std::complex<long double> ,1u>::store_gamma3D(Eigen::Array<std::complex<long double>, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
 
-template void Simulation<float ,2u>::store_gamma3D(Eigen::Array<float, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<double ,2u>::store_gamma3D(Eigen::Array<double, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<long double ,2u>::store_gamma3D(Eigen::Array<long double, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<float> ,2u>::store_gamma3D(Eigen::Array<std::complex<float>, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<double> ,2u>::store_gamma3D(Eigen::Array<std::complex<double>, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<long double> ,2u>::store_gamma3D(Eigen::Array<std::complex<long double>, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
+template void Simulation<float ,2u>::store_gamma3D(Eigen::Array<float, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
+template void Simulation<double ,2u>::store_gamma3D(Eigen::Array<double, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
+template void Simulation<long double ,2u>::store_gamma3D(Eigen::Array<long double, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
+template void Simulation<std::complex<float> ,2u>::store_gamma3D(Eigen::Array<std::complex<float>, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
+template void Simulation<std::complex<double> ,2u>::store_gamma3D(Eigen::Array<std::complex<double>, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
+template void Simulation<std::complex<long double> ,2u>::store_gamma3D(Eigen::Array<std::complex<long double>, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
 
-template void Simulation<float ,3u>::store_gamma3D(Eigen::Array<float, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<double ,3u>::store_gamma3D(Eigen::Array<double, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<long double ,3u>::store_gamma3D(Eigen::Array<long double, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<float> ,3u>::store_gamma3D(Eigen::Array<std::complex<float>, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<double> ,3u>::store_gamma3D(Eigen::Array<std::complex<double>, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<long double> ,3u>::store_gamma3D(Eigen::Array<std::complex<long double>, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
+template void Simulation<float ,3u>::store_gamma3D(Eigen::Array<float, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
+template void Simulation<double ,3u>::store_gamma3D(Eigen::Array<double, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
+template void Simulation<long double ,3u>::store_gamma3D(Eigen::Array<long double, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
+template void Simulation<std::complex<float> ,3u>::store_gamma3D(Eigen::Array<std::complex<float>, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
+template void Simulation<std::complex<double> ,3u>::store_gamma3D(Eigen::Array<std::complex<double>, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);
+template void Simulation<std::complex<long double> ,3u>::store_gamma3D(Eigen::Array<std::complex<long double>, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, const std::string &);

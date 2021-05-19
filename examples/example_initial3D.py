@@ -31,7 +31,6 @@ def graphene(onsite=(0, 0)):
         Onsite energy at different sublattices.
     """
 
-    theta = np.pi / 3
     t = 2.8  # eV
     a1 = np.array([1, 0, 0] )
     a2 = np.array([0, 1, 0])
