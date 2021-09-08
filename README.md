@@ -125,7 +125,7 @@ to the description of your numerical calculations. In addition, the KITE team wo
 
 ## License
 
-This project is licensed under the GPL v3 License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the LGPL v3 License - see the [LICENSE.md](LICENSE.md) file for details
 
 ## Acknowledgments
 
