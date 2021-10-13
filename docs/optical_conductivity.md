@@ -26,7 +26,7 @@ calculation.conductivity_optical(num_points=1000, num_disorder=1,
 ```
 The optical conductivity can also be calculated in different directions, which can be quite interesting in the case of Hamiltonians with non-trivial topology that also present transverse optical conductivity. However, in this example we focus on longitudinal optical conductivity. The other quantities that can be set in the python script are the same of the density of states: number of energy poins used in KITE-tools, moments in the expansion, random vectors and disorder realisations.
 
-When calculating the optical conductivity, it is also necessary to set the Fermi energy. However, in this BETA version, the executable KITE-tools only calculates the optical conductivity in one pre-defined Fermi energy. To change it, it is necessary to edit the source code and recompile KITE-tools.
+When calculating the optical conductivity, it is necessary to pass the Fermi energy as a parameter to the executable KITE-tools. Run ./KITE-tools --help for syntax examples.
 
 The results of the real and imaginary parts of the optical conductivity presented in the first figure were obtained on a normal desktop with calculations that took 8 minutes for a system with $N=512\times 512$ units cells and 512 expansion moments.
 
