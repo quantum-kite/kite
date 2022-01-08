@@ -13,7 +13,8 @@ endif()
 
 project(KITEx)
 
-FILE(GLOB SRCFILES Src/*.cpp)
+FILE(GLOB_RECURSE SRCFILES Src/*.cpp)
+MESSAGE(STATUS "Files to compile" ${SRCFILES})
 add_executable(${PROJECT_NAME} ${SRCFILES})
 
 find_package(HDF5 COMPONENTS CXX C HL)
@@ -53,7 +54,6 @@ if (OPENMP_FOUND)
 endif()
 
 
-
 set(compile_wp 1)
 if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.0.0)
     MESSAGE( STATUS "Cannot compile gaussian wavepacket")
@@ -63,7 +63,14 @@ add_definitions(-DCOMPILE_WAVEPACKET=${compile_wp})
 
 
 
-include_directories(${Src})
+
 target_link_libraries(${PROJECT_NAME} ${HDF5_CXX_LIBRARIES} )
+target_include_directories(${PROJECT_NAME} PRIVATE "Src/"
+"Src/Tools/"
+"Src/Lattice/"
+"Src/Hamiltonian/"
+"Src/Vector/"
+"Src/Simulation/"
+)
 
 install (TARGETS ${PROJECT_NAME} DESTINATION bin)
