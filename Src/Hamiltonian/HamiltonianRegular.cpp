@@ -28,8 +28,8 @@ Periodic_Operator<T,D>::Periodic_Operator (char * name, LatticeStructure<D> & rr
     get_hdf5<unsigned>(NHoppings.data(), file, (char *) "/Hamiltonian/NHoppings");
     
     std::size_t max  	= NHoppings.maxCoeff();
-    distance 			= Eigen::Matrix< std::ptrdiff_t, Eigen::Dynamic, Eigen::Dynamic>  (max, r.Orb);
-    dist 				= Eigen::Matrix< int, Eigen::Dynamic, Eigen::Dynamic>  (max, r.Orb);
+    distance 	        = Eigen::Matrix< std::ptrdiff_t, Eigen::Dynamic, Eigen::Dynamic>  (max, r.Orb);
+    dist 		= Eigen::Matrix< int, Eigen::Dynamic, Eigen::Dynamic>  (max, r.Orb);
     hopping  		= Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic>(max, r.Orb);
     
     get_hdf5<T>(hopping.data(), file, (char *) "/Hamiltonian/Hoppings");          // Read Hoppings
@@ -99,6 +99,12 @@ void Periodic_Operator<T,D>::Convert_Build (  LatticeStructure <D> & r )
 template <typename T, unsigned D>
 void Periodic_Operator<T,D>::build_velocity(std::vector<unsigned> & components, unsigned n)
 {
+  /*
+    The velocity v is a vector of several generalized axis
+    each axis is described by a vector of cartesian components
+    The build_velocity creates the axis n with the the generalized components 
+  */
+  
   Coordinates<std::ptrdiff_t, D + 1> Lda(r.Ld), Ldb(r.Ld);
   Eigen::Map<Eigen::Matrix<std::ptrdiff_t,D, 1>> va(Lda.coord), vb(Ldb.coord); // Column vector
   Eigen::Matrix<double, D, 1> orbital_difference_R;
@@ -115,13 +121,12 @@ void Periodic_Operator<T,D>::build_velocity(std::vector<unsigned> & components, 
     {
       std::ptrdiff_t ip = io*Lda.basis[D];
       for(unsigned i = 0; i < D; i++)
-        ip += r.Ld[i]/2 * Lda.basis[i];
+        ip += r.Ld[i]/2 * Lda.basis[i];  // Choose a point in the middle of the domain
       Lda.set_coord(ip);
       
       for(unsigned ih = 0; ih < NHoppings(io); ih++)
         {
-          Lda.set_coord(ip);
-          Ldb.set_coord(ip + distance(ih,io));
+          Ldb.set_coord(ip + distance(ih,io)); // add the distance in the memory
           lattice_difference_R = r.rLat * (vb - va).template cast<double>();
           orbital_difference_R = r.rOrb.col(Ldb.coord[D]) - r.rOrb.col(Lda.coord[D]);
           dr_R = orbital_difference_R + lattice_difference_R;
@@ -132,25 +137,6 @@ void Periodic_Operator<T,D>::build_velocity(std::vector<unsigned> & components, 
     }
 }
 
-
-template struct Periodic_Operator<float, 1u>;
-template struct Periodic_Operator<double, 1u>;
-template struct Periodic_Operator<long double, 1u>;
-template struct Periodic_Operator<std::complex<float>, 1u>;
-template struct Periodic_Operator<std::complex<double>, 1u>;
-template struct Periodic_Operator<std::complex<long double>, 1u>;
-
-template struct Periodic_Operator<float, 2u>;
-template struct Periodic_Operator<double, 2u>;
-template struct Periodic_Operator<long double, 2u>;
-template struct Periodic_Operator<std::complex<float>, 2u>;
-template struct Periodic_Operator<std::complex<double>, 2u>;
-template struct Periodic_Operator<std::complex<long double>, 2u>;
-
-template struct Periodic_Operator<float, 3u>;
-template struct Periodic_Operator<double, 3u>;
-template struct Periodic_Operator<long double, 3u>;
-template struct Periodic_Operator<std::complex<float>, 3u>;
-template struct Periodic_Operator<std::complex<double>, 3u>;
-template struct Periodic_Operator<std::complex<long double>, 3u>;
+#define instantiate(type, dim)               template struct Periodic_Operator<type, dim>;
+#include "instantiate.hpp"
 

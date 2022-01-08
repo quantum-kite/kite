@@ -427,26 +427,8 @@ void Defect_Operator<T,D>::build_velocity(std::vector<unsigned> & components, un
     }
 }
 
-template struct Defect_Operator<float, 1u>;
-template struct Defect_Operator<double, 1u>;
-template struct Defect_Operator<long double, 1u>;
-template struct Defect_Operator<std::complex<float>, 1u>;
-template struct Defect_Operator<std::complex<double>, 1u>;
-template struct Defect_Operator<std::complex<long double>, 1u>;
-
-template struct Defect_Operator<float, 2u>;
-template struct Defect_Operator<double, 2u>;
-template struct Defect_Operator<long double, 2u>;
-template struct Defect_Operator<std::complex<float>, 2u>;
-template struct Defect_Operator<std::complex<double>, 2u>;
-template struct Defect_Operator<std::complex<long double>, 2u>;
-
-template struct Defect_Operator<float, 3u>;
-template struct Defect_Operator<double, 3u>;
-template struct Defect_Operator<long double, 3u>;
-template struct Defect_Operator<std::complex<float>, 3u>;
-template struct Defect_Operator<std::complex<double>, 3u>;
-template struct Defect_Operator<std::complex<long double>, 3u>;
+#define instantiate(type, dim)  template struct Defect_Operator<type,dim>;
+#include "instantiate.hpp"
 
 
 

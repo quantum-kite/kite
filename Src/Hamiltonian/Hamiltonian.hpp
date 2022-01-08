@@ -22,6 +22,7 @@ public:
   LatticeStructure<D>    & r;
   typedef typename extract_value_type<T>::value_type value_type;
   GLOBAL_VARIABLES <T>  & Global;
+  double                  EnergyScale;
   Periodic_Operator<T,D>  hr;
   
   /* Anderson disorder */

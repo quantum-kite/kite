@@ -7,7 +7,7 @@
 
 
 
-#include "../Generic.hpp"
+#include "Generic.hpp"
 #include "ComplexTraits.hpp"
 #include "Random.hpp"
 #include "Coordinates.hpp"
@@ -21,6 +21,13 @@ extern "C" herr_t getMembers(hid_t loc_id, const char *name, void *opdata);
 template <typename T, unsigned D>
 Hamiltonian<T,D>::Hamiltonian(char *filename,  LatticeStructure<D> & rr, GLOBAL_VARIABLES <T> & gg) : name(filename), r(rr) , Global(gg),  hr(name, r), cross_mozaic(r.NStr), hV(name, rr, rnd)
 {
+#pragma omp critical
+  {
+    H5::H5File *file = new H5::H5File(filename, H5F_ACC_RDONLY);
+    get_hdf5<double>(&EnergyScale, file, (char *) "/EnergyScale");
+    delete file;
+  }
+  
   /* Anderson disorder */
   build_Anderson_disorder();
   build_vacancies_disorder();
@@ -259,23 +266,6 @@ herr_t getMembers(hid_t loc_id, const char *name, void *opdata)
   return 0;
 }
 
-template class Hamiltonian<float,1u>;
-template class Hamiltonian<double,1u>;
-template class Hamiltonian<long double,1u>;
-template class Hamiltonian<std::complex<float>,1u>;
-template class Hamiltonian<std::complex<double>,1u>;
-template class Hamiltonian<std::complex<long double>,1u>;
+#define instantiate(type, dim)               template class Hamiltonian<type,dim>;
+#include "instantiate.hpp"
 
-template class Hamiltonian<float,2u>;
-template class Hamiltonian<double,2u>;
-template class Hamiltonian<long double,2u>;
-template class Hamiltonian<std::complex<float>,2u>;
-template class Hamiltonian<std::complex<double>,2u>;
-template class Hamiltonian<std::complex<long double>,2u>;
-
-template class Hamiltonian<float,3u>;
-template class Hamiltonian<double,3u>;
-template class Hamiltonian<long double,3u>;
-template class Hamiltonian<std::complex<float>,3u>;
-template class Hamiltonian<std::complex<double>,3u>;
-template class Hamiltonian<std::complex<long double>,3u>;

@@ -131,24 +131,5 @@ void Vacancy_Operator<T,D>::test_field( T * phi0 )
 }
 
 
-template struct Vacancy_Operator<float,1u>;
-template struct Vacancy_Operator<double,1u>;
-template struct Vacancy_Operator<long double,1u>;
-template struct Vacancy_Operator<std::complex<float>,1u>;
-template struct Vacancy_Operator<std::complex<double>,1u>;
-template struct Vacancy_Operator<std::complex<long double>,1u>;
-
-
-template struct Vacancy_Operator<float,2u>;
-template struct Vacancy_Operator<double,2u>;
-template struct Vacancy_Operator<long double,2u>;
-template struct Vacancy_Operator<std::complex<float>,2u>;
-template struct Vacancy_Operator<std::complex<double>,2u>;
-template struct Vacancy_Operator<std::complex<long double>,2u>;
-
-template struct Vacancy_Operator<float,3u>;
-template struct Vacancy_Operator<double,3u>;
-template struct Vacancy_Operator<long double,3u>;
-template struct Vacancy_Operator<std::complex<float>,3u>;
-template struct Vacancy_Operator<std::complex<double>,3u>;
-template struct Vacancy_Operator<std::complex<long double>,3u>;
+#define instantiate(type, dim)  template struct Vacancy_Operator<type,dim>;
+#include "instantiate.hpp"
