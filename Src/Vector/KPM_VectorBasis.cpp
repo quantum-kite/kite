@@ -86,9 +86,9 @@ void KPM_VectorBasis<T,D>::Velocity(KPM_Vector<T,D> * kpm_final,  std::vector<st
       break;
     default:
       {
-        inc_index(); 
+        child->inc_index(); 
         child->template KPM_MOTOR<0u, true>(kpm_final, static_cast<unsigned>(pos));
-        dec_index();
+        child->dec_index();
       }
     }
 }

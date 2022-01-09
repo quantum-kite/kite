@@ -40,50 +40,50 @@ void Simulation<T,D>::Gamma1D(int NRandomV, int NDisorder, int N_moments,
   Eigen::Matrix<T, 1, 2> tmp =  Eigen::Matrix < T, 1, 2> ::Zero();		
 
   long average = 0;
-  for(int disorder = 0; disorder < NDisorder; disorder++){
-    h.generate_disorder();
-
-    for(unsigned it = 0; it < indices.size(); it++){
-      h.build_velocity(indices.at(it), it);
-    }
-
-    for(int randV = 0; randV < NRandomV; randV++){
-        
-      kpm0.initiate_vector();			// original random vector
-      kpm1.set_index(0);
-      kpm1.v.col(0) = kpm0.v.col(0);
-      kpm1.Exchange_Boundaries();
-
-      if(indices.size() != 0)
-        kpm0.Velocity(&kpm1, indices, 0);
+  for(int disorder = 0; disorder < NDisorder; disorder++)
+    {
+      h.generate_disorder();
       
-      kpm0.v.col(0) = factor*kpm0.v.col(0); // This factor is due to the fact that this Velocity operator is not self-adjoint
-      kpm0.empty_ghosts(0);
-
-			
-      kpm1.template Multiply<0>();		
-      tmp.setZero();
-      for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
-        tmp += kpm0.v.block(ii,0, r.Ld[0], 1).adjoint() * kpm1.v.block(ii, 0, r.Ld[0], 2);
-
-      gamma.matrix().block(0,0,1,2) += (tmp - gamma.matrix().block(0,0,1,2))/value_type(average + 1);			
-	
-      for(int m = 2; m < N_moments; m += 2){
-        kpm1.template Multiply<1>();
-        kpm1.template Multiply<1>();
-        tmp.setZero();
-        for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
-          tmp += kpm0.v.block(ii,0, r.Ld[0], 1).adjoint() * kpm1.v.block(ii, 0, r.Ld[0], 2);
-
-        gamma.matrix().block(0, m,1,2) += (tmp - gamma.matrix().block(0,m,1,2))/value_type(average + 1);
-
-      }
-  //std::cout << "got to line " << __LINE__ << " in file " << __FILE__ << "\n" << std::flush;
-
-      average++;
-    }
-  } 
-
+      for(unsigned it = 0; it < indices.size(); it++)
+        h.build_velocity(indices.at(it), it);
+      
+      for(int randV = 0; randV < NRandomV; randV++)
+        {
+          kpm0.initiate_vector();			// original random vector
+          kpm1.set_index(0);
+          kpm1.v.col(0) = kpm0.v.col(0);
+          kpm1.Exchange_Boundaries();
+          
+          if(indices.size() != 0)
+            kpm0.Velocity(&kpm1, indices, 0);
+          
+          kpm0.v.col(0) = factor*kpm0.v.col(0); // This factor is due to the fact that this Velocity operator is not self-adjoint
+          kpm0.empty_ghosts(0);
+          
+          
+          kpm1.template Multiply<0>();		
+          tmp.setZero();
+          for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
+            tmp += kpm0.v.block(ii,0, r.Ld[0], 1).adjoint() * kpm1.v.block(ii, 0, r.Ld[0], 2);
+          
+          gamma.matrix().block(0,0,1,2) += (tmp - gamma.matrix().block(0,0,1,2))/value_type(average + 1);			
+          
+          for(int m = 2; m < N_moments; m += 2)
+            {
+              kpm1.template Multiply<1>();
+              kpm1.template Multiply<1>();
+              tmp.setZero();
+              for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
+                tmp += kpm0.v.block(ii,0, r.Ld[0], 1).adjoint() * kpm1.v.block(ii, 0, r.Ld[0], 2);
+              
+              gamma.matrix().block(0, m,1,2) += (tmp - gamma.matrix().block(0,m,1,2))/value_type(average + 1);
+            }
+          //std::cout << "got to line " << __LINE__ << " in file " << __FILE__ << "\n" << std::flush;
+          
+          average++;
+        }
+    } 
+  
   store_gamma1D(&gamma, name_dataset);
 }
 

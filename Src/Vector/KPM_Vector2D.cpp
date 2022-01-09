@@ -426,7 +426,7 @@ template <unsigned MULT, bool VELOCITY>
 void KPM_Vector <T, 2>::KPM_MOTOR(KPM_Vector<T,2> *kpm_final, unsigned axis)
 {
   std::size_t i0, i1;    
-  phi0 = kpm_final->v.col(index).data();
+  phi0 = kpm_final->v.col(kpm_final->index).data();
   phiM1 = v.col( (memory - 1 + index) % memory ).data();
   phiM2 = v.col( (memory - 2 + index) % memory ).data();
     
