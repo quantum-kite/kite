@@ -34,7 +34,15 @@ public:
   std::vector<value_type> U_Orbital;
   std::vector<value_type> U_Anderson;      // Local disorder  
   std::vector<int> Anderson_orb_address;
-  
+
+  // Custom user-defined local potential. This can be read from the
+  // HDF file, or defined in runtime with a function in the ../lib
+  // directory
+  Eigen::Array<T,-1,-1> custom_local;
+  bool is_custom_local_set;
+  void generate_custom_local();
+  Eigen::Array<T,-1,-1> fetch_type1();
+
   /*   Structural disorder    */
   std::vector <bool>                   cross_mozaic;
   std::vector <std::size_t>            cross_mozaic_indexes;
