@@ -22,8 +22,7 @@ public:
   Hamiltonian<T,D>       h;
   
   Simulation(char *, GLOBAL_VARIABLES <T> &);
-  void cheb_iteration(KPM_Vector<T,D>*, long int);
-  void generalized_velocity(KPM_Vector<T,D> *, KPM_Vector<T,D> *, std::vector<std::vector<unsigned>>, int);
+
   //void Measure_Gamma(measurement_queue);
 
   void Gamma1D(int, int, int, std::vector<std::vector<unsigned>>, std::string );

@@ -224,19 +224,21 @@ void KPM_Vector <T, 2>::build_planewave(Eigen::Matrix<double,-1,1> & k, Eigen::M
         exp_R(io) = weight(io)*exp(assign_value(0, 2.0*M_PI*orb_a_coords.col(io).transpose()*k))/T(sqrt(r.Nt));
 
     // Calculate the exponential related to each unit cell
-    for(std::size_t i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1++){
-        for(std::size_t i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0++){
-            local_coords.set({i0,i1,std::size_t(0)});
-            r.convertCoordinates(global_coords, local_coords);          // Converts the coordinates within a thread to global coordinates
-
-            exp_r = exp(assign_value(0,  2.0*M_PI * position.cast<double>().transpose()*k ));
-
-            for(std::size_t io = 0; io < r.Orb; io++){
-                local_coords.set({i0,i1,io});
-                v(local_coords.index, 0) = exp_r*exp_R(io);
-            }
+    for(std::size_t i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1++)
+      for(std::size_t i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0++)
+        {
+          local_coords.set({i0,i1,std::size_t(0)});
+          r.convertCoordinates(global_coords, local_coords);          // Converts the coordinates within a thread to global coordinates
+          
+          exp_r = exp(assign_value(0,  2.0*M_PI * position.cast<double>().transpose()*k ));
+          
+          for(std::size_t io = 0; io < r.Orb; io++){
+            local_coords.set({i0,i1,io});
+            v(local_coords.index, 0) = exp_r*exp_R(io);
+          }
         }
-    }
+
+    KPM_VectorBasis<T,2u>::build_defect_planewave(k, weight);
 }
 
 
@@ -419,24 +421,14 @@ void inline KPM_Vector <T, 2>::mult_regular_hoppings(const  std::size_t & j0, co
 
 
 
-
-template <typename T>
-void KPM_Vector <T, 2>::Velocity(T * phi0,T * phiM1, unsigned axis) {
-  KPM_MOTOR<0u, true>(phi0, phiM1, phiM1, axis);
-}
-template <typename T>
-void KPM_Vector <T, 2>::Velocity(T * phi0,T * phiM1, int axis) {
-  KPM_MOTOR<0u, true>(phi0, phiM1, phiM1, axis);
-}
-
 template <typename T>
 template <unsigned MULT, bool VELOCITY>
-void KPM_Vector <T, 2>::KPM_MOTOR(T * phi0a, T * phiM1a, T *phiM2a, unsigned axis)
+void KPM_Vector <T, 2>::KPM_MOTOR(KPM_Vector<T,2> *kpm_final, unsigned axis)
 {
   std::size_t i0, i1;    
-  phi0 = phi0a;
-  phiM1 = phiM1a;
-  phiM2 = phiM2a;
+  phi0 = kpm_final->v.col(index).data();
+  phiM1 = v.col( (memory - 1 + index) % memory ).data();
+  phiM2 = v.col( (memory - 2 + index) % memory ).data();
     
   // Initialize tiles that have deffects connecting elements of a previous tile
   for(auto istr = h.cross_mozaic_indexes.begin(); istr != h.cross_mozaic_indexes.end() ; istr++)
@@ -464,8 +456,8 @@ void KPM_Vector <T, 2>::KPM_MOTOR(T * phi0a, T * phiM1a, T *phiM2a, unsigned axi
               // Hoppings
               mult_regular_hoppings(j0, io);
             }
-          for(auto id = h.hd.begin(); id != h.hd.end(); id++)
-            id->template multiply_defect<MULT, VELOCITY>(istr, phi0, phiM1, axis);
+
+          KPM_VectorBasis<T,2u>::template multiply_defect<MULT, VELOCITY>(istr, phi0, phiM1, axis);
 	  	    
           // Empty the vacancies in the tile
           auto & hV = h.hV.position.at(istr);
@@ -688,51 +680,20 @@ void KPM_Vector <T, 2>::empty_ghosts(int mem_index) {
 }
 
 
-// Structural disorder contribution - iterate over the disorder models
-template <typename T>
-template <unsigned MULT> 
-void KPM_Vector<T,2>::Multiply() {
-  vverbose_message("Entered Multiply");
-  
-  unsigned i = 0;
-  /*
-    Mosaic Multiplication using a TILE of TILE x TILE
-    Right Now We expect that both ld[0] and ld[1]  are multiple of TILE
-    MULT = 0 : For the case of the Velocity/Hamiltonian
-    MULT = 1 : For the case of the KPM_iteration
-  */
-  inc_index();
-  phi0 = v.col(index).data();
-  phiM1 = v.col((memory + index - 1) % memory ).data();
-  phiM2 = v.col((memory + index - 2) % memory ).data();
-  KPM_MOTOR<MULT, false>(phi0, phiM1, phiM2, i);
-}
+
+#define instantiateTYPE(type)               template class KPM_Vector <type,2u>; \
+  template void KPM_Vector<type,2u>::template KPM_MOTOR<0u,false>(KPM_Vector<type,2u> * kpm_final, unsigned axis); \
+  template void KPM_Vector<type,2u>::template KPM_MOTOR<1u,false>(KPM_Vector<type,2u> * kpm_final, unsigned axis); \
+  template void KPM_Vector<type,2u>::template KPM_MOTOR<0u,true>(KPM_Vector<type,2u> * kpm_final,  unsigned axis);
+
+instantiateTYPE(float)
+instantiateTYPE(double)
+instantiateTYPE(long double)
+instantiateTYPE(std::complex<float>)
+instantiateTYPE(std::complex<double>)
+instantiateTYPE(std::complex<long double>)
 
 
-
-
-template class KPM_Vector<float ,2u>;
-template class KPM_Vector<double ,2u>;
-template class KPM_Vector<long double ,2u>;
-template class KPM_Vector<std::complex<float> ,2u>;
-template class KPM_Vector<std::complex<double> ,2u>;
-template class KPM_Vector<std::complex<long double> ,2u>;
-
-
-template void KPM_Vector<float ,2u>::Multiply<0u>();
-template void KPM_Vector<double ,2u>::Multiply<0u>();
-template void KPM_Vector<long double ,2u>::Multiply<0u>();
-template void KPM_Vector<std::complex<float> ,2u>::Multiply<0u>();
-template void KPM_Vector<std::complex<double> ,2u>::Multiply<0u>();
-template void KPM_Vector<std::complex<long double> ,2u>::Multiply<0u>();
-
-
-template void KPM_Vector<float ,2u>::Multiply<1u>();
-template void KPM_Vector<double ,2u>::Multiply<1u>();
-template void KPM_Vector<long double ,2u>::Multiply<1u>();
-template void KPM_Vector<std::complex<float> ,2u>::Multiply<1u>();
-template void KPM_Vector<std::complex<double> ,2u>::Multiply<1u>();
-template void KPM_Vector<std::complex<long double> ,2u>::Multiply<1u>();
 
 
 

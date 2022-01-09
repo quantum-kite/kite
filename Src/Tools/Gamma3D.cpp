@@ -99,75 +99,76 @@ void Simulation<T,D>::Gamma3D(int NRandomV, int NDisorder, std::vector<int> N_mo
     
   // start the kpm iteration
   long average = 0;
-  for(int disorder = 0; disorder < NDisorder; disorder++){
+  for(int disorder = 0; disorder < NDisorder; disorder++)
+    {
+      
+      // Distribute the disorder and update the velocity matrices
+      h.generate_disorder();
+      for(unsigned it = 0; it < indices.size(); it++)
+        h.build_velocity(indices.at(it), it);
 
-    // Distribute the disorder and update the velocity matrices
-    h.generate_disorder();
-    for(unsigned it = 0; it < indices.size(); it++)
-      h.build_velocity(indices.at(it), it);
-
-    for(int randV = 0; randV < NRandomV; randV++){
-        
-        
-      kpm0.initiate_vector();			// original random vector. This sets the index to zero
-      kpm0.Exchange_Boundaries();
-      kpm_Vn.set_index(0);
-
-      generalized_velocity(&kpm_Vn, &kpm0, indices, 0);
-        
-      for(int n = 0; n < N_moments.at(0); n+=MEMORY){
-
-        // Calculation of the left kpm vector
-        for(int ni = n; ni < n + MEMORY; ni++){
-          if(ni!=0) cheb_iteration(&kpm_Vn, ni-1);
-           
-          kpm_VnV.set_index(ni%MEMORY);
-          generalized_velocity(&kpm_VnV, &kpm_Vn, indices, 1);
-          kpm_VnV.empty_ghosts(ni%MEMORY);
-        }
+      for(int randV = 0; randV < NRandomV; randV++)
+        {
+          kpm0.initiate_vector();			// original random vector. This sets the index to zero
+          kpm0.Exchange_Boundaries();
+          kpm_Vn.set_index(0);
+          kpm0.Velocity(&kpm_Vn, indices, 0);
           
-        // Calculation of the right kpm vector
-        kpm_p.set_index(0);
-        kpm_p.v.col(0) = kpm0.v.col(0);
-        for(int p = 0; p < N_moments.at(2); p++){
-          if(p!=0) cheb_iteration(&kpm_p, p-1);
-            
-          kpm_pVm.set_index(0);
-          generalized_velocity(&kpm_pVm, &kpm_p, indices, 2);
-          for(int m = 0; m < N_moments.at(1); m += MEMORY){
-            for(int mi = m; mi < m + MEMORY; mi++)
-              if(mi != 0) cheb_iteration(&kpm_pVm, mi-1);
-
-            tmp.setZero();
-            for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
-              tmp += kpm_VnV.v.block(ii,0, r.Ld[0], MEMORY).adjoint() * kpm_pVm.v.block(ii, 0, r.Ld[0], MEMORY);
-              
-#pragma omp master
+          for(int n = 0; n < N_moments.at(0); n += MEMORY)
             {
-              Global.smaller_gamma.setZero();
-            }
+              
+              // Calculation of the left kpm vector
+              for(int ni = n; ni < n + MEMORY; ni++)
+                {
+                  kpm_Vn.cheb_iteration(ni);
+                  kpm_VnV.set_index(ni%MEMORY);
+                  kpm_Vn.Velocity(&kpm_VnV, indices, 1);
+                  kpm_VnV.empty_ghosts(ni%MEMORY);
+                }
+              
+              // Calculation of the right kpm vector
+              kpm_p.set_index(0);
+              kpm_p.v.col(0) = kpm0.v.col(0);
+              for(int p = 0; p < N_moments.at(2); p++)
+                {
+                  kpm_p.cheb_iteration(p);
+                
+                  kpm_pVm.set_index(0);
+                  kpm_p.Velocity(&kpm_pVm, indices, 2);
+                  for(int m = 0; m < N_moments.at(1); m += MEMORY){
+                    for(int mi = m; mi < m + MEMORY; mi++)
+                      kpm_pVm.cheb_iteration(mi);
+                    
+                    tmp.setZero();
+                    for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
+                      tmp += kpm_VnV.v.block(ii,0, r.Ld[0], MEMORY).adjoint() * kpm_pVm.v.block(ii, 0, r.Ld[0], MEMORY);
+                    
+#pragma omp master
+                    {
+                      Global.smaller_gamma.setZero();
+                    }
 #pragma omp barrier
 #pragma omp critical
-            {
-              Global.smaller_gamma += tmp.array();
-            }
+                    {
+                      Global.smaller_gamma += tmp.array();
+                    }
 #pragma omp barrier
 #pragma omp master
-            {
-              long int index;
-              for(int i = 0; i < MEMORY; i++)
-                for(int j = 0; j < MEMORY; j++){
-                  index = p*N_moments.at(1)*N_moments.at(0) + (m+j)*N_moments.at(0) + n+i;
-                  Global.general_gamma(index) += (Global.smaller_gamma(i, j) - Global.general_gamma(index))/value_type(average + 1);
+                    {
+                      long int index;
+                      for(int i = 0; i < MEMORY; i++)
+                        for(int j = 0; j < MEMORY; j++){
+                          index = p*N_moments.at(1)*N_moments.at(0) + (m+j)*N_moments.at(0) + n+i;
+                          Global.general_gamma(index) += (Global.smaller_gamma(i, j) - Global.general_gamma(index))/value_type(average + 1);
+                        }
+                    }
+#pragma omp barrier
+                  }
                 }
             }
-#pragma omp barrier
-          }
+          average++;
         }
-      }
-      average++;
-    }
-  } 
+    } 
 #pragma omp master
   {
     store_gamma3D(&Global.general_gamma, N_moments, indices, name_dataset);
@@ -286,49 +287,7 @@ void Simulation<T,D>::store_gamma3D(Eigen::Array<T, -1, -1> *gamma, std::vector<
   debug_message("Left store_gamma\n");
 }
 
-template void Simulation<float ,1u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<double ,1u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<long double ,1u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<float> ,1u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<double> ,1u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<long double> ,1u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
+#define instantiate(type,dim) template void Simulation<type,dim>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string); \
+  template void Simulation<type,dim>::store_gamma3D(Eigen::Array<type, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
 
-template void Simulation<float ,3u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<double ,3u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<long double ,3u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<float> ,3u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<double> ,3u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<long double> ,3u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-
-template void Simulation<float ,2u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<double ,2u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<long double ,2u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<float> ,2u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<double> ,2u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<long double> ,2u>::Gamma3D(int, int, std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-
-
-
-//void Simulation<T,D>::store_gamma3D(Eigen::Array<T, -1, -1> *gamma, std::vector<int> N_moments, 
-                                    //std::vector<std::vector<unsigned>> indices, std::string name_dataset){
-
-template void Simulation<float ,1u>::store_gamma3D(Eigen::Array<float, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<double ,1u>::store_gamma3D(Eigen::Array<double, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<long double ,1u>::store_gamma3D(Eigen::Array<long double, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<float> ,1u>::store_gamma3D(Eigen::Array<std::complex<float>, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<double> ,1u>::store_gamma3D(Eigen::Array<std::complex<double>, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<long double> ,1u>::store_gamma3D(Eigen::Array<std::complex<long double>, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-
-template void Simulation<float ,2u>::store_gamma3D(Eigen::Array<float, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<double ,2u>::store_gamma3D(Eigen::Array<double, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<long double ,2u>::store_gamma3D(Eigen::Array<long double, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<float> ,2u>::store_gamma3D(Eigen::Array<std::complex<float>, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<double> ,2u>::store_gamma3D(Eigen::Array<std::complex<double>, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<long double> ,2u>::store_gamma3D(Eigen::Array<std::complex<long double>, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-
-template void Simulation<float ,3u>::store_gamma3D(Eigen::Array<float, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<double ,3u>::store_gamma3D(Eigen::Array<double, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<long double ,3u>::store_gamma3D(Eigen::Array<long double, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<float> ,3u>::store_gamma3D(Eigen::Array<std::complex<float>, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<double> ,3u>::store_gamma3D(Eigen::Array<std::complex<double>, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
-template void Simulation<std::complex<long double> ,3u>::store_gamma3D(Eigen::Array<std::complex<long double>, -1, -1>* , std::vector<int>, std::vector<std::vector<unsigned>>, std::string);
+#include "instantiate.hpp"

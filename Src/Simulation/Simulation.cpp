@@ -31,34 +31,6 @@ Simulation<T,D>::Simulation(char *filename, GLOBAL_VARIABLES <T> & Global1): r(f
 }
 
 
-template <typename T,unsigned D>
-void Simulation<T,D>::generalized_velocity(KPM_Vector<T,D>* kpm0, KPM_Vector<T,D>* kpm1, std::vector<std::vector<unsigned>> indices, int pos){
-  // Check which generalized velocity operator needs to be calculated. 
-  // reads from kpm1 and writes on kpm0
-  
-  T * kpm1data = kpm1->v.col(kpm1->get_index()).data();
-  T * kpm0data = kpm0->v.col(kpm0->get_index()).data();
-  
-  switch(indices.at(pos).size()){
-  case 0:
-    break;
-  default:
-    kpm0->Velocity(kpm0data, kpm1data, pos); 											
-    break;
-  }
-}
-
-
-template <typename T,unsigned D>
-void Simulation<T,D>::cheb_iteration(KPM_Vector<T,D>* kpm, long int current_iteration){
-  // Performs a chebyshev iteration
-  if(current_iteration == 0){
-    kpm->template Multiply<0>(); 
-  } else {
-    kpm->template Multiply<1>(); 
-  }
-}
-
 
 
 template <typename T,unsigned D>	

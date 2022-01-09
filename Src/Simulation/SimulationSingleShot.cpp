@@ -247,39 +247,40 @@ void Simulation<T,D>::singleshot(Eigen::Array<double, -1, 1> energies,
         phi0.Exchange_Boundaries(); 	
         phi1.v.col(0).setZero();
 
-            
+        
         // calculate the left KPM vector
         phi.set_index(0);				
-        generalized_velocity(&phi, &phi0, indices, 0);      // |phi> = v |phi_0>
+        phi0.Velocity(&phi, indices, 0);      // |phi> = v |phi_0>
+        
 
-
-        for(int n = 0; n < job_NMoments; n++){		
-          if(n!=0) cheb_iteration(&phi, n-1);
-
-          phi1.v.col(0) += phi.v.col(phi.get_index())
-            *green(n, 1, energy).imag()/(1.0 + int(n==0));
-        }
-          
+        for(int n = 0; n < job_NMoments; n++)
+          {		
+            phi.cheb_iteration(n);
+            
+            phi1.v.col(0) += phi.v.col(phi.get_index())
+              * green(n, 1, energy).imag()/(1.0 + int(n==0));
+          }
+        
         // multiply phi1 by the velocity operator again. 
         // We need a temporary vector to mediate the operation, which will be |phi>
         phi.v.col(0) = phi1.v.col(0);
         phi.set_index(0);
         phi.Exchange_Boundaries();
-        generalized_velocity(&phi1, &phi, indices, 1);
+        phi.Velocity(&phi1, indices, 1);
         phi1.empty_ghosts(0);
         
-          
+        
         phi.set_index(0);			
         phi.v.col(0) = phi0.v.col(0);
         phi0.v.col(0).setZero(); 
-
+        
         for(int n = 0; n < job_NMoments; n++){		
-          if(n!=0) cheb_iteration(&phi, n-1);
-
+          phi.cheb_iteration(n);
+          
           phi0.v.col(0) += phi.v.col(phi.get_index())
             *green(n, 1, energy).imag()/(1.0 + int(n==0));
         }
-          
+        
           
         // finally, the dot product of phi1 and phi0 yields the conductivity
         tmp *= 0.;
@@ -304,58 +305,59 @@ void Simulation<T,D>::singleshot(Eigen::Array<double, -1, 1> energies,
         phir2.set_index(0);				
 
         phir2.v.col(0) = phi0.v.col(0);
-        generalized_velocity(&phir1, &phi0, indices, 0);      // |phi> = v |phi_0>
+        phi0.Velocity(&phir1, indices, 0);      // |phi> = v |phi_0>
         // from here on, phi0 is free to be used elsewhere, it is no longer needed
         phi0.v.col(0).setZero();
+        
+        for(int nn = 0; nn < SSPRINT; nn++)
+          {
 
-        for(int nn = 0; nn < SSPRINT; nn++){
-
-          for(int n = nn*job_NMoments/SSPRINT; n < job_NMoments/SSPRINT*(nn+1); n++){	
-            if(n!=0) cheb_iteration(&phir1, n-1);
-
-            phi1.v.col(0) += phir1.v.col(phir1.get_index())
-              *green(n, 1, energy).imag()/(1.0 + int(n==0));
-          }
+            for(int n = nn*job_NMoments/SSPRINT; n < job_NMoments/SSPRINT*(nn+1); n++){	
+              phir1.cheb_iteration(n);
+              
+              phi1.v.col(0) += phir1.v.col(phir1.get_index())
+                *green(n, 1, energy).imag()/(1.0 + int(n==0));
+            }
             
-          // multiply phi1 by the velocity operator again. 
-          // We need a temporary vector to mediate the operation, which will be |phi>
-          // If the SSPRINT flag is set to true, we are going to need the phi1 vector again
-          // so the product of phi1 by the velocity is stored in phi2 instead
-          phi2.set_index(0);
-          generalized_velocity(&phi2, &phi1, indices, 1);
-          phi2.empty_ghosts(0);
+            // multiply phi1 by the velocity operator again. 
+            // We need a temporary vector to mediate the operation, which will be |phi>
+            // If the SSPRINT flag is set to true, we are going to need the phi1 vector again
+            // so the product of phi1 by the velocity is stored in phi2 instead
+            phi2.set_index(0);
+            phi1.Velocity(&phi2, indices, 1);
+            phi2.empty_ghosts(0);
           
             
-          for(int n = nn*job_NMoments/SSPRINT; n < job_NMoments/SSPRINT*(nn+1); n++){		
-            if(n!=0) cheb_iteration(&phir2, n-1);
+            for(int n = nn*job_NMoments/SSPRINT; n < job_NMoments/SSPRINT*(nn+1); n++){		
+              phir2.cheb_iteration(n);
 
-            phi0.v.col(0) += phir2.v.col(phir2.get_index())
-              *green(n, 1, energy).imag()/(1.0 + int(n==0));
-          }
-           
-          // This is the conductivity for a smaller number of chebyshev moments
-          // if you want to add it to the average conductivity, you have yo wait
-          // until all the moments have been summed. otherwise the result would be wrong
-          T temp;
-          temp *= 0.;
-          for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
-            temp += phi2.v.col(0).segment(ii,r.Ld[0]).adjoint() * phi0.v.col(0).segment(ii,r.Ld[0]);
-
-
-          if(nn == SSPRINT-1){
-            cond_array(job_index) += (temp - cond_array(job_index))/value_type(average_R+1);
-          }
+              phi0.v.col(0) += phir2.v.col(phir2.get_index())
+                *green(n, 1, energy).imag()/(1.0 + int(n==0));
+            }
+            
+            // This is the conductivity for a smaller number of chebyshev moments
+            // if you want to add it to the average conductivity, you have yo wait
+            // until all the moments have been summed. otherwise the result would be wrong
+            T temp;
+            temp *= 0.;
+            for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
+              temp += phi2.v.col(0).segment(ii,r.Ld[0]).adjoint() * phi0.v.col(0).segment(ii,r.Ld[0]);
+            
+            
+            if(nn == SSPRINT-1){
+              cond_array(job_index) += (temp - cond_array(job_index))/value_type(average_R+1);
+            }
             
 #pragma omp master
-          {
-            std::cout << "   energy: " << (energy*EScale).real() << " broadening: "
-                      << (energy*EScale).imag() << " moments: "; 
-            std::cout << job_NMoments/SSPRINT*(nn+1) << " SS_Cond: " << temp*factor*(1.0*omp_get_num_threads()) << "\n" << std::flush;
-            if(nn == SSPRINT-1)
-              std::cout << "\n";
-          }
+            {
+              std::cout << "   energy: " << (energy*EScale).real() << " broadening: "
+                        << (energy*EScale).imag() << " moments: "; 
+              std::cout << job_NMoments/SSPRINT*(nn+1) << " SS_Cond: " << temp*factor*(1.0*omp_get_num_threads()) << "\n" << std::flush;
+              if(nn == SSPRINT-1)
+                std::cout << "\n";
+            }
 #pragma omp barrier
-        }
+          }
 #endif
         average_R++;
         debug_message("Concluded SingleShot calculation for SSPRINT!=0\n");
@@ -373,14 +375,14 @@ void Simulation<T,D>::singleshot(Eigen::Array<double, -1, 1> energies,
   // finished calculating the longitudinal DC conductivity for all the energies
   // Now let's store the gamma matrix. Now we're going to use the 
   // property that gamma is hermitian: gamma_nm=gamma_mn*
-    
+  
 #pragma omp master
   { 
     Global.singleshot_cond = Eigen::Matrix<T, -1, -1> :: Zero(1, N_energies);
   }
 #pragma omp barrier
-    
-    
+  
+  
   //std::cout << "IMPORTANT ! ! !:\n V is not hermitian. Make sure you take this into account\n";
   // in this case there's no problem. both V are anti-hermitic, so the minus signs cancel
 #pragma omp critical
@@ -389,16 +391,16 @@ void Simulation<T,D>::singleshot(Eigen::Array<double, -1, 1> energies,
   }
 #pragma omp barrier
     
-    
+  
 #pragma omp master
   {
-			
+    
     Global.singleshot_cond *= factor;
       
     // Create array to store the data
     Eigen::Array<double, -1, -1> store_data;
     store_data = Eigen::Array<double, -1, -1>::Zero(4, energies.rows());
-      
+    
     for(int ener = 0; ener < N_energies; ener++)
       {
         store_data(0, ener) = energies(ener)*EScale;
@@ -407,12 +409,12 @@ void Simulation<T,D>::singleshot(Eigen::Array<double, -1, 1> energies,
         store_data(3, ener) = Global.singleshot_cond.real()(ener);
       }
       
-      
-			
+    
+    
     H5::H5File * file = new H5::H5File(name, H5F_ACC_RDWR);
     write_hdf5(store_data, file, name_dataset);
     delete file;
-      
+    
     // make sure the global matrix is zeroed
     Global.singleshot_cond.setZero();
     debug_message("Left single_shot");
@@ -420,23 +422,5 @@ void Simulation<T,D>::singleshot(Eigen::Array<double, -1, 1> energies,
 #pragma omp barrier
 }
 
-template class Simulation<float ,1u>;
-template class Simulation<double ,1u>;
-template class Simulation<long double ,1u>;
-template class Simulation<std::complex<float> ,1u>;
-template class Simulation<std::complex<double> ,1u>;
-template class Simulation<std::complex<long double> ,1u>;
-
-template class Simulation<float ,3u>;
-template class Simulation<double ,3u>;
-template class Simulation<long double ,3u>;
-template class Simulation<std::complex<float> ,3u>;
-template class Simulation<std::complex<double> ,3u>;
-template class Simulation<std::complex<long double> ,3u>;
-
-template class Simulation<float ,2u>;
-template class Simulation<double ,2u>;
-template class Simulation<long double ,2u>;
-template class Simulation<std::complex<float> ,2u>;
-template class Simulation<std::complex<double> ,2u>;
-template class Simulation<std::complex<long double> ,2u>;
+#define instantiate(type, dim)               template class Simulation<type,dim>;
+#include "instantiate.hpp"

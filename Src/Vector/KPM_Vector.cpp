@@ -80,26 +80,8 @@ void inline KPM_Vector<T,D>::mult_regular_hoppings(const  std::size_t & j0, cons
 }
 
 template <typename T, unsigned D>
-void KPM_Vector<T,D>::Velocity(T * phi0,T * phiM1, unsigned axis){
-  (void) phi0;
-  (void) phiM1;
-  (void) axis;
-}
-
-
-template <typename T, unsigned D>
-void KPM_Vector<T,D>::Velocity(T * phi0,T * phiM1, int axis){
-  (void) phi0;
-  (void) phiM1;
-  (void) axis;
-}
-
-template <typename T, unsigned D>
 template <unsigned MULT, bool VELOCITY>
-void KPM_Vector<T,D>::KPM_MOTOR (T * phi0a, T * phiM1a, T *phiM2a, unsigned axis){
-  (void) phi0a;
-  (void) phiM2;
-  (void) phiM2a;
+void KPM_Vector<T,D>::KPM_MOTOR (KPM_Vector<T,D> * kpm_final,  unsigned axis){
   (void) axis;
 }
 
@@ -119,18 +101,17 @@ void KPM_Vector<T,D>::test_boundaries_system(){}
 template <typename T, unsigned D>
 void KPM_Vector<T,D>::empty_ghosts(int mem_index){(void) mem_index;}
 
-template class KPM_Vector<float ,1u>;
-template class KPM_Vector<double ,1u>;
-template class KPM_Vector<long double ,1u>;
-template class KPM_Vector<std::complex<float> ,1u>;
-template class KPM_Vector<std::complex<double> ,1u>;
-template class KPM_Vector<std::complex<long double> ,1u>;
+#define instantiateTYPE(type)               template class KPM_Vector <type,1u>; \
+  template void KPM_Vector<type,1u>::template KPM_MOTOR<0u,false>(KPM_Vector<type,1u> * kpm_final, unsigned axis); \
+  template void KPM_Vector<type,1u>::template KPM_MOTOR<1u,false>(KPM_Vector<type,1u> * kpm_final, unsigned axis); \
+  template void KPM_Vector<type,1u>::template KPM_MOTOR<0u,true>(KPM_Vector<type,1u> * kpm_final, unsigned axis);
 
-template class KPM_Vector<float ,3u>;
-template class KPM_Vector<double ,3u>;
-template class KPM_Vector<long double ,3u>;
-template class KPM_Vector<std::complex<float> ,3u>;
-template class KPM_Vector<std::complex<double> ,3u>;
-template class KPM_Vector<std::complex<long double> ,3u>;
+instantiateTYPE(float)
+instantiateTYPE(double)
+instantiateTYPE(long double)
+instantiateTYPE(std::complex<float>)
+instantiateTYPE(std::complex<double>)
+instantiateTYPE(std::complex<long double>)
+
 
 

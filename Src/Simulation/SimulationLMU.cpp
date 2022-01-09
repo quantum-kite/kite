@@ -88,18 +88,19 @@ void Simulation<T,D>::LMU(int NDisorder, int NMoments, Eigen::Array<unsigned lon
             kpm1.v.col(0) = kpm0.v.col(0);
             kpm0.empty_ghosts(0);
 
-            for(int n = 0; n < NMoments; n+=2){
-                for(int i = n; i < n+2; i++)
-                    if(i!=0) cheb_iteration(&kpm1, i-1);
-
-              
+            for(int n = 0; n < NMoments; n+=2)
+              {
+                for(int i = n; i < n + 2; i++)
+                  kpm1.cheb_iteration(i);
+                
+                
                 tmp.setZero();
                 for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
-                    tmp += kpm0.v.block(ii,0, r.Ld[0], 1).adjoint() * kpm1.v.block(ii, 0, r.Ld[0], 2);
-
+                  tmp += kpm0.v.block(ii,0, r.Ld[0], 1).adjoint() * kpm1.v.block(ii, 0, r.Ld[0], 2);
+                
                 gamma(n, pos_index) += (tmp(0,0) - gamma(n, pos_index))/value_type(average(pos_index) + 1);			
                 gamma(n+1, pos_index) += (tmp(0,1) - gamma(n+1, pos_index))/value_type(average(pos_index) + 1);			
-            }
+              }
             average(pos_index)++;
         } 
     }

@@ -168,26 +168,25 @@ void Simulation<T,D>::Gaussian_Wave_Packet(){
               phi.set_index(0);
               phi.v.col(0) = sum_ket.v.col(0);
               phi.Exchange_Boundaries();
-              cheb_iteration(&phi, 0); // multiply by H
+              phi.cheb_iteration(1); // multiply by H
               sum_ket.v.col(0) = phi.v * m.segment(0, 2);
               for(unsigned n = 2; n < unsigned(NumMoments); n += 2)
                 {
-                  cheb_iteration(&phi, n - 1);
-                  cheb_iteration(&phi, n);
+                  phi.cheb_iteration(n);
+                  phi.cheb_iteration(n + 1);
                   sum_ket.v.col(0) += phi.v * m.segment(n,2);
                 }
             }
           sum_ket.empty_ghosts(0);
-	    
+          
           // In the multiplication of a matrix the number of columns of the first should be equal to
           // the number of rows of the second, because the spin is organized by columns we have:
-
+          
           //	    vtmp = (vket * ident.transpose()) - vket;
           //	    auto x3 = sum_ket2.v.adjoint() * vtmp1;
           auto x3 = sum_ket.get_point();
           avg_ident(t) += (x3 - avg_ident(t) ) /T(id + 1);
-
-
+          
           vtmp = vket * spin_x.transpose();
           auto x0 = sum_ket.v.adjoint() * vtmp1;
           avg_x(t) += (x0(0,0) - avg_x(t) ) /T(id + 1);
@@ -254,23 +253,5 @@ void Simulation<T,D>::Gaussian_Wave_Packet(){
 #endif
 }
 
-template class Simulation<float ,1u>;
-template class Simulation<double ,1u>;
-template class Simulation<long double ,1u>;
-template class Simulation<std::complex<float> ,1u>;
-template class Simulation<std::complex<double> ,1u>;
-template class Simulation<std::complex<long double> ,1u>;
-
-template class Simulation<float ,3u>;
-template class Simulation<double ,3u>;
-template class Simulation<long double ,3u>;
-template class Simulation<std::complex<float> ,3u>;
-template class Simulation<std::complex<double> ,3u>;
-template class Simulation<std::complex<long double> ,3u>;
-
-template class Simulation<float ,2u>;
-template class Simulation<double ,2u>;
-template class Simulation<long double ,2u>;
-template class Simulation<std::complex<float> ,2u>;
-template class Simulation<std::complex<double> ,2u>;
-template class Simulation<std::complex<long double> ,2u>;
+#define instantiate(type,dim) template class Simulation<type,dim>;
+#include "instantiate.hpp"

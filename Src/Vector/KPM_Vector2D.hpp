@@ -55,12 +55,10 @@ public:
   void inline mult_local_disorder(const  std::size_t & j0, const  std::size_t & io);
   void inline mult_regular_hoppings(const  std::size_t & j0, const  std::size_t & io);
   template <unsigned MULT, bool VELOCITY>
-  void KPM_MOTOR(T * phi0a, T * phiM1a, T *phiM2a, unsigned axis);
+  void KPM_MOTOR(KPM_Vector<T,2> * kpm_final, unsigned axis);
 
-  template <unsigned MULT> 
-  void Multiply();
-  void Velocity(T * phi0,T * phiM1, unsigned axis);
-  void Velocity(T * phi0,T * phiM1, int);
+  template <unsigned MULT, bool VELOCITY>  
+  void multiply_defect(std::size_t , T* & , T* & , unsigned axis);
   
   void measure_wave_packet(T * bra, T * ket, T * results);  
   void Exchange_Boundaries();
