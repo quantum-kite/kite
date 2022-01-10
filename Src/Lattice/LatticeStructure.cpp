@@ -29,8 +29,10 @@ LatticeStructure<D>::LatticeStructure(char *name )
     get_hdf5<unsigned>(Lt, file, (char *) "/L");
     get_hdf5<unsigned>(Bd, file, (char *) "/Boundaries");
     get_hdf5<unsigned>(nd, file, (char *) "/Divisions");      
+    get_hdf5<double>(BdTwist, file, (char *) "/BoundaryTwists");
+    for(int i=0; i<D;i++)
+      RandomBoundaries[i] = (Bd[i]==2);
     
-
     try {
       H5::Exception::dontPrint();
       get_hdf5<int>(&MagneticField, file, (char *) "/Hamiltonian/MagneticFieldMul");

@@ -48,8 +48,11 @@ public:
   std::vector <std::size_t>            cross_mozaic_indexes;
   std::vector < Defect_Operator<T,D>>  hd;
   Vacancy_Operator<T,D>                hV;
+  Eigen::Array<double,D,1> BoundTwist; // Vector Containing Boundary Twist Angles
+  
   Hamiltonian(char *name,  LatticeStructure<D> & rr, GLOBAL_VARIABLES <T> &  );
   void generate_disorder();
+  void generate_twists();
   void build_structural_disorder();
   void build_vacancies_disorder();
   void build_Anderson_disorder();

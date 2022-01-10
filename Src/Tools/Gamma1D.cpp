@@ -49,7 +49,11 @@ void Simulation<T,D>::Gamma1D(int NRandomV, int NDisorder, int N_moments,
       
       for(int randV = 0; randV < NRandomV; randV++)
         {
-          kpm0.initiate_vector();			// original random vector
+	  /* Note: Still need to include in Gamma2D and Gamma3D */
+	  h.generate_twists(); // Generates Random or fixed boundaries
+	  
+          kpm0.initiate_vector();   // original random vector
+	  kpm1.initiate_phases();   //Initiates the Hopping Phases in KPM1
           kpm1.set_index(0);
           kpm1.v.col(0) = kpm0.v.col(0);
           kpm1.Exchange_Boundaries();

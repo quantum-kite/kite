@@ -27,6 +27,7 @@ public:
   Coordinates<std::size_t,D+1>  x;
 
   typedef typename extract_value_type<T>::value_type value_type;
+  T  *Fact_Bnd[D][3]; // Factor to Multiply hoppings (TwsBoundaries)
   using KPM_VectorBasis<T,D>::simul;
   using KPM_VectorBasis<T,D>::index;
   using KPM_VectorBasis<T,D>::v;
@@ -41,6 +42,7 @@ public:
   KPM_Vector(int mem, Simulation<T,D> & sim);
   ~KPM_Vector(void);
   void initiate_vector();
+  void initiate_phases(); //Initiate Boundary Phases
   T get_point();
 
   void build_wave_packet(Eigen::Matrix<double,-1,-1> & k, Eigen::Matrix<T,-1,-1> & psi0, double & sigma,

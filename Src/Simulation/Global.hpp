@@ -27,6 +27,7 @@ struct GLOBAL_VARIABLES {
   Eigen::Array <T, Eigen::Dynamic, Eigen::Dynamic> avg_z;
   Eigen::Array <T, Eigen::Dynamic, Eigen::Dynamic> avg_ident;
   Eigen::Array <T, Eigen::Dynamic, Eigen::Dynamic> avg_results;
+  Eigen::Array <double,3,1> GlobBTwist; // Glob Boundary Twist Angles
   double kpm_iteration_time;
   
   bool calculate_arpes;

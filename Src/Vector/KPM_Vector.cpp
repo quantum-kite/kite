@@ -33,6 +33,9 @@ template <typename T, unsigned D>
 void KPM_Vector<T,D>::initiate_vector(){}
 
 template <typename T, unsigned D>
+void KPM_Vector<T,D>::initiate_phases(){}
+
+template <typename T, unsigned D>
 T KPM_Vector<T,D>::get_point(){return v(0,0);}
 
 template <typename T, unsigned D>

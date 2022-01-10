@@ -134,10 +134,13 @@ KPM_Vector<T,3u>::KPM_Vector(int mem, Simulation<T,3u> & sim) :
           block[d][b] = x.set_coord( int(r.thread_id) ).add(dist).index;
         }
 
+    // JPPP Calcular os vectores das fases devido às condicoes fronteira
+    for(unsigned i = 0; i < D; i ++)
+      for(unsigned j = 0; j < 3; j ++)
+	Fact_Bnd[i][j] = new T[r.Ld[i]];
+    
     initiate_vector();
-
   }
-
 
 template <typename T>
 KPM_Vector <T, 3u>::~KPM_Vector(void) {
@@ -177,9 +180,40 @@ void KPM_Vector <T, 3u>::initiate_vector()
       for(unsigned j = 0; j < vv.size(); j++)
         v(vv.at(j), index ) = 0. ;
     }
-  
 }
 
+template <typename T>
+void KPM_Vector <T, 3>::initiate_phases() {
+  // JPPP Calcular os vectores das fases devido às condicoes fronteira
+  Coordinates<std::size_t, 4> x(r.Ld), z(r.Lt);
+#pragma omp critical
+  {
+    for(unsigned i = NGHOSTS; i < r.Ld[0] - NGHOSTS; i++)
+      {
+	x.set({i, 0, 0, 0});
+	r.convertCoordinates(z,x);
+	Fact_Bnd[0][2][x.coord[0]] = exp(ComplexTraits<T>::assign_value(0.0,-1.0*(h.BoundTwist[0] * int((int(z.coord[0]) + 1)/r.Lt[0]))));
+	Fact_Bnd[0][1][x.coord[0]] = ComplexTraits<T>::assign_value(1.0,0.0);
+	Fact_Bnd[0][0][x.coord[0]] = exp(ComplexTraits<T>::assign_value(0.0,h.BoundTwist[0] * int((int(r.Lt[0] - z.coord[0]))/r.Lt[0])));
+      }
+    for(unsigned i = NGHOSTS; i < r.Ld[1] - NGHOSTS; i++)
+      {
+	x.set({0, i, 0, 0});
+	r.convertCoordinates(z,x);
+	Fact_Bnd[1][2][x.coord[1]] = exp(ComplexTraits<T>::assign_value(0.0,-1.0*(h.BoundTwist[1] * int((int(z.coord[1]) + 1)/r.Lt[1]))));
+	Fact_Bnd[1][1][x.coord[1]] = ComplexTraits<T>::assign_value(1.0,0.0);
+	Fact_Bnd[1][0][x.coord[1]] = exp(ComplexTraits<T>::assign_value(0.0,h.BoundTwist[1] * int((int(r.Lt[1] - z.coord[1]))/r.Lt[1])));
+      }
+    for(unsigned i = NGHOSTS; i < r.Ld[2] - NGHOSTS; i++)
+      {
+	x.set({0, 0, i, 0});
+	r.convertCoordinates(z,x);
+	Fact_Bnd[2][2][x.coord[2]] = exp(ComplexTraits<T>::assign_value(0.0,-1.0*(h.BoundTwist[2] * int((int(z.coord[2]) + 1)/r.Lt[2]))));
+	Fact_Bnd[2][1][x.coord[2]] = ComplexTraits<T>::assign_value(1.0,0.0);
+	Fact_Bnd[2][0][x.coord[2]] = exp(ComplexTraits<T>::assign_value(0.0,h.BoundTwist[2] * int((int(r.Lt[2] - z.coord[2]))/r.Lt[2])));
+      }
+  }
+}
 
 template <typename T>
 T KPM_Vector <T, 3>::get_point()
@@ -551,26 +585,44 @@ void KPM_Vector <T, 3>::Exchange_Boundaries() {
 template <typename T>
 void inline KPM_Vector <T, 3>::mult_regular_hoppings(const  std::size_t & ind_i, const  std::size_t & io)
 {
-  
   std::size_t count;
   const std::size_t ind_f = ind_i + TILE * tile[2];
+  std::size_t rr[3], hop[3], x, y, z; // Variables for TBC
   // Hoppings
   for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
     {
+      rr[0] = (ind_i % r.Ld[0]);
+      rr[1] = (ind_i % (r.Ld[0] * r.Ld[1]) )/(r.Ld[0]);
+      rr[2] = (ind_i % (r.Ld[0] * r.Ld[1] * r.Ld[2]) )/(r.Ld[0]*r.Ld[1]);
+	
       const std::ptrdiff_t d1 = h.hr.distance(ib, io);
+      // Determine the Supercell Jumps
+      const std::size_t i_f = ind_i + d1;
+      hop[0] = (i_f % r.Ld[0] ) - rr[0] +1 ;
+      hop[1] = (i_f % (r.Ld[0] * r.Ld[1]) )/(r.Ld[0]) - rr[1] + 1;
+      hop[2] = (i_f % (r.Ld[0] * r.Ld[1] * r.Ld[2]) )/(r.Ld[0]*r.Ld[1]) - rr[2] + 1;
+      
       count = 0;
+      z = 0;
       for( std::size_t j2 = ind_i; j2 < ind_f; j2 += tile[2] )
         {
-          const T t1 = mult_t1_ghost_cor[io][ib][count++];
+          const T t1 = mult_t1_ghost_cor[io][ib][count++] * Fact_Bnd[2][hop[2]][rr[2]+z];
           const std::size_t std = tile[1], j2M = j2 + std * TILE;
+	  y = 0;
           for(std::size_t j1 = j2; j1 < j2M; j1 += std )
-            for(std::size_t j0 = j1; j0 < j1 + TILE ; j0++)
-              phi0[j0] += t1 * phiM1[j0 + d1];								
-        }
-    }
-  
+	    {
+	      x = 0;
+	      for(std::size_t j0 = j1; j0 < j1 + TILE ; j0++)
+		{
+		  phi0[j0] += t1 * phiM1[j0 + d1] * Fact_Bnd[1][hop[1]][rr[1]+y] * Fact_Bnd[0][hop[0]][rr[0]+x];
+		  x++;
+		};
+	      y++;
+	    };
+	  z++;
+	};
+    } 
 }
-
 
 template <typename T>
 template < unsigned MULT> 
