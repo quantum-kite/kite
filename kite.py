@@ -756,7 +756,7 @@ class Calculation:
 class Configuration:
 
     def __init__(self, divisions=(1, 1, 1), length=(1, 1, 1), boundaries=(False, False, False),
-                 is_complex=False, precision=1, spectrum_range=None):
+                 is_complex=False, precision=1, spectrum_range=None, angles=(0,0,0)):
         """Define basic parameters used in the calculation
 
        Parameters
@@ -796,7 +796,8 @@ class Configuration:
         self._is_complex = int(is_complex)
         self._precision = precision
         self._divisions = divisions
-        self._boundaries = np.asarray(boundaries).astype(int)
+        self._boundaries = np.array(boundaries)
+        self._Twists = np.array(angles)
 
         self._length = length
         self._htype = np.float32
@@ -849,8 +850,22 @@ class Configuration:
     @property
     def bound(self):  # -> boundaries:
         """Returns the boundary conditions in each direction, 0 - no boundary condtions, 1 - peridoc bc. """
-        return self._boundaries
-
+        Bounds_tmp = np.zeros(len(self._boundaries),dtype=np.float64);
+        BoundTwists = np.zeros(len(self._boundaries),dtype=np.float64);
+        for i,b in enumerate(self._boundaries):
+            if b=="open":
+                Bounds_tmp[i] = 0
+            elif b=="periodic":
+                Bounds_tmp[i] = 1
+            elif b=="twisted":
+                Bounds_tmp[i] = 1
+                BoundTwists[i] = self._Twists[i]
+            elif b=="random":
+                Bounds_tmp[i] = 2
+            else:
+                print("Badly Defined Boundaries!")
+        return Bounds_tmp, BoundTwists
+        
     @property
     def leng(self):  # -> length:
         """Return the number of unit cell repetitions in each direction. """
@@ -1304,12 +1319,13 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
         raise SystemExit('Select number of unit cells accordingly with the number of dimensions of your system!')
     f.create_dataset('L', data=leng, dtype='u4')
     # periodic boundary conditions, 0 - no, 1 - yes.
-    bound = config.bound
+    bound, Twists = config.bound
     if len(bound) != space_size:
         raise SystemExit('Select boundary condition accordingly with the number of dimensions of your system!')
     print('\nPeriodic boundary conditions along the direction of lattice vectors \n'
           'respectively are set to: ', bound, '\n')
     f.create_dataset('Boundaries', data=bound, dtype='u4')
+    f.create_dataset('BoundaryTwists', data=Twists, dtype=float) # JPPP Values of the Fixed Boundary Twists
     print('\n##############################################################################\n')
     print('DECOMPOSITION:\n')
     domain_dec = config.div

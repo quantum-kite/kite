@@ -54,11 +54,28 @@ void Hamiltonian<T,D>::generate_disorder()
   hV.generate_disorder();
   for(auto id = hd.begin(); id != hd.end(); id++)
     id->generate_disorder();
-    
-
 }
 
-
+template <typename T, unsigned D>
+void Hamiltonian<T,D>::generate_twists()
+{
+  BoundTwist.setZero(); 
+#pragma omp master
+  {
+    Global.GlobBTwist.setZero(); // Set the Global Boundary Twists to zero
+    for(unsigned i = 0; i < D; i++)
+      {
+	Global.GlobBTwist(i,0)  = float(r.RandomBoundaries[i])* 2 * M_PI * (0.5 - rnd.get()); //JPPP Random value between -π and π
+	Global.GlobBTwist(i,0) += (1. - float(r.RandomBoundaries[i])) * r.BdTwist[i];         //JPPP Fixed Case
+      };
+  };
+#pragma omp barrier
+#pragma omp critical
+  {
+    for(unsigned i = 0; i < D; i++)
+      BoundTwist(i,0) = Global.GlobBTwist(i,0); // Hard Copy Global Boundary Twists to Local Variables
+  };
+}
 
 template <typename T, unsigned D>
 void Hamiltonian<T,D>::build_structural_disorder()
@@ -314,7 +331,6 @@ Eigen::Array<T,-1,-1> Hamiltonian<T,D>::fetch_type1(){
         get_hdf5(&Escale, file, (char*)"EnergyScale");
         get_hdf5(&Eshift, file, (char*)"EnergyShift");
         delete file;
-
     }
 #pragma omp barrier
 
@@ -325,8 +341,8 @@ Eigen::Array<T,-1,-1> Hamiltonian<T,D>::fetch_type1(){
 
         // Convert to global coordinates to get the value of the potential
         r.convertCoordinates(coord_Lt, coord_ld);
-        V = uncorrelated_wrapper(coord_Lt.coord, D+1);
-
+	//        V = uncorrelated_wrapper(coord_Lt.coord, D+1);
+	V = 0;
         // type shenanigans
         V_converted = T((V - Eshift)/Escale);
 

@@ -93,8 +93,7 @@ KPM_Vector<T,2u>::KPM_Vector(int mem, Simulation<T,2> & sim) :
           MemIndEnd[1][1][io] = z.set({std::size_t(0), std::size_t(r.Ld[1] - NGHOSTS),   io}).index;
         }
     }
-    
-    
+       
   for(d = 0 ; d < D; d++)
     for(unsigned b  = 0 ; b < 2; b++)
       {
@@ -102,6 +101,12 @@ KPM_Vector<T,2u>::KPM_Vector(int mem, Simulation<T,2> & sim) :
         dist.coord[d] = int(b) * 2 - 1;
         block[d][b] = x.set_coord( int(r.thread_id) ).add(dist).index;
       }
+
+  // JPPP Calcular os vectores das fases devido às condicoes fronteira
+    for(unsigned i = 0; i < D; i ++)
+      for(unsigned j = 0; j < 3; j ++)
+	Fact_Bnd[i][j] = new T[r.Ld[i]];
+
   initiate_vector();
 }
 
@@ -171,7 +176,31 @@ void KPM_Vector <T, 2>::initiate_vector() {
       for(unsigned j = 0; j < vv.size(); j++)
         v(vv.at(j), index ) = 0. ;
     }
-  
+}
+
+template <typename T>
+void KPM_Vector <T, 2>::initiate_phases() {
+  // JPPP Calcular os vectores das fases devido às condicoes fronteira
+  Coordinates<std::size_t, 3> x(r.Ld), z(r.Lt);
+#pragma omp critical
+  {
+    for(unsigned i = NGHOSTS; i < r.Ld[0] - NGHOSTS; i++)
+      {
+	x.set({i, 0, 0});
+	r.convertCoordinates(z,x);
+	Fact_Bnd[0][2][x.coord[0]] = exp(ComplexTraits<T>::assign_value(0.0,-1.0*(h.BoundTwist[0] * int((int(z.coord[0]) + 1)/r.Lt[0]))));
+	Fact_Bnd[0][1][x.coord[0]] = ComplexTraits<T>::assign_value(1.0,0.0);
+	Fact_Bnd[0][0][x.coord[0]] = exp(ComplexTraits<T>::assign_value(0.0,h.BoundTwist[0] * int((int(r.Lt[0] - z.coord[0]))/r.Lt[0])));
+      }
+    for(unsigned i = NGHOSTS; i < r.Ld[1] - NGHOSTS; i++)
+      {
+	x.set({0, i, 0});
+	r.convertCoordinates(z,x);
+	Fact_Bnd[1][2][x.coord[1]] = exp(ComplexTraits<T>::assign_value(0.0,-1.0*(h.BoundTwist[1] * int((int(z.coord[1]) + 1)/r.Lt[1]))));
+	Fact_Bnd[1][1][x.coord[1]] = ComplexTraits<T>::assign_value(1.0,0.0);
+	Fact_Bnd[1][0][x.coord[1]] = exp(ComplexTraits<T>::assign_value(0.0,h.BoundTwist[1] * int((int(r.Lt[1] - z.coord[1]))/r.Lt[1])));
+      }
+  }
 }
 
 template <typename T>
@@ -438,21 +467,34 @@ void inline KPM_Vector <T, 2>::mult_regular_hoppings(const  std::size_t & j0, co
 {
   std::size_t count;
   const std::size_t j1 = j0 + TILE * std;
+  std::size_t rr[2], hop[2], x, y; // Variables for TBC
   // Hoppings
   for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
     {
+      rr[0] = (j0 % r.Ld[0]);
+      rr[1] = (j0 % (r.Ld[0] * r.Ld[1]))/(r.Ld[0]);
+      
       const std::ptrdiff_t d1 = h.hr.distance(ib, io);
+      // Determine the Supercell Jumps
+      const std::size_t i_f = j0 + d1;
+      hop[0] = (i_f % r.Ld[0] ) - rr[0] +1 ;
+      hop[1] = (i_f % (r.Ld[0] * r.Ld[1]))/(r.Ld[0]) - rr[1] + 1;
+      
       count = 0;
+      y = 0;
       for(std::size_t j = j0; j < j1; j += std )
         {
-          const T t1 = mult_t1_ghost_cor[io][ib][count++];
+          const T t1 = mult_t1_ghost_cor[io][ib][count++] * Fact_Bnd[1][hop[1]][rr[1]+y];
+	  x = 0;
           for(std::size_t i = j; i < j + TILE ; i++)
-            phi0[i] += t1 * phiM1[i + d1];								
-        }
+	    {
+	      phi0[i] += t1 * phiM1[i + d1] * Fact_Bnd[0][hop[0]][rr[0]+x];
+	      x++;
+	    };
+	  y++;
+        };
     }
 }
-
-
 
 template <typename T>
 template <unsigned MULT, bool VELOCITY>

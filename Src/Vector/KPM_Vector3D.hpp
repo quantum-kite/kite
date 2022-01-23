@@ -26,6 +26,7 @@ public:
   Hamiltonian<T,3u>                  & h;
   //  Coordinates<std::size_t,4>           x;
   typedef typename extract_value_type<T>::value_type value_type;
+  T *Fact_Bnd[D][3]; //3 Modos [Salto Positivo, Não Salto, Salto Negativo]
   using KPM_VectorBasis<T,3>::simul;
   using KPM_VectorBasis<T,3>::index;
   using KPM_VectorBasis<T,3>::v;
@@ -40,6 +41,7 @@ public:
   KPM_Vector(int mem, Simulation<T,3> & sim);
   ~KPM_Vector(void);
   void initiate_vector();
+  void initiate_phases();
   T get_point();
   void build_wave_packet(Eigen::Matrix<double,-1,-1> & k, Eigen::Matrix<T,-1,-1> & psi0, double & sigma,
                          Eigen::Matrix<double,1,2> & vb);

@@ -26,6 +26,8 @@ public:
   unsigned Bd[D+1]; // Information about periodic or non-periodic boundary conditions
   unsigned lStr[D+1];
   unsigned lB3[D+1];
+  double   BdTwist[D+1]; //Saves the boundary twists [thx,thy,thz]
+  bool     RandomBoundaries[D+1]; //Random Boundaries or Not
   
   std::size_t Nt; // Number of lattice postions of the global sample
   std::size_t Nd; // Number of lattice postions of the sub-domain with ghosts
