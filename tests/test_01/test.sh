@@ -3,7 +3,7 @@
 # This script will compare the .h5 file
 
 
-S=3  # the seed that will be used by KITE
+S=deterministic  # the seed that will be used by KITE
 file=/Calculation/dos/MU
 
 

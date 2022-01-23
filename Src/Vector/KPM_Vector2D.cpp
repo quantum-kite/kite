@@ -126,12 +126,45 @@ KPM_Vector <T, 2>::~KPM_Vector(void){
 template <typename T>
 void KPM_Vector <T, 2>::initiate_vector() {
   index = 0;
-  Coordinates<std::size_t, 3> x(r.Ld);
-  for(std::size_t io = 0; io < r.Orb; io++)
-    for(std::size_t i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1++)
-      for(std::size_t i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0++)
-        v(x.set({i0,i1,io}).index, index) = simul.rnd.init()/static_cast<value_type>(sqrt(value_type(r.Sizet - r.SizetVacancies)));
   
+
+
+  // Check if the SEED variable is set to deterministic
+  char *env;
+  std::string seed("");
+  env = getenv("SEED");
+  if(env != NULL) seed = std::string(env);
+
+  if(seed=="deterministic"){
+      // For testing purposes only. Set only one site (0,0,0) to one, all else to zero
+      // with PBC and translation invariance, this must yield the exact value of the trace
+      // restricted to orbital 0
+
+      v.setZero();
+      Coordinates<std::size_t, 3> coord_Lt(r.Lt); // global sample, without ghosts
+      Coordinates<std::size_t, 3> coord_Ld(r.Ld); // domain, with ghosts
+
+      coord_Ld.set({NGHOSTS, NGHOSTS,0});
+      r.convertCoordinates(coord_Lt, coord_Ld);
+
+      unsigned x,y,o;
+      x = coord_Lt.coord[0]; 
+      y = coord_Lt.coord[1]; 
+      o = coord_Lt.coord[2]; 
+      if(x == 0 && y == 0 && o == 0) v(coord_Ld.index,index) = 1; 
+
+  } else {
+      // Proceed as normal
+      Coordinates<std::size_t, 3> x(r.Ld);
+      for(std::size_t io = 0; io < r.Orb; io++)
+        for(std::size_t i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1++)
+          for(std::size_t i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0++)
+            v(x.set({i0,i1,io}).index, index) = simul.rnd.init()/static_cast<value_type>(sqrt(value_type(r.Sizet - r.SizetVacancies)));
+  }
+
+
+
+
   for(unsigned i = 0; i < r.NStr; i++)
     {
       auto & vv = h.hV.position.at(i); 
