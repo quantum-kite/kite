@@ -19,8 +19,7 @@ nx = ny = 4
 lx = ly = 256
 lattice = square_lattice()
 
-configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
-                                   is_complex=True, precision=1, spectrum_range=[-4.1,4.1])
+configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=["periodic", "periodic"], is_complex=True, precision=1, spectrum_range=[-4.1,4.1])
 
 b1, b2 = lattice.reciprocal_vectors()
 Gamma = [0, 0]

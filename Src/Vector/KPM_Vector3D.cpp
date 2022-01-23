@@ -180,6 +180,7 @@ void KPM_Vector <T, 3u>::initiate_vector()
       for(unsigned j = 0; j < vv.size(); j++)
         v(vv.at(j), index ) = 0. ;
     }
+  initiate_phases();
 }
 
 template <typename T>
@@ -606,7 +607,8 @@ void inline KPM_Vector <T, 3>::mult_regular_hoppings(const  std::size_t & ind_i,
       z = 0;
       for( std::size_t j2 = ind_i; j2 < ind_f; j2 += tile[2] )
         {
-          const T t1 = mult_t1_ghost_cor[io][ib][count++] * Fact_Bnd[2][hop[2]][rr[2]+z];
+          const T t1 = mult_t1_ghost_cor[io][ib][count++];// * Fact_Bnd[2][hop[2]][rr[2]+z];
+          //const T t1 = mult_t1_ghost_cor[io][ib][count++] * Fact_Bnd[2][hop[2]][rr[2]+z];
           const std::size_t std = tile[1], j2M = j2 + std * TILE;
 	  y = 0;
           for(std::size_t j1 = j2; j1 < j2M; j1 += std )
@@ -614,7 +616,8 @@ void inline KPM_Vector <T, 3>::mult_regular_hoppings(const  std::size_t & ind_i,
 	      x = 0;
 	      for(std::size_t j0 = j1; j0 < j1 + TILE ; j0++)
 		{
-		  phi0[j0] += t1 * phiM1[j0 + d1] * Fact_Bnd[1][hop[1]][rr[1]+y] * Fact_Bnd[0][hop[0]][rr[0]+x];
+		  phi0[j0] += t1 * phiM1[j0 + d1];// * Fact_Bnd[1][hop[1]][rr[1]+y] * Fact_Bnd[0][hop[0]][rr[0]+x];
+		  //phi0[j0] += t1 * phiM1[j0 + d1] * Fact_Bnd[1][hop[1]][rr[1]+y] * Fact_Bnd[0][hop[0]][rr[0]+x];
 		  x++;
 		};
 	      y++;

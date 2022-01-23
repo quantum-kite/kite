@@ -51,8 +51,7 @@ lattice = graphene_initial()
 disorder = kite.Disorder(lattice)
 disorder.add_disorder('A', 'Uniform', 0.0, W*0.5/np.sqrt(3))
 disorder.add_disorder('B', 'Uniform', 0.0, W*0.5/np.sqrt(3))
-configuration = kite.Configuration(divisions=[nx, ny], length=[Lx, Ly], boundaries=[True, True],
-                                      is_complex=(B!=0), precision=0, spectrum_range=[-energy_scale, energy_scale])
+configuration = kite.Configuration(divisions=[nx, ny], length=[Lx, Ly], boundaries=["periodic", "periodic"], is_complex=(B!=0), precision=0, spectrum_range=[-energy_scale, energy_scale])
 calculation = kite.Calculation(configuration)
 calculation.conductivity_optical_nonlinear(num_points=1000, num_moments=N, num_random=1, num_disorder=1,
                                                   direction='yyy', temperature=0.01)

@@ -37,8 +37,7 @@ nx = ny = 2
 # number of unit cells in each direction.
 lx = 256
 ly = 256
-configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
-                                   is_complex=False, precision=1, spectrum_range=[-4.1,4.1])
+configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=["periodic", "periodic"], is_complex=False, precision=1, spectrum_range=[-4.1,4.1])
 
 calculation_ldos = kite.Calculation(configuration)
 calculation_ldos.ldos(energy=np.linspace(-1, 1, 100), num_moments=32, num_disorder=1, position=[4,3], sublattice='A')

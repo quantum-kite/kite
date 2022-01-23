@@ -84,8 +84,7 @@ elif ths==64: nx,ny,nz = 4,4,4
 else:
     sys.exit("INVALID NUMBER OF THREADS\n\nSCRIPT ABORTED!")
     
-# configuration = kite.Configuration(divisions=[nx, ny, nz], length=[L1, L2, L3], boundaries=["periodic", "periodic", "periodic"], is_complex=True, precision=1,spectrum_range=norm_range)
-configuration = kite.Configuration(divisions=[nx, ny, nz], length=[L1, L2, L3], boundaries=["open", "open", "open"], is_complex=True, precision=1,spectrum_range=norm_range)
+configuration = kite.Configuration(divisions=[nx, ny, nz], length=[L1, L2, L3], boundaries=["periodic", "periodic", "periodic"], is_complex=True, precision=1,spectrum_range=norm_range)
 
 struc_disorder = kite.StructuralDisorder(lattice, concentration=C)
 struc_disorder.add_vacancy('A')
@@ -94,7 +93,8 @@ struc_disorder.add_vacancy('B')
 # Requires the calculation of DOS
 calculation = kite.Calculation(configuration)
 #calculation.dos(num_points=100, num_moments=M, num_random=1, num_disorder=1)
-calculation.singleshot_conductivity_dc(energy=energy, num_moments=M, num_random=1, num_disorder=1, direction='xx', eta=scattering, preserve_disorder=True)
+# calculation.singleshot_conductivity_dc(energy=energy, num_moments=M, num_random=1, num_disorder=1, direction='xx', eta=scattering, preserve_disorder=True)
+calculation.conductivity_dc(num_points=1000, num_moments=32, num_random=1, direction='xx', temperature=0.01)
 
 Center = [int(L1/2),int(L2/2),int(L3/2)]
 Radius = 4

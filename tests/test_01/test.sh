@@ -4,6 +4,7 @@
 
 
 S=deterministic  # the seed that will be used by KITE
+S=3
 file=/Calculation/dos/MU
 
 

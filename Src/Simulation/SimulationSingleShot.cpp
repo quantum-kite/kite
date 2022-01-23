@@ -277,8 +277,7 @@ void Simulation<T,D>::singleshot(Eigen::Array<double, -1, 1> energies,
         for(int n = 0; n < job_NMoments; n++){		
           phi.cheb_iteration(n);
           
-          phi0.v.col(0) += phi.v.col(phi.get_index())
-            *green(n, 1, energy).imag()/(1.0 + int(n==0));
+          phi0.v.col(0) += phi.v.col(phi.get_index())*green(n, 1, energy).imag()/(1.0 + int(n==0));
         }
         
           
@@ -299,6 +298,7 @@ void Simulation<T,D>::singleshot(Eigen::Array<double, -1, 1> energies,
         phi0.initiate_vector();					
         phi0.Exchange_Boundaries(); 	
         phi1.v.col(0).setZero();
+
 
         // chebyshev recursion vectors
         phir1.set_index(0);				

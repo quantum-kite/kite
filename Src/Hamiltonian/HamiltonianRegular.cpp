@@ -99,6 +99,7 @@ void Periodic_Operator<T,D>::Convert_Build (  LatticeStructure <D> & r )
 template <typename T, unsigned D>
 void Periodic_Operator<T,D>::build_velocity(std::vector<unsigned> & components, unsigned n)
 {
+    std::cout << "Entered periodic operator\n";
   /*
     The velocity v is a vector of several generalized axis
     each axis is described by a vector of cartesian components
@@ -135,6 +136,8 @@ void Periodic_Operator<T,D>::build_velocity(std::vector<unsigned> & components, 
             v1(ih,io) *= value_type(dr_R(components.at(i)));
         }
     }
+  std::cout << v1 << "\n";
+  std::cout << "left periodic op\n" << std::flush;
 }
 
 #define instantiate(type, dim)               template struct Periodic_Operator<type, dim>;

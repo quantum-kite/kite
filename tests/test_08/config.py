@@ -51,8 +51,7 @@ lattice, disorded_structural = graphene_initial()
 nx = ny = 2
 lx = 128
 ly = 128
-configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
-                                 is_complex=True, precision=1, spectrum_range=[-EnergyScale, EnergyScale])
+configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=["periodic", "periodic"], is_complex=True, precision=1, spectrum_range=[-EnergyScale, EnergyScale])
 
 
 pos_matrix=[]

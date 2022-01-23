@@ -49,7 +49,7 @@ disorder.add_disorder('A', 'Uniform', 0.0, W*0.5/np.sqrt(3))
 
 nx = ny = 2
 
-configuration = kite.Configuration(divisions=[nx, ny], length=[L, L], boundaries=[True, True], is_complex=False, precision=0, spectrum_range=[-energy_scale, energy_scale]) 
+configuration = kite.Configuration(divisions=[nx, ny], length=[L, L], boundaries=["periodic", "periodic"], is_complex=False, precision=0, spectrum_range=[-energy_scale, energy_scale]) 
 
 
 calculation = kite.Calculation(configuration) 

@@ -176,6 +176,7 @@ void KPM_Vector <T, 2>::initiate_vector() {
       for(unsigned j = 0; j < vv.size(); j++)
         v(vv.at(j), index ) = 0. ;
     }
+  initiate_phases();
 }
 
 template <typename T>

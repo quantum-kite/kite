@@ -131,8 +131,7 @@ scale_a = (emax - emin) / 2
 emin -= np.abs(disorder_strength)
 emax += np.abs(disorder_strength)
 
-configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
-                                   is_complex=True, precision=1, spectrum_range=[emin, emax])
+configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=["periodic", "periodic"], is_complex=True, precision=1, spectrum_range=[emin, emax])
 
 Gamma = [0, 0]
 M = [np.pi/np.sqrt(3), np.pi/3.0]
