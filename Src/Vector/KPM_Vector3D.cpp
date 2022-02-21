@@ -721,7 +721,7 @@ void KPM_Vector <T, 3>::KPM_MOTOR(KPM_Vector<T,3> *kpm_final, unsigned axis)
 {
   std::size_t i0, i1, i2;
   Coordinates<std::size_t, D + 1> x(r.Ld);
-  phi0 = kpm_final->v.col(index).data();
+  phi0 = kpm_final->v.col(kpm_final->index).data();
   phiM1 = v.col( (memory - 1 + index) % memory ).data();
   phiM2 = v.col( (memory - 2 + index) % memory ).data();
   
