@@ -87,7 +87,7 @@ class StructuralDisorder:
         self._nodes_map = dict()
         self._node_orbital = []
         num_orbitals = np.zeros(lattice.nsub, dtype=np.uint64)
-        for name, sub in lattice.sublattices.items():
+        for sub in lattice.sublattices.items():
             # num of orbitals at each sublattice is equal to size of onsite energy
             num_energies = np.asarray(sub.energy).shape[0]
             num_orbitals[sub.alias_id] = num_energies
@@ -159,7 +159,6 @@ class StructuralDisorder:
 
     def add_local_vacancy_disorder(self, relative_index, sub):
         orbital_vacancy = []
-        orbital_vacancy_cell = []
         names, sublattices = zip(*self._lattice.sublattices.items())
 
         if sub not in names:
@@ -413,7 +412,6 @@ class Disorder:
             # number of orbitals before i-th sublattice, where is is the array index
             orbitals_before = self._num_orbitals_before
 
-            orbital_from = []
             orbital_dis_mean = []
             orbital_dis_stdv = []
             orbital_dis_type_id = []
@@ -887,7 +885,7 @@ def make_pybinding_model(lattice, disorder=None, disorder_structural=None, **kwa
         if not isinstance(disorder_structural, list):
             disorder_struc_list = [disorder_structural]
 
-        for idx_struc, dis_struc in enumerate(disorder_struc_list):
+        for dis_struc in enumerate(disorder_struc_list):
             if len(dis_struc._sub_from):
                 raise SystemExit(
                     'Automatic scaling is not supported when bond disorder is specified. Please select the scaling '
@@ -1071,7 +1069,7 @@ def make_pybinding_model(lattice, disorder=None, disorder_structural=None, **kwa
                 model.add(vacancy_disorder(sub=vac, concentration=dis_struc._concentration))
 
             for idx in range(len(dis_struc._sub_onsite)):
-                names, sublattices = zip(*model.lattice.sublattices.items())
+                names = zip(*model.lattice.sublattices.items())
 
                 sublattice_alias = names.index(dis_struc._sub_onsite[idx])
 
@@ -1148,7 +1146,7 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
     # check if there's complex hopping or magnetic field but identifier is_complex is 0
     imag_part = 0
     # loop through all hoppings
-    for name, hop in lattice.hoppings.items():
+    for hop in lattice.hoppings.items():
         imag_part += np.linalg.norm(np.asarray(hop.energy).imag)
     if imag_part > 0 and complx == 0:
         print('Complex hoppings are added but is_complex identifier is 0. Automatically turning is_complex to 1!')
@@ -1465,7 +1463,6 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
                                     dtype=np.int32).reshape(-1)
 
             num_orb_vac = len(disorder_struct._orbital_vacancy)
-            num_positions = len(fixed_positions_index)
             if num_orb_vac > 0:
                 grp_dis_type = grp_dis_vac.create_group('Type{val}'.format(val=idx_vacancy))
 

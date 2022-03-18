@@ -137,7 +137,7 @@ void Simulation<T,D>::singleshot(Eigen::Array<double, -1, 1> energies,
   Eigen::Array<double, -1, 1> gammas,
   Eigen::Array<int, -1, 1> preserve_disorders,
   Eigen::Array<int, -1, 1> moments,
-  int NDisorder, int NRandomV, std::string direction_string){
+  int NDisorder, int NRandomV, const std::string & direction_string){
   // Calculate the longitudinal dc conductivity for a single value of the energy
     
   T tmp = assign_value(0.,0.);

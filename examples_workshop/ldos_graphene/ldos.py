@@ -9,7 +9,6 @@
         #                                                                            #      
         ##############################################################################      
 """
-import matplotlib.pyplot as plt
 import kite
 import numpy as np
 import pybinding as pb

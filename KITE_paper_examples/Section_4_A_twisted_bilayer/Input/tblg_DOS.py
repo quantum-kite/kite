@@ -14,11 +14,9 @@ import pybinding as pb
 import numpy as np
 import re
 import copy
-import sys
 import kite
 
-from scipy.spatial import cKDTree
-from math import pi, sqrt
+from math import sqrt
 
 
 
@@ -41,9 +39,6 @@ def load_ovito_lattice(name):
     __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
     load_f = open(os.path.join(__location__, name), 'r')
-
-    # read the atom number
-    num_atoms = load_f.readline()
 
     # read the lattice vectors
     vectors = load_f.readline()

@@ -1,3 +1,4 @@
+#!/bin/bash
 echo "Compiling KITEx and KITE-tools. To have the full functionality, you need to have at least version 8 of gcc."
 echo "If you do not, you will not be able to run guassian_wavepacket. To enable compiling with this feature, please edit this file and set WAVEPACKET=1" 
 echo "By default, the flag WAVEPACKET is set to 0"
