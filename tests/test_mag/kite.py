@@ -1375,8 +1375,8 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
         print('MAGNETIC FIELD:\n')
 
         # find the minimum commensurate magnetic field
-        if not space_size == 2:
-            raise SystemExit('Magnetic field is currently supported only in 2D!')
+        # if not space_size == 2:
+            # raise SystemExit('Magnetic field is currently supported only in 2D!')
         hbar = 6.58211899 * 10 ** -16  #: [eV*s]
         phi0 = 2 * np.pi * hbar  #: [V*s] flux quantum
         unit_cell_area = np.linalg.norm(np.cross(vectors[0, :], vectors[1, :])) * 1e-18
@@ -1387,18 +1387,19 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
         if modification.magnetic_field:
             multiply_bmin = int(round(modification.magnetic_field / magnetic_field_min))
 
-            if multiply_bmin == 0:
-                raise SystemExit('The system is to small for a desired field.')
-            print('Closest_field to the one you selected is {:.2f} T'.format(
-                multiply_bmin * magnetic_field_min))
+            # if multiply_bmin == 0:
+                # raise SystemExit('The system is to small for a desired field.')
+            # print('Closest_field to the one you selected is {:.2f} T'.format(
+                # multiply_bmin * magnetic_field_min))
 
         if modification.flux:
             multiply_bmin = int(round(modification.flux * leng[1]))
-            if multiply_bmin == 0:
-                raise SystemExit('The system is to small for a desired field.')
-            print('Closest_field to the one you selected is {:.2f} T which in the terms of flux quantum is {:.2f}'.
-                  format(multiply_bmin * magnetic_field_min, multiply_bmin / leng[1]))
-            print('Selected field is {:.2f} T'.format(multiply_bmin * magnetic_field_min))
+            # if multiply_bmin == 0:
+                # raise SystemExit('The system is to small for a desired field.')
+            # print('Closest_field to the one you selected is {:.2f} T which in the terms of flux quantum is {:.2f}'.
+                  # format(multiply_bmin * magnetic_field_min, multiply_bmin / leng[1]))
+            # print('Selected field is {:.2f} T'.format(multiply_bmin * magnetic_field_min))
+        multiply_bmin = modification.magnetic_field
         grp.create_dataset('MagneticFieldMul', data=int(multiply_bmin), dtype='u4')
         print('\n##############################################################################\n')
 
