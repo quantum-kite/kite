@@ -1,3 +1,16 @@
+"""       
+        ##############################################################################      
+        #                        KITE | Release  1.1                                 #      
+        #                                                                            #      
+        #                        Kite home: quantum-kite.com                         #           
+        #                                                                            #      
+        #  Developed by: Simao M. Joao, Joao V. Lopes, Tatiana G. Rappoport,         #       
+        #  Misa Andelkovic, Lucian Covaci, Aires Ferreira, 2018-2022                 #      
+        #                                                                            #      
+        ##############################################################################      
+"""
+""" Bilayer Graphene with Rashba SOC """
+
 import pybinding as pb
 import matplotlib.pyplot as plt
 from math import sqrt, pi
