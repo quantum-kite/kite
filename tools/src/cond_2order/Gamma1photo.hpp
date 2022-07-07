@@ -1,11 +1,9 @@
 /***********************************************************/
 /*                                                         */
-/*   Copyright (C) 2018-2021, M. Andelkovic, L. Covaci,    */
+/*   Copyright (C) 2018-2022, M. Andelkovic, L. Covaci,    */
 /*  A. Ferreira, S. M. Joao, J. V. Lopes, T. G. Rappoport  */
 /*                                                         */
 /***********************************************************/
-
-
 
 template <typename U, unsigned DIM>
 Eigen::Matrix<std::complex<U>, -1, -1> conductivity_nonlinear<U, DIM>::Gamma1contractAandR(){
