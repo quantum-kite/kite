@@ -2,14 +2,14 @@
 
 **KITE** is an open-source Python/C++ software suite for real-space tight-binding (TB) simulations of electronic structure and bulk quantum transport properties of disordered systems scalable to multi billions of atomic orbitals.
 
-KITE v1.1 (this version) is shipped with the following capabilities (for clean and disordered systems in two and three spatial dimensions):
+KITE v1.1 (this version) is shipped with the following capabilities:
 
 * Quantum Transport: longitudinal and transverse DC conductivities at zero and finite temperature;
 * Optical Properties: AC longitudinal conductivity;
 * Optical Properties: nonlinear optical susceptibility;
 * Unitary time evolution: Gaussian wave-packet propagation (diffusion);
 * Electronic Structure: high-resolution density of states (DoS);
-* Electronic Structure: local DoS and ARPES;
+* Electronic Structure: local DoS (LDoS) and ARPES;
 * Special Features: automated magnetic field in 2D;
 * Special Features: lattice perturbations (e.g., strain) and ‘disorder cell’ concept for implementation of multi-orbital/-bond impurities;
 * Algorithms: ultra-high-resolution CPGF full spectral (DoS);
@@ -18,18 +18,20 @@ KITE v1.1 (this version) is shipped with the following capabilities (for clean a
 
 New functionalities in v1.1:
 
-* Twisted boundary conditions for arbitrary lattice models
+* Special features: Twisted boundary conditions for arbitrary lattice models
+* Special features: customized on-site potential landscapes
+* Special features: automated magnetic field in 3D cubic systems
 
 For further details on the algorithms and the implementation please refer to S. M. Joao et al., R. Soc. Open Sci. 7, 191809 (2020) [https://royalsocietypublishing.org/doi/full/10.1098/rsos.191809].
 
 ## Getting Started
 
-For understanding the main functionalities, how to set up a TB model and disorder and evaluate the **KITE** target functions, please check the tutorial [Getting Started](https://quantum-kite.com/category/getting-started/).
-More advanced calculations are explained in [Examples](https://quantum-kite.com/category/examples/). After downloading the repository, you can find a copy of the tutorial scripts under the examples folder.
+For installation instructions and an overview of the main functionalities of **KITE**, please refer the documentation online [Getting Started](https://quantum-kite.com/category/getting-started/).
+Advanced examples are explained in [Examples](https://quantum-kite.com/category/examples/). After downloading the repository, you can find a copy of the tutorial scripts under the examples folder.
 
 ### Prerequisites
 
-Before installing the code, following prerequisites need to be satisfied:
+Before installing the core components, KITEx and KITE-tools, the following prerequisites need to be satisfied:
 
 * Eigen3
 
@@ -45,11 +47,13 @@ Before installing the code, following prerequisites need to be satisfied:
 
 * Make.
 
-### Installing
+### Installation
 
-After meeting prerequisites and downloading the repository, you can compile the KITE code using the already available Cmake files. Please check the Cmake files first, and if required libraries/packages are installed elsewhere, edit them accordingly. For the full installation procedure, please refer to the [Installation](https://quantum-kite.com/installation/) section.
+After meeting prerequisites and downloading the repository, you can compile KITE using the already available Cmake files. Please check the Cmake files first, and make any necessary edits to the libraries/packages' paths. For step by step instructions, please refer to the [Installation](https://quantum-kite.com/installation/) section.
 
 ## Contributors
+
+**João P. Santos Pires** (Universidade do Porto, Portugal)**
 
 If you would like to collaborate with us on the KITE project, send us a message through the [Contact](https://quantum-kite.com/contact/) form.
 
