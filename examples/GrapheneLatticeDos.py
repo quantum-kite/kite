@@ -1,11 +1,11 @@
 """       
         ##############################################################################      
-        #                        KITE | Release  1.0                                 #      
+        #                        KITE | Release  1.1                                 #      
         #                                                                            #      
         #                        Kite home: quantum-kite.com                         #           
         #                                                                            #      
         #  Developed by: Simao M. Joao, Joao V. Lopes, Tatiana G. Rappoport,         #       
-        #  Misa Andelkovic, Lucian Covaci, Aires Ferreira, 2018-2021                 #      
+        #  Misa Andelkovic, Lucian Covaci, Aires Ferreira, 2018-2022                 #      
         #                                                                            #      
         ##############################################################################      
 """
