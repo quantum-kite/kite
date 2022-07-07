@@ -3,7 +3,7 @@
 
 **KITE** is an open-source Python/C++ software suite for real-space tight-binding (TB) simulations of electronic structure and bulk quantum transport properties of disordered systems scalable to multi billions of atomic orbitals.
 
-KITE v1.0 is shipped with the following capabilities (for clean and disordered systems in two and three spatial dimensions):
+KITE v1.1 (this version) is shipped with the following capabilities (for clean and disordered systems in two and three spatial dimensions):
 
 * Quantum Transport: longitudinal and transverse DC conductivities at zero and finite temperature;
 * Optical Properties: AC longitudinal conductivity;
@@ -17,11 +17,15 @@ KITE v1.0 is shipped with the following capabilities (for clean and disordered s
 * Algorithms: high-resolution CPGF full spectral (finite temperature response functions);
 * Algorithms: ultra-high-resolution CPGF single-shot (zero temperature DC conductivity)
 
+New functionalities in v1.1:
+
+* Twisted boundary conditions for arbitrary lattices
+
 For further details on the algorithms and the implementation please refer to S. M. Joao et al., R. Soc. Open Sci. 7, 191809 (2020) [https://royalsocietypublishing.org/doi/full/10.1098/rsos.191809].
 
 ## Getting Started
 
-For understanding the main functionalities, how to setup a TB model and disorder and evaluate the **KITE** target functions, we suggest you to check the tutorial [Getting Started](https://quantum-kite.com/category/getting-started/).
+For understanding the main functionalities, how to set up a TB model and disorder and evaluate the **KITE** target functions, please check the tutorial [Getting Started](https://quantum-kite.com/category/getting-started/).
 More advanced calculations are explained in [Examples](https://quantum-kite.com/category/examples/). After downloading the repository, you can find a copy of the tutorial scripts under the examples folder.
 
 ### Prerequisites
