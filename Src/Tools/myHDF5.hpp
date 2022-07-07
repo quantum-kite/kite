@@ -1,6 +1,6 @@
 /***********************************************************/
 /*                                                         */
-/*   Copyright (C) 2018-2021, M. Andelkovic, L. Covaci,    */
+/*   Copyright (C) 2018-2022, M. Andelkovic, L. Covaci,    */
 /*  A. Ferreira, S. M. Joao, J. V. Lopes, T. G. Rappoport  */
 /*                                                         */
 /***********************************************************/
@@ -11,10 +11,6 @@ class DataTypeFor
 public:
   static  H5::DataType value;  
 };
-
-
-
-
 
 template <typename T>
 typename std::enable_if<is_tt<std::complex, T>::value, void>::type get_hdf5(T * l, H5::H5File *  file,  char * name) {
@@ -49,7 +45,6 @@ typename std::enable_if<!is_tt<std::complex, T>::value, void>::type get_hdf5(T *
   H5::DataSet dataset = H5::DataSet(file->openDataSet(name));
   dataset.read(l, DataTypeFor<T>::value);
 }
-
 
 /*
 
