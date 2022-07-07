@@ -1,9 +1,10 @@
 /***********************************************************/
 /*                                                         */
-/*   Copyright (C) 2018-2021, M. Andelkovic, L. Covaci,    */
+/*   Copyright (C) 2018-2022, M. Andelkovic, L. Covaci,    */
 /*  A. Ferreira, S. M. Joao, J. V. Lopes, T. G. Rappoport  */
 /*                                                         */
 /***********************************************************/
+
 #include "Generic.hpp"
 #include "ComplexTraits.hpp"
 #include "myHDF5.hpp"
