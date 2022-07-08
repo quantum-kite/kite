@@ -1,6 +1,6 @@
 <img src=https://user-images.githubusercontent.com/39924384/41094707-9e4ead6e-6a25-11e8-9e16-070a3236c8da.png width="100">
 
-**KITE** is an open-source Python/C++ software suite for real-space tight-binding (TB) simulations of electronic structure and bulk quantum transport properties of disordered systems scalable to multi billions of atomic orbitals.
+**KITE** is an open-source Python/C++ software suite for efficient real-space tight-binding (TB) simulations of electronic structure and bulk quantum transport properties of disordered systems scalable to multi billions of atomic orbitals.
 
 KITE v1.1 (this version) is shipped with the following capabilities:
 
@@ -18,7 +18,7 @@ KITE v1.1 (this version) is shipped with the following capabilities:
 
 New functionalities in v1.1:
 
-* Special features: Twisted boundary conditions for arbitrary lattice models
+* Special features: twisted boundary conditions for arbitrary lattice models
 * Special features: customized on-site potential landscapes
 * Special features: automated magnetic field in 3D cubic systems
 
@@ -51,20 +51,21 @@ Before installing the core components, KITEx and KITE-tools, the following prere
 
 After meeting prerequisites and downloading the repository, you can compile KITE using the already available Cmake files. Please check the Cmake files first, and make any necessary edits to the libraries/packages' paths. For step by step instructions, please refer to the [Installation](https://quantum-kite.com/installation/) section.
 
-## Contributors
-
-**João P. Santos Pires** (Universidade do Porto, Portugal)**
-
-If you would like to collaborate with us on the KITE project, send us a message through the [Contact](https://quantum-kite.com/contact/) form.
-
-## Authors
-
-**Simão M. João**, **João V. Lopes** (Universidade do Porto, Portugal), **Tatiana G. Rappoport** (Universidade Federal Rio de Janeiro, Brazil), **Miša Anđelković**, **Lucian Covaci** (University of Antwerp, Belgium) and **Aires Ferreira** (University of York, UK).
-
 ## License
 
 This project is licensed under the GPL v3 License - see the [LICENSE.md](LICENSE.md) file for details
 
+## Project founders
+
+**Simão M. João**, **João V. Lopes** (Universidade do Porto, Portugal), **Tatiana G. Rappoport** (Universidade Federal Rio de Janeiro, Brazil), **Miša Anđelković**, **Lucian Covaci** (University of Antwerp, Belgium) and **Aires Ferreira** (University of York, UK).
+
+## Contributors
+
+* KITEx/KITE-tools development: **João P. Santos Pires** (Porto)
+* Python interface / documentation: **Bert Jorissen** (Antwerp), **Emile Aerts** (Antwerp), **Robin Smeyers** (Antwerp), **David T. S. Perkins** (York)
+
+If you would like to collaborate with us on the KITE project, please email a team member directly or send us a message through the [Contact](https://quantum-kite.com/contact/) form.
+
 ## Acknowledgments
 
-KITE's open source project was funded by The Royal Society through grant NA150043 "*Efficient Numerical Solver for Spin, Charge and Optical Conductivity*" (T. Rappoport and A. Ferreira). KITE's team thanks the partial support from EPSRC (A. Ferreira), The Royal Society (UF130385, A. Ferreira) and FLAG-ERA (TRANS2DTMD, M. Anđelković and L. Covaci). We thank Miguel Dias Costa (HPC at NUS, Singapore), Killian Murphy (HPC at University of York, UK) and Julia Giannella (Web Design) for technical support.
+KITE's project kick-off was funded by The Royal Society through grant NA150043 "*Efficient Numerical Solver for Spin, Charge and Optical Conductivity*" (T. Rappoport and A. Ferreira). The KITE team is also grateful for the support received from EPSRC (A. Ferreira), The Royal Society (UF130385, A. Ferreira) and FLAG-ERA (TRANS2DTMD, M. Anđelković and L. Covaci). We thanks Miguel Dias Costa (HPC at NUS, Singapore), Killian Murphy (HPC at University of York, UK) and Julia Giannella (Web Design) for the technical support provided in the early stages of the KITE project.
