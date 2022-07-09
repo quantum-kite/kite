@@ -54,7 +54,7 @@ lx = ly = lz = 256
 # - boundary conditions, setting True as periodic boundary conditions, and False elsewise,
 # - info if the exported hopping and onsite data should be complex,
 # - info of the precision of the exported hopping and onsite data, 0 - float, 1 - double, and 2 - long double.
-# - scaling, if None it's automatic, if present select spectrum_bound=[e_min, e_max]
+# - scaling, if None it's automatic, if present select spectrum_range=[e_min, e_max]
 configuration = kite.Configuration(divisions=[nx, ny, nz], length=[lx, ly, lz], boundaries=[True, True, True],
                                    is_complex=False, precision=1, spectrum_range=[-6.1,6.1])
 # require the calculation of DOS
