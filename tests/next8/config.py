@@ -104,7 +104,7 @@ nx = ny = 4
 # number of unit cells in each direction.
 lx = 256
 ly = 256
-configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
+configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=["periodic", "periodic"],
                                  is_complex=True, precision=1, spectrum_range=[-EnergyScale, EnergyScale])
 
 

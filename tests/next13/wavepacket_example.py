@@ -140,7 +140,7 @@ emin, emax = -3.03 * np.abs(t) - delta, 3.03 * np.abs(t) + delta
 use_disorder = False
 
 configuration = kite.Configuration(divisions=[domain_decompose_1, domain_decompose_2], length=[lx, ly],
-                                   boundaries=[True, True], is_complex=True, precision=1, spectrum_range=[emin, emax])
+                                   boundaries=["periodic", "periodic"], is_complex=True, precision=1, spectrum_range=[emin, emax])
 
 scale_a = (emax - emin) / 2
 deltaT = 1e-15  #: [fs] timestep

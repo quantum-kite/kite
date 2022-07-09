@@ -34,7 +34,7 @@ lim     = 0.99
 delta   = lim*2.0/(NPoints - 1)*100*5
 
 configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], 
-    boundaries=[True, True], is_complex=False, precision=1, spectrum_range=[-5+delta, 5+delta])
+    boundaries=["periodic", "periodic"], is_complex=False, precision=1, spectrum_range=[-5+delta, 5+delta])
 calculation = kite.Calculation(configuration)
 calculation.dos(num_points=NPoints, num_moments=2048, num_random=1, num_disorder=1)
 kite.config_system(lattice, configuration, calculation, filename='config.h5')

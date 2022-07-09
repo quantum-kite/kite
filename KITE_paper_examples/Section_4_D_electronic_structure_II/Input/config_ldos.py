@@ -223,7 +223,7 @@ disorder_structural = [struc_disorder_1, struc_disorder_2, struc_disorder_3]
 
 nx = ny = 4
 lx = ly = int(sys.argv[1])
-configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True], is_complex=True, precision=1, spectrum_range = [-10,10])
+configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=["periodic", "periodic"], is_complex=True, precision=1, spectrum_range = [-10,10])
 calculation = kite.Calculation(configuration)
 calculation.ldos(energy=np.linspace(-0.1, 0.1, 3), num_moments=N, num_disorder=1, position=pos_matrix, sublattice=sub_matrix)
 calculation.dos(num_points=512, num_moments=512, num_random=1, num_disorder=1)

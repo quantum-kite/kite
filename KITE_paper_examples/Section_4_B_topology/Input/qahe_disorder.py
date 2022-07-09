@@ -150,7 +150,7 @@ ly = 2048
 # - scaling, if None it's automatic, if present select spectrum_range=[e_min, e_max]
 #
 
-configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
+configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=["periodic", "periodic"],
                                    is_complex=True, precision=1)
 calculation = kite.Calculation(configuration)
 

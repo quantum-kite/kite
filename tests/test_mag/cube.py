@@ -44,7 +44,7 @@ lx = 64
 ly = 64
 lz = 64
 # lx = ly = lz = 64
-configuration = kite.Configuration(divisions=[nx, ny, nz], length=[lx, ly, lz], boundaries=[True, True, True], is_complex=True, precision=1, spectrum_range=[-6.1,6.1])
+configuration = kite.Configuration(divisions=[nx, ny, nz], length=[lx, ly, lz], boundaries=["periodic", "periodic", "periodic"], is_complex=True, precision=1, spectrum_range=[-6.1,6.1])
 calculation = kite.Calculation(configuration)
 mod = kite.Modification(magnetic_field = 1)
 calculation.dos(num_points=1000, num_moments=32768, num_random=1, num_disorder=1)

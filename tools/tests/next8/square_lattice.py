@@ -50,7 +50,7 @@ weights = 1.0
 
 
 SCALE = 4.02 + W/2.0
-configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True], is_complex=True, precision=1, spectrum_range=[-SCALE, SCALE])
+configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=["periodic", "periodic"], is_complex=True, precision=1, spectrum_range=[-SCALE, SCALE])
 calculation = kite.Calculation(configuration)
 # calculation.singleshot_conductivity_dc(energy=energy, num_moments=N, num_random=1, num_disorder=1, direction='yy', eta=scattering)
 # calculation.dos(num_points=1000, num_moments=N, num_random=1, num_disorder=1)

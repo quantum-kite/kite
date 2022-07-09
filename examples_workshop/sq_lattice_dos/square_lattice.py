@@ -46,7 +46,7 @@ lattice = square_lattice()
 nx = ny = 1
 # number of unit cells in each direction.
 lx = ly = 256
-configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
+configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=["periodic", "periodic"],
                                    is_complex=False, precision=1, spectrum_range=[-4.2, 4.2])
 # require the calculation of DOS
 calculation = kite.Calculation(configuration)

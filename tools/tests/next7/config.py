@@ -20,7 +20,7 @@ lx = ly = 256
 moments = 512
 lattice = square_lattice()
 
-configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
+configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=["periodic", "periodic"],
                                    is_complex=True, precision=1, spectrum_range=[-4.1,4.1])
 
 b1, b2 = lattice.reciprocal_vectors()

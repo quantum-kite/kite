@@ -177,7 +177,7 @@ lx = ly = int(sys.argv[1])
 weights = [float(sys.argv[4]), float(sys.argv[5]), float(sys.argv[6]), float(sys.argv[7]), 
            float(sys.argv[8]), float(sys.argv[9]), float(sys.argv[10]), float(sys.argv[11])]
 
-configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
+configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=["periodic", "periodic"],
                                    is_complex=True, precision=1, spectrum_range=[-LIM,LIM])
 calculation_arpes = kite.Calculation(configuration)
 calculation_arpes.arpes(k_vector=k_path, num_moments=moments, weight=weights,num_disorder=1)

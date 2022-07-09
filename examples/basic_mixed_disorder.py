@@ -46,15 +46,20 @@ lx = ly = 512
 # make config object which caries info about
 # - the number of decomposition parts [nx, ny],
 # - lengths of structure [lx, ly]
-# - boundary conditions, setting True as periodic boundary conditions, and False elsewise,
+# - boundary conditions [mode,mode, ... ] with modes:
+#   . "periodic"
+#   . "open"
+#   . "twist_fixed"     this option needs the extra argument ths=[phi_1,..,phi_DIM] where phi_i \in [0, 2*M_PI]  
+#   . "twist_random"
+#
 # - info if the exported hopping and onsite data should be complex,
 # - info of the precision of the exported hopping and onsite data, 0 - float, 1 - double, and 2 - long double.
 # - scaling, if None it's automatic, if present select spectrum_range=[e_min, e_max]
-configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True], is_complex=False,
+configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=["periodic", "periodic"], is_complex=False,
                                    precision=1)
 
 # manual scaling
-# configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
+# configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=["periodic", "periodic"],
 #                                    is_complex=False, precision=1, spectrum_range=[-10, 10])
 
 # require the calculation of DOS

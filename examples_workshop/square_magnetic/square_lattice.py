@@ -38,7 +38,7 @@ lattice = square_lattice()
 nx = ny = 1
 lx = ly = 256
 N = 2048
-configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
+configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=["periodic", "periodic"],
                                    is_complex=True, precision=1, spectrum_range=[-4.1,4.1])
 calculation = kite.Calculation(configuration)
 mod = kite.Modification(magnetic_field = 160)

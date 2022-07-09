@@ -28,7 +28,7 @@ def graphene(onsite=(0, 0)):
 lattice = graphene()
 nx = ny = 4
 lx = ly = 4096
-configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True], is_complex=False, precision=1, spectrum_range=[-5, 5])
+configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=["periodic", "periodic"], is_complex=False, precision=1, spectrum_range=[-5, 5])
 calculation = kite.Calculation(configuration)
 calculation.dos(num_points=1000, num_moments=2048, num_random=1, num_disorder=1)
 kite.config_system(lattice, configuration, calculation, filename='config_sym.h5')

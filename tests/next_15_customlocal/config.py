@@ -21,7 +21,7 @@ lx = ly = 512
 a,b = -6,6
 M = 4096
 
-configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True], is_complex=False, precision=1, spectrum_range=[a,b])
+configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=["periodic", "periodic"], is_complex=False, precision=1, spectrum_range=[a,b])
 calculation = kite.Calculation(configuration)
 calculation.dos(num_points=1000, num_moments=M, num_random=10, num_disorder=1)
 kite.config_system(lattice, configuration, calculation, filename='config.h5')

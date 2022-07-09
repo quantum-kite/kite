@@ -243,7 +243,7 @@ if __name__ == '__main__':
         emax += 1.1 * np.abs(disorder_strength) / 2
 
     scale_a = (emax - emin) / 2
-    configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
+    configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=["periodic", "periodic"],
                                        is_complex=True, precision=1, spectrum_range=[emin, emax])
 
     # estimate the num moments

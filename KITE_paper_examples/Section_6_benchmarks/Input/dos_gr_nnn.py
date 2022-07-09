@@ -91,7 +91,7 @@ num_moments = int(sys.argv[5])
 
 emin, emax = -3.01 * np.abs(t) - 6 * t_nn, 3.01 * np.abs(t) + 6 * t_nn
 configuration = kite.Configuration(divisions=[domain_decompose_1, domain_decompose_2], length=[lx, ly],
-                                   boundaries=[True, True], is_complex=False, precision=1, spectrum_range=[emin, emax])
+                                   boundaries=["periodic", "periodic"], is_complex=False, precision=1, spectrum_range=[emin, emax])
 
 calculation = kite.Calculation(configuration)
 calculation.dos(num_points=1000, num_moments=num_moments, num_random=1, num_disorder=1)
