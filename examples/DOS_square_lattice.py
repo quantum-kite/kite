@@ -56,7 +56,7 @@ lx = ly = 32
 # Boundary Mode
 mode = "periodic"
 
-configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[mode,mode], is_complex=True, precision=1)
+configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[mode,mode], is_complex=False, precision=1)
 # specify calculation type
 calculation = kite.Calculation(configuration)
 calculation.dos(num_points=4000, num_moments=256, num_random=256, num_disorder=1)
