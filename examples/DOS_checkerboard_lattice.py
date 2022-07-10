@@ -47,7 +47,8 @@ def checkboard_lattice(onsite=(0, 0)):
     return lat
 
 # load lattice
-lattice = checkboard_lattice((-0.1,0.1))
+delta = 0.1 
+lattice = checkboard_lattice((-delta,delta))
 # number of decomposition parts [nx,ny,nz] in each direction of matrix. This divides the lattice into various sections,
 # each of which is calculated in parallel
 nx = ny = 2
