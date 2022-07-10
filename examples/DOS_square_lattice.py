@@ -11,7 +11,7 @@
 """
 """ Density of states of a square lattice model 
 
-    Units: arbitrary (energy in units of hopping, |t| = 1)
+    Units: Energy in units of hopping, |t| = 1
     Lattice: Square lattice
     Configuration: Periodic boundary conditions, double precision, automatic rescaling
     Calculation type: Average DOS
