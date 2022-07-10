@@ -11,7 +11,7 @@
 """
 """ Density of states of a cubic lattice model (twisted boundary conditions)
 
-    Units: arbitrary (energy in units of hopping, |t| = 1)
+    Units: Energy in units of hopping, |t| = 1
     Lattice: Simple cubic lattice
     Configuration: twisted boundary conditions, double precision, automatic rescaling
     Calculation type: Average DOS
