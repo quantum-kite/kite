@@ -9,7 +9,7 @@
         #                                                                            #      
         ##############################################################################      
 """
-""" Cubic lattice with twisted boundary conditions
+""" Density of states of a cubic lattice model (twisted boundary conditions)
 
     Units: arbitrary (energy in units of hopping, |t| = 1)
     Lattice: Simple cubic lattice
