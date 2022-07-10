@@ -45,7 +45,7 @@ lattice = cubic_lattice()
 # number of decomposition parts [nx,ny,nz] in each direction of matrix. This divides the lattice into various sections,
 # each of which is calculated in parallel
 nx = ny = nz = 1
-# number of unit cells in each direction.
+# number of unit cells in each direction
 lx = ly = lz = 32
 
 # - boundary conditions [mode,mode, ... ] with modes:
