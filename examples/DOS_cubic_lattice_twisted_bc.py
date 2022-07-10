@@ -24,6 +24,7 @@ import pybinding as pb
 
 def cubic_lattice(onsite=(0, 0, 0)):
     # Return lattice specification for a cubic lattice with nearest neighbor hoppings
+    
     a1 = np.array([1, 0, 0])
     a2 = np.array([0, 1, 0])
     a3 = np.array([0, 0, 1])
