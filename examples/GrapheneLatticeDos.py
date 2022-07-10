@@ -49,13 +49,13 @@ lattice = graphene_lattice()
 # number of decomposition parts in each direction of matrix. This divides the lattice into various sections,
 # each of which is calculated in parallel
 nx = ny = 1
-# number of unit cells in each direction.
+# number of unit cells in each direction
 lx = ly = 32
 
 # - boundary conditions [mode,mode, ... ] with modes:
 #   . "periodic"
 #   . "open"
-#   . "twist_fixed"     this option needs the extra argument ths=[phi_1,..,phi_DIM] where phi_i \in [0, 2*M_PI]  
+#   . "twist_fixed" -- this option needs the extra argument ths=[phi_1,..,phi_DIM] where phi_i \in [0, 2*M_PI]  
 #   . "twist_random"
 # Boundary Mode
 mode = "periodic"
