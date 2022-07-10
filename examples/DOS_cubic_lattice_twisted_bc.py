@@ -13,7 +13,7 @@
 
     Units: arbitrary (energy in units of hopping, |t| = 1)
     Lattice: Simple cubic lattice
-    Configuration: twisted boundary conditions, double precision, automatic Hamiltonian rescaling
+    Configuration: twisted boundary conditions, double precision, automatic rescaling
     Calculation type: Average DOS
     Last updated: 10/07/2022
 """
