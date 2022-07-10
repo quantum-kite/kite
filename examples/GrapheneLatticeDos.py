@@ -9,11 +9,11 @@
         #                                                                            #      
         ##############################################################################      
 """
-""" Density of states of pristine Graphene
+""" Density of states of pristine graphene
 
     Units: Energy in eV
     Lattice: Honeycomb
-    Configuration: L_x=L_y=32, periodic boundary conditions, double precision, automatic Hamiltonian rescaling;
+    Configuration: Periodic boundary conditions, double precision, automatic Hamiltonian rescaling;
     Calculation type: Average DOS;
     Last updated: 10/07/2022
 """
@@ -61,9 +61,8 @@ lx = ly = 32
 mode = "periodic"
 
 configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[mode,mode], is_complex=True, precision=1)
-# require the calculation of DOS
+# specify calculation type
 calculation = kite.Calculation(configuration)
 calculation.dos(num_points=4000, num_moments=256, num_random=256, num_disorder=1)
 # configure the *.h5 file
-#os.chdir("ConfigurationFiles/")
 kite.config_system(lattice, configuration, calculation, filename='graphene_lattice.h5')
