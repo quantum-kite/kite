@@ -23,7 +23,6 @@ import numpy as np
 import pybinding as pb
 import os
 
-
 def graphene_lattice(onsite=(0, 0)):
     # Return lattice specification for a honyecomb lattice with nearest neighbor hoppings
 
