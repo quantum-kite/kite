@@ -13,8 +13,8 @@
 
     Units: arbitrary (energy in units of hopping, |t| = 1)
     Lattice: Square lattice
-    Configuration: Periodic boundary conditions, double precision, automatic Hamiltonian rescaling;
-    Calculation type: Average DOS;
+    Configuration: Periodic boundary conditions, double precision, automatic rescaling
+    Calculation type: Average DOS
     Last updated: 10/07/2022
 """
 
