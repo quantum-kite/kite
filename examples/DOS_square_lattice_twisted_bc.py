@@ -9,12 +9,12 @@
         #                                                                            #      
         ##############################################################################      
 """
-""" Density of states of a square lattice model 
+""" Density of states of a square lattice model (twisted boundary conditions)
 
     Units: arbitrary (energy in units of hopping, |t| = 1)
     Lattice: Square lattice
-    Configuration: Twisted boundary conditions, double precision, automatic Hamiltonian rescaling;
-    Calculation type: Average DOS;
+    Configuration: Twisted boundary conditions, double precision, automatic rescaling
+    Calculation type: Average DOS
     Last updated: 10/07/2022
 """
 
