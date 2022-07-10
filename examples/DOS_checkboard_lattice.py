@@ -9,11 +9,11 @@
         #                                                                            #      
         ##############################################################################      
 """
-""" Density of states of a checkboard model 
+""" Density of states of a checkerboard lattice
 
     Units: Energy in units of hopping, |t| = 1
-    Lattice: Square lattice
-    Configuration: Twisted boundary conditions, double precision, automatic rescaling
+    Lattice: Checkerboard lattice
+    Configuration: Periodic boundary conditions, double precision, automatic rescaling
     Calculation type: Average DOS
     Last updated: 10/07/2022
 """
