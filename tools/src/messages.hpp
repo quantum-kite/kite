@@ -24,7 +24,7 @@ void print_header_message(){
       "|                                                                        | \n"                                            
       "|            Funded by The Royal Society | royalsociety.org              | \n"
       "|                                                                        | \n"
-      "|    Copyright (C) 2018-2021, M. Andelkovic, L. Covaci, A. Ferreira,     | \n"
+      "|    Copyright (C) 2018-2022, M. Andelkovic, L. Covaci, A. Ferreira,     | \n"
       "|                S. M. Joao, J. V. Lopes, T. G. Rappoport                | \n"
       "|                                                                        | \n"
       "|  This program is free software: you can redistribute it and/or modify  | \n"
