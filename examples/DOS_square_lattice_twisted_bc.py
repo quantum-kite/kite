@@ -56,7 +56,7 @@ lx = ly = 32
 # Boundary Mode
 mode = "twisted"
 # Twists in each direction
-twsx = twsy = twsz = np.pi/2.0
+twsx = twsy = np.pi/2.0
 
 configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[mode,mode], is_complex=True, precision=1, angles=[twsx, twsy])
 # specify calculation type
