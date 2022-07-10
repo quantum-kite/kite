@@ -64,4 +64,4 @@ configuration = kite.Configuration(divisions=[nx, ny, nz], length=[lx, ly, lz], 
 calculation = kite.Calculation(configuration)
 calculation.dos(num_points=4000, num_moments=256, num_random=256, num_disorder=1)
 # configure the *.h5 file
-kite.config_system(lattice, configuration, calculation, filename='cubic_lattice.h5')
+kite.config_system(lattice, configuration, calculation, filename='cubic_lattice_tbc.h5')
