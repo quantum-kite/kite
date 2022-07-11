@@ -1,12 +1,7 @@
 """       
         ##############################################################################      
-        #                        KITE | Release  1.1                                 #      
-        #                                                                            #      
-        #                        Kite home: quantum-kite.com                         #           
-        #                                                                            #      
-        #  Developed by: Simao M. Joao, Joao V. Lopes, Tatiana G. Rappoport,         #       
-        #  Misa Andelkovic, Lucian Covaci, Aires Ferreira, 2018-2022                 #      
-        #                                                                            #      
+        #                        Copyright 2022, KITE                                #            
+        #                        Home page: quantum-kite.com                         #        
         ##############################################################################      
 """
 """ Density of states of a checkerboard lattice
