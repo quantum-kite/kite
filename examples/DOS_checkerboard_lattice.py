@@ -27,7 +27,6 @@ def checkboard_lattice(onsite=(0, 0)):
     lat = pb.Lattice(a1=a1, a2=a2)
     
     # add sublattices
-
     lat.add_sublattices(('A', [0,  0], onsite[0]),('B', [1/2,  1/2], onsite[1]))
 
     # Add hoppings
