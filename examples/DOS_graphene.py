@@ -20,26 +20,36 @@ import pybinding as pb
 def graphene_lattice(onsite=(0, 0)):
     # Return lattice specification for a honyecomb lattice with nearest neighbor hoppings
 
+    # parameters
+    t = 2.8 # eV
     theta = np.pi/3.
-    t = 2.8  # eV
+
     a1 = np.array([1 + np.cos(theta), np.sin(theta)])
     a2 = np.array([0, 2 * np.sin(theta)])
+
+    # create a lattice with 2 primitive vectors
     lat = pb.Lattice(a1=a1, a2=a2)
-    
+
+    # add sublattices
     lat.add_sublattices(
         # name, position, and onsite potential
         ('A', [0, 0], onsite[0]),
         ('B', [1, 0], onsite[1])
     )
-    lat.add_hoppings(([0, 0], 'A', 'B', - t),
-                     ([-1, 0], 'A', 'B', - t),
-                     ([-1, 1], 'A', 'B', - t))
 
+    # Add hoppings
+    lat.add_hoppings(
+        # inside the main cell
+        ([0, 0], 'A', 'B', -t),
+        # between neighboring cells
+        ([-1, 0], 'A', 'B', -t),
+        ([-1, 1], 'A', 'B', -t)
+    )
     return lat
 
 # load lattice
 lattice = graphene_lattice()
-# number of decomposition parts in each direction of matrix. This divides the lattice into various sections,
+# number of decomposition parts [nx,ny,nz] in each direction of matrix. This divides the lattice into various sections,
 # each of which is calculated in parallel
 nx = ny = 1
 # number of unit cells in each direction
@@ -53,9 +63,16 @@ lx = ly = 32
 # Boundary Mode
 mode = "periodic"
 
-configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[mode,mode], is_complex=False, precision=1)
+configuration = kite.Configuration(divisions=[nx, ny],
+                                   length=[lx, ly],
+                                   boundaries=[mode, mode],
+                                   is_complex=False,
+                                   precision=1)
 # specify calculation type
 calculation = kite.Calculation(configuration)
-calculation.dos(num_points=4000, num_moments=256, num_random=256, num_disorder=1)
+calculation.dos(num_points=4000,
+                num_moments=256,
+                num_random=256,
+                num_disorder=1)
 # configure the *.h5 file
-kite.config_system(lattice, configuration, calculation, filename='graphene_lattice.h5')
+kite.config_system(lattice, configuration, calculation, filename='graphene_lattice-output.h5')

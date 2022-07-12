@@ -31,9 +31,12 @@ def cubic_lattice(onsite=(0, 0, 0)):
     lat.add_sublattices(('A', [0, 0, 0], onsite[0]))
 
     # Add hoppings
-    lat.add_hoppings(([1, 0, 1], 'A', 'A', - 1),
-                     ([0, 1, 0], 'A', 'A', - 1),
-                     ([0, 0, 1], 'A', 'A', - 1))
+    lat.add_hoppings(
+        # between neighboring cells
+        ([1, 0, 1], 'A', 'A', - 1),
+        ([0, 1, 0], 'A', 'A', - 1),
+        ([0, 0, 1], 'A', 'A', - 1)
+    )
     return lat
 
 # load lattice
@@ -55,9 +58,15 @@ mode = "random"
 # - specify precision of the exported hopping and onsite data, 0 - float, 1 - double, and 2 - long double.
 # - scaling, if None it's automatic, if present select spectrum_range=[e_min, e_max]
 
-configuration = kite.Configuration(divisions=[nx, ny, nz], length=[lx, ly, lz], boundaries=[mode,mode,mode], is_complex=True)
+configuration = kite.Configuration(divisions=[nx, ny, nz],
+                                   length=[lx, ly, lz],
+                                   boundaries=[mode, mode, mode],
+                                   is_complex=True)
 # specify calculation type
 calculation = kite.Calculation(configuration)
-calculation.dos(num_points=4000, num_moments=256, num_random=256, num_disorder=1)
+calculation.dos(num_points=4000,
+                num_moments=256,
+                num_random=256,
+                num_disorder=1)
 # configure the *.h5 file
-kite.config_system(lattice, configuration, calculation, filename='cubic_lattice.h5')
+kite.config_system(lattice, configuration, calculation, filename='cubic_lattice-output.h5')

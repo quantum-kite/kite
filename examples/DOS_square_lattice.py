@@ -20,6 +20,9 @@ import pybinding as pb
 def square_lattice(onsite=(0, 0)):
     # Return lattice specification for a square lattice with nearest neighbor hoppings
 
+    # parameters
+    t = 1 # eV
+
     a1 = np.array([1, 0])
     a2 = np.array([0, 1])
 
@@ -27,17 +30,22 @@ def square_lattice(onsite=(0, 0)):
     lat = pb.Lattice(a1=a1, a2=a2)
 
     # Add sublattices
-    lat.add_sublattices(('A', [0, 0], onsite[0]))
+    lat.add_sublattices(
+        # name, position, and onsite potential
+        ('A', [0, 0], onsite[0])
+    )
 
     # Add hoppings
-    lat.add_hoppings(([1, 0], 'A', 'A', - 1),
-                     ([0, 1], 'A', 'A', - 1))
-
+    lat.add_hoppings(
+        # between neighboring cells
+        ([1, 0], 'A', 'A', -t),
+        ([0, 1], 'A', 'A', -t)
+    )
     return lat
 
 # load lattice
 lattice = square_lattice()
-# number of decomposition parts in each direction of matrix. This divides the lattice into various sections,
+# number of decomposition parts [nx,ny,nz] in each direction of matrix. This divides the lattice into various sections,
 # each of which is calculated in parallel
 nx = ny = 1
 # number of unit cells in each direction.
@@ -46,14 +54,21 @@ lx = ly = 32
 # - boundary conditions [mode,mode, ... ] with modes:
 #   . "periodic"
 #   . "open"
-#   . "twist_fixed"     this option needs the extra argument ths=[phi_1,..,phi_DIM] where phi_i \in [0, 2*M_PI]  
+#   . "twist_fixed" -- this option needs the extra argument ths=[phi_1,..,phi_DIM] where phi_i \in [0, 2*M_PI]
 #   . "twist_random"
 # Boundary Mode
 mode = "periodic"
 
-configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[mode,mode], is_complex=False, precision=1)
+configuration = kite.Configuration(divisions=[nx, ny],
+                                   length=[lx, ly],
+                                   boundaries=[mode, mode],
+                                   is_complex=False,
+                                   precision=1)
 # specify calculation type
 calculation = kite.Calculation(configuration)
-calculation.dos(num_points=4000, num_moments=256, num_random=256, num_disorder=1)
+calculation.dos(num_points=4000,
+                num_moments=256,
+                num_random=256,
+                num_disorder=1)
 # configure the *.h5 file
-kite.config_system(lattice, configuration, calculation, filename='square_lattice.h5')
+kite.config_system(lattice, configuration, calculation, filename='square_lattice-output.h5')

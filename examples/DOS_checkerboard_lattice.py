@@ -20,29 +20,36 @@ import pybinding as pb
 def checkboard_lattice(onsite=(0, 0)):
     # Return lattice specification for a checkboard model with nearest neighbor hoppings
 
-    a1=np.array([1, 0])
-    a2=np.array([0, 1])
-    
+    # parameters
+    t = 1 # eV
+
+    a1 = np.array([1, 0])
+    a2 = np.array([0, 1])
+
     # create a lattice with 2 primitive vectors
     lat = pb.Lattice(a1=a1, a2=a2)
     
     # add sublattices
-    lat.add_sublattices(('A', [0,  0], onsite[0]),('B', [1/2,  1/2], onsite[1]))
+    lat.add_sublattices(
+        # name, position, and onsite potential
+        ('A', [0,  0], onsite[0]),
+        ('B', [1/2,  1/2], onsite[1])
+    )
 
     # Add hoppings
     lat.add_hoppings(
         # inside the main cell
-        ([0,  0], 'A', 'B', -1),
+        ([0,  0], 'A', 'B', -t),
         # between neighboring cells
-        ([-1, 0], 'A', 'B',  -1),
-        ([0, -1], 'A', 'B',  -1),
-        ([-1, -1], 'A', 'B', -1))
-
+        ([-1, 0], 'A', 'B',  -t),
+        ([0, -1], 'A', 'B',  -t),
+        ([-1, -1], 'A', 'B', -t)
+    )
     return lat
 
 # load lattice
 delta = 0.1 
-lattice = checkboard_lattice((-delta,delta))
+lattice = checkboard_lattice((-delta, delta))
 # number of decomposition parts [nx,ny,nz] in each direction of matrix. This divides the lattice into various sections,
 # each of which is calculated in parallel
 nx = ny = 2
@@ -57,9 +64,16 @@ lx = ly = 512
 # Boundary Mode
 mode = "periodic"
 
-configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[mode,mode], is_complex=False, precision=1)
+configuration = kite.Configuration(divisions=[nx, ny],
+                                   length=[lx, ly],
+                                   boundaries=[mode, mode],
+                                   is_complex=False,
+                                   precision=1)
 # specify calculation type
 calculation = kite.Calculation(configuration)
-calculation.dos(num_points=1000, num_moments=512, num_random=5, num_disorder=1)
+calculation.dos(num_points=1000,
+                num_moments=512,
+                num_random=5,
+                num_disorder=1)
 # configure the *.h5 file
-kite.config_system(lattice, configuration, calculation, filename='checkboard_lattice.h5')
+kite.config_system(lattice, configuration, calculation, filename='checkboard_lattice-output.h5')
