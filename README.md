@@ -12,12 +12,13 @@ KITE v1.1 (this version) is shipped with the following capabilities:
 * Electronic Structure: local DoS (LDoS) and ARPES;
 * Special Features: automated magnetic field in 2D;
 * Special Features: lattice perturbations (e.g., strain) and ‘disorder cell’ concept for implementation of multi-orbital/-bond impurities;
-* Algorithms: ultra-high-resolution CPGF full spectral (DoS);
+* Algorithms: high-resolution CPGF full spectral (DoS);
 * Algorithms: high-resolution CPGF full spectral (finite temperature response functions);
-* Algorithms: ultra-high-resolution CPGF single-shot (zero temperature DC conductivity)
+* Algorithms: high-resolution CPGF single-shot (zero temperature DC conductivity)
 
 New functionalities in v1.1:
 
+* Algorithms: High-resolution CPGF single-shot algorithm extended to handle multiple Fermi energies simultaneously  
 * Special features: twisted boundary conditions for arbitrary lattice models
 * Special features: customized on-site potential landscapes
 * Special features: automated magnetic field in 3D cubic systems
