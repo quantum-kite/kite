@@ -14,15 +14,15 @@
     Last updated: 13/07/2022
 """
 
+__all__ = ["honeycomb_lattice", "main"]
+
 import kite
 import numpy as np
 import pybinding as pb
 
-def honeycomb_lattice(onsite=(0, 0)):
-    # Return lattice specification for a honeycomb lattice with nearest neighbor hoppings
 
-    # parameters
-    t = 1
+def honeycomb_lattice(onsite=(0, 0), t=1):
+    # Return lattice specification for a honeycomb lattice with nearest neighbor hoppings
 
     # define lattice vectors
     theta = np.pi / 3
@@ -50,9 +50,9 @@ def honeycomb_lattice(onsite=(0, 0)):
     return lat
 
 
-if __name__ == "__main__":
+def main(onsite=(0, 0), t=1):
     # load lattice
-    lattice = honeycomb_lattice((-0.0, 0.0))
+    lattice = honeycomb_lattice(onsite, t)
 
     # add vacancy StructuralDisorder
     # In this manner we can distribute vacancy disorder
@@ -104,3 +104,7 @@ if __name__ == "__main__":
     # for generating the desired output from the generated HDF5-file, run
     # ../build/KITEx vacancies-data.h5
     # ../tools/build/KITE-tools vacancies-data.h5
+
+
+if __name__ == "__main__":
+    main()

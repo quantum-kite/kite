@@ -10,11 +10,15 @@
     Configuration: Periodic boundary conditions, double precision,
                     automatic scaling, size of the system 512x512, with domain decomposition (nx=ny=1)
     Calculation: singleshot_conductivity_dc xx/yy
+    Last updated: 13/07/2022
 """
+
+__all__ = ["phosphorene_lattice", "main"]
 
 import kite
 import numpy as np
 import pybinding as pb
+
 
 def phosphorene_lattice(num_hoppings=4):
     # Return lattice specification for a bilayer phosphorene lattice
@@ -102,19 +106,16 @@ def phosphorene_lattice(num_hoppings=4):
     return lat
 
 
-if __name__ == "__main__":
+def main(direction='xx', num_hoppings=4):
     # load lattice
-    lattice = phosphorene_lattice(num_hoppings=4)
-    
-    # direction of conductivity_dc
-    direction = 'xx'  # 'yy'
+    lattice = phosphorene_lattice(num_hoppings=num_hoppings)
 
     # number of decomposition parts [nx,ny,nz] in each direction of matrix.
     # This divides the lattice into various sections, each of which is calculated in parallel
     nx = ny = 1
     # number of unit cells in each direction.
     lx = ly = 512
-    
+
     # make config object which caries info about
     # - the number of decomposition parts [nx, ny],
     # - lengths of structure [lx, ly]
@@ -132,7 +133,8 @@ if __name__ == "__main__":
                                        length=[lx, ly],
                                        boundaries=[mode, mode],
                                        is_complex=False,
-                                       precision=1)
+                                       precision=1,
+                                       spectrum_range=[-10, 10])
 
     # define energy grid
     num_points = 15
@@ -154,3 +156,7 @@ if __name__ == "__main__":
     # for generating the desired output from the generated HDF5-file, run (replace xx with yy when calculating yy cond)
     # ../build/KITEx phxx-data.h5
     # ../tools/build/KITE-tools phxx-data.h5
+
+
+if __name__ == "__main__":
+    main()

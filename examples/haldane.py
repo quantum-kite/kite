@@ -14,17 +14,19 @@
     Last updated: 13/07/2022
 """
 
+__all__ = ["haldane", "main"]
+
 import kite
 import numpy as np
 import pybinding as pb
 
-def haldane(onsite=(0, 0)):
+
+def haldane(onsite=(0, 0), t=1):
     # Return lattice specification for Haldane model
 
     # parameters
     a = 0.24595  # [nm] unit cell length
     a_cc = 0.142  # [nm] carbon-carbon distance
-    t = 1
     t2 = t/10
 
     # define lattice vectors
@@ -58,9 +60,9 @@ def haldane(onsite=(0, 0)):
     return lat
 
 
-if __name__ == "__main__":
+def main(onsite=(0, 0), t=1):
     # load lattice
-    lattice = haldane()
+    lattice = haldane(onsite, t)
 
     # add Disorder
     disorder = kite.Disorder(lattice)
@@ -90,7 +92,8 @@ if __name__ == "__main__":
                                        length=[lx, ly],
                                        boundaries=[mode, mode],
                                        is_complex=True,
-                                       precision=0)
+                                       precision=0,
+                                       spectrum_range=[-10, 10])
 
     # specify calculation type
     calculation = kite.Calculation(configuration)
@@ -117,3 +120,7 @@ if __name__ == "__main__":
     # note: to generate  the conductivity data file for a desired window of Fermi energies, please use
     # ../tools/build/KITE-tools h5_file.h --CondDC -F Emin Emax NumPoints
     # Run ../tools/build/KITE-tools --help for more options
+
+
+if __name__ == "__main__":
+    main()

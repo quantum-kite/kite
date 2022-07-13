@@ -1,81 +1,78 @@
-""" Density of states of pristine graphene
+""" Density of states of a cubic lattice model (twisted boundary conditions)
 
     ##############################################################################
     #                        Copyright 2022, KITE                                #
     #                        Home page: quantum-kite.com                         #
     ##############################################################################
 
-    Units: Energy in eV
-    Lattice: Honeycomb
-    Configuration: Periodic boundary conditions, double precision, automatic rescaling
+    Units: Energy in units of hopping, |t| = 1
+    Lattice: Simple cubic lattice
+    Configuration: twisted boundary conditions, double precision, automatic rescaling
     Calculation type: Average DOS
     Last updated: 13/07/2022
 """
+
+__all__ = ["cubic_lattice", "main"]
 
 import kite
 import numpy as np
 import pybinding as pb
 
-def graphene_lattice(onsite=(0, 0)):
-    # Return lattice specification for a honeycomb lattice with nearest neighbor hoppings
 
-    # parameters
-    t = 2.8  # eV
+def cubic_lattice(onsite=(0, 0, 0), t=1):
+    # Return lattice specification for a cubic lattice with nearest neighbor hoppings
 
     # define lattice vectors
-    theta = np.pi / 3
-    a1 = np.array([1 + np.cos(theta), np.sin(theta)])
-    a2 = np.array([0, 2 * np.sin(theta)])
+    a1 = np.array([1, 0, 0])
+    a2 = np.array([0, 1, 0])
+    a3 = np.array([0, 0, 1])
 
-    # create a lattice with 2 primitive vectors
-    lat = pb.Lattice(a1=a1, a2=a2)
+    # create lattice with 3 primitive vectors
+    lat = pb.Lattice(a1=a1, a2=a2, a3=a3)
 
-    # add sublattices
+    # Add sublattices
     lat.add_sublattices(
         # name, position, and onsite potential
-        ('A', [0, 0], onsite[0]),
-        ('B', [1, 0], onsite[1])
+        ('A', [0, 0, 0], onsite[0])
     )
 
     # Add hoppings
     lat.add_hoppings(
-        # inside the main cell, between which atoms, and the value
-        ([0, 0], 'A', 'B', -t),
         # between neighboring cells, between which atoms, and the value
-        ([-1, 0], 'A', 'B', -t),
-        ([-1, 1], 'A', 'B', -t)
+        ([1, 0, 1], 'A', 'A', -t),
+        ([0, 1, 0], 'A', 'A', -t),
+        ([0, 0, 1], 'A', 'A', -t)
     )
     return lat
 
 
-if __name__ == "__main__":
+def main(onsite=(0, 0, 0), t=1):
     # load lattice
-    lattice = graphene_lattice()
+    lattice = cubic_lattice(onsite, t)
 
     # number of decomposition parts [nx,ny,nz] in each direction of matrix.
     # This divides the lattice into various sections, each of which is calculated in parallel
-    nx = ny = 1
+    nx = ny = nz = 1
     # number of unit cells in each direction.
-    lx = ly = 32
+    lx = ly = lz = 32
 
     # make config object which caries info about
-    # - the number of decomposition parts [nx, ny],
-    # - lengths of structure [lx, ly]
+    # - the number of decomposition parts [nx, ny, nz],
+    # - lengths of structure [lx, ly, lz]
     # - boundary conditions [mode,mode, ... ] with modes:
     #   . "periodic"
     #   . "open"
     #   . "twist_fixed" -- this option needs the extra argument ths=[phi_1,..,phi_DIM] where phi_i \in [0, 2*M_PI]
     #   . "twist_random"
     # Boundary Mode
-    mode = "periodic"
+    mode = "random"
 
     # - specify precision of the exported hopping and onsite data, 0 - float, 1 - double, and 2 - long double.
     # - scaling, if None it's automatic, if present select spectrum_range=[e_min, e_max]
-    configuration = kite.Configuration(divisions=[nx, ny],
-                                       length=[lx, ly],
-                                       boundaries=[mode, mode],
-                                       is_complex=False,
-                                       precision=1)
+    configuration = kite.Configuration(divisions=[nx, ny, nz],
+                                       length=[lx, ly, lz],
+                                       boundaries=[mode, mode, mode],
+                                       is_complex=True)
 
     # specify calculation type
     calculation = kite.Calculation(configuration)
@@ -85,8 +82,12 @@ if __name__ == "__main__":
                     num_disorder=1)
 
     # configure the *.h5 file
-    kite.config_system(lattice, configuration, calculation, filename='graphene_lattice-data.h5')
+    kite.config_system(lattice, configuration, calculation, filename='cubic_lattice-data.h5')
 
     # for generating the desired output from the generated HDF5-file, run
-    # ../build/KITEx graphene_lattice-data.h5
-    # ../tools/build/KITE-tools graphene_lattice-data.h5
+    # ../build/KITEx cubic_lattice-data.h5
+    # ../tools/build/KITE-tools cubic_lattice-data.h5
+
+
+if __name__ == "__main__":
+    main()

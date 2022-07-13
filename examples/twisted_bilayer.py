@@ -14,6 +14,8 @@
     Last updated: 13/07/2022
 """
 
+__all__ = ["twisted_bilayer_lattice", "main"]
+
 import pybinding as pb
 import numpy as np
 import kite
@@ -33,13 +35,13 @@ def twisted_bilayer_lattice(angle_index=0):
     return lat
 
 
-if __name__ == "__main__":
+def main(angle_index=0):
     # select the twist angle, choose between
-    #   0 ->  2.005
-    #   1 ->  7.341
-    #   2 -> 13.174
-    #   3 -> 21.787
-    angle_index = 0
+    #   angle_index     twist angle (degrees)
+    #     0         ->       2.005
+    #     1         ->       7.341
+    #     2         ->      13.174
+    #     3         ->      21.787
 
     # load lattice
     lattice = twisted_bilayer_lattice(angle_index)
@@ -90,3 +92,7 @@ if __name__ == "__main__":
     #   model = kite.make_pybinding_model(lattice)
     #   dos = pb.kpm(model).calc_dos(np.linspace(-4, 4, 2000), broadening=1e-2, num_random=1)
     #   dos.plot()
+
+
+if __name__ == "__main__":
+    main()

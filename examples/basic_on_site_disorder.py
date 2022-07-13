@@ -14,19 +14,21 @@
     Last updated: 13/07/2022
 """
 
+__all__ = ["main"]
+
 import kite
 
 from pybinding.repository import graphene
 
 
-if __name__ == "__main__":
+def main(onsite=(0, 0)):
     # load a monolayer graphene lattice
-    lattice = graphene.monolayer()
+    lattice = graphene.monolayer(onsite=onsite)
 
     # add Disorder
     disorder = kite.Disorder(lattice)
     disorder.add_disorder('B', 'Deterministic', -1.0)
-    disorder.add_disorder('A', 'Uniform', +1.5, 1.0)
+    disorder.add_disorder('A', 'Uniform', 1.5, 1.0)
 
     # number of decomposition parts [nx,ny] in each direction of matrix.
     # This divides the lattice into various sections, each of which is calculated in parallel
@@ -51,7 +53,8 @@ if __name__ == "__main__":
                                        length=[lx, ly],
                                        boundaries=[mode, mode],
                                        is_complex=False,
-                                       precision=1)
+                                       precision=1,
+                                       spectrum_range=[-10, 10])
 
     # specify calculation type
     calculation = kite.Calculation(configuration)
@@ -67,3 +70,7 @@ if __name__ == "__main__":
     # for generating the desired output from the generated HDF5-file, run
     # ../build/KITEx on_site_disorder-data.h5
     # ../tools/build/KITE-tools on_site_disorder-data.h5
+
+
+if __name__ == "__main__":
+    main()

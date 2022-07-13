@@ -14,14 +14,16 @@
     Last updated: 13/07/2022
 """
 
+__all__ = ["main"]
+
 import kite
 
 from pybinding.repository import graphene
 
 
-if __name__ == "__main__":
+def main(onsite=(0, 0)):
     # load a monolayer graphene lattice
-    lattice = graphene.monolayer()
+    lattice = graphene.monolayer(onsite=onsite)
 
     # add Disorder
     disorder = kite.Disorder(lattice)
@@ -51,7 +53,8 @@ if __name__ == "__main__":
                                        length=[lx, ly],
                                        boundaries=[mode, mode],
                                        is_complex=False,
-                                       precision=1)
+                                       precision=1,
+                                       spectrum_range=[-10, 10])
 
     # specify calculation type
     calculation = kite.Calculation(configuration)
@@ -73,3 +76,7 @@ if __name__ == "__main__":
     # for generating the desired output from the generated HDF5-file, run
     # ../build/KITEx optcond_gaussian_disorder-data.h5
     # ../tools/build/KITE-tools optcond_gaussian_disorder-data.h5
+
+
+if __name__ == "__main__":
+    main()

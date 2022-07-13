@@ -12,15 +12,15 @@
     Last updated: 13/07/2022
 """
 
+__all__ = ["square_lattice", "main"]
+
 import kite
 import numpy as np
 import pybinding as pb
 
-def square_lattice(onsite=(0, 0)):
-    # Return lattice specification for a square lattice with nearest neighbor hoppings
 
-    # parameters
-    t = 1
+def square_lattice(onsite=(0, 0), t=1):
+    # Return lattice specification for a square lattice with nearest neighbor hoppings
 
     # define lattice vectors
     a1 = np.array([1, 0])
@@ -43,9 +43,10 @@ def square_lattice(onsite=(0, 0)):
     )
     return lat
 
-if __name__ == "__main__":
+
+def main(onsite=(0, 0), t=1):
     # load lattice
-    lattice = square_lattice()
+    lattice = square_lattice(onsite, t)
 
     # number of decomposition parts [nx,ny,nz] in each direction of matrix.
     # This divides the lattice into various sections, each of which is calculated in parallel
@@ -85,3 +86,7 @@ if __name__ == "__main__":
     # for generating the desired output from the generated HDF5-file, run
     # ../build/KITEx square_lattice-data.h5
     # ../tools/build/KITE-tools square_lattice-data.h5
+
+
+if __name__ == "__main__":
+    main()
