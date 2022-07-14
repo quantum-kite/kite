@@ -1,18 +1,18 @@
 """ Density of states of pristine graphene
 
-    ##############################################################################
-    #                        Copyright 2022, KITE                                #
-    #                        Home page: quantum-kite.com                         #
-    ##############################################################################
+    ##########################################################################
+    #                         Copyright 2022, KITE                           #
+    #                         Home page: quantum-kite.com                    #
+    ##########################################################################
 
     Units: Energy in eV
     Lattice: Honeycomb
     Configuration: Periodic boundary conditions, double precision, automatic rescaling
     Calculation type: Average DOS
-    Last updated: 13/07/2022
+    Last updated: 14/07/2022
 """
 
-__all__ = ["graphene_lattice", "main"]
+__all__ = ["main"]
 
 import kite
 import numpy as np
@@ -20,7 +20,7 @@ import pybinding as pb
 
 
 def graphene_lattice(onsite=(0, 0)):
-    # Return lattice specification for a honeycomb lattice with nearest neighbor hoppings
+    """Return lattice specification for a honeycomb lattice with nearest neighbor hoppings"""
 
     # parameters
     t = 2.8  # eV
@@ -52,6 +52,7 @@ def graphene_lattice(onsite=(0, 0)):
 
 
 def main(onsite=(0, 0)):
+    """Prepare the input file for KITEx"""
     # load lattice
     lattice = graphene_lattice(onsite)
 
@@ -88,11 +89,15 @@ def main(onsite=(0, 0)):
                     num_disorder=1)
 
     # configure the *.h5 file
-    kite.config_system(lattice, configuration, calculation, filename='graphene_lattice-data.h5')
+    output_file = "graphene_lattice-output.h5"
+    kite.config_system(lattice, configuration, calculation, filename=output_file)
 
     # for generating the desired output from the generated HDF5-file, run
-    # ../build/KITEx graphene_lattice-data.h5
-    # ../tools/build/KITE-tools graphene_lattice-data.h5
+    # ../build/KITEx graphene_lattice-output.h5
+    # ../tools/build/KITE-tools graphene_lattice-output.h5
+
+    # returning the name of the created HDF5-file
+    return output_file
 
 
 if __name__ == "__main__":

@@ -1,9 +1,9 @@
 """ Density of States and DC conductivity of the Haldane model
 
-    ##############################################################################
-    #                        Copyright 2022, KITE                                #
-    #                        Home page: quantum-kite.com                         #
-    ##############################################################################
+    ##########################################################################
+    #                         Copyright 2022, KITE                           #
+    #                         Home page: quantum-kite.com                    #
+    ##########################################################################
 
     Units: Energy in units of hopping, |t| = 1
     Lattice: Honeycomb
@@ -11,10 +11,10 @@
                     automatic scaling, size of the system 256x256, with domain decomposition (nx=ny=1)
     Disorder: Disorder class Uniform at different sublattices
     Calculation type: Average DOS and DC conductivity (xy)
-    Last updated: 13/07/2022
+    Last updated: 14/07/2022
 """
 
-__all__ = ["haldane", "main"]
+__all__ = ["main"]
 
 import kite
 import numpy as np
@@ -22,7 +22,7 @@ import pybinding as pb
 
 
 def haldane(onsite=(0, 0), t=1):
-    # Return lattice specification for Haldane model
+    """Return lattice specification for Haldane model"""
 
     # parameters
     a = 0.24595  # [nm] unit cell length
@@ -61,6 +61,7 @@ def haldane(onsite=(0, 0), t=1):
 
 
 def main(onsite=(0, 0), t=1):
+    """Prepare the input file for KITEx"""
     # load lattice
     lattice = haldane(onsite, t)
 
@@ -110,16 +111,20 @@ def main(onsite=(0, 0), t=1):
                                 temperature=100)
 
     # configure the *.h5 file
-    kite.config_system(lattice, configuration, calculation, filename='haldane-data.h5',
+    output_file = "haldane-output.h5"
+    kite.config_system(lattice, configuration, calculation, filename=output_file,
                        disorder=disorder)
 
     # for generating the desired output from the generated HDF5-file, run
-    # ../build/KITEx haldane-data.h5
-    # ../tools/build/KITE-tools haldane-data.h5
+    # ../build/KITEx haldane-output.h5
+    # ../tools/build/KITE-tools haldane-output.h5
 
     # note: to generate  the conductivity data file for a desired window of Fermi energies, please use
     # ../tools/build/KITE-tools h5_file.h --CondDC -F Emin Emax NumPoints
     # Run ../tools/build/KITE-tools --help for more options
+
+    # returning the name of the created HDF5-file
+    return output_file
 
 
 if __name__ == "__main__":

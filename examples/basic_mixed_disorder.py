@@ -1,9 +1,9 @@
 """ Density of states of graphene with On-site and vacancy disorder
 
-    ##############################################################################
-    #                        Copyright 2022, KITE                                #
-    #                        Home page: quantum-kite.com                         #
-    ##############################################################################
+    ##########################################################################
+    #                         Copyright 2022, KITE                           #
+    #                         Home page: quantum-kite.com                    #
+    ##########################################################################
 
     Units: Energy in eV
     Lattice: Honeycomb
@@ -13,7 +13,7 @@
                StructuralDisorder class vacancy and bond disorder
     Calculation type: Average DOS
     Note: automatic scaling is not supported when bond disorder is present
-    Last updated: 13/07/2022
+    Last updated: 14/07/2022
 """
 
 __all__ = ["main"]
@@ -24,6 +24,7 @@ from pybinding.repository import graphene
 
 
 def main(onsite=(0, 0)):
+    """Prepare the input file for KITEx"""
     # load a monolayer graphene lattice
     lattice = graphene.monolayer(onsite=onsite)
 
@@ -70,12 +71,16 @@ def main(onsite=(0, 0)):
                     num_disorder=1)
 
     # configure the *.h5 file
-    kite.config_system(lattice, configuration, calculation, filename='mixed_disorder-data.h5',
+    output_file = "mixed_disorder-output.h5"
+    kite.config_system(lattice, configuration, calculation, filename=output_file,
                        disorder=disorder, disorder_structural=disorder_structural)
 
     # for generating the desired output from the generated HDF5-file, run
-    # ../build/KITEx mixed_disorder-data.h5
-    # ../tools/build/KITE-tools mixed_disorder-data.h5
+    # ../build/KITEx mixed_disorder-output.h5
+    # ../tools/build/KITE-tools mixed_disorder-output.h5
+
+    # returning the name of the created HDF5-file
+    return output_file
 
 
 if __name__ == "__main__":

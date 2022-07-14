@@ -1,9 +1,9 @@
 """ Twisted bilayer graphene, loading a predefined lattice
 
-    ##############################################################################
-    #                        Copyright 2022, KITE                                #
-    #                        Home page: quantum-kite.com                         #
-    ##############################################################################
+    ##########################################################################
+    #                         Copyright 2022, KITE                           #
+    #                         Home page: quantum-kite.com                    #
+    ##########################################################################
 
     Units: Energy in eV
     Lattice: Twisted bilayer graphene
@@ -11,10 +11,10 @@
     Configuration: Periodic boundary conditions, double precision,
                     automatic scaling, size of the system  flexible, with domain decomposition (nx=ny=1)
     Calculation type: Average DOS
-    Last updated: 13/07/2022
+    Last updated: 14/07/2022
 """
 
-__all__ = ["twisted_bilayer_lattice", "main"]
+__all__ = ["main"]
 
 import pybinding as pb
 import numpy as np
@@ -22,7 +22,7 @@ import kite
 
 
 def twisted_bilayer_lattice(angle_index=0):
-    # Return lattice specification for a twisted bilayer lattice with nearest neighbor hoppings
+    """Return lattice specification for a twisted bilayer lattice with nearest neighbor hoppings"""
 
     # define the angle
     angle = np.array([2.005, 7.341, 13.174, 21.787])[angle_index]
@@ -36,6 +36,7 @@ def twisted_bilayer_lattice(angle_index=0):
 
 
 def main(angle_index=0):
+    """Prepare the input file for KITEx"""
     # select the twist angle, choose between
     #   angle_index     twist angle (degrees)
     #     0         ->       2.005
@@ -80,11 +81,12 @@ def main(angle_index=0):
                     num_points=1000)
 
     # configure the *.h5 file
-    kite.config_system(lattice, configuration, calculation, filename='tblg_{:d}-data.h5'.format(angle_index))
+    output_file = "tblg_{0}-output.h5".format(str(angle_index))
+    kite.config_system(lattice, configuration, calculation, filename=output_file)
 
-    # for generating the desired output from the generated HDF5-file, run (replace n with the value os angle_index)
-    # ../build/KITEx tbl_n.h5
-    # ../tools/build/KITE-tools tbl_n-data.h5
+    # for generating the desired output from the generated HDF5-file, run (replace 0 with the value of angle_index)
+    # ../build/KITEx tblg_0-output.h5
+    # ../tools/build/KITE-tools tblg_0-output.h5
 
     # Note: for a quick check, make a Pybinding model and check the DOS
     #   model = pb.Model(lattice, pb.rectangle(100, 100), pb.translational_symmetry(a1=50, a2=50))
@@ -92,6 +94,9 @@ def main(angle_index=0):
     #   model = kite.make_pybinding_model(lattice)
     #   dos = pb.kpm(model).calc_dos(np.linspace(-4, 4, 2000), broadening=1e-2, num_random=1)
     #   dos.plot()
+
+    # returning the name of the created HDF5-file
+    return output_file
 
 
 if __name__ == "__main__":

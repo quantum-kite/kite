@@ -1,19 +1,19 @@
 """ Phosphorene conductivity 'xx'/'yy'
 
-    ##############################################################################
-    #                        Copyright 2022, KITE                                #
-    #                        Home page: quantum-kite.com                         #
-    ##############################################################################
+    ##########################################################################
+    #                         Copyright 2022, KITE                           #
+    #                         Home page: quantum-kite.com                    #
+    ##########################################################################
 
     Units: Energy in eV
     Lattice: Bilayer phosphorene
     Configuration: Periodic boundary conditions, double precision,
                     automatic scaling, size of the system 512x512, with domain decomposition (nx=ny=1)
     Calculation: singleshot_conductivity_dc xx/yy
-    Last updated: 13/07/2022
+    Last updated: 14/07/2022
 """
 
-__all__ = ["phosphorene_lattice", "main"]
+__all__ = ["main"]
 
 import kite
 import numpy as np
@@ -21,7 +21,7 @@ import pybinding as pb
 
 
 def phosphorene_lattice(num_hoppings=4):
-    # Return lattice specification for a bilayer phosphorene lattice
+    """Return lattice specification for a bilayer phosphorene lattice"""
     
     # parameters
     a = 0.222  # nm
@@ -107,6 +107,7 @@ def phosphorene_lattice(num_hoppings=4):
 
 
 def main(direction='xx', num_hoppings=4):
+    """Prepare the input file for KITEx"""
     # load lattice
     lattice = phosphorene_lattice(num_hoppings=num_hoppings)
 
@@ -133,12 +134,11 @@ def main(direction='xx', num_hoppings=4):
                                        length=[lx, ly],
                                        boundaries=[mode, mode],
                                        is_complex=False,
-                                       precision=1,
-                                       spectrum_range=[-10, 10])
+                                       precision=1)
 
     # define energy grid
     num_points = 15
-    energy = [(1.0 / num_points * i ) * 3.5 for i in range(num_points)]
+    energy = np.linspace(0, 3, num_points)
 
     # specify calculation type
     calculation = kite.Calculation(configuration)
@@ -151,11 +151,21 @@ def main(direction='xx', num_hoppings=4):
                                            eta=0.02)
 
     # configure the *.h5 file
-    kite.config_system(lattice, configuration, calculation, filename='ph{:s}-data.h5'.format(direction))
+    output_file = "ph{0}-output.h5".format(direction)
+    kite.config_system(lattice, configuration, calculation, filename=output_file)
 
-    # for generating the desired output from the generated HDF5-file, run (replace xx with yy when calculating yy cond)
-    # ../build/KITEx phxx-data.h5
-    # ../tools/build/KITE-tools phxx-data.h5
+    # for generating the desired output from the generated HDF5-file, run
+    # ../build/KITEx phxx-output.h5
+    # ../tools/build/KITE-tools phxx-output.h5
+
+    # returning the name of the created HDF5-file
+    return output_file
+
+
+def post_process(file_name="phxx-output.h5", out_file_name="condDC.dat"):
+    from h5py import File
+    single_shot = File(file_name, "r+")['Calculation']['singleshot_conductivity_dc']['SingleShot']
+    np.savetxt(out_file_name, np.c_[single_shot[:, 0], single_shot[:, 1]])
 
 
 if __name__ == "__main__":

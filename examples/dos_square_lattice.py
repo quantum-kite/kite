@@ -1,18 +1,18 @@
 """ Density of states of a square lattice
 
-    ##############################################################################
-    #                        Copyright 2022, KITE                                #
-    #                        Home page: quantum-kite.com                         #
-    ##############################################################################
+    ##########################################################################
+    #                         Copyright 2022, KITE                           #
+    #                         Home page: quantum-kite.com                    #
+    ##########################################################################
 
     Units: Energy in units of hopping, |t| = 1
     Lattice: Square lattice
     Configuration: Periodic boundary conditions, double precision, automatic rescaling
     Calculation type: Average DOS
-    Last updated: 13/07/2022
+    Last updated: 14/07/2022
 """
 
-__all__ = ["square_lattice", "main"]
+__all__ = ["main"]
 
 import kite
 import numpy as np
@@ -20,7 +20,7 @@ import pybinding as pb
 
 
 def square_lattice(onsite=(0, 0), t=1):
-    # Return lattice specification for a square lattice with nearest neighbor hoppings
+    """Return lattice specification for a square lattice with nearest neighbor hoppings"""
 
     # define lattice vectors
     a1 = np.array([1, 0])
@@ -45,6 +45,7 @@ def square_lattice(onsite=(0, 0), t=1):
 
 
 def main(onsite=(0, 0), t=1):
+    """Prepare the input file for KITEx"""
     # load lattice
     lattice = square_lattice(onsite, t)
 
@@ -81,11 +82,15 @@ def main(onsite=(0, 0), t=1):
                     num_disorder=1)
 
     # configure the *.h5 file
-    kite.config_system(lattice, configuration, calculation, filename='square_lattice-data.h5')
+    output_file = "square_lattice-output.h5"
+    kite.config_system(lattice, configuration, calculation, filename=output_file)
 
     # for generating the desired output from the generated HDF5-file, run
-    # ../build/KITEx square_lattice-data.h5
-    # ../tools/build/KITE-tools square_lattice-data.h5
+    # ../build/KITEx square_lattice-output.h5
+    # ../tools/build/KITE-tools square_lattice-output.h5
+
+    # returning the name of the created HDF5-file
+    return output_file
 
 
 if __name__ == "__main__":

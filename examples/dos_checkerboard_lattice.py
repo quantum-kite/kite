@@ -1,18 +1,18 @@
 """ Density of states of a checkerboard lattice
 
-    ##############################################################################
-    #                        Copyright 2022, KITE                                #
-    #                        Home page: quantum-kite.com                         #
-    ##############################################################################
+    ##########################################################################
+    #                         Copyright 2022, KITE                           #
+    #                         Home page: quantum-kite.com                    #
+    ##########################################################################
 
     Units: Energy in units of hopping, |t| = 1
     Lattice: Checkerboard lattice
     Configuration: Periodic boundary conditions, double precision, automatic rescaling
     Calculation type: Average DOS
-    Last updated: 13/07/2022
+    Last updated: 14/07/2022
 """
 
-__all__ = ["checkboard_lattice", "main"]
+__all__ = ["main"]
 
 import kite
 import numpy as np
@@ -20,7 +20,7 @@ import pybinding as pb
 
 
 def checkboard_lattice(onsite=(0, 0), t=1):
-    # Return lattice specification for a checkboard lattice with nearest neighbor hoppings
+    """Return lattice specification for a checkboard lattice with nearest neighbor hoppings"""
 
     # define lattice vectors
     a1 = np.array([1, 0])
@@ -49,6 +49,7 @@ def checkboard_lattice(onsite=(0, 0), t=1):
 
 
 def main(delta=0.1, t=1):
+    """Prepare the input file for KITEx"""
     # load lattice
     lattice = checkboard_lattice((-delta, delta), t)
 
@@ -85,11 +86,15 @@ def main(delta=0.1, t=1):
                     num_disorder=1)
 
     # configure the *.h5 file
-    kite.config_system(lattice, configuration, calculation, filename='checkboard_lattice-data.h5')
+    output_file = "checkerboard_lattice-output.h5"
+    kite.config_system(lattice, configuration, calculation, filename=output_file)
 
     # for generating the desired output from the generated HDF5-file, run
-    # ../build/KITEx checkboard_lattice-data.h5
-    # ../tools/build/KITE-tools checkboard_lattice-data.h5
+    # ../build/KITEx checkerboard_lattice-output.h5
+    # ../tools/build/KITE-tools checkerboard_lattice-output.h5
+
+    # returning the name of the created HDF5-file
+    return output_file
 
 
 if __name__ == "__main__":
