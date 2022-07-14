@@ -18,13 +18,13 @@ _kite_tools_dir = "../tools/build"
 
 def run_calculation(input_file="output.h5"):
     """Run KITEx"""
-    print(f"\033[94m - - - -             Doing the KITEx-calculation                - - - - - \033[0m")
+    print_command("- - - -             Doing the KITEx-calculation                - - - - -")
     terminal("{0}/KITEx {1}".format(_kitex_dir, input_file))
 
 
 def run_tools(input_file="output.h5"):
     """Run KITE-tools to obtain the DOS"""
-    print(f"\033[94m - - - -             Doing the KITE-tools postprocessing        - - - - - \033[0m")
+    print_command("- - - -             Doing the KITE-tools postprocessing        - - - - -")
     terminal("{0}/KITE-tools {1}".format(_kite_tools_dir, input_file))
 
 
@@ -232,7 +232,7 @@ def main():
     run_calculation(hdf5_file)
     run_tools(hdf5_file)
     terminal("mv dos.dat {0}".format(dos_data))
-    terminal("mv condDC.dat {0}".format(opt_cond_data))
+    terminal("mv condDC.dat {0}".format(cond_dc_data))
     make_figure_dos(file_data=dos_data, title="DOS Graphene Gaussian On-site disorder",
                     file_out=dos_figure)
     make_figure_cond_cd(file_data=cond_dc_data, title="DC Conductivity Haldene",
@@ -241,7 +241,7 @@ def main():
     print_command("-" * 74 + "\n" + " " * 10 + "Ran all the examples in the kite/examples-folder\n" + "-" * 74 + "\n")
 
     # Example 11: phosphorene.py
-    print_command("======= Example 11: DOS & DC coductivity for phosphorene in XX   =========")
+    print_command("======= Example 11: DC coductivity for phosphorene in XX         =========")
     import phosphorene as example
     print_command("- - - -            Making the configuration file                 - - - - -")
     hdf5_file = example.main()
@@ -255,7 +255,7 @@ def main():
                         file_out=cond_dc_figure)
 
     # Example 12: phosphorene.py
-    print_command("======= Example 12: DOS & DC coductivity for phosphorene in YY   =========")
+    print_command("======= Example 12: DC coductivity for phosphorene in YY         =========")
     import phosphorene as example
     print_command("- - - -            Making the configuration file                 - - - - -")
     hdf5_file = example.main(direction='yy')

@@ -22,7 +22,9 @@ import pybinding as pb
 
 def phosphorene_lattice(num_hoppings=4):
     """Return lattice specification for a bilayer phosphorene lattice"""
-    
+
+    raise Warning("Currently, this code is buggy on the Pybinding side.")
+
     # parameters
     a = 0.222  # nm
     ax = 0.438  # nm
@@ -87,12 +89,12 @@ def phosphorene_lattice(num_hoppings=4):
         lat.add_hoppings(
             # inside the main cell, between which atoms, and the value
             ([0, 0], 'A', 'C', 't4'),
+            ([0, 0], 'B', 'D', 't4'),
+            ([0, -1], 'B', 'D', 't4'),
             # between neighboring cells, between which atoms, and the value
             ([0, -1], 'A', 'C', 't4'),
             ([-1, 0], 'A', 'C', 't4'),
             ([-1, -1], 'A', 'C', 't4'),
-            ([0, 0], 'B', 'D', 't4'),
-            ([0, -1], 'B', 'D', 't4'),
             ([-1, 0], 'B', 'D', 't4'),
             ([-1, -1], 'B', 'D', 't4')
         )
