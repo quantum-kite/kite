@@ -23,3 +23,5 @@ if [[ "$1" == "script" ]]; then
     python ../compare.py configREF.h5 $file1 config.h5 $file1
     rm -r __pycache__
 fi
+
+
