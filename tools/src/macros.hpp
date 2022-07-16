@@ -9,11 +9,11 @@
 #define outres "\033[0m"
 
 #ifndef DEBUG
-#define DEBUG 1
+#define DEBUG 0
 #endif
 
 #ifndef VERBOSE
-#define VERBOSE 1
+#define VERBOSE 0
 #endif
 
 // The first scale is 1/2pi and corresponds to the conductance quantum per spin e^2/h
