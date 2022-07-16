@@ -40,6 +40,7 @@ public:
   // directory
   Eigen::Array<T,-1,-1> custom_local;
   bool is_custom_local_set;
+  bool print_custom;
   void generate_custom_local();
   Eigen::Array<T,-1,-1> fetch_type1();
 

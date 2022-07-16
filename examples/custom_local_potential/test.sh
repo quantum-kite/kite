@@ -12,7 +12,9 @@ if [[ "$1" == "redo" ]]; then
     
     # Replace the library in the lib directory
     rm ../../lib/libaux.so.1
-    ln -s libaux.so ../../lib/libaux.so.1
+    cd ../../lib
+    ln -s ../tests/next_15_customlocal/libaux.so libaux.so.1
+    cd ../tests/next_15_customlocal
 
     # Use the existing configuration file
     cp configORIG.h5 config.h5
@@ -21,8 +23,10 @@ if [[ "$1" == "redo" ]]; then
     python ../compare.py configREF.h5 $file config.h5 $file
 
     # Put the library back the way it was, so it does not change the other tests
-    rm ../../lib/libaux.so.1
-    ln -s ../../lib/libaux.so ../../lib/libaux.so.1
+    cd ../../lib
+    rm libaux.so.1
+    ln -s libaux.so libaux.so.1
+    cd ../tests/next_15_customlocal
 fi
 
 if [[ "$1" == "script" ]]; then

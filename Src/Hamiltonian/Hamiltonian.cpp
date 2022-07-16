@@ -17,7 +17,7 @@
 #include "Hamiltonian.hpp"
 
 // Function defined in lib/aux.cpp - it is loaded dynamically in runtime
-double uncorrelated_wrapper(std::size_t *vec, unsigned dim);
+double uncorrelated_wrapper(double *vec, unsigned orb);
 
 
 
@@ -33,8 +33,8 @@ Hamiltonian<T,D>::Hamiltonian(char *filename,  LatticeStructure<D> & rr, GLOBAL_
   }
   
 
-     is_custom_local_set = false;
-     generate_custom_local();
+  is_custom_local_set = false;
+  generate_custom_local();
 
 
   /* Anderson disorder */
@@ -63,10 +63,17 @@ void Hamiltonian<T,D>::generate_twists()
 #pragma omp master
   {
     Global.GlobBTwist.setZero(); // Set the Global Boundary Twists to zero
-    for(unsigned i = 0; i < D; i++)
-      {
-	Global.GlobBTwist(i,0)  = float(r.RandomBoundaries[i])* 2 * M_PI * (0.5 - rnd.get()); //JPPP Random value between -π and π
-	Global.GlobBTwist(i,0) += (1. - float(r.RandomBoundaries[i])) * r.BdTwist[i];         //JPPP Fixed Case
+    for(unsigned i = 0; i < D; i++) {
+          //JPPP Fixed Case
+          if(r.RandomBoundaries[i] == 0){
+	        Global.GlobBTwist(i,0) = r.BdTwist[i];         
+          }
+
+            //JPPP Random value between -π and π
+          if(r.RandomBoundaries[i] == 1){
+	        Global.GlobBTwist(i,0) = 2 * M_PI * (0.5 - rnd.get()); 
+          } 
+
       };
   };
 #pragma omp barrier
@@ -297,11 +304,32 @@ void Hamiltonian<T,D>::generate_custom_local(){
     //
     //
 
-    // Check if the user wants to define the local energy
-    bool wants = true;
-    if(!wants) return;
+    // Check if the user wants to define the local energy. This is an optimization flag
+    // KITE does not need to store the local energy if it is not required
+    int custom_required = -1;
+    int print_flag = false;
 
-    //custom_local = Eigen::Array<T, -1, -1>::Zero(r.Sized,1); // with ghosts
+#pragma omp barrier
+#pragma omp critical
+{
+    try { 
+      H5::H5File *file = new H5::H5File(name, H5F_ACC_RDONLY);
+      get_hdf5(&custom_required, file, (char*)"Hamiltonian/CustomLocalEnergy");
+      get_hdf5(&print_flag, file, (char*)"Hamiltonian/PrintCustomLocalEnergy");
+      delete file;
+    }
+    catch(...) {
+        std::cout << "Error: CustomLocalEnergy is not defined in the configuration file. Exiting program.\n";
+        exit(1);
+    }
+}
+#pragma omp barrier
+    print_custom = print_flag;
+    
+
+    if(custom_required != 1) return;
+
+    // Generate the custom local energy from an external library inside /lib
     custom_local = fetch_type1();
     is_custom_local_set = true;
 
@@ -335,22 +363,48 @@ Eigen::Array<T,-1,-1> Hamiltonian<T,D>::fetch_type1(){
 #pragma omp barrier
 
     double V;
+    unsigned orb;
     T V_converted;
-    for(unsigned i=0; i<r.N; i++){
-        coord_ld.set_coord(i);
 
-        // Convert to global coordinates to get the value of the potential
-        r.convertCoordinates(coord_Lt, coord_ld);
-	//        V = uncorrelated_wrapper(coord_Lt.coord, D+1);
-	V = 0;
-        // type shenanigans
-        V_converted = T((V - Eshift)/Escale);
+    Eigen::Matrix<double,D,1> vec_real = Eigen::Matrix<double,D,1>::Zero(D);
+
+    std::string filename = std::string("local_potential") + std::to_string(omp_get_thread_num()) + std::string(".dat");
+    std::ofstream potential_file;
+
+    // Only runs if the user wants to print the local custom energy
+    if(print_custom)
+        potential_file = std::ofstream(filename);
+
+    for(unsigned i=0; i<r.N*r.Orb; i++){
+
+        coord_ld.set_coord(i);                          // Convert from index to local coordinates
+        r.convertCoordinates(coord_Lt, coord_ld);       // Convert from local to global coordinates, 
+        orb = coord_Lt.coord[D];
+
+        for(unsigned j = 0; j < D; j++)
+            vec_real(j) = coord_Lt.coord[j];            // Set first coordinates 
+
+        vec_real = r.rLat*vec_real;                     // Convert to real space
+        V = uncorrelated_wrapper(vec_real.data(), orb); // and get the value of the potential
+
+        V_converted = T((V - Eshift)/Escale); // type shenanigans
 
         // Convert to local coordinates with ghosts to get the index of the
         // KPM_Vector in which to store that value of the potential
         r.convertCoordinates(coord_Ld, coord_ld);
         vec(coord_Ld.index) = V_converted;
+
+        // write to a stream
+        if(print_custom){
+            for(unsigned j = 0; j < D; j++)
+                potential_file << vec_real(j) << " ";
+            potential_file << orb << " ";
+            potential_file << V_converted << "\n";
+        }
     }
+
+    if(print_custom)
+        potential_file.close();
 
     return vec;
 }

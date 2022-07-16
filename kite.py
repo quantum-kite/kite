@@ -756,7 +756,7 @@ class Calculation:
 class Configuration:
 
     def __init__(self, divisions=(1, 1, 1), length=(1, 1, 1), boundaries=(False, False, False),
-                 is_complex=False, precision=1, spectrum_range=None, angles=(0,0,0)):
+                 is_complex=False, precision=1, spectrum_range=None, angles=(0,0,0), custom_local=False, custom_local_print=False):
         """Define basic parameters used in the calculation
 
        Parameters
@@ -798,6 +798,8 @@ class Configuration:
         self._divisions = divisions
         self._boundaries = np.array(boundaries)
         self._Twists = np.array(angles)
+        self._custom_local = custom_local
+        self._print_custom_local = custom_local_print
 
         self._length = length
         self._htype = np.float32
@@ -876,6 +878,16 @@ class Configuration:
     def type(self):  # -> type:
         """Return the type of the Hamiltonian complex or real, and float, double or long double. """
         return self._htype
+
+    @property
+    def custom_pot(self):  # -> potential
+        """Return custom potential flag"""
+        return self._custom_local
+
+    @property
+    def print_custom_pot(self):  # -> potential
+        """Return print custom potential flag"""
+        return self._print_custom_local
 
 
 def make_pybinding_model(lattice, disorder=None, disorder_structural=None, **kwargs):
@@ -1160,6 +1172,8 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
 
     # hamiltonian is complex 1 or real 0
     complx = int(config.comp)
+    localEn = config.custom_pot
+    printlocalEn = config.print_custom_pot
 
     # check if there's complex hopping or magnetic field but identifier is_complex is 0
     imag_part = 0
@@ -1362,6 +1376,10 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
     grp.create_dataset('NHoppings', data=num_hoppings, dtype='u4')
     # distance
     grp.create_dataset('d', data=d, dtype='i4')
+    # custom pot
+    grp.create_dataset('CustomLocalEnergy', data=localEn, dtype=int)
+    # custom pot
+    grp.create_dataset('PrintCustomLocalEnergy', data=printlocalEn, dtype=int)
 
     if complx:
         # hoppings

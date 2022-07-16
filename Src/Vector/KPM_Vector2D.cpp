@@ -459,6 +459,13 @@ void inline KPM_Vector <T, 2>::mult_local_disorder(const  std::size_t & j0, cons
         for(std::size_t i = j; i < j + TILE ; i++)
           phi0[i] += value_type(MULT + 1) * phiM1[i] * h.U_Orbital.at(io);
     }
+
+  // Custom local disorder
+  if(h.is_custom_local_set){
+    for(std::size_t j = j0; j < j1; j += std )
+      for(std::size_t i = j; i < j + TILE ; i++)
+        phi0[i] += value_type(MULT + 1) * phiM1[i] * h.custom_local(i);
+  }
 }
 
 template <typename T>

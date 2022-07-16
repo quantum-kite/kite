@@ -37,7 +37,7 @@
 #endif
 
 #ifndef TILE
-#define TILE 16
+#define TILE 8
 #endif
 
 #ifndef DEBUG
