@@ -11,7 +11,7 @@
     Configuration: Periodic boundary conditions, double precision,
                     automatic scaling, size of the system  flexible, with domain decomposition (nx=ny=1)
     Calculation type: Average DOS
-    Last updated: 14/07/2022
+    Last updated: 18/07/2022
 """
 
 __all__ = ["main"]

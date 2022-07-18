@@ -10,7 +10,7 @@
     Configuration: Periodic boundary conditions, double precision,
                     automatic scaling, size of the system 512x512, with domain decomposition (nx=ny=1)
     Calculation: singleshot_conductivity_dc xx/yy
-    Last updated: 14/07/2022
+    Last updated: 18/07/2022
 """
 
 __all__ = ["main"]
@@ -22,8 +22,6 @@ import pybinding as pb
 
 def phosphorene_lattice(num_hoppings=4):
     """Return lattice specification for a bilayer phosphorene lattice"""
-
-    raise Warning("Currently, this code is buggy on the Pybinding side.")
 
     # parameters
     a = 0.222  # nm
@@ -117,7 +115,7 @@ def main(direction='xx', num_hoppings=4):
     # This divides the lattice into various sections, each of which is calculated in parallel
     nx = ny = 1
     # number of unit cells in each direction.
-    lx = ly = 512
+    lx = ly = 64
 
     # make config object which caries info about
     # - the number of decomposition parts [nx, ny],
@@ -166,8 +164,7 @@ def main(direction='xx', num_hoppings=4):
 
 def post_process(file_name="phxx-output.h5", out_file_name="condDC.dat"):
     from h5py import File
-    single_shot = File(file_name, "r+")['Calculation']['singleshot_conductivity_dc']['SingleShot']
-    np.savetxt(out_file_name, np.c_[single_shot[:, 0], single_shot[:, 1]])
+    np.savetxt(out_file_name, File(file_name, "r+")['Calculation']['singleshot_conductivity_dc']['SingleShot'])
 
 
 if __name__ == "__main__":

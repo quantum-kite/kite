@@ -5,7 +5,7 @@
     #                         Home page: quantum-kite.com                    #
     ##########################################################################
 
-    Last updated: 13/07/2022
+    Last updated: 18/07/2022
 """
 
 import numpy as np
@@ -80,6 +80,19 @@ def print_title(text=""):
 
 
 def main():
+    import matplotlib as mpl
+    import seaborn as sns
+
+    mpl.rcParams['figure.dpi'] = 100
+    mpl.rcParams['savefig.dpi'] = 100
+    sns.set_style("white")
+
+    colors = ["dusty purple", "faded green","windows blue", "amber", "greyish"]
+    current_palette = sns.xkcd_palette(colors)
+    sns.set_palette(current_palette)
+    sns.set_style("ticks")
+    sns.set_context("talk", font_scale=1.1)
+
     # Header
     print_command("##########################################################################")
     print_command("#                         Copyright 2022, KITE                           #")
@@ -250,7 +263,7 @@ def main():
     cond_dc_figure = "{0}-condDC.pdf".format(pre_file_name)
     run_calculation(hdf5_file)
     example.post_process(hdf5_file)
-    terminal("mv condDC.dat {0}".format(opt_cond_data))
+    terminal("mv condDC.dat {0}".format(cond_dc_data))
     make_figure_cond_cd(file_data=cond_dc_data, title="DC Conductivity Phosphorene XX",
                         file_out=cond_dc_figure)
 
@@ -264,7 +277,7 @@ def main():
     cond_dc_figure = "{0}-condDC.pdf".format(pre_file_name)
     run_calculation(hdf5_file)
     example.post_process(hdf5_file)
-    terminal("mv condDC.dat {0}".format(opt_cond_data))
+    terminal("mv condDC.dat {0}".format(cond_dc_data))
     make_figure_cond_cd(file_data=cond_dc_data, title="DC Conductivity Phosphorene YY",
                         file_out=cond_dc_figure)
 
@@ -281,6 +294,8 @@ def main():
     terminal("mv dos.dat {0}".format(dos_data))
     make_figure_dos(file_data=dos_data, title="DOS Twisted Bilayer graphene at 21.787 degrees",
                     file_out=dos_figure)
+
+    print_title("Ran all the KITE-examples")
 
 
 def clean():

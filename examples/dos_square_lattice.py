@@ -9,7 +9,7 @@
     Lattice: Square lattice
     Configuration: Periodic boundary conditions, double precision, automatic rescaling
     Calculation type: Average DOS
-    Last updated: 14/07/2022
+    Last updated: 18/07/2022
 """
 
 __all__ = ["main"]

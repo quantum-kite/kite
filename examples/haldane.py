@@ -11,7 +11,7 @@
                     automatic scaling, size of the system 256x256, with domain decomposition (nx=ny=1)
     Disorder: Disorder class Uniform at different sublattices
     Calculation type: Average DOS and DC conductivity (xy)
-    Last updated: 14/07/2022
+    Last updated: 18/07/2022
 """
 
 __all__ = ["main"]
@@ -74,7 +74,7 @@ def main(onsite=(0, 0), t=1):
     # This divides the lattice into various sections, each of which is calculated in parallel
     nx = ny = 1
     # number of unit cells in each direction.
-    lx = ly = 256
+    lx = ly = 64
 
     # make config object which caries info about
     # - the number of decomposition parts [nx, ny],

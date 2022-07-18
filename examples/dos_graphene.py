@@ -7,9 +7,10 @@
 
     Units: Energy in eV
     Lattice: Honeycomb
-    Configuration: Periodic boundary conditions, double precision, automatic rescaling
+    Configuration: Periodic boundary conditions, double precision,
+                    automatic rescaling, size of the system 32x32, with domain decomposition (nx=ny=1)
     Calculation type: Average DOS
-    Last updated: 14/07/2022
+    Last updated: 18/07/2022
 """
 
 __all__ = ["main"]
@@ -56,7 +57,7 @@ def main(onsite=(0, 0)):
     # load lattice
     lattice = graphene_lattice(onsite)
 
-    # number of decomposition parts [nx,ny,nz] in each direction of matrix.
+    # number of decomposition parts [nx,ny] in each direction of matrix.
     # This divides the lattice into various sections, each of which is calculated in parallel
     nx = ny = 1
     # number of unit cells in each direction.

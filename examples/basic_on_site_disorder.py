@@ -11,7 +11,7 @@
                     manual scaling, size of the system 256x256, without domain decomposition (nx=ny=1),
     Disorder: Disorder class Deterministic and Uniform at different sublattices
     Calculation type: Average DOS
-    Last updated: 14/07/2022
+    Last updated: 18/07/2022
 """
 
 __all__ = ["main"]

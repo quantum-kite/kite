@@ -20,7 +20,7 @@ import sys
 
 # Check if running inside a jupyter notebook
 if 'ipykernel' in sys.modules:
-    get_ipython().system('jupyter-nbconvert --to script test_potential.ipynb')
+    get_ipython().system('jupyter-nbconvert --to script test_potential.ipynb ')
 
 
 # In[ ]:

@@ -11,7 +11,7 @@
                     automatic scaling, size of the system 512x512, with domain decomposition (nx=ny=1)
     Disorder: Disorder class Gaussian at different sublattices
     Calculation type: Average DOS and optical conductivity (xx)
-    Last updated: 14/07/2022
+    Last updated: 18/07/2022
 """
 
 __all__ = ["main"]

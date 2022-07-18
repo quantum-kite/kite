@@ -13,7 +13,7 @@
                StructuralDisorder class vacancy and bond disorder
     Calculation type: Average DOS
     Note: automatic scaling is not supported when bond disorder is present
-    Last updated: 14/07/2022
+    Last updated: 18/07/2022
 """
 
 __all__ = ["main"]

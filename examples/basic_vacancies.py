@@ -11,7 +11,7 @@
                     automatic scaling, size of the system 512x512, without domain decomposition (nx=ny=1)
     Disorder: StructuralDisorder, vacancy with concentration 0.1 inside A and 0.05 inside B sublattices
     Calculation type: Average DOS
-    Last updated: 14/07/2022
+    Last updated: 18/07/2022
 """
 
 __all__ = ["main"]
