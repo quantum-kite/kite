@@ -1,4 +1,4 @@
-# Costum local potentials
+# Custom local potentials
 This example shows how to use the custom local potential functionality in KITE. 
 
 Begin by defining the local energy function that you want to use.
