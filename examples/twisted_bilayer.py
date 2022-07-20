@@ -59,8 +59,9 @@ def main(angle_index=0):
     # - boundary conditions [mode,mode, ... ] with modes:
     #   . "periodic"
     #   . "open"
-    #   . "twist_fixed" -- this option needs the extra argument ths=[phi_1,..,phi_DIM] where phi_i \in [0, 2*M_PI]
-    #   . "twist_random"
+    #   . "twisted" -- this option needs the extra argument ths=[phi_1,..,phi_DIM] where phi_i \in [0, 2*M_PI]
+    #   . "random"
+
     # Boundary Mode
     mode = "periodic"
 
