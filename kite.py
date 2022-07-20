@@ -14,6 +14,8 @@ import numpy as np
 import h5py as hp
 import pybinding as pb
 
+import warnings
+
 from scipy.sparse import coo_matrix
 from scipy.spatial import cKDTree
 
@@ -796,8 +798,8 @@ class Configuration:
         self._is_complex = int(is_complex)
         self._precision = precision
         self._divisions = divisions
-        self._boundaries = np.array(boundaries)
-        self._Twists = np.array(angles)
+        self._boundaries = boundaries
+        self._Twists = np.array(angles, dtype=np.float64)
         self._custom_local = custom_local
         self._print_custom_local = custom_local_print
 
@@ -852,18 +854,26 @@ class Configuration:
     @property
     def bound(self):  # -> boundaries:
         """Returns the boundary conditions in each direction, 0 - no boundary condtions, 1 - peridoc bc. """
-        Bounds_tmp = np.zeros(len(self._boundaries),dtype=np.float64);
-        BoundTwists = np.zeros(len(self._boundaries),dtype=np.float64);
-        for i,b in enumerate(self._boundaries):
-            if b=="open":
+        Bounds_tmp = np.zeros(len(self._boundaries), dtype=np.float64)
+        BoundTwists = np.zeros(len(self._boundaries), dtype=np.float64)
+        for i, b in enumerate(self._boundaries):
+            if b == "open":
                 Bounds_tmp[i] = 0
-            elif b=="periodic":
+            elif b == "periodic":
                 Bounds_tmp[i] = 1
-            elif b=="twisted":
+            elif b == "twisted":
                 Bounds_tmp[i] = 1
                 BoundTwists[i] = self._Twists[i]
-            elif b=="random":
+            elif b == "random":
                 Bounds_tmp[i] = 2
+            elif b and isinstance(b, bool):
+                warnings.warn("Use 'periodic' instead of 'True' for specifying the boundary.",
+                              LoudDeprecationWarning, stacklevel=2)
+                Bounds_tmp[i] = 1
+            elif not b and isinstance(b, bool):
+                warnings.warn("Use 'open' instead of 'False' for specifying the boundary.",
+                              LoudDeprecationWarning, stacklevel=2)
+                Bounds_tmp[i] = 0
             else:
                 print("Badly Defined Boundaries!")
                 exit()
@@ -1896,3 +1906,8 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
     print('\nExporting of KITE configuration to {} finished.\n'.format(filename))
     print('\n##############################################################################\n')
     f.close()
+
+
+class LoudDeprecationWarning(UserWarning):
+    """Python's DeprecationWarning is silent by default"""
+    pass
