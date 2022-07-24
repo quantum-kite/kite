@@ -61,7 +61,7 @@ def main(onsite=(0, 0), t=1):
     # - boundary conditions [mode,mode, ... ] with modes:
     #   . "periodic"
     #   . "open"
-    #   . "twisted" -- this option needs the extra argument ths=[phi_1,..,phi_DIM] where phi_i \in [0, 2*M_PI]
+    #   . "twisted" -- this option needs the extra argument angles=[phi_1,..,phi_DIM] where phi_i \in [0, 2*M_PI]
     #   . "random"
 
     # Boundary Mode

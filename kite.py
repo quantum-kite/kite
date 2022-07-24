@@ -106,7 +106,7 @@ class StructuralDisorder:
         for dis in disorder:
             if len(disorder) == 1:
                 relative_index = [0, 0]
-                dis =[relative_index, dis]
+                dis = [relative_index, dis]
 
             # check if it's just concentration or sublatt
             num_vacancy_disorder += 1
@@ -115,10 +115,8 @@ class StructuralDisorder:
             if len(disorder) > 2:
                 raise SystemExit('Vacancy disorder should be added in a form:'
                                  '\n sublattice name,'
-                                 '\n sublattice name, [rel. unit cell],'
-                                 '\n or in a form of disorder onsite energy:'
-                                 '\n ([rel. unit cell], sublattice_name, '
-                                 'onsite energy)')
+                                 '\n or in a form of:'
+                                 '\n ([rel. unit cell], sublattice_name)')
 
     def add_structural_disorder(self, *disorder):
         self._nodes_map = dict()
@@ -556,7 +554,7 @@ class Calculation:
                           'num_disorder': num_disorder})
 
     def ldos(self, energy, num_moments, position, sublattice, num_disorder=1):
-        """Calculate the density of states as a function of energy
+        """Calculate the local density of states as a function of energy
 
         Parameters
         ----------
@@ -576,7 +574,7 @@ class Calculation:
                            'sublattice': sublattice, 'num_disorder': num_disorder})
 
     def arpes(self, k_vector, weight, num_moments, num_disorder=1):
-        """Calculate the density of states as a function of energy
+        """Calculate the spectral contribution for given k-points and weights.
 
         Parameters
         ----------
@@ -594,7 +592,7 @@ class Calculation:
 
     def gaussian_wave_packet(self, num_points, num_moments, timestep, k_vector, spinor, width, mean_value,
                              num_disorder=1, **kwargs):
-        """Calculate the density of states as a function of energy
+        """Calculate the time evolution function of a wave packet
 
         Parameters
         ----------
@@ -627,11 +625,11 @@ class Calculation:
              'mean_value': mean_value, 'probing_point': probing_point})
 
     def conductivity_dc(self, direction, num_points, num_moments, num_random, num_disorder=1, temperature=0):
-        """Calculate the density of states as a function of energy
+        """Calculate the DC conductivity for a given direction
 
         Parameters
         ----------
-        direction : string
+        direction : str
             direction in xyz coordinates along which the conductivity is calculated.
             Supports 'xx', 'yy', 'zz', 'xy', 'xz', 'yx', 'yz', 'zx', 'zy'.
         num_points : int
@@ -656,7 +654,7 @@ class Calculation:
                  'temperature': temperature})
 
     def conductivity_optical(self, direction, num_points, num_moments, num_random, num_disorder=1, temperature=0):
-        """Calculate the density of states as a function of energy
+        """Calculate optical conductivity for a given direction
 
         Parameters
         ----------
@@ -686,7 +684,7 @@ class Calculation:
 
     def conductivity_optical_nonlinear(self, direction, num_points, num_moments, num_random, num_disorder=1,
                                        temperature=0, **kwargs):
-        """Calculate the density of states as a function of energy
+        """Calculate nonlinear optical conductivity for a given direction
 
         Parameters
         ----------
@@ -720,7 +718,7 @@ class Calculation:
                  'temperature': temperature, 'special': special})
 
     def singleshot_conductivity_dc(self, energy, direction, eta, num_moments, num_random, num_disorder=1, **kwargs):
-        """Calculate the density of states as a function of energy
+        """Calculate the DC conductivity using KITEx for a fiven direction and energy
 
         Parameters
         ----------
@@ -757,8 +755,9 @@ class Calculation:
 
 class Configuration:
 
-    def __init__(self, divisions=(1, 1, 1), length=(1, 1, 1), boundaries=(False, False, False),
-                 is_complex=False, precision=1, spectrum_range=None, angles=(0,0,0), custom_local=False, custom_local_print=False):
+    def __init__(self, divisions=(1, 1, 1), length=(1, 1, 1), boundaries=('open', 'open', 'open'),
+                 is_complex=False, precision=1, spectrum_range=None, angles=(0, 0, 0), custom_local=False,
+                 custom_local_print=False):
         """Define basic parameters used in the calculation
 
        Parameters
@@ -767,14 +766,18 @@ class Configuration:
            Number of decomposition parts of the system.
        length : int, tuple(int, int), tuple(int, int, int)
            Number of unit cells in each direction.
-       boundaries : int, tuple(int, int), tuple(int, int, int)
-           Periodic boundary conditions each direction.
+       boundaries : str, tuple(str, str), tuple(str, str, srt)
+           Periodic boundary conditions each direction:
+               "periodic"
+               "open"
+               "twisted" -- this option needs the extra argument ths=[phi_1,..,phi_DIM] where phi_i \in [0, 2*M_PI]
+               "random"
        is_complex : bool
            Boolean that reflects whether the type of Hamiltonian is complex or not.
        precision : int
             Integer which defines the precision of the number used in the calculation. Float - 0, double - 1,
             long double - 2.
-       spectrum_range : Optional[Tuple[float, float]]
+       spectrum_range : Optional[tuple(float, float)]
             Energy scale which defines the scaling factor of all the energy related parameters. The scaling is done
             automatically in the background after this definition. If the term is not specified, a rough estimate of the
             bounds is found.

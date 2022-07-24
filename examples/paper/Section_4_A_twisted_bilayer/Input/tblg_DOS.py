@@ -1,28 +1,30 @@
-"""       
-        ##############################################################################      
-        #                        KITE | Release  1.1                                 #      
-        #                                                                            #      
-        #                        Kite home: quantum-kite.com                         #           
-        #                                                                            #      
-        #  Developed by: Simao M. Joao, Joao V. Lopes, Tatiana G. Rappoport,         #       
-        #  Misa Andelkovic, Lucian Covaci, Aires Ferreira, 2018-2022                 #      
-        #                                                                            #      
-        ##############################################################################      
+""" Density of states for twisted bilayer graphene
+
+    ##########################################################################
+    #                         Copyright 2022, KITE                           #
+    #                         Home page: quantum-kite.com                    #
+    ##########################################################################
+
+    Units: Energy in eV
+    Lattice: Twisted bilayer graphene
+    Disorder: None
+    Configuration: Periodic boundary conditions, double precision,
+                    given rescaling, size of the system flexible, with domain decomposition (nx=ny=1)
+    Calculation type: Average DOS
+    Last updated: 24/07/2022
 """
-import os
+
+__all__ = ["main"]
+
 import pybinding as pb
 import numpy as np
+import os
 import re
 import copy
-import sys
 import kite
 
-from scipy.spatial import cKDTree
-from math import pi, sqrt
 
-
-
-def load_ovito_lattice(name):
+def _load_ovito_lattice(name):
     """Load a lattice from a Ovito .xyz file. At the moment, works for files that have following format
        Type_id X_coord Y_coord Z_coord Data
        The point needs to have all 3 coordinates, and the approach is not general.
@@ -50,7 +52,7 @@ def load_ovito_lattice(name):
     vec = re.findall(r"[-+]?\d*\.*\d+", vectors)
     vec = list(map(float, vec))
 
-    space_size = int(sqrt(len(vec)))
+    space_size = int(np.sqrt(len(vec)))
 
     _l1, _l2, _l3 = vec[0:space_size], vec[space_size:2 * space_size], vec[2 * space_size:3 * space_size]
 
@@ -76,58 +78,93 @@ def load_ovito_lattice(name):
     return _x_coord, _y_coord, _z_coord, _atom_type, _l1, _l2, _l3
 
 
-# WARNING: the calculation ran with parameters given here will run for at least 72h 
-# load an xyz file, relaxed or unrelaxed
-name = 'relaxed_tblg_1.050.xyz'
+def twisted_bilayer_lattice(name='relaxed_tblg_1.050.xyz'):
+    # WARNING: the calculation ran with parameters given here will run for at least 72h
+    # load an xyz file, relaxed or unrelaxed
+    lat = pb.load('lattice_' + name[:-4])
+    return lat
 
 
-# load coordinates, atom types and lattice vectors
-x_coord, y_coord, z_coord, atom_type, l1, l2, l3 = load_ovito_lattice(name)
-l1 = np.array(l1[0:2]) / 10.
-l2 = np.array(l2[0:2]) / 10.
-positions = np.column_stack((x_coord, y_coord, z_coord))
-positions_to = copy.deepcopy(positions)
+def twisted_bilayer_period(name='relaxed_tblg_1.050.xyz'):
+    # WARNING: the calculation ran with parameters given here will run for at least 72h
+    # load an xyz file, relaxed or unrelaxed
+    # load coordinates, atom types and lattice vectors
+    _, _, _, _, l1, l2, _ = _load_ovito_lattice(name)
+    l1 = np.array(l1[0:2]) / 10.
+    l2 = np.array(l2[0:2]) / 10.
+    return l1, l2
 
-# load a PB lattice
-complete_lattice = pb.load('lattice_' + name[:-4])
-num_x = 1
-num_y = 1
-print('Done loading ', flush=True)
-print('Making the model', flush=True)
 
-# check for the bonds
-model = pb.Model(complete_lattice,
-                 pb.force_double_precision(),
-                 pb.translational_symmetry(a1=num_x * np.linalg.norm(l1), a2=num_y * np.linalg.norm(l2))
-                 )
-model.eval()
-print(model.report(), flush=True)
-kpm = pb.kpm(model, kernel=pb.jackson_kernel(), matrix_format="CSR", optimal_size=False, interleaved=False)
-print(kpm.scaling_factors)
+def main():
+    """Prepare the input file for KITEx"""
+    # load lattice
+    name='relaxed_tblg_1.050.xyz'
+    lattice = twisted_bilayer_lattice(name)
+    l1, l2 = twisted_bilayer_period(name)
+    print('Done loading ', flush=True)
 
-nx = 5
-ny = 4
-e_min = - 11.7
-e_max = + 9.3
+    # make the pybidning model
+    print('Making the model', flush=True)
+    # check for the bonds
+    model = pb.Model(lattice,
+                     pb.force_double_precision(),
+                     pb.translational_symmetry(a1=np.linalg.norm(l1), a2=np.linalg.norm(l2))
+                     )
+    model.eval()
+    print(model.report(), flush=True)
 
-num_a1 = 640
-num_a2 = 512
+    # calculation the scaling factors as proposed by pybinding
+    kpm = pb.kpm(model, kernel=pb.jackson_kernel(), matrix_format="CSR", optimal_size=False, interleaved=False)
+    print(kpm.scaling_factors)
 
-num_moments = 12000
+    # number of decomposition parts [nx,ny] in each direction of matrix.
+    # This divides the lattice into various sections, each of which is calculated in parallel
+    nx = ny = 5, 4
+    # number of unit cells in each direction.
+    lx = ly = 640, 512
+    # energy scale
+    e_min, e_max = -11.7, 9.3
+    num_moments = 12000
 
-# make config object which caries info about
-# - the number of decomposition parts [nx, ny],
-# - lengths of structure [lx, ly]
-# - boundary conditions, setting True as periodic boundary conditions, and False elsewise,
-# - info if the exported hopping and onsite data should be complex,
-# - info of the precision of the exported hopping and onsite data, 0 - float, 1 - double, and 2 - long double.
-configuration = kite.Configuration(divisions=[nx, ny], length=[num_a1, num_a2], boundaries=["periodic", "periodic"],
-                                   is_complex=False, precision=0, spectrum_range=[e_min, e_max])
+    # make config object which caries info about
+    # - the number of decomposition parts [nx, ny],
+    # - lengths of structure [lx, ly]
+    # - boundary conditions [mode,mode, ... ] with modes:
+    #   . "periodic"
+    #   . "open"
+    #   . "twisted" -- this option needs the extra argument ths=[phi_1,..,phi_DIM] where phi_i \in [0, 2*M_PI]
+    #   . "random"
 
-calculation = kite.Calculation(configuration)
-calculation.dos(num_points=5000, num_moments=num_moments, num_random=1, num_disorder=1)
+    # Boundary Mode
+    mode = "periodic"
 
-# export the lattice from the lattice object, config and calculation object and the name of the file
-# the disorder is optional. If there is disorder in the lattice for now it should be given separately
-kite.config_system(complete_lattice, configuration, calculation,
-                   filename='dos_' + name[:-4] + '_{}_moments.h5'.format(num_moments))
+    # - specify precision of the exported hopping and onsite data, 0 - float, 1 - double, and 2 - long double.
+    # - scaling, if None it's automatic, if present select spectrum_range=[e_min, e_max]
+    configuration = kite.Configuration(divisions=[nx, ny],
+                                       length=[lx, ly],
+                                       boundaries=[mode, mode],
+                                       is_complex=False,
+                                       precision=1,
+                                       spectrum_range=[e_min, e_max])
+
+    # specify calculation type
+    calculation = kite.Calculation(configuration)
+    calculation.dos(num_points=5000,
+                    num_moments=num_moments,
+                    num_random=1,
+                    num_disorder=1)
+
+    # configure the *.h5 file
+    output_file = "dos_" + name[:-4] + "_{}_moments.h5".format(num_moments)
+    kite.config_system(lattice, configuration, calculation, filename=output_file)
+
+    # for generating the desired output from the generated HDF5-file, run
+    # ../build/KITEx [output-file]
+    # ../tools/build/KITE-tools [output-file]
+
+    # returning the name of the created HDF5-file
+    return output_file
+
+
+if __name__ == "__main__":
+    main()

@@ -10,7 +10,7 @@
     Configuration: Periodic boundary conditions, double precision,
                     automatic rescaling, size of the system 32x32, with domain decomposition (nx=ny=1)
     Calculation type: Average DOS
-    Last updated: 18/07/2022
+    Last updated: 24/07/2022
 """
 
 __all__ = ["main"]
@@ -24,12 +24,13 @@ def graphene_lattice(onsite=(0, 0)):
     """Return lattice specification for a honeycomb lattice with nearest neighbor hoppings"""
 
     # parameters
+    a = 0.24595  # [nm] unit cell length
+    a_cc = 0.142  # [nm] carbon-carbon distance
     t = 2.8  # eV
 
     # define lattice vectors
-    theta = np.pi / 3
-    a1 = np.array([1 + np.cos(theta), np.sin(theta)])
-    a2 = np.array([0, 2 * np.sin(theta)])
+    a1 = a * np.array([1, 0])
+    a2 = a * np.array([1 / 2, 1 / 2 * np.sqrt(3)])
 
     # create a lattice with 2 primitive vectors
     lat = pb.Lattice(a1=a1, a2=a2)
@@ -37,8 +38,8 @@ def graphene_lattice(onsite=(0, 0)):
     # add sublattices
     lat.add_sublattices(
         # name, position, and onsite potential
-        ('A', [0, 0], onsite[0]),
-        ('B', [1, 0], onsite[1])
+        ('A', [0, -a_cc/2], onsite[0]),
+        ('B', [0,  a_cc/2], onsite[1])
     )
 
     # Add hoppings
@@ -46,8 +47,8 @@ def graphene_lattice(onsite=(0, 0)):
         # inside the main cell, between which atoms, and the value
         ([0, 0], 'A', 'B', -t),
         # between neighboring cells, between which atoms, and the value
-        ([-1, 0], 'A', 'B', -t),
-        ([-1, 1], 'A', 'B', -t)
+        ([1, -1], 'A', 'B', -t),
+        ([0, -1], 'A', 'B', -t)
     )
     return lat
 
@@ -69,7 +70,7 @@ def main(onsite=(0, 0)):
     # - boundary conditions [mode,mode, ... ] with modes:
     #   . "periodic"
     #   . "open"
-    #   . "twisted" -- this option needs the extra argument ths=[phi_1,..,phi_DIM] where phi_i \in [0, 2*M_PI]
+    #   . "twisted" -- this option needs the extra argument angles=[phi_1,..,phi_DIM] where phi_i \in [0, 2*M_PI]
     #   . "random"
 
     # Boundary Mode
