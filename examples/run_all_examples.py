@@ -173,7 +173,7 @@ def main():
 
     # Example 6: basic_on_site_disorder.py
     print_command("======= Example 6: DOS for lattice with onsite disorder          =========")
-    import basic_on_site_disorder as example
+    import dos_on_site_disorder as example
     print_command("- - - -            Making the configuration file                 - - - - -")
     hdf5_file = example.main()
     pre_file_name = hdf5_file.replace("-output.h5", "")
@@ -187,7 +187,7 @@ def main():
 
     # Example 7: basic_vacancies.py
     print_command("======= Example 7: DOS for lattice with vacancies                =========")
-    import basic_vacancies as example
+    import dos_vacancies as example
     print_command("- - - -            Making the configuration file                 - - - - -")
     hdf5_file = example.main()
     pre_file_name = hdf5_file.replace("-output.h5", "")
@@ -201,7 +201,7 @@ def main():
 
     # Example 8: basic_mixed_disorder.py
     print_command("======= Example 8: DOS for lattice with vacancies and onsite disorder ====")
-    import basic_mixed_disorder as example
+    import dos_mixed_disorder as example
     print_command("- - - -            Making the configuration file                 - - - - -")
     hdf5_file = example.main()
     pre_file_name = hdf5_file.replace("-output.h5", "")
@@ -215,7 +215,7 @@ def main():
 
     # Example 9: optcond_gaussian_disorder.py
     print_command("======= Example 9: Optical conductivity with onsite disorder     =========")
-    import optcond_gaussian_disorder as example
+    import dos_optcond_gaussian_disorder as example
     print_command("- - - -            Making the configuration file                 - - - - -")
     hdf5_file = example.main()
     pre_file_name = hdf5_file.replace("-output.h5", "")
@@ -234,7 +234,7 @@ def main():
 
     # Example 10: haldane.py
     print_command("======= Example 10: DOS & optical conductivity for the Haldene model =====")
-    import haldane as example
+    import dos_dccond_haldane as example
     print_command("- - - -            Making the configuration file                 - - - - -")
     hdf5_file = example.main()
     pre_file_name = hdf5_file.replace("-output.h5", "")
@@ -255,7 +255,7 @@ def main():
 
     # Example 11: phosphorene.py
     print_command("======= Example 11: DC coductivity for phosphorene in XX         =========")
-    import phosphorene as example
+    import dccond_phosphorene as example
     print_command("- - - -            Making the configuration file                 - - - - -")
     hdf5_file = example.main()
     pre_file_name = hdf5_file.replace("-output.h5", "")
@@ -269,7 +269,7 @@ def main():
 
     # Example 12: phosphorene.py
     print_command("======= Example 12: DC coductivity for phosphorene in YY         =========")
-    import phosphorene as example
+    import dccond_phosphorene as example
     print_command("- - - -            Making the configuration file                 - - - - -")
     hdf5_file = example.main(direction='yy')
     pre_file_name = hdf5_file.replace("-output.h5", "")
@@ -283,7 +283,7 @@ def main():
 
     # Example 13: twisted_bilayer.py
     print_command("======= Example 12: DOS for twisted bilayer graphene at 21.787 degrees ===")
-    import twisted_bilayer as example
+    import dos_twisted_bilayer as example
     print_command("- - - -            Making the configuration file                 - - - - -")
     hdf5_file = example.main()
     pre_file_name = hdf5_file.replace("-output.h5", "")
