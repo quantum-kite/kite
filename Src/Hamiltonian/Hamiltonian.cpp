@@ -62,6 +62,7 @@ void Hamiltonian<T,D>::generate_twists()
   BoundTwist.setZero(); 
 #pragma omp master
   {
+    // GlobBTwist is a 3D vector. The last dimension isn't used for 2D
     Global.GlobBTwist.setZero(); // Set the Global Boundary Twists to zero
     for(unsigned i = 0; i < D; i++) {
           //JPPP Fixed Case
@@ -211,10 +212,8 @@ void Hamiltonian<T,D>::build_Anderson_disorder() {
   std::fill_n ( Anderson_orb_address.begin(), r.Orb, -2 );
   std::fill_n ( U_Orbital.begin(), r.Orb,  0 );
   int sum = 0;
-  for (unsigned i = 0; i < model.size(); i++)
-    {
-      if(model.at(i) < 3)
-        {
+  for (unsigned i = 0; i < model.size(); i++){
+      if(model.at(i) < 3){
           int count = 0;
           while(unsigned(count) < dim[0] &&  vv(i, count) != -1 )
             {

@@ -243,6 +243,7 @@ void Simulation<T,D>::singleshot(Eigen::Array<double, -1, 1> energies,
 #if (SSPRINT == 0)
         debug_message("Started SingleShot calculation for SSPRINT=0\n");
         // initialize the random vector
+        h.generate_twists(); // Generates Random or fixed boundaries
         phi0.initiate_vector();					
         phi0.Exchange_Boundaries(); 	
         phi1.v.col(0).setZero();

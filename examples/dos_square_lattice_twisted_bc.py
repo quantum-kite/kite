@@ -51,9 +51,9 @@ def main(onsite=(0, 0), t=1):
 
     # number of decomposition parts [nx,ny] in each direction of matrix.
     # This divides the lattice into various sections, each of which is calculated in parallel
-    nx = ny = 1
+    nx = ny = 2
     # number of unit cells in each direction.
-    lx = ly = 32
+    lx = ly = 64
 
     # make config object which caries info about
     # - the number of decomposition parts [nx, ny],
@@ -81,8 +81,8 @@ def main(onsite=(0, 0), t=1):
     # specify calculation type
     calculation = kite.Calculation(configuration)
     calculation.dos(num_points=4000,
-                    num_moments=256,
-                    num_random=256,
+                    num_moments=512,
+                    num_random=32,
                     num_disorder=1)
 
     # configure the *.h5 file

@@ -13,10 +13,13 @@ endif()
 
 project(KITE-tools)
 
-FILE(GLOB SRCFILES src/*.cpp)
-FILE(GLOB SRCFILES2 src/cond_2order/*.cpp)
-FILE(GLOB SRCFILES3 src/cond_dc/*.cpp)
-add_executable(${PROJECT_NAME} ${SRCFILES} ${SRCFILES2} ${SRCFILES3})
+FILE(GLOB SRCFILES Src/*.cpp)
+FILE(GLOB SRCFILES2 Src/Spectral/*.cpp)
+FILE(GLOB SRCFILES3 Src/Tools/*.cpp)
+FILE(GLOB SRCFILES4 Src/CondDC/*.cpp)
+FILE(GLOB SRCFILES5 Src/OptCond_1order/*.cpp)
+FILE(GLOB SRCFILES6 Src/OptCond_2order/*.cpp)
+add_executable(${PROJECT_NAME} ${SRCFILES} ${SRCFILES2} ${SRCFILES3} ${SRCFILES4} ${SRCFILES5} ${SRCFILES6})
 
 
 find_package(HDF5 COMPONENTS CXX C HL)
@@ -30,7 +33,7 @@ MESSAGE(STATUS "Hdf5 Library:  ${HDF5_CXX_HL_LIBRARIES}")
 MESSAGE(STATUS "Hdf5Hl Library:  ${HDF5_CXX_LIBRARIES}")
 MESSAGE(STATUS "Compiler:  ${CMAKE_CXX_COMPILER}")
 include_directories(~/include/)
-include_directories(${PROJECT_BINARY_DIR}/src)
+include_directories(${PROJECT_BINARY_DIR}/Src)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
 
@@ -60,8 +63,8 @@ cmake_host_system_information(RESULT _host_name QUERY HOSTNAME)
 set(MACHINE_NAME ${_host_name})
 string(TIMESTAMP TODAY "(yymmdd) %Y-%m-%d %H:%M:%S")
 configure_file (
-  "src/compiletime_info.h.in"
-  "src/compiletime_info.h"
+  "Src/compiletime_info.h.in"
+  "Src/compiletime_info.h"
   )
 
 include_directories(${Src})

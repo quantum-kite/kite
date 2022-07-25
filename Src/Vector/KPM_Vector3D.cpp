@@ -160,22 +160,43 @@ KPM_Vector <T, 3u>::~KPM_Vector(void) {
 
 
 template <typename T>
-void KPM_Vector <T, 3u>::initiate_vector()
-{  
+void KPM_Vector <T, 3u>::initiate_vector(){  
   index = 0;
-  Coordinates<std::size_t, 4> x(r.Ld);
-  for(std::size_t io = 0; io < r.Orb; io++)
-    for(std::size_t i2 = NGHOSTS; i2 < r.Ld[2] - NGHOSTS; i2++)
-      for(std::size_t i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1++)
-        for(std::size_t i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0++)
-          v(x.set({i0,i1,i2,io}).index, index) = simul.rnd.init()/static_cast<value_type>(sqrt(value_type(r.Sizet - r.SizetVacancies)));
+
+  // Check if the SEED variable is set to deterministic
+  char *env;
+  std::string seed("");
+  env = getenv("SEED");
+  if(env != NULL) seed = std::string(env);
+
+    
+  // Set all numbers to ones
+  if(seed=="ones"){
+      Coordinates<std::size_t, 4> x(r.Ld);
+      for(std::size_t io = 0; io < r.Orb; io++)
+        for(std::size_t i2 = NGHOSTS; i2 < r.Ld[2] - NGHOSTS; i2++)
+          for(std::size_t i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1++)
+            for(std::size_t i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0++)
+              v(x.set({i0,i1,i2,io}).index, index) = 1.0/static_cast<value_type>(sqrt(value_type(r.Sizet - r.SizetVacancies)));
+
+  // Proceed normally
+  } else {
+      Coordinates<std::size_t, 4> x(r.Ld);
+      for(std::size_t io = 0; io < r.Orb; io++)
+        for(std::size_t i2 = NGHOSTS; i2 < r.Ld[2] - NGHOSTS; i2++)
+          for(std::size_t i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1++)
+            for(std::size_t i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0++)
+              v(x.set({i0,i1,i2,io}).index, index) = simul.rnd.init()/static_cast<value_type>(sqrt(value_type(r.Sizet - r.SizetVacancies)));
+  }
   
-  for(unsigned i = 0; i < r.NStr; i++)
-    {
+  // Set to zero the places where there are vacancies
+  for(unsigned i = 0; i < r.NStr; i++){
       auto & vv = h.hV.position.at(i); 
       for(unsigned j = 0; j < vv.size(); j++)
         v(vv.at(j), index ) = 0. ;
-    }
+  }
+
+  // Initiate the phases for the twisted boundary conditions
   initiate_phases();
 }
 

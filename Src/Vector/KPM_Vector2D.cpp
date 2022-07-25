@@ -130,8 +130,6 @@ template <typename T>
 void KPM_Vector <T, 2>::initiate_vector() {
   index = 0;
   
-
-
   // Check if the SEED variable is set to deterministic
   char *env;
   std::string seed("");
@@ -156,8 +154,17 @@ void KPM_Vector <T, 2>::initiate_vector() {
       o = coord_Lt.coord[2]; 
       if(x == 0 && y == 0 && o == 0) v(coord_Ld.index,index) = 1; 
 
+  } else if(seed == "ones"){
+      Coordinates<std::size_t, 3> x(r.Ld);
+      for(std::size_t io = 0; io < r.Orb; io++)
+        for(std::size_t i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1++)
+          for(std::size_t i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0++)
+            v(x.set({i0,i1,io}).index, index) = 1.0/static_cast<value_type>(sqrt(value_type(r.Sizet - r.SizetVacancies)));
+
+
   } else {
       // Proceed as normal
+      // The RNG is called inside the Random.cpp file, and there the code checks for a SEED again
       Coordinates<std::size_t, 3> x(r.Ld);
       for(std::size_t io = 0; io < r.Orb; io++)
         for(std::size_t i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1++)
@@ -200,6 +207,12 @@ void KPM_Vector <T, 2>::initiate_phases() {
 	Fact_Bnd[1][0][x.coord[1]] = exp(ComplexTraits<T>::assign_value(0.0,h.BoundTwist[1] * int((int(r.Lt[1] - z.coord[1]))/r.Lt[1])));
       }
   }
+
+  // Testing initiate phases
+  unsigned i=2;
+	x.set({0, i, 0});
+	r.convertCoordinates(z,x);
+
 }
 
 template <typename T>
@@ -469,14 +482,12 @@ void inline KPM_Vector <T, 2>::mult_local_disorder(const  std::size_t & j0, cons
 }
 
 template <typename T>
-void inline KPM_Vector <T, 2>::mult_regular_hoppings(const  std::size_t & j0, const  std::size_t & io)
-{
+void inline KPM_Vector <T, 2>::mult_regular_hoppings(const  std::size_t & j0, const  std::size_t & io){
   std::size_t count;
   const std::size_t j1 = j0 + TILE * std;
   std::size_t rr[2], hop[2], x, y; // Variables for TBC
   // Hoppings
-  for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
-    {
+  for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++){
       rr[0] = (j0 % r.Ld[0]);
       rr[1] = (j0 % (r.Ld[0] * r.Ld[1]))/(r.Ld[0]);
       
@@ -485,20 +496,22 @@ void inline KPM_Vector <T, 2>::mult_regular_hoppings(const  std::size_t & j0, co
       const std::size_t i_f = j0 + d1;
       hop[0] = (i_f % r.Ld[0] ) - rr[0] +1 ;
       hop[1] = (i_f % (r.Ld[0] * r.Ld[1]))/(r.Ld[0]) - rr[1] + 1;
+#pragma omp critical
+{
       
       count = 0;
       y = 0;
-      for(std::size_t j = j0; j < j1; j += std )
-        {
+      for(std::size_t j = j0; j < j1; j += std ) {
           const T t1 = mult_t1_ghost_cor[io][ib][count++] * Fact_Bnd[1][hop[1]][rr[1]+y];
-	  x = 0;
-          for(std::size_t i = j; i < j + TILE ; i++)
-	    {
-	      phi0[i] += t1 * phiM1[i + d1] * Fact_Bnd[0][hop[0]][rr[0]+x];
-	      x++;
-	    };
+	      x = 0;
+          for(std::size_t i = j; i < j + TILE ; i++) {
+
+            phi0[i] += t1 * phiM1[i + d1] * Fact_Bnd[0][hop[0]][rr[0]+x];
+            x++;
+          };
 	  y++;
         };
+}
     }
 }
 
@@ -515,12 +528,10 @@ void KPM_Vector <T, 2>::KPM_MOTOR(KPM_Vector<T,2> *kpm_final, unsigned axis)
   for(auto istr = h.cross_mozaic_indexes.begin(); istr != h.cross_mozaic_indexes.end() ; istr++)
     initiate_stride<MULT>(*istr);
     
-  for( i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1 += TILE  )
-    {
+  for( i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1 += TILE  ){
       build_regular_phases<MULT,VELOCITY>(i1, axis);
 		
-      for( i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0 += TILE )
-        {
+      for( i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0 += TILE ){
 		    
           std::size_t istr = (i1 - NGHOSTS) / TILE * r.lStr[0] + (i0 - NGHOSTS) / TILE;
           if(h.cross_mozaic.at(istr))
@@ -562,8 +573,9 @@ void KPM_Vector <T, 2>::KPM_MOTOR(KPM_Vector<T,2> *kpm_final, unsigned axis)
   for(auto id = h.hd.begin(); id != h.hd.end(); id++)
     id->template multiply_broken_defect<MULT,VELOCITY>(phi0, phiM1,axis);
 	  
-  // These four lines pertrain only to the magnetic field
   Exchange_Boundaries();
+
+
 }
 template <typename T>
 void KPM_Vector <T, 2>::measure_wave_packet(T * bra, T * ket, T * results)  

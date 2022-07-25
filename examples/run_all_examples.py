@@ -5,16 +5,27 @@
     #                         Home page: quantum-kite.com                    #
     ##########################################################################
 
-    Last updated: 18/07/2022
+    Last updated: 20/07/2022
 """
 
 import numpy as np
 import matplotlib.pyplot as plt
 from os import system as terminal
+from os.path import exists
+
 
 _kitex_dir = "../build"
 _kite_tools_dir = "../tools/build"
 
+KITEx_exists = exists(_kitex_dir)
+tools_exists = exists(_kite_tools_dir)
+
+if not KITEx_exists:
+    print("Please make sure the KITEx executable is in the correct place relative to this script: ../build/KITEx")
+    exit(1)
+if not tools_exists:
+    print("Please make sure the KITE-tools executable is in the correct place relative to this script: ../tools/build/KITEx")
+    exit(1)
 
 def run_calculation(input_file="output.h5"):
     """Run KITEx"""
@@ -70,6 +81,19 @@ def make_figure_cond_cd(file_data="condDC.dat", title="DC conductivity", xlabel=
     fig.savefig(file_out)
     plt.close(fig)
 
+def make_figure_cond_dc_ss(file_data="condDC.dat", title="DC conductivity", xlabel="E (eV)",
+                         ylabel=r"$\sigma (2e^2/h)$", file_out="optcond.pdf"):
+    """Make a figure for the DOS"""
+    optcond = np.loadtxt(file_data)
+    fig = plt.figure()
+    ax = fig.subplots()
+    lines = [ax.plot(optcond[:, 0], optcond[:, 3])[0]]
+    ax.legend(lines, [r"$\sigma_{xx}$"])
+    ax.set_title(title)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    fig.savefig(file_out)
+    plt.close(fig)
 
 def print_command(text=""):
     print("\033[94m {0} \033[0m".format(text))
@@ -182,7 +206,7 @@ def main():
     run_calculation(hdf5_file)
     run_tools(hdf5_file)
     terminal("mv dos.dat {0}".format(dos_data))
-    make_figure_dos(file_data=dos_data, title="DOS Graphene with on-site disorder",
+    make_figure_dos(file_data=dos_data, title="DOS Graphene with mixed on-site disorder",
                     file_out=dos_figure)
 
     # Example 7: basic_vacancies.py
@@ -232,8 +256,9 @@ def main():
     make_figure_opt_cond(file_data=opt_cond_data, title="Optical Conductivity Graphene",
                          file_out=opt_cond_figure)
 
+
     # Example 10: haldane.py
-    print_command("======= Example 10: DOS & optical conductivity for the Haldene model =====")
+    print_command("======= Example 10: DOS & DC conductivity for the Haldene model =====")
     import haldane as example
     print_command("- - - -            Making the configuration file                 - - - - -")
     hdf5_file = example.main()
@@ -246,12 +271,13 @@ def main():
     run_tools(hdf5_file)
     terminal("mv dos.dat {0}".format(dos_data))
     terminal("mv condDC.dat {0}".format(cond_dc_data))
-    make_figure_dos(file_data=dos_data, title="DOS Graphene Gaussian On-site disorder",
+    make_figure_dos(file_data=dos_data, title="DOS Haldane",
                     file_out=dos_figure)
-    make_figure_cond_cd(file_data=cond_dc_data, title="DC Conductivity Haldene",
+    make_figure_cond_cd(file_data=cond_dc_data, title="DC Conductivity Haldane",
                         file_out=cond_dc_figure)
 
     print_command("-" * 74 + "\n" + " " * 10 + "Ran all the examples in the kite/examples-folder\n" + "-" * 74 + "\n")
+
 
     # Example 11: phosphorene.py
     print_command("======= Example 11: DC coductivity for phosphorene in XX         =========")
@@ -264,7 +290,7 @@ def main():
     run_calculation(hdf5_file)
     example.post_process(hdf5_file)
     terminal("mv condDC.dat {0}".format(cond_dc_data))
-    make_figure_cond_cd(file_data=cond_dc_data, title="DC Conductivity Phosphorene XX",
+    make_figure_cond_dc_ss(file_data=cond_dc_data, title="DC Conductivity Phosphorene XX",
                         file_out=cond_dc_figure)
 
     # Example 12: phosphorene.py
@@ -278,7 +304,7 @@ def main():
     run_calculation(hdf5_file)
     example.post_process(hdf5_file)
     terminal("mv condDC.dat {0}".format(cond_dc_data))
-    make_figure_cond_cd(file_data=cond_dc_data, title="DC Conductivity Phosphorene YY",
+    make_figure_cond_dc_ss(file_data=cond_dc_data, title="DC Conductivity Phosphorene YY",
                         file_out=cond_dc_figure)
 
     # Example 13: twisted_bilayer.py

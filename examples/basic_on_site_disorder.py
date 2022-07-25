@@ -8,7 +8,7 @@
     Units: Energy in eV
     Lattice: Honeycomb
     Configuration: Periodic boundary conditions, double precision,
-                    manual scaling, size of the system 256x256, without domain decomposition (nx=ny=1),
+                    manual scaling, size of the system 256x256, with domain decomposition (nx=ny=2),
     Disorder: Disorder class Deterministic and Uniform at different sublattices
     Calculation type: Average DOS
     Last updated: 18/07/2022
@@ -33,7 +33,7 @@ def main(onsite=(0, 0)):
 
     # number of decomposition parts [nx,ny] in each direction of matrix.
     # This divides the lattice into various sections, each of which is calculated in parallel
-    nx = ny = 1
+    nx = ny = 2
     # number of unit cells in each direction.
     lx = ly = 512
 
@@ -61,12 +61,12 @@ def main(onsite=(0, 0)):
     calculation = kite.Calculation(configuration)
     calculation.dos(num_points=4000,
                     num_moments=512,
-                    num_random=5,
+                    num_random=2,
                     num_disorder=1)
 
     # configure the *.h5 file
     output_file = "on_site_disorder-output.h5"
-    kite.config_system(lattice, configuration, calculation, filename=output_file)
+    kite.config_system(lattice, configuration, calculation, filename=output_file, disorder=disorder)
 
     # for generating the desired output from the generated HDF5-file, run
     # ../build/KITEx on_site_disorder-output.h5
