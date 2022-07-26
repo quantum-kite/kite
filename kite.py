@@ -1190,7 +1190,7 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
         modification = Modification(magnetic_field=False)
 
     # check if magnetic field is On
-    if modification.magnetic_field or modification.flux and complx == 0:
+    if (modification.magnetic_field or modification.flux) and complx == 0:
         print('Magnetic field is added but is_complex identifier is 0. Automatically turning is_complex to 1!')
         config._is_complex = 1
         config.set_type()
