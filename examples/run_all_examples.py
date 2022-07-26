@@ -27,6 +27,7 @@ if not tools_exists:
     print("Please make sure the KITE-tools executable is in the correct place relative to this script: ../tools/build/KITEx")
     exit(1)
 
+
 def run_calculation(input_file="output.h5"):
     """Run KITEx"""
     print_command("- - - -             Doing the KITEx-calculation                - - - - -")
@@ -81,6 +82,7 @@ def make_figure_cond_cd(file_data="condDC.dat", title="DC conductivity", xlabel=
     fig.savefig(file_out)
     plt.close(fig)
 
+
 def make_figure_cond_dc_ss(file_data="condDC.dat", title="DC conductivity", xlabel="E (eV)",
                          ylabel=r"$\sigma (2e^2/h)$", file_out="optcond.pdf"):
     """Make a figure for the DOS"""
@@ -94,6 +96,7 @@ def make_figure_cond_dc_ss(file_data="condDC.dat", title="DC conductivity", xlab
     ax.set_ylabel(ylabel)
     fig.savefig(file_out)
     plt.close(fig)
+
 
 def print_command(text=""):
     print("\033[94m {0} \033[0m".format(text))
@@ -256,7 +259,6 @@ def main():
     make_figure_opt_cond(file_data=opt_cond_data, title="Optical Conductivity Graphene",
                          file_out=opt_cond_figure)
 
-
     # Example 10: haldane.py
     print_command("======= Example 10: DOS & DC conductivity for the Haldene model =====")
     import dos_dccond_haldane as example
@@ -277,7 +279,6 @@ def main():
                         file_out=cond_dc_figure)
 
     print_command("-" * 74 + "\n" + " " * 10 + "Ran all the examples in the kite/examples-folder\n" + "-" * 74 + "\n")
-
 
     # Example 11: phosphorene.py
     print_command("======= Example 11: DC coductivity for phosphorene in XX         =========")

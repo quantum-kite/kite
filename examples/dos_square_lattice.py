@@ -19,7 +19,7 @@ import numpy as np
 import pybinding as pb
 
 
-def square_lattice(onsite=(0, 0), t=1):
+def square_lattice(onsite=(0), t=1):
     """Return lattice specification for a square lattice with nearest neighbor hoppings"""
 
     # define lattice vectors
@@ -44,7 +44,7 @@ def square_lattice(onsite=(0, 0), t=1):
     return lat
 
 
-def main(onsite=(0, 0), t=1):
+def main(onsite=(0), t=1):
     """Prepare the input file for KITEx"""
     # load lattice
     lattice = square_lattice(onsite, t)
