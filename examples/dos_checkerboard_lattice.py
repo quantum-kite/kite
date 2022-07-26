@@ -83,7 +83,7 @@ def main(delta=0.1, t=1):
     calculation = kite.Calculation(configuration)
     calculation.dos(num_points=1000,
                     num_moments=512,
-                    num_random=5,
+                    num_random=3,
                     num_disorder=1)
 
     # configure the *.h5 file

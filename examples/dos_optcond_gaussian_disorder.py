@@ -8,7 +8,7 @@
     Units: Energy in eV
     Lattice: Honeycomb
     Configuration: Periodic boundary conditions, double precision,
-                    automatic scaling, size of the system 512x512, with domain decomposition (nx=ny=1)
+                    automatic scaling, size of the system 512x512, with domain decomposition (nx=ny=2)
     Disorder: Disorder class Gaussian at different sublattices
     Calculation type: Average DOS and optical conductivity (xx)
     Last updated: 18/07/2022
@@ -62,12 +62,12 @@ def main(onsite=(0, 0)):
     calculation = kite.Calculation(configuration)
     calculation.dos(num_points=4096,
                     num_moments=512,
-                    num_random=10,
+                    num_random=1,
                     num_disorder=1)
     # require the calculation conductivity_optical (xx)
-    calculation.conductivity_optical(num_points=1024,
+    calculation.conductivity_optical(num_points=256,
                                      num_disorder=1,
-                                     num_random=5,
+                                     num_random=1,
                                      num_moments=256,
                                      direction='xx')
 

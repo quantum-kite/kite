@@ -8,7 +8,7 @@
     Units: Energy in units of hopping, |t| = 1
     Lattice: Honeycomb
     Configuration: Periodic boundary conditions, double precision,
-                    automatic scaling, size of the system 256x256, with domain decomposition (nx=ny=1)
+                    automatic scaling, size of the system 256x256, with domain decomposition (nx=ny=2)
     Disorder: Disorder class Uniform at different sublattices
     Calculation type: Average DOS and DC conductivity (xy)
     Last updated: 24/07/2022
@@ -72,9 +72,9 @@ def main(onsite=(0, 0), t=1):
 
     # number of decomposition parts [nx,ny] in each direction of matrix.
     # This divides the lattice into various sections, each of which is calculated in parallel
-    nx = ny = 1
+    nx = ny = 2
     # number of unit cells in each direction.
-    lx = ly = 64
+    lx = ly = 128
 
     # make config object which caries info about
     # - the number of decomposition parts [nx, ny],
@@ -100,13 +100,14 @@ def main(onsite=(0, 0), t=1):
     # specify calculation type
     calculation = kite.Calculation(configuration)
     calculation.dos(num_points=1000,
-                    num_moments=512,
-                    num_random=10,
+                    num_moments=256,
+                    num_random=1,
                     num_disorder=1)
+
     # require the calculation conductivity_dc
     calculation.conductivity_dc(num_points=1000,
                                 num_moments=256,
-                                num_random=50,
+                                num_random=1,
                                 num_disorder=1,
                                 direction='xy',
                                 temperature=100)

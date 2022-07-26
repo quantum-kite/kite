@@ -8,7 +8,7 @@
     Units: Energy in eV
     Lattice: Bilayer phosphorene
     Configuration: Periodic boundary conditions, double precision,
-                    automatic scaling, size of the system 512x512, with domain decomposition (nx=ny=1)
+                    automatic scaling, size of the system 512x512, with domain decomposition (nx=ny=2)
     Calculation: singleshot_conductivity_dc xx/yy
     Last updated: 18/07/2022
 """
@@ -18,7 +18,6 @@ __all__ = ["main"]
 import kite
 import numpy as np
 import pybinding as pb
-
 
 def phosphorene_lattice(num_hoppings=4):
     """Return lattice specification for a bilayer phosphorene lattice"""
@@ -113,9 +112,9 @@ def main(direction='xx', num_hoppings=4):
 
     # number of decomposition parts [nx,ny,nz] in each direction of matrix.
     # This divides the lattice into various sections, each of which is calculated in parallel
-    nx = ny = 1
+    nx = ny = 2
     # number of unit cells in each direction.
-    lx = ly = 64
+    lx = ly = 256
 
     # make config object which caries info about
     # - the number of decomposition parts [nx, ny],
@@ -135,6 +134,7 @@ def main(direction='xx', num_hoppings=4):
                                        length=[lx, ly],
                                        boundaries=[mode, mode],
                                        is_complex=False,
+                                       spectrum_range=[-10, 10],
                                        precision=1)
 
     # define energy grid
@@ -146,7 +146,7 @@ def main(direction='xx', num_hoppings=4):
     # require the calculation of singleshot_conductivity_dc
     calculation.singleshot_conductivity_dc(energy=energy,
                                            num_moments=512,
-                                           num_random=2,
+                                           num_random=1,
                                            num_disorder=1,
                                            direction=direction,
                                            eta=0.02)

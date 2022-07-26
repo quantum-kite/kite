@@ -40,20 +40,18 @@ void Simulation<T,D>::Gamma1D(int NRandomV, int NDisorder, int N_moments,
   Eigen::Matrix<T, 1, 2> tmp =  Eigen::Matrix < T, 1, 2> ::Zero();		
 
   long average = 0;
-  for(int disorder = 0; disorder < NDisorder; disorder++)
-    {
+  for(int disorder = 0; disorder < NDisorder; disorder++){
       h.generate_disorder();
       
       for(unsigned it = 0; it < indices.size(); it++)
         h.build_velocity(indices.at(it), it);
       
-      for(int randV = 0; randV < NRandomV; randV++)
-        {
+      for(int randV = 0; randV < NRandomV; randV++){
 	  /* Note: Still need to include in Gamma2D and Gamma3D */
-	  h.generate_twists(); // Generates Random or fixed boundaries
+	      h.generate_twists(); // Generates Random or fixed boundaries
 	  
           kpm0.initiate_vector();   // original random vector
-	  kpm1.initiate_phases();   //Initiates the Hopping Phases in KPM1
+	      kpm1.initiate_phases();   //Initiates the Hopping Phases in KPM1
           kpm1.set_index(0);
           kpm1.v.col(0) = kpm0.v.col(0);
           kpm1.Exchange_Boundaries();

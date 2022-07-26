@@ -9,7 +9,7 @@
     Lattice: Twisted bilayer graphene
     Disorder: None
     Configuration: Periodic boundary conditions, double precision,
-                    automatic scaling, size of the system flexible, with domain decomposition (nx=ny=1)
+                   automatic scaling, size of the system  flexible, with domain decomposition (nx=ny=2)
     Calculation type: Average DOS
     Last updated: 24/07/2022
 """
@@ -35,7 +35,7 @@ def twisted_bilayer_lattice(angle_index=0):
     return lat
 
 
-def main(angle_index=0):
+def main(angle_index=3):
     """Prepare the input file for KITEx"""
     # select the twist angle, choose between
     #   angle_index     twist angle (degrees)
@@ -49,9 +49,9 @@ def main(angle_index=0):
 
     # number of decomposition parts [nx,ny] in each direction of matrix.
     # This divides the lattice into various sections, each of which is calculated in parallel
-    nx = ny = 1
+    nx = ny = 2
     # number of unit cells in each direction.
-    lx = ly = 64, 64
+    lx = ly = 128,128
 
     # make config object which caries info about
     # - the number of decomposition parts [nx, ny],
@@ -76,7 +76,7 @@ def main(angle_index=0):
 
     # specify calculation type
     calculation = kite.Calculation(configuration)
-    calculation.dos(num_moments=1000,
+    calculation.dos(num_moments=2000,
                     num_random=1,
                     num_disorder=1,
                     num_points=1000)

@@ -85,10 +85,17 @@ void Simulation<T,D>::Gamma2D(int NRandomV, int NDisorder, std::vector<int> N_mo
     h.generate_disorder();
     for(unsigned it = 0; it < indices.size(); it++)
       h.build_velocity(indices.at(it), it);
+
     for(int randV = 0; randV < NRandomV; randV++){
-        
+	  h.generate_twists(); // Generates Random or fixed boundaries
 
       kpm0.initiate_vector();			// original random vector. This sets the index to zero
+
+	  kpm0.initiate_phases();           //Initiates the Hopping Phases, including TBC
+	  kpm1.initiate_phases();          
+	  kpm2.initiate_phases();          
+	  kpm3.initiate_phases();          
+                                        
       kpm0.Exchange_Boundaries();
       kpm1.set_index(0);
       kpm0.Velocity(&kpm1, indices, 0);
@@ -99,10 +106,8 @@ void Simulation<T,D>::Gamma2D(int NRandomV, int NDisorder, std::vector<int> N_mo
           
           // Iterate MEMORY times. The first time this occurs, we must exclude the zeroth
           // case, because it is already calculated, it's the identity
-          for(int i = n; i < n + MEMORY; i++)
-            {
+          for(int i = n; i < n + MEMORY; i++) {
               kpm1.cheb_iteration(i);
-              
               
               kpm3.set_index(i%MEMORY);
               kpm1.Velocity(&kpm3, indices, 1);
@@ -119,9 +124,9 @@ void Simulation<T,D>::Gamma2D(int NRandomV, int NDisorder, std::vector<int> N_mo
               for(int i = m; i < m + MEMORY; i++)
                 kpm2.cheb_iteration(i);
               
-              //std::cout << "index2: " << kpm2.get_index() << "\n";
               // Finally, do the matrix product and store the result in the Gamma matrix
               tmp.setZero();
+
               for(std::size_t ii = 0; ii < r.Sized ; ii += r.Ld[0])
                 tmp += kpm3.v.block(ii,0, r.Ld[0], MEMORY).adjoint() * kpm2.v.block(ii, 0, r.Ld[0], MEMORY);
               T flatten;

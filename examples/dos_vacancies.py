@@ -66,7 +66,7 @@ def main(onsite=(0, 0), t=1):
     # each realisation should be specified as a separate object
     struc_disorder_A = kite.StructuralDisorder(lattice, concentration=0.1)
     struc_disorder_A.add_vacancy('A')
-    struc_disorder_B = kite.StructuralDisorder(lattice, concentration=0.1)
+    struc_disorder_B = kite.StructuralDisorder(lattice, concentration=0.05)
     struc_disorder_B.add_vacancy('B')
     disorder_structural = [struc_disorder_A, struc_disorder_B]
 
@@ -100,12 +100,12 @@ def main(onsite=(0, 0), t=1):
     calculation = kite.Calculation(configuration)
     calculation.dos(num_points=1000,
                     num_moments=512,
-                    num_random=5,
+                    num_random=1,
                     num_disorder=1)
 
     # configure the *.h5 file
     output_file = "vacancies-output.h5"
-    kite.config_system(lattice, configuration, calculation, filename=output_file)
+    kite.config_system(lattice, configuration, calculation, filename=output_file, disorder_structural=disorder_structural)
 
     # for generating the desired output from the generated HDF5-file, run
     # ../build/KITEx vacancies-output.h5

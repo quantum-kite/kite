@@ -78,6 +78,7 @@ void Simulation<T,D>::Gamma3D(int NRandomV, int NDisorder, std::vector<int> N_mo
   KPM_Vector<T,D> kpm_VnV(MEMORY, *this);    // kpmL multiplied by the velocity
   KPM_Vector<T,D> kpm_p(2, *this);          // right-most vector that will be Chebyshev-iterated on
   KPM_Vector<T,D> kpm_pVm(MEMORY, *this);         // middle vector that will be Chebyshev-iterated on
+
     
   // initialize the local gamma matrix and set it to 0
   int size_gamma = 1;
@@ -107,9 +108,17 @@ void Simulation<T,D>::Gamma3D(int NRandomV, int NDisorder, std::vector<int> N_mo
       for(unsigned it = 0; it < indices.size(); it++)
         h.build_velocity(indices.at(it), it);
 
-      for(int randV = 0; randV < NRandomV; randV++)
-        {
+      for(int randV = 0; randV < NRandomV; randV++){
+	      h.generate_twists(); // Generates Random or fixed boundaries
+        
           kpm0.initiate_vector();			// original random vector. This sets the index to zero
+
+          kpm0.initiate_phases();
+          kpm_Vn.initiate_phases();
+          kpm_VnV.initiate_phases();
+          kpm_p.initiate_phases();
+          kpm_pVm.initiate_phases();
+
           kpm0.Exchange_Boundaries();
           kpm_Vn.set_index(0);
           kpm0.Velocity(&kpm_Vn, indices, 0);

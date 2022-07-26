@@ -35,6 +35,9 @@ public:
   std::vector<value_type> U_Anderson;      // Local disorder  
   std::vector<int> Anderson_orb_address;
 
+  // Some checks
+  bool twists_set;
+
   // Custom user-defined local potential. This can be read from the
   // HDF file, or defined in runtime with a function in the ../lib
   // directory

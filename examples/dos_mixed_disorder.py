@@ -67,7 +67,7 @@ def main(onsite=(0, 0)):
     # specify calculation type
     calculation = kite.Calculation(configuration)
     calculation.dos(num_points=10000,
-                    num_moments=2048,
+                    num_moments=1024,
                     num_random=1,
                     num_disorder=1)
 

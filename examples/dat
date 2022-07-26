@@ -1,0 +1,18 @@
+The density of states will be calculated with these parameters: (eV)
+   Energy range: [-9.900000, 9.900000] (default)
+   Number of energies: 1000
+   Filename: dos.dat (default)
+   Number of moments: 2048
+   Kernel: jackson (default)
+The DC conductivity will be calculated with these parameters: (eV, Kelvin)
+   Temperature: 100
+   Broadening: 0.01 (default)
+   Delta broadening: 0.01 (default)
+   Max Fermi energy: 1 (default)
+   Min Fermi energy: -1 (default)
+   Number Fermi energies: 1000
+   Filename: condDC.dat (default)
+   Integration range: [-9.900000, 9.900000] (default)
+   Num integration points: 512 (default)
+   Num Chebychev moments: 128 (default)
+   Num threads: 4 (default)
