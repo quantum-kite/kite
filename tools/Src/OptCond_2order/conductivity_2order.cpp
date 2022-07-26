@@ -201,7 +201,7 @@ void conductivity_nonlinear<T, DIM>::override_parameters(){
     if(variables.CondOpt2_Fermi != -8888)    e_fermi     = (variables.CondOpt2_Fermi - shift)/scale;
     if(variables.CondOpt2_Scat != -8888)     scat        = variables.CondOpt2_Scat/scale;
     if(variables.CondOpt2_Name != "")        filename    = variables.CondOpt2_Name;
-    beta = 1.0/8.6173303*pow(10,5)/temperature;
+    beta = 1.0/temperature;
 }
 
 template <typename T, unsigned DIM>
@@ -209,8 +209,8 @@ void conductivity_nonlinear<T, DIM>::set_default_parameters(){
     
   double scale = systemInfo.energy_scale;
   double shift = systemInfo.energy_shift;
-  temperature = 0.01/scale;
-  beta        = 1.0/8.6173303*pow(10,5)/temperature;
+  temperature = 0.001/scale;
+  beta        = 1.0/temperature;
   default_temperature = true;
 
 
@@ -284,7 +284,7 @@ bool conductivity_nonlinear<T, DIM>::fetch_parameters(){
   get_hdf5(&temperature, &file, (char*)(dirName+"Temperature").c_str());	
   get_hdf5(&NumPoints, &file, (char*)(dirName+"NumPoints").c_str());	
   get_hdf5(&special, &file, (char*)(dirName+"Special").c_str());	
-  beta = 1.0/8.6173303*pow(10,5)/temperature;   // 1/kT, where k is the Boltzmann constant in eV/K
+  beta = 1.0/temperature;   // 1/kT, where k is the Boltzmann constant in eV/K
 	
   // Frequency parameters needed to run the simulation
   N_omegas = NumPoints;

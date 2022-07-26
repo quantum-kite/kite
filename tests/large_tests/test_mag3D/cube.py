@@ -36,18 +36,13 @@ lattice = cube()
 
 # number of decomposition parts in each direction of matrix.
 # This divides the lattice into various sections, each of which is calculated in parallel
-nx = 2
-ny = 1
-nz = 2
+nx = 2; ny = 2; nz = 2
 # number of unit cells in each direction.
-lx = 64
-ly = 64
-lz = 64
-# lx = ly = lz = 64
+lx = 64; ly = 32; lz = 64
 configuration = kite.Configuration(divisions=[nx, ny, nz], length=[lx, ly, lz], boundaries=["periodic", "periodic", "periodic"], is_complex=True, precision=1, spectrum_range=[-6.1,6.1])
 calculation = kite.Calculation(configuration)
-mod = kite.Modification(magnetic_field = 1)
-calculation.dos(num_points=1000, num_moments=32768, num_random=1, num_disorder=1)
+mod = kite.Modification(magnetic_field = 65)
+calculation.dos(num_points=1000, num_moments=16384, num_random=1, num_disorder=1)
 # configure the *.h5 file
 # kite.config_system(lattice, configuration, calculation, filename='cube.h5')
 

@@ -131,8 +131,9 @@ void conductivity_dc<T, DIM>::set_default_parameters(){
     filename            = "condDC.dat";     // Filename to save the final result
     default_filename    = true;
 
-    temperature         = 0.001/scale;      // Temperature of 1mK in KPM reduced units
-    beta                = 1.0/8.6173303*pow(10,5)/temperature;
+    // Temperature is in energy units, so it is actually kb*T, where kb is Boltzmann's constant
+    temperature         = 0.001/scale;      
+    beta                = 1.0/temperature;
     default_temp        = true;
 }
 
@@ -174,9 +175,9 @@ bool conductivity_dc<T, DIM>::fetch_parameters(){
 	get_hdf5(&MaxMoments, &file, (char*)(dirName+"NumMoments").c_str());	
 
   // Fetch the temperature from the .h5 file
-  // The temperature is already in KPM reduced units
+  // The temperature (kb*T) is in energy units. It is already reduced by SCALE from within the python script
 	get_hdf5(&temperature, &file, (char*)(dirName+"Temperature").c_str());	
-  beta = 1.0/8.6173303*pow(10,5)/temperature;
+  beta = 1.0/temperature;
   default_temp = false;
 
   // Fetch the number of Fermi energies from the .h5 file
@@ -230,7 +231,7 @@ void conductivity_dc<U, DIM>::override_parameters(){
 
     if(variables.CondDC_Temp != -1){
         temperature     = variables.CondDC_Temp/scale;
-        beta            = 1.0/8.6173303*pow(10,5)/temperature;
+        beta            = 1.0/temperature;
         default_temp    = false;
     }
 

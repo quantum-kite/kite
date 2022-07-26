@@ -94,7 +94,7 @@ void conductivity_optical<T, DIM>::set_default_parameters(){
 
     // Temperature
     temperature = 0.001/scale;
-    beta = 1.0/8.6173303*pow(10,5)/temperature;
+    beta = 1.0/temperature;
     default_temperature = true;
 
     Convergence_G = systemInfo.NumThreads;
@@ -259,7 +259,7 @@ void conductivity_optical<U, DIM>::override_parameters(){
     if(variables.CondOpt_Temp != -8888){
       debug_message("Overriding temperature");
       temperature = variables.CondOpt_Temp/scale;
-      beta = 1.0/8.6173303*pow(10,5)/temperature;
+      beta = 1.0/temperature;
       default_temperature = false;
     }
 

@@ -1203,7 +1203,7 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
         modification = Modification(magnetic_field=False)
 
     # check if magnetic field is On
-    if modification.magnetic_field or modification.flux and complx == 0:
+    if (modification.magnetic_field or modification.flux) and complx == 0:
         print('Magnetic field is added but is_complex identifier is 0. Automatically turning is_complex to 1!')
         config._is_complex = 1
         config.set_type()
@@ -1419,8 +1419,6 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
         print('MAGNETIC FIELD:\n')
 
         # find the minimum commensurate magnetic field
-        if not space_size == 2:
-            raise SystemExit('Magnetic field is currently supported only in 2D!')
         hbar = 6.58211899 * 10 ** -16  #: [eV*s]
         phi0 = 2 * np.pi * hbar  #: [V*s] flux quantum
         unit_cell_area = np.linalg.norm(np.cross(vectors[0, :], vectors[1, :])) * 1e-18

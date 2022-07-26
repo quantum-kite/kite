@@ -112,7 +112,7 @@ void arpes<T, DIM>::override_parameters(){
 
     if(variables.ARPES_Temp != -8888){
         temperature       = variables.ARPES_Temp;
-        beta              = 1.0/8.6173303*pow(10,5)/temperature;
+        beta              = 1.0/temperature;
         default_temp      = false;
     }
 
@@ -193,7 +193,7 @@ void arpes<T, DIM>::set_default_parameters(){
 
   // default temperature
   temperature       = 0.1/scale;
-  beta              = 1.0/8.6173303*pow(10,5)/temperature;
+  beta              = 1.0/temperature;
   default_temp      = true;
 
   // default Fermi energy of the system
