@@ -601,19 +601,22 @@ void KPM_Vector <T, 3>::Exchange_Boundaries() {
 } 
 
 template <typename T>
-void inline KPM_Vector <T, 3>::mult_regular_hoppings(const  std::size_t & ind_i, const  std::size_t & io)
-{
+void inline KPM_Vector <T, 3>::mult_regular_hoppings(const  std::size_t & ind_i, const  std::size_t & io){
+    /* Perform the KPM iteration for the regular part of the Hamiltonian, that is, the translation-invariant part 
+     * */
+
   std::size_t count;
   const std::size_t ind_f = ind_i + TILE * tile[2];
   std::size_t rr[3], hop[3], x, y, z; // Variables for TBC
-  // Hoppings
-  for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
-    {
+
+  // Iterate over the hoppings
+  for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++){
       rr[0] = (ind_i % r.Ld[0]);
       rr[1] = (ind_i % (r.Ld[0] * r.Ld[1]) )/(r.Ld[0]);
       rr[2] = (ind_i % (r.Ld[0] * r.Ld[1] * r.Ld[2]) )/(r.Ld[0]*r.Ld[1]);
 	
       const std::ptrdiff_t d1 = h.hr.distance(ib, io);
+
       // Determine the Supercell Jumps
       const std::size_t i_f = ind_i + d1;
       hop[0] = (i_f % r.Ld[0] ) - rr[0] +1 ;
@@ -622,25 +625,26 @@ void inline KPM_Vector <T, 3>::mult_regular_hoppings(const  std::size_t & ind_i,
       
       count = 0;
       z = 0;
-      for( std::size_t j2 = ind_i; j2 < ind_f; j2 += tile[2] )
-        {
-          //const T t1 = mult_t1_ghost_cor[io][ib][count++];// * Fact_Bnd[2][hop[2]][rr[2]+z];
+
+      // Iterate over the slowest coordinate (z)
+      for( std::size_t j2 = ind_i; j2 < ind_f; j2 += tile[2] ) {
           const T t1 = mult_t1_ghost_cor[io][ib][count++] * Fact_Bnd[2][hop[2]][rr[2]+z];
           const std::size_t std = tile[1], j2M = j2 + std * TILE;
-	  y = 0;
-          for(std::size_t j1 = j2; j1 < j2M; j1 += std )
-	    {
-	      x = 0;
-	      for(std::size_t j0 = j1; j0 < j1 + TILE ; j0++)
-		{
-		  //phi0[j0] += t1 * phiM1[j0 + d1];// * Fact_Bnd[1][hop[1]][rr[1]+y] * Fact_Bnd[0][hop[0]][rr[0]+x];
-          phi0[j0] += t1 * phiM1[j0 + d1] * Fact_Bnd[1][hop[1]][rr[1]+y] * Fact_Bnd[0][hop[0]][rr[0]+x];
-		  x++;
-		};
-	      y++;
-	    };
-	  z++;
-	};
+	      y = 0;
+
+          // Iterate over the middle coordinate (y)
+          for(std::size_t j1 = j2; j1 < j2M; j1 += std ){
+              x = 0;
+
+              // Iterate over the quick coordinate (x)
+              for(std::size_t j0 = j1; j0 < j1 + TILE ; j0++){
+                phi0[j0] += t1 * phiM1[j0 + d1] * Fact_Bnd[1][hop[1]][rr[1]+y] * Fact_Bnd[0][hop[0]][rr[0]+x];
+                x++;
+              };
+	          y++;
+	       };
+	       z++;
+	  };
     } 
 }
 
@@ -707,8 +711,7 @@ void KPM_Vector <T, 3u>::initiate_stride(std::size_t & istr)
 
 template <typename T>
 template < unsigned MULT,bool VELOCITY> 
-void KPM_Vector <T, 3>::build_regular_phases(int i2min, unsigned axis)
-{
+void KPM_Vector <T, 3>::build_regular_phases(int i2min, unsigned axis) {
 
   Coordinates<std::ptrdiff_t, D + 1>  global(r.Lt);
   Coordinates<std::ptrdiff_t, D + 1>  local1(r.Ld);
@@ -754,19 +757,18 @@ void KPM_Vector <T, 3>::KPM_MOTOR(KPM_Vector<T,3> *kpm_final, unsigned axis)
   for(auto istr = h.cross_mozaic_indexes.begin(); istr != h.cross_mozaic_indexes.end() ; istr++)
     initiate_stride<MULT>(*istr);
   
-  for( i2 = NGHOSTS; i2 < r.Ld[2] - NGHOSTS; i2 += TILE  )
-    {
+  // Iterate over tiles first
+  for( i2 = NGHOSTS; i2 < r.Ld[2] - NGHOSTS; i2 += TILE  ){
       build_regular_phases<MULT,VELOCITY>(i2, axis);
       for( i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1 += TILE  )
-        for( i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0 += TILE )
-          {
+        for( i0 = NGHOSTS; i0 < r.Ld[0] - NGHOSTS; i0 += TILE ){
             
             std::size_t istr = ((i2 - NGHOSTS) / TILE * r.lStr[1] + (i1 - NGHOSTS) / TILE) * r.lStr[0] + (i0 - NGHOSTS) / TILE;
             if(h.cross_mozaic.at(istr))
               initiate_stride<MULT>(istr);
-            // These four lines pertrain only to the magnetic field
-            for(std::size_t io = 0; io < r.Orb; io++)
-              {
+
+            // Iterate over the orbitals
+            for(std::size_t io = 0; io < r.Orb; io++){
                 const std::size_t ip = io * x.basis[3];
                 const std::size_t j0 = ip + i0 + i1 * tile[1] + i2 * tile[2];
 		
@@ -775,7 +777,7 @@ void KPM_Vector <T, 3>::KPM_MOTOR(KPM_Vector<T,3> *kpm_final, unsigned axis)
 		
                 // Hoppings
                 mult_regular_hoppings(j0, io);
-              }
+             }
             
             KPM_VectorBasis<T,3u>::template multiply_defect<MULT, VELOCITY>(istr, phi0, phiM1, axis);
             
@@ -784,7 +786,7 @@ void KPM_Vector <T, 3>::KPM_MOTOR(KPM_Vector<T,3> *kpm_final, unsigned axis)
             for(auto k = hV.begin(); k != hV.end(); k++)
               phi0[*k] = 0.;
 
-          }
+        }
     }
 
   for(auto vc =  h.hV.vacancies_with_defects.begin(); vc != h.hV.vacancies_with_defects.end(); vc++)

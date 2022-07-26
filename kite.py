@@ -1393,8 +1393,6 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
         print('MAGNETIC FIELD:\n')
 
         # find the minimum commensurate magnetic field
-        if not space_size == 2:
-            raise SystemExit('Magnetic field is currently supported only in 2D!')
         hbar = 6.58211899 * 10 ** -16  #: [eV*s]
         phi0 = 2 * np.pi * hbar  #: [V*s] flux quantum
         unit_cell_area = np.linalg.norm(np.cross(vectors[0, :], vectors[1, :])) * 1e-18

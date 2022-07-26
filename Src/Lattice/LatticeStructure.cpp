@@ -41,9 +41,13 @@ LatticeStructure<D>::LatticeStructure(char *name )
     file->close();
   }
 
-  // Set the ghost_correlation potential and normalize it to the size of the system
+  // Set the Peierls phase in order to include the magnetic field
+  // The vector potential always changes in the direction of the slow coordinate
+  // which is 1 in 2D and 2 in 3D
   ghost_pot.setZero();
-  ghost_pot(0,1) = MagneticField * 1.0 /Lt[1]*2.0*M_PI;
+  if(D==2) ghost_pot(0,1) = MagneticField * 2.0 /Lt[1]*M_PI;
+  if(D==3) ghost_pot(0,1) = MagneticField * 2.0 /Lt[2]*M_PI;
+
 
   test_divisibility();
     
