@@ -770,7 +770,7 @@ class Configuration:
            Periodic boundary conditions each direction:
                "periodic"
                "open"
-               "twisted" -- this option needs the extra argument ths=[phi_1,..,phi_DIM] where phi_i \in [0, 2*M_PI]
+               "twisted" -- this option needs the extra argument angles=[phi_1,..,phi_DIM] where phi_i \in [0, 2*M_PI]
                "random"
        is_complex : bool
            Boolean that reflects whether the type of Hamiltonian is complex or not.
@@ -1350,8 +1350,21 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
     bound, Twists = config.bound
     if len(bound) != space_size:
         raise SystemExit('Select boundary condition accordingly with the number of dimensions of your system!')
-    print('\nPeriodic boundary conditions along the direction of lattice vectors \n'
-          'respectively are set to: ', bound, '\n')
+
+    bound_Name = [" ", " ", " "]
+    for i in range(len(bound)):
+        if bound[i] == 0:
+            bound_Name[i] = "Open"
+        if bound[i] == 1:
+            if Twists[0]==0 and Twists[1] == 0 and Twists[2] == 0:
+                bound_Name[i] = "Periodic"
+            else:
+                 bound_Name[i] = "Fixed Twisted"
+        if bound[i] == 2:
+            bound_Name[i] = "Random Twisted"
+            
+    print('\nBoundary conditions along the lattice vectors are set to:\n ')
+    print("a1:",bound_Name[0],"    a2:",bound_Name[1],"    a3:",bound_Name[2], '\n')
     f.create_dataset('Boundaries', data=bound, dtype='u4')
     f.create_dataset('BoundaryTwists', data=Twists, dtype=float) # JPPP Values of the Fixed Boundary Twists
     print('\n##############################################################################\n')
