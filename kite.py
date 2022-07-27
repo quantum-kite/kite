@@ -1170,17 +1170,10 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
     """
 
     print('##############################################################################')
-    print('#                        KITE | Pre-Release Beta 0.1                         #')
-    print('#                                                                            #')
+    print('#                        KITE | Release  1.1                                 #')
     print('#                        Kite home: quantum-kite.com                         #')
     print('#                                                                            #')
-    print('#                                                                            #')
-    print('#                                                                            #')
-    print('#  Developed by: Simao M. Joao, Joao V. Lopes, Tatiana G. Rappoport,         #')
-    print('#                                                                            #')
-    print('#  Misa Andelkovic, Lucian Covaci, Aires Ferreira, 2018-2021                 #')
-    print('#                                                                            #')
-    print('#                                                                            #')
+    print('#                        Copyright 2022, KITE                                #')
     print('##############################################################################')
 
     # hamiltonian is complex 1 or real 0
