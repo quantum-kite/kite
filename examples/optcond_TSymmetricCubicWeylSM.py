@@ -8,8 +8,8 @@
     Units: Energy in units of nearest neighbour hopping, |t| = 1
     Lattice: simple cubic lattice (two orbitals per site)
     Configuration: random twisted boundary conditions, double precision, manual rescaling
-    Calculation type: Linear Optical Conductivity (sigma_xx)
-    Last updated: 26/07/2022
+    Calculation type: Linear Optical Conductivity (sigma_xx) [Heavily Paralellized Example]
+    Last updated: 27/07/2022
 """
 
 __all__ = ["main"]
@@ -40,7 +40,7 @@ def Weyl_Semimetal(t = 1.0):
                               ([0,0,1],'B','B',-0.5*t))
     return lat
 
-def main(Anderson_W = 0.8):
+def main(Anderson_W = 0.0):
     """Prepare the input file for KITEx"""
     # load lattice
     lattice =  Weyl_Semimetal()
@@ -53,10 +53,9 @@ def main(Anderson_W = 0.8):
     
     # number of decomposition parts [nx,ny,nz] in each direction of matrix.
     # This divides the lattice into various sections, each of which is calculated in parallel
-    nx = 4; ny = nz = 1
+    nx = 2; ny = nz = 4
     # number of unit cells in each direction.
-    lx = ly = 64
-    lz = 32
+    lx = ly = lz = 128
     # Boundary Mode
     mode = "random"
     
@@ -78,19 +77,19 @@ def main(Anderson_W = 0.8):
     
     # require the calculation of DOS
     calculation = kite.Calculation(configuration)
-    calculation.conductivity_optical(num_points=256,
-                                                   num_moments=256,
+    calculation.conductivity_optical(num_points=512,
+                                                   num_moments=1024,
                                                    num_random=1,
                                                    num_disorder=1,
                                                    direction="xx",
-                                                   temperature=0.025)
+                                                   temperature=0.01)
     # configure the *.h5 file
     output_file = "Weyl_optical-output.h5"
     kite.config_system(lattice, configuration, calculation, filename=output_file, disorder=disorder)
     
     # for generating the desired output from the generated HDF5-file, run
     # ../build/KITEx Weyl_optical-output.h5
-    # ../tools/build/KITE-tools Weyl_optical-output.h5 --CondOpt -O 0.1 1 201 -F 0.25 -S 0.01
+    # ../tools/build/KITE-tools Weyl_optical-output.h5 --CondOpt -O 0.02 1 401 -E 1000 -F 0.25 -S 0.005
     
     # returning the name of the created HDF5-file
     return output_file
