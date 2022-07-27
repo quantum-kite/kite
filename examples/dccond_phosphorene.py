@@ -1,4 +1,4 @@
-""" Phosphorene conductivity 'xx'/'yy'
+""" Phosphorene DC-conductivity 'xx'/'yy'
 
     ##########################################################################
     #                         Copyright 2022, KITE                           #
@@ -10,7 +10,7 @@
     Configuration: Periodic boundary conditions, double precision,
                     automatic scaling, size of the system 512x512, with domain decomposition (nx=ny=2)
     Calculation: singleshot_conductivity_dc xx/yy
-    Last updated: 18/07/2022
+    Last updated: 27/07/2022
 """
 
 __all__ = ["main"]
@@ -157,16 +157,10 @@ def main(direction='xx', num_hoppings=4):
 
     # for generating the desired output from the generated HDF5-file, run
     # ../build/KITEx phxx-output.h5
-    # ../tools/build/KITE-tools phxx-output.h5
+    # python ../tools/ProcessSingleShot.py phxx-output.h5 (extracts a data file with Energy | Re Sigma | Im Sigma)
 
     # returning the name of the created HDF5-file
     return output_file
-
-
-def post_process(file_name="phxx-output.h5", out_file_name="condDC.dat"):
-    from h5py import File
-    np.savetxt(out_file_name, File(file_name, "r+")['Calculation']['singleshot_conductivity_dc']['SingleShot'])
-
 
 if __name__ == "__main__":
     main()
