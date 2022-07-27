@@ -1,3 +1,14 @@
+""" Script to Extract Data for the longitudinal DC-conductitivy obtained by the single-shot
+    method (note that this method does not require post-processing by KITE-tools)
+
+    ##########################################################################
+    #                     Copyright 2022, KITE                               #
+    #                 Home page: quantum-kite.com                            #
+    ##########################################################################
+    Last updated: 27/07/2022
+"""
+
+
 import h5py as hdf
 import numpy as np
 import sys
