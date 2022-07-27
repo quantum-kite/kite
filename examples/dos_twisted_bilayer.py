@@ -28,7 +28,7 @@ def twisted_bilayer_lattice(angle_index=0):
     angle = np.array([2.005, 7.341, 13.174, 21.787])[angle_index]
 
     # define the name of the pb.Lattice object
-    name = 'lattice_twisted_bilayer/lattice_tblg_{:.3f}'.format(angle)
+    name = '.lattice_twisted_bilayer/lattice_tblg_{:.3f}'.format(angle)
 
     # load a predefined lattice object, the lattice can be saved with pb.save(lattice, name)
     lat = pb.load(name)
