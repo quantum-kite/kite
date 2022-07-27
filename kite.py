@@ -1350,23 +1350,39 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
     bound, Twists = config.bound
     if len(bound) != space_size:
         raise SystemExit('Select boundary condition accordingly with the number of dimensions of your system!')
+    if len(bound) == 3:
+        bound_Name = [" ", " ", " "]
+        for i in range(len(bound)):
+            if bound[i] == 0:
+                bound_Name[i] = "Open"
+            if bound[i] == 1:
+                if Twists[0]==0 and Twists[1] == 0 and Twists[2] == 0:
+                    bound_Name[i] = "Periodic"
+                else:
+                    bound_Name[i] = "Fixed Twisted"
+            if bound[i] == 2:
+                bound_Name[i] = "Random Twisted"
+        print('\nBoundary conditions along the lattice vectors are set to:\n ')
+        print("a1:",bound_Name[0],"    a2:",bound_Name[1],"    a3:",bound_Name[2], '\n')
 
-    bound_Name = [" ", " ", " "]
-    for i in range(len(bound)):
-        if bound[i] == 0:
-            bound_Name[i] = "Open"
-        if bound[i] == 1:
-            if Twists[0]==0 and Twists[1] == 0 and Twists[2] == 0:
-                bound_Name[i] = "Periodic"
-            else:
-                 bound_Name[i] = "Fixed Twisted"
-        if bound[i] == 2:
-            bound_Name[i] = "Random Twisted"
-            
-    print('\nBoundary conditions along the lattice vectors are set to:\n ')
-    print("a1:",bound_Name[0],"    a2:",bound_Name[1],"    a3:",bound_Name[2], '\n')
+    if len(bound) == 2:
+        bound_Name = [" ", " "]
+        for i in range(len(bound)):
+            if bound[i] == 0:
+                bound_Name[i] = "Open"
+            if bound[i] == 1:
+                if Twists[0]==0 and Twists[1] == 0:
+                    bound_Name[i] = "Periodic"
+                else:
+                    bound_Name[i] = "Fixed Twisted"
+            if bound[i] == 2:
+                bound_Name[i] = "Random Twisted"
+        print('\nBoundary conditions along the lattice vectors are set to:\n ')
+        print("a1:",bound_Name[0],"    a2:",bound_Name[1], '\n')
     f.create_dataset('Boundaries', data=bound, dtype='u4')
     f.create_dataset('BoundaryTwists', data=Twists, dtype=float) # JPPP Values of the Fixed Boundary Twists
+
+    
     print('\n##############################################################################\n')
     print('DECOMPOSITION:\n')
     domain_dec = config.div
