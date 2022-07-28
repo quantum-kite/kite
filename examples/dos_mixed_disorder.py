@@ -13,7 +13,7 @@
                StructuralDisorder class vacancy and bond disorder
     Calculation type: Average DOS
     Note: automatic scaling is not supported when bond disorder is present
-    Last updated: 18/07/2022
+    Last updated: 28/07/2022
 """
 
 __all__ = ["main"]
@@ -57,19 +57,23 @@ def main(onsite=(0, 0)):
 
     # - specify precision of the exported hopping and onsite data, 0 - float, 1 - double, and 2 - long double.
     # - scaling, if None it's automatic, if present select spectrum_range=[e_min, e_max]
-    configuration = kite.Configuration(divisions=[nx, ny],
-                                       length=[lx, ly],
-                                       boundaries=[mode, mode],
-                                       is_complex=False,
-                                       precision=1,
-                                       spectrum_range=[-10, 10])
+    configuration = kite.Configuration(
+        divisions=[nx, ny],
+        length=[lx, ly],
+        boundaries=[mode, mode],
+        is_complex=False,
+        precision=1,
+        spectrum_range=[-10, 10]
+    )
 
     # specify calculation type
     calculation = kite.Calculation(configuration)
-    calculation.dos(num_points=10000,
-                    num_moments=1024,
-                    num_random=1,
-                    num_disorder=1)
+    calculation.dos(
+        num_points=10000,
+        num_moments=1024,
+        num_random=1,
+        num_disorder=1
+    )
 
     # configure the *.h5 file
     output_file = "mixed_disorder-output.h5"

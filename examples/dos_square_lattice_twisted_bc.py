@@ -9,7 +9,7 @@
     Lattice: Square lattice
     Configuration: Twisted boundary conditions, double precision, automatic rescaling
     Calculation type: Average DOS
-    Last updated: 18/07/2022
+    Last updated: 28/07/2022
 """
 
 __all__ = ["main"]
@@ -72,19 +72,23 @@ def main(onsite=(0, 0), t=1):
 
     # - specify precision of the exported hopping and onsite data, 0 - float, 1 - double, and 2 - long double.
     # - scaling, if None it's automatic, if present select spectrum_range=[e_min, e_max]
-    configuration = kite.Configuration(divisions=[nx, ny],
-                                       length=[lx, ly],
-                                       boundaries=[mode, mode],
-                                       is_complex=True,
-                                       precision=1,
-                                       angles=[twsx, twsy])
+    configuration = kite.Configuration(
+        divisions=[nx, ny],
+        length=[lx, ly],
+        boundaries=[mode, mode],
+        is_complex=True,
+        precision=1,
+        angles=[twsx, twsy]
+    )
 
     # specify calculation type
     calculation = kite.Calculation(configuration)
-    calculation.dos(num_points=4000,
-                    num_moments=512,
-                    num_random=32,
-                    num_disorder=1)
+    calculation.dos(
+        num_points=4000,
+        num_moments=512,
+        num_random=32,
+        num_disorder=1
+    )
 
     # configure the *.h5 file
     output_file = "square_lattice_twisted_bc-output.h5"

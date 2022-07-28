@@ -10,7 +10,7 @@
     Configuration: Periodic boundary conditions, double precision,
                     automatic scaling, size of the system 512x512, with domain decomposition (nx=ny=2)
     Calculation: singleshot_conductivity_dc xx/yy
-    Last updated: 27/07/2022
+    Last updated: 28/07/2022
 """
 
 __all__ = ["main"]
@@ -18,6 +18,7 @@ __all__ = ["main"]
 import kite
 import numpy as np
 import pybinding as pb
+
 
 def phosphorene_lattice(num_hoppings=4):
     """Return lattice specification for a bilayer phosphorene lattice"""
@@ -130,12 +131,14 @@ def main(direction='xx', num_hoppings=4):
 
     # - specify precision of the exported hopping and onsite data, 0 - float, 1 - double, and 2 - long double.
     # - scaling, if None it's automatic, if present select spectrum_range=[e_min, e_max]
-    configuration = kite.Configuration(divisions=[nx, ny],
-                                       length=[lx, ly],
-                                       boundaries=[mode, mode],
-                                       is_complex=False,
-                                       spectrum_range=[-10, 10],
-                                       precision=1)
+    configuration = kite.Configuration(
+        divisions=[nx, ny],
+        length=[lx, ly],
+        boundaries=[mode, mode],
+        is_complex=False,
+        spectrum_range=[-10, 10],
+        precision=1
+    )
 
     # define energy grid
     num_points = 15
@@ -144,12 +147,14 @@ def main(direction='xx', num_hoppings=4):
     # specify calculation type
     calculation = kite.Calculation(configuration)
     # require the calculation of singleshot_conductivity_dc
-    calculation.singleshot_conductivity_dc(energy=energy,
-                                           num_moments=512,
-                                           num_random=1,
-                                           num_disorder=1,
-                                           direction=direction,
-                                           eta=0.02)
+    calculation.singleshot_conductivity_dc(
+        energy=energy,
+        num_moments=512,
+        num_random=1,
+        num_disorder=1,
+        direction=direction,
+        eta=0.02
+    )
 
     # configure the *.h5 file
     output_file = "ph{0}-output.h5".format(direction)
@@ -161,6 +166,7 @@ def main(direction='xx', num_hoppings=4):
 
     # returning the name of the created HDF5-file
     return output_file
+
 
 if __name__ == "__main__":
     main()

@@ -10,7 +10,7 @@
     Lattice: face-centered cubic lattice (Diamond Structure)
     Configuration: random twisted boundary conditions, double precision, automatic rescaling
     Calculation type: Average DOS
-    Last updated: 26/07/2022
+    Last updated: 28/07/2022
 """
 
 __all__ = ["main"]
@@ -61,7 +61,7 @@ def fu_kane_mele(dt_plus, dt_minus, lambda_so=1, t=1):
     # Add Next-Nearest-Neighbour hoppings (Spin-Orbit Coupling)
     deltas = np.array(
         [[1, 0, 0],
-         [0, 1, 0]
+         [0, 1, 0],
          [0, 0, 1],
          [-1, 1, 0],
          [0, -1, 1],
@@ -92,6 +92,7 @@ def fu_kane_mele(dt_plus, dt_minus, lambda_so=1, t=1):
             (deltas[i, :], 'B2', 'B1', -lso * (gg[i, 0] + 1j * gg[i, 1]))
         )
     return lat
+
 
 def main(dt_plus=0.1, dt_minus=0.1):
     """Prepare the input file for KITEx"""
@@ -126,18 +127,22 @@ def main(dt_plus=0.1, dt_minus=0.1):
 
     # - specify precision of the exported hopping and onsite data, 0 - float, 1 - double, and 2 - long double.
     # - scaling, if None it's automatic, if present select spectrum_range=[e_min, e_max]
-    configuration = kite.Configuration(divisions=[nx, ny, nz],
-                                       length=[lx, ly, lz],
-                                       boundaries=[mode, mode, mode],
-                                       is_complex=True,
-                                       precision=1)
+    configuration = kite.Configuration(
+        divisions=[nx, ny, nz],
+        length=[lx, ly, lz],
+        boundaries=[mode, mode, mode],
+        is_complex=True,
+        precision=1
+    )
 
     # configure the *.h5 file
     calculation = kite.Calculation(configuration)
-    calculation.dos(num_points=1001,
-                    num_moments=1024,
-                    num_random=1,
-                    num_disorder=5)
+    calculation.dos(
+        num_points=1001,
+        num_moments=1024,
+        num_random=1,
+        num_disorder=5
+    )
 
     # configure the *.h5 file
     output_file = "FKM_Model-output.h5"

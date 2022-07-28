@@ -1,15 +1,13 @@
-""" Density of states of graphene with On-site disorder
+""" Density of states of a square lattice
 
     ##########################################################################
     #                         Copyright 2022, KITE                           #
     #                         Home page: quantum-kite.com                    #
     ##########################################################################
 
-    Units: Energy in eV
-    Lattice: Honeycomb
-    Configuration: Periodic boundary conditions, double precision,
-                    manual scaling, size of the system 256x256, with domain decomposition (nx=ny=2),
-    Disorder: Disorder class Deterministic and Uniform at different sublattices
+    Units: Energy in units of hopping, |t| = 1
+    Lattice: Square lattice
+    Configuration: Periodic boundary conditions, double precision, manual rescaling
     Calculation type: Average DOS
     Last updated: 28/07/2022
 """
@@ -17,25 +15,50 @@
 __all__ = ["main"]
 
 import kite
+import numpy as np
+import pybinding as pb
 
-from pybinding.repository import graphene
+
+def square_lattice(onsite=[0], t=1):
+    """Return lattice specification for a square lattice with nearest neighbor hoppings"""
+
+    # define lattice vectors
+    a1 = np.array([1, 0])
+    a2 = np.array([0, 1])
+
+    # create a lattice with 2 primitive vectors
+    lat = pb.Lattice(a1=a1, a2=a2)
+
+    # add sublattices
+    lat.add_sublattices(
+        # name, position, and onsite potential
+        ('A', [0, 0], onsite[0])
+    )
+
+    # Add hoppings
+    lat.add_hoppings(
+        # between neighboring cells, between which atoms, and the value
+        ([1, 0], 'A', 'A', -t),
+        ([0, 1], 'A', 'A', -t)
+    )
+
+    return lat
 
 
-def main(onsite=(0, 0)):
+def main(onsite=[0], t=1):
     """Prepare the input file for KITEx"""
-    # load a monolayer graphene lattice
-    lattice = graphene.monolayer(onsite=onsite)
+    # load lattice
+    lattice = square_lattice(onsite, t)
 
     # add Disorder
     disorder = kite.Disorder(lattice)
-    disorder.add_disorder('B', 'Deterministic', -1.0)
-    disorder.add_disorder('A', 'Uniform', 1.5, 1.0)
+    disorder.add_disorder('A', 'Uniform', 0.0, 0.1)
 
-    # number of decomposition parts [nx,ny] in each direction of matrix.
+    # number of decomposition parts [nx,ny,nz] in each direction of matrix.
     # This divides the lattice into various sections, each of which is calculated in parallel
     nx = ny = 2
     # number of unit cells in each direction.
-    lx = ly = 512
+    lx = ly = 1024
 
     # make config object which caries info about
     # - the number of decomposition parts [nx, ny],
@@ -57,25 +80,24 @@ def main(onsite=(0, 0)):
         boundaries=[mode, mode],
         is_complex=False,
         precision=1,
-        spectrum_range=[-10, 10]
-    )
+        spectrum_range=[-5.0, 5.0])
 
     # specify calculation type
     calculation = kite.Calculation(configuration)
     calculation.dos(
-            num_points=4000,
-            num_moments=512,
-            num_random=2,
-            num_disorder=1
+        num_points=8192 * 4,
+        num_moments=4 * 4096,
+        num_random=1,
+        num_disorder=1
     )
 
     # configure the *.h5 file
-    output_file = "on_site_disorder-output.h5"
-    kite.config_system(lattice, configuration, calculation, filename=output_file, disorder=disorder)
+    output_file = "square_lattice_disorder-output.h5"
+    kite.config_system(lattice, configuration, calculation, disorder=disorder, filename=output_file)
 
     # for generating the desired output from the generated HDF5-file, run
-    # ../build/KITEx on_site_disorder-output.h5
-    # ../tools/build/KITE-tools on_site_disorder-output.h5
+    # ../build/KITEx square_lattice_disorder-output.h5
+    # ../tools/build/KITE-tools square_lattice_disorder-output.h5
 
     # returning the name of the created HDF5-file
     return output_file

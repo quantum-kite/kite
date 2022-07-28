@@ -10,7 +10,7 @@
     Lattice: simple cubic lattice (two orbitals per site)
     Configuration: random twisted boundary conditions, double precision, manual rescaling
     Calculation type: Average DOS
-    Last updated: 26/07/2022
+    Last updated: 28/07/2022
 """
 
 __all__ = ["main"]
@@ -53,7 +53,7 @@ def weyl_semimetal(onsite=(0, 0), t=1):
 def main(anderson_w=3.0):
     """Prepare the input file for KITEx"""
     # load lattice
-    lattice =  weyl_semimetal()
+    lattice = weyl_semimetal()
     
     # add scalar on-site Disorder (Box distribution in [W/2,W/2])
     # Number of Samples controlled by num_disorder
@@ -86,19 +86,23 @@ def main(anderson_w=3.0):
 
     # - specify precision of the exported hopping and onsite data, 0 - float, 1 - double, and 2 - long double.
     # - scaling, if None it's automatic, if present select spectrum_range=[e_min, e_max]
-    configuration = kite.Configuration(divisions=[nx, ny, nz],
-                                       length=[lx, ly, lz],
-                                       boundaries=[mode, mode, mode],
-                                       is_complex=True,
-                                       precision=1,
-                                       spectrum_range=[-1.8 - anderson_w,1.8 + anderson_w])
+    configuration = kite.Configuration(
+        divisions=[nx, ny, nz],
+        length=[lx, ly, lz],
+        boundaries=[mode, mode, mode],
+        is_complex=True,
+        precision=1,
+        spectrum_range=[-1.8 - anderson_w, 1.8 + anderson_w]
+    )
 
     # specify calculation type
     calculation = kite.Calculation(configuration)
-    calculation.dos(num_points=1001,
-                    num_moments=512,
-                    num_random=1,
-                    num_disorder=10)
+    calculation.dos(
+        num_points=1001,
+        num_moments=512,
+        num_random=1,
+        num_disorder=10
+    )
 
     # configure the *.h5 file
     output_file = "Weyl_Semimetal-output.h5"

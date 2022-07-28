@@ -11,7 +11,7 @@
     Configuration: Periodic boundary conditions, double precision,
                    automatic scaling, size of the system  flexible, with domain decomposition (nx=ny=2)
     Calculation type: Average DOS
-    Last updated: 24/07/2022
+    Last updated: 28/07/2022
 """
 
 __all__ = ["main"]
@@ -67,19 +67,23 @@ def main(angle_index=3):
 
     # - specify precision of the exported hopping and onsite data, 0 - float, 1 - double, and 2 - long double.
     # - scaling, if None it's automatic, if present select spectrum_range=[e_min, e_max]
-    configuration = kite.Configuration(divisions=[nx, ny],
-                                       length=[lx, ly],
-                                       boundaries=[mode, mode],
-                                       is_complex=False,
-                                       precision=1,
-                                       spectrum_range=[-10, 10])
+    configuration = kite.Configuration(
+        divisions=[nx, ny],
+        length=[lx, ly],
+        boundaries=[mode, mode],
+        is_complex=False,
+        precision=1,
+        spectrum_range=[-10, 10]
+    )
 
     # specify calculation type
     calculation = kite.Calculation(configuration)
-    calculation.dos(num_moments=2000,
-                    num_random=1,
-                    num_disorder=1,
-                    num_points=1000)
+    calculation.dos(
+        num_moments=2000,
+        num_random=1,
+        num_disorder=1,
+        num_points=1000
+    )
 
     # configure the *.h5 file
     output_file = "tblg_{0}-output.h5".format(str(angle_index))
