@@ -1,4 +1,5 @@
-""" Post-process the singleshot conductivity DC calculation
+""" Script to Extract Data for the longitudinal DC-conductitivy obtained by the single-shot
+    method (note that this method does not require post-processing by KITE-tools)
 
     ##########################################################################
     #                         Copyright 2022, KITE                           #
