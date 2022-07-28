@@ -5,6 +5,7 @@
 /*                                                         */
 /***********************************************************/
 
+
 template <typename T, unsigned D>
 class Hamiltonian;
 

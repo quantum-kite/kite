@@ -62,9 +62,7 @@ endif()
 add_definitions(-DCOMPILE_WAVEPACKET=${compile_wp})
 
 
-
-target_link_directories(${PROJECT_NAME} BEFORE PUBLIC lib)
-target_link_libraries(${PROJECT_NAME} ${HDF5_CXX_LIBRARIES} aux)
+target_link_libraries(${PROJECT_NAME} ${HDF5_CXX_LIBRARIES})
 target_include_directories(${PROJECT_NAME} PRIVATE "Src/"
 "Src/Tools/"
 "Src/Lattice/"
