@@ -15,9 +15,7 @@
 #include "myHDF5.hpp"
 #include "Global.hpp"
 #include "Hamiltonian.hpp"
-
-// Function defined in lib/aux.cpp - it is loaded dynamically in runtime
-double uncorrelated_wrapper(double *vec, unsigned orb);
+#include "aux.hpp"
 
 
 
