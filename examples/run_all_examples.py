@@ -99,14 +99,16 @@ def make_figure_cond_dc_ss(file_data="condDC.dat", title="DC conductivity", xlab
 
 
 def print_command(text=""):
-    print("\033[94m {0} \033[0m".format(text))
+    print("\033[94m{0}\033[0m".format(text))
 
 
 def print_title(text=""):
     print_command("-" * 74 + "\n" + " " * 10 + text + "\n" + "-" * 74 + "\n")
 
 
-def main():
+def main(selection=None):
+    if selection is None:
+        selection = np.arange(17, dtype=np.int) + 1
     import matplotlib as mpl
     import seaborn as sns
 
@@ -128,199 +130,278 @@ def main():
     print_command()
     print_title("Run all the examples in the kite/examples-folder")
 
-    # Example 1: dos_square_lattice.py
-    print_command("======= Example 1: DOS for a square lattice                      =========")
-    import dos_square_lattice
-    print_command("- - - -            Making the configuration file                 - - - - -")
-    hdf5_file = dos_square_lattice.main()
-    pre_file_name = hdf5_file.replace("-output.h5", "")
-    dos_data = "{0}-dos.dat".format(pre_file_name)
-    dos_figure = "{0}-dos.pdf".format(pre_file_name)
-    run_calculation(hdf5_file)
-    run_tools(hdf5_file)
-    terminal("mv dos.dat {0}".format(dos_data))
-    make_figure_dos(file_data=dos_data, title="DOS Square lattice", xlabel="Energy (|t|)",
-                    file_out=dos_figure)
+    if 1 in selection:
+        # Example 1: dos_square_lattice.py
+        print_command("======= Example 1: DOS for a square lattice                      =========")
+        import dos_square_lattice as example
+        print_command("- - - -            Making the configuration file                 - - - - -")
+        hdf5_file = example.main()
+        pre_file_name = hdf5_file.replace("-output.h5", "")
+        dos_data = "{0}-dos.dat".format(pre_file_name)
+        dos_figure = "{0}-dos.pdf".format(pre_file_name)
+        run_calculation(hdf5_file)
+        run_tools(hdf5_file)
+        terminal("mv dos.dat {0}".format(dos_data))
+        make_figure_dos(file_data=dos_data, title="DOS Square lattice", xlabel="Energy (|t|)",
+                        file_out=dos_figure)
 
-    # Example 2: dos_square_lattice_twisted_bc.py
-    print_command("    ======= Example 2: DOS for a square lattice with twisted BC  =========")
-    import dos_square_lattice_twisted_bc as example
-    print_command("- - - -            Making the configuration file                 - - - - -")
-    hdf5_file = example.main()
-    pre_file_name = hdf5_file.replace("-output.h5", "")
-    dos_data = "{0}-dos.dat".format(pre_file_name)
-    dos_figure = "{0}-dos.pdf".format(pre_file_name)
-    run_calculation(hdf5_file)
-    run_tools(hdf5_file)
-    terminal("mv dos.dat {0}".format(dos_data))
-    make_figure_dos(file_data=dos_data, title="DOS Square lattice & twisted BC", xlabel="Energy (|t|)",
-                    file_out=dos_figure)
+    if 2 in selection:
+        # Example 2: dos_cube.py
+        print_command("======= Example 2: DOS for a square lattice                      =========")
+        import dos_cube as example
+        print_command("- - - -            Making the configuration file                 - - - - -")
+        hdf5_file = example.main()
+        pre_file_name = hdf5_file.replace("-output.h5", "")
+        dos_data = "{0}-dos.dat".format(pre_file_name)
+        dos_figure = "{0}-dos.pdf".format(pre_file_name)
+        run_calculation(hdf5_file)
+        run_tools(hdf5_file)
+        terminal("mv dos.dat {0}".format(dos_data))
+        make_figure_dos(file_data=dos_data, title="DOS cube lattice", xlabel="Energy (|t|)",
+                        file_out=dos_figure)
 
-    # Example 3: dos_checkerboard_lattice.py
-    print_command("======= Example 3: DOS for a checkerboard lattice                =========")
-    import dos_checkerboard_lattice as example
-    print_command("- - - -            Making the configuration file                 - - - - -")
-    hdf5_file = example.main()
-    pre_file_name = hdf5_file.replace("-output.h5", "")
-    dos_data = "{0}-dos.dat".format(pre_file_name)
-    dos_figure = "{0}-dos.pdf".format(pre_file_name)
-    run_calculation(hdf5_file)
-    run_tools(hdf5_file)
-    terminal("mv dos.dat {0}".format(dos_data))
-    make_figure_dos(file_data=dos_data, title="DOS Checkerboard lattice", xlabel="Energy (|t|)",
-                    file_out=dos_figure)
+    if 3 in selection:
+        # Example 3: dos_square_lattice_twisted_bc.py
+        print_command("    ======= Example 3: DOS for a square lattice with twisted BC  =========")
+        import dos_square_lattice_twisted_bc as example
+        print_command("- - - -            Making the configuration file                 - - - - -")
+        hdf5_file = example.main()
+        pre_file_name = hdf5_file.replace("-output.h5", "")
+        dos_data = "{0}-dos.dat".format(pre_file_name)
+        dos_figure = "{0}-dos.pdf".format(pre_file_name)
+        run_calculation(hdf5_file)
+        run_tools(hdf5_file)
+        terminal("mv dos.dat {0}".format(dos_data))
+        make_figure_dos(file_data=dos_data, title="DOS Square lattice & twisted BC", xlabel="Energy (|t|)",
+                        file_out=dos_figure)
 
-    # Example 4: dos_graphene.py
-    print_command("======= Example 4: DOS for graphene                              =========")
-    import dos_graphene as example
-    print_command("- - - -            Making the configuration file                 - - - - -")
-    hdf5_file = example.main()
-    pre_file_name = hdf5_file.replace("-output.h5", "")
-    dos_data = "{0}-dos.dat".format(pre_file_name)
-    dos_figure = "{0}-dos.pdf".format(pre_file_name)
-    run_calculation(hdf5_file)
-    run_tools(hdf5_file)
-    terminal("mv dos.dat {0}".format(dos_data))
-    make_figure_dos(file_data=dos_data, title="DOS Graphene",
-                    file_out=dos_figure)
+    if 4 in selection:
+        # Example 4: dos_checkerboard_lattice.py
+        print_command("======= Example 4: DOS for a checkerboard lattice                =========")
+        import dos_checkerboard_lattice as example
+        print_command("- - - -            Making the configuration file                 - - - - -")
+        hdf5_file = example.main()
+        pre_file_name = hdf5_file.replace("-output.h5", "")
+        dos_data = "{0}-dos.dat".format(pre_file_name)
+        dos_figure = "{0}-dos.pdf".format(pre_file_name)
+        run_calculation(hdf5_file)
+        run_tools(hdf5_file)
+        terminal("mv dos.dat {0}".format(dos_data))
+        make_figure_dos(file_data=dos_data, title="DOS Checkerboard lattice", xlabel="Energy (|t|)",
+                        file_out=dos_figure)
 
-    # Example 5: dos_cubic_lattice_twisted_bc.py
-    print_command("======= Example 5: DOS for a cubic lattice                       =========")
-    import dos_cubic_lattice_twisted_bc as example
-    print_command("- - - -            Making the configuration file                 - - - - -")
-    hdf5_file = example.main()
-    pre_file_name = hdf5_file.replace("-output.h5", "")
-    dos_data = "{0}-dos.dat".format(pre_file_name)
-    dos_figure = "{0}-dos.pdf".format(pre_file_name)
-    run_calculation(hdf5_file)
-    run_tools(hdf5_file)
-    terminal("mv dos.dat {0}".format(dos_data))
-    make_figure_dos(file_data=dos_data, title="DOS Cubic lattice", xlabel="Energy (|t|)",
-                    file_out=dos_figure)
+    if 5 in selection:
+        # Example 5: dos_graphene.py
+        print_command("======= Example 5: DOS for graphene                              =========")
+        import dos_graphene as example
+        print_command("- - - -            Making the configuration file                 - - - - -")
+        hdf5_file = example.main()
+        pre_file_name = hdf5_file.replace("-output.h5", "")
+        dos_data = "{0}-dos.dat".format(pre_file_name)
+        dos_figure = "{0}-dos.pdf".format(pre_file_name)
+        run_calculation(hdf5_file)
+        run_tools(hdf5_file)
+        terminal("mv dos.dat {0}".format(dos_data))
+        make_figure_dos(file_data=dos_data, title="DOS Graphene",
+                        file_out=dos_figure)
 
-    # Example 6: basic_on_site_disorder.py
-    print_command("======= Example 6: DOS for lattice with onsite disorder          =========")
-    import dos_on_site_disorder as example
-    print_command("- - - -            Making the configuration file                 - - - - -")
-    hdf5_file = example.main()
-    pre_file_name = hdf5_file.replace("-output.h5", "")
-    dos_data = "{0}-dos.dat".format(pre_file_name)
-    dos_figure = "{0}-dos.pdf".format(pre_file_name)
-    run_calculation(hdf5_file)
-    run_tools(hdf5_file)
-    terminal("mv dos.dat {0}".format(dos_data))
-    make_figure_dos(file_data=dos_data, title="DOS Graphene with mixed on-site disorder",
-                    file_out=dos_figure)
+    if 6 in selection:
+        # Example 6: ldos_graphene.py
+        print_command("======= Example 6: LDOS for graphene                             =========")
+        import ldos_graphene as example
+        print_command("- - - -            Making the configuration file                 - - - - -")
+        hdf5_file = example.main()
+        pre_file_name = hdf5_file.replace("-output.h5", "")
+        run_calculation(hdf5_file)
+        run_tools(hdf5_file)
+        from pybinding.repository.graphene import monolayer as lattice
+        for energy in np.linspace(-1, 1, 101):
+            print_command("Making a figure for LDOS at energy {energy:.6f}".format(energy=energy))
+            ldos_data = "{0}.dat".format(pre_file_name)
+            terminal("mv ldos{energy:.6f}.dat ldos-{energy:.6f}{data}".format(energy=energy, data=ldos_data))
+            example.analyze_results("ldos-{energy:.6f}{data}".format(energy=energy, data=ldos_data), lattice())
 
-    # Example 7: basic_vacancies.py
-    print_command("======= Example 7: DOS for lattice with vacancies                =========")
-    import dos_vacancies as example
-    print_command("- - - -            Making the configuration file                 - - - - -")
-    hdf5_file = example.main()
-    pre_file_name = hdf5_file.replace("-output.h5", "")
-    dos_data = "{0}-dos.dat".format(pre_file_name)
-    dos_figure = "{0}-dos.pdf".format(pre_file_name)
-    run_calculation(hdf5_file)
-    run_tools(hdf5_file)
-    terminal("mv dos.dat {0}".format(dos_data))
-    make_figure_dos(file_data=dos_data, title="DOS Honeycomb lattice with vacancies", xlabel="Energy (|t|)",
-                    file_out=dos_figure)
+    if 7 in selection:
+        # Example 7: dos_cubic_lattice_twisted_bc.py
+        print_command("======= Example 7: DOS for a cubic lattice                       =========")
+        import dos_cubic_lattice_twisted_bc as example
+        print_command("- - - -            Making the configuration file                 - - - - -")
+        hdf5_file = example.main()
+        pre_file_name = hdf5_file.replace("-output.h5", "")
+        dos_data = "{0}-dos.dat".format(pre_file_name)
+        dos_figure = "{0}-dos.pdf".format(pre_file_name)
+        run_calculation(hdf5_file)
+        run_tools(hdf5_file)
+        terminal("mv dos.dat {0}".format(dos_data))
+        make_figure_dos(file_data=dos_data, title="DOS Cubic lattice", xlabel="Energy (|t|)",
+                        file_out=dos_figure)
 
-    # Example 8: basic_mixed_disorder.py
-    print_command("======= Example 8: DOS for lattice with vacancies and onsite disorder ====")
-    import dos_mixed_disorder as example
-    print_command("- - - -            Making the configuration file                 - - - - -")
-    hdf5_file = example.main()
-    pre_file_name = hdf5_file.replace("-output.h5", "")
-    dos_data = "{0}-dos.dat".format(pre_file_name)
-    dos_figure = "{0}-dos.pdf".format(pre_file_name)
-    run_calculation(hdf5_file)
-    run_tools(hdf5_file)
-    terminal("mv dos.dat {0}".format(dos_data))
-    make_figure_dos(file_data=dos_data, title="DOS Graphene with vacancies & on-site disorder",
-                    file_out=dos_figure)
+    if 8 in selection:
+        # Example 8: dos_square_lattice_disorder.py
+        print_command("======= Example 8: DOS for a square lattice with on-site disorder ========")
+        import dos_square_lattice_disorder as example
+        print_command("- - - -            Making the configuration file                 - - - - -")
+        hdf5_file = example.main()
+        pre_file_name = hdf5_file.replace("-output.h5", "")
+        dos_data = "{0}-dos.dat".format(pre_file_name)
+        dos_figure = "{0}-dos.pdf".format(pre_file_name)
+        run_calculation(hdf5_file)
+        run_tools(hdf5_file)
+        terminal("mv dos.dat {0}".format(dos_data))
+        make_figure_dos(file_data=dos_data, title="DOS square lattice with uniform on-site disorder",
+                        file_out=dos_figure)
 
-    # Example 9: optcond_gaussian_disorder.py
-    print_command("======= Example 9: Optical conductivity with onsite disorder     =========")
-    import dos_optcond_gaussian_disorder as example
-    print_command("- - - -            Making the configuration file                 - - - - -")
-    hdf5_file = example.main()
-    pre_file_name = hdf5_file.replace("-output.h5", "")
-    dos_data = "{0}-dos.dat".format(pre_file_name)
-    opt_cond_data = "{0}-optcond.dat".format(pre_file_name)
-    dos_figure = "{0}-dos.pdf".format(pre_file_name)
-    opt_cond_figure = "{0}-optcond.pdf".format(pre_file_name)
-    run_calculation(hdf5_file)
-    run_tools(hdf5_file)
-    terminal("mv dos.dat {0}".format(dos_data))
-    terminal("mv optcond.dat {0}".format(opt_cond_data))
-    make_figure_dos(file_data=dos_data, title="DOS Graphene Gaussian On-site disorder",
-                    file_out=dos_figure)
-    make_figure_opt_cond(file_data=opt_cond_data, title="Optical Conductivity Graphene",
-                         file_out=opt_cond_figure)
+    if 9 in selection:
+        # Example 9: dos_on_site_disorder.py
+        print_command("======= Example 9: DOS for a graphene lattice with on-site disorder ======")
+        import dos_on_site_disorder as example
+        print_command("- - - -            Making the configuration file                 - - - - -")
+        hdf5_file = example.main()
+        pre_file_name = hdf5_file.replace("-output.h5", "")
+        dos_data = "{0}-dos.dat".format(pre_file_name)
+        dos_figure = "{0}-dos.pdf".format(pre_file_name)
+        run_calculation(hdf5_file)
+        run_tools(hdf5_file)
+        terminal("mv dos.dat {0}".format(dos_data))
+        make_figure_dos(file_data=dos_data, title="DOS Graphene with mixed on-site disorder",
+                        file_out=dos_figure)
 
-    # Example 10: haldane.py
-    print_command("======= Example 10: DOS & DC conductivity for the Haldene model =====")
-    import dos_dccond_haldane as example
-    print_command("- - - -            Making the configuration file                 - - - - -")
-    hdf5_file = example.main()
-    pre_file_name = hdf5_file.replace("-output.h5", "")
-    dos_data = "{0}-dos.dat".format(pre_file_name)
-    cond_dc_data = "{0}-condDC.dat".format(pre_file_name)
-    dos_figure = "{0}-dos.pdf".format(pre_file_name)
-    cond_dc_figure = "{0}-condDC.pdf".format(pre_file_name)
-    run_calculation(hdf5_file)
-    run_tools(hdf5_file)
-    terminal("mv dos.dat {0}".format(dos_data))
-    terminal("mv condDC.dat {0}".format(cond_dc_data))
-    make_figure_dos(file_data=dos_data, title="DOS Haldane",
-                    file_out=dos_figure)
-    make_figure_cond_cd(file_data=cond_dc_data, title="DC Conductivity Haldane",
-                        file_out=cond_dc_figure)
+    if 10 in selection:
+        # Example 10: dos_vacancies.py
+        print_command("======= Example 10: DOS for lattice with vacancies               =========")
+        import dos_vacancies as example
+        print_command("- - - -            Making the configuration file                 - - - - -")
+        hdf5_file = example.main()
+        pre_file_name = hdf5_file.replace("-output.h5", "")
+        dos_data = "{0}-dos.dat".format(pre_file_name)
+        dos_figure = "{0}-dos.pdf".format(pre_file_name)
+        run_calculation(hdf5_file)
+        run_tools(hdf5_file)
+        terminal("mv dos.dat {0}".format(dos_data))
+        make_figure_dos(file_data=dos_data, title="DOS Honeycomb lattice with vacancies", xlabel="Energy (|t|)",
+                        file_out=dos_figure)
 
-    print_command("-" * 74 + "\n" + " " * 10 + "Ran all the examples in the kite/examples-folder\n" + "-" * 74 + "\n")
+    if 11 in selection:
+        # Example 11: dos_mixed_disorder.py
+        print_command("======= Example 11: DOS for lattice with vacancies and onsite disorder ===")
+        import dos_mixed_disorder as example
+        print_command("- - - -            Making the configuration file                -  - - - -")
+        hdf5_file = example.main()
+        pre_file_name = hdf5_file.replace("-output.h5", "")
+        dos_data = "{0}-dos.dat".format(pre_file_name)
+        dos_figure = "{0}-dos.pdf".format(pre_file_name)
+        run_calculation(hdf5_file)
+        run_tools(hdf5_file)
+        terminal("mv dos.dat {0}".format(dos_data))
+        make_figure_dos(file_data=dos_data, title="DOS Graphene with vacancies & on-site disorder",
+                        file_out=dos_figure)
 
-    # Example 11: phosphorene.py
-    print_command("======= Example 11: DC coductivity for phosphorene in XX         =========")
-    import dccond_phosphorene as example
-    print_command("- - - -            Making the configuration file                 - - - - -")
-    hdf5_file = example.main()
-    pre_file_name = hdf5_file.replace("-output.h5", "")
-    cond_dc_data = "{0}-condDC.dat".format(pre_file_name)
-    cond_dc_figure = "{0}-condDC.pdf".format(pre_file_name)
-    run_calculation(hdf5_file)
-    example.post_process(hdf5_file)
-    terminal("mv condDC.dat {0}".format(cond_dc_data))
-    make_figure_cond_dc_ss(file_data=cond_dc_data, title="DC Conductivity Phosphorene XX",
-                        file_out=cond_dc_figure)
+    if 12 in selection:
+        # Example 12: dos_optcond_gaussian_disorder.py
+        print_command("======= Example 12: Optical conductivity with onsite disorder    =========")
+        import dos_optcond_gaussian_disorder as example
+        print_command("- - - -            Making the configuration file                 - - - - -")
+        hdf5_file = example.main()
+        pre_file_name = hdf5_file.replace("-output.h5", "")
+        dos_data = "{0}-dos.dat".format(pre_file_name)
+        opt_cond_data = "{0}-optcond.dat".format(pre_file_name)
+        dos_figure = "{0}-dos.pdf".format(pre_file_name)
+        opt_cond_figure = "{0}-optcond.pdf".format(pre_file_name)
+        run_calculation(hdf5_file)
+        run_tools(hdf5_file)
+        terminal("mv dos.dat {0}".format(dos_data))
+        terminal("mv optcond.dat {0}".format(opt_cond_data))
+        make_figure_dos(file_data=dos_data, title="DOS Graphene Gaussian On-site disorder",
+                        file_out=dos_figure)
+        make_figure_opt_cond(file_data=opt_cond_data, title="Optical Conductivity Graphene",
+                             file_out=opt_cond_figure)
 
-    # Example 12: phosphorene.py
-    print_command("======= Example 12: DC coductivity for phosphorene in YY         =========")
-    import dccond_phosphorene as example
-    print_command("- - - -            Making the configuration file                 - - - - -")
-    hdf5_file = example.main(direction='yy')
-    pre_file_name = hdf5_file.replace("-output.h5", "")
-    cond_dc_data = "{0}-condDC.dat".format(pre_file_name)
-    cond_dc_figure = "{0}-condDC.pdf".format(pre_file_name)
-    run_calculation(hdf5_file)
-    example.post_process(hdf5_file)
-    terminal("mv condDC.dat {0}".format(cond_dc_data))
-    make_figure_cond_dc_ss(file_data=cond_dc_data, title="DC Conductivity Phosphorene YY",
-                        file_out=cond_dc_figure)
+    if 13 in selection:
+        # Example 13: dos_dccond_square_lattice.py
+        print_command("======= Example 13: DOS & DC conductivity for the a square lattice =======")
+        import dos_dccond_square_lattice as example
+        print_command("- - - -            Making the configuration file                 - - - - -")
+        hdf5_file = example.main()
+        pre_file_name = hdf5_file.replace("-output.h5", "")
+        dos_data = "{0}-dos.dat".format(pre_file_name)
+        cond_dc_data = "{0}-condDC.dat".format(pre_file_name)
+        dos_figure = "{0}-dos.pdf".format(pre_file_name)
+        cond_dc_figure = "{0}-condDC.pdf".format(pre_file_name)
+        run_calculation(hdf5_file)
+        run_tools(hdf5_file)
+        terminal("mv dos.dat {0}".format(dos_data))
+        terminal("mv condDC.dat {0}".format(cond_dc_data))
+        make_figure_dos(file_data=dos_data, title="DOS Square Lattice",
+                        file_out=dos_figure)
+        make_figure_cond_cd(file_data=cond_dc_data, title="DC Conductivity Square Lattice",
+                            file_out=cond_dc_figure)
 
-    # Example 13: twisted_bilayer.py
-    print_command("======= Example 12: DOS for twisted bilayer graphene at 21.787 degrees ===")
-    import dos_twisted_bilayer as example
-    print_command("- - - -            Making the configuration file                 - - - - -")
-    hdf5_file = example.main()
-    pre_file_name = hdf5_file.replace("-output.h5", "")
-    dos_data = "{0}-dos.dat".format(pre_file_name)
-    dos_figure = "{0}-dos.pdf".format(pre_file_name)
-    run_calculation(hdf5_file)
-    run_tools(hdf5_file)
-    terminal("mv dos.dat {0}".format(dos_data))
-    make_figure_dos(file_data=dos_data, title="DOS Twisted Bilayer graphene at 21.787 degrees",
-                    file_out=dos_figure)
+    if 14 in selection:
+        # Example 14: dos_dccond_haldane.py
+        print_command("======= Example 14: DOS & DC conductivity for the Haldene model  =========")
+        import dos_dccond_haldane as example
+        print_command("- - - -            Making the configuration file                 - - - - -")
+        hdf5_file = example.main()
+        pre_file_name = hdf5_file.replace("-output.h5", "")
+        dos_data = "{0}-dos.dat".format(pre_file_name)
+        cond_dc_data = "{0}-condDC.dat".format(pre_file_name)
+        dos_figure = "{0}-dos.pdf".format(pre_file_name)
+        cond_dc_figure = "{0}-condDC.pdf".format(pre_file_name)
+        run_calculation(hdf5_file)
+        run_tools(hdf5_file)
+        terminal("mv dos.dat {0}".format(dos_data))
+        terminal("mv condDC.dat {0}".format(cond_dc_data))
+        make_figure_dos(file_data=dos_data, title="DOS Haldane",
+                        file_out=dos_figure)
+        make_figure_cond_cd(file_data=cond_dc_data, title="DC Conductivity Haldane",
+                            file_out=cond_dc_figure)
+
+        print_command("-" * 74 + "\n" + " " * 10 + "Ran all the examples in the kite/examples-folder\n" + "-" * 74 + "\n")
+
+    if 15 in selection:
+        # Example 15: dccond_phosphorene.py
+        print_command("======= Example 15: DC coductivity for phosphorene in XX         =========")
+        import dccond_phosphorene as example
+        print_command("- - - -            Making the configuration file                 - - - - -")
+        hdf5_file = example.main()
+        pre_file_name = hdf5_file.replace("-output.h5", "")
+        cond_dc_data = "{0}-condDC.dat".format(pre_file_name)
+        cond_dc_figure = "{0}-condDC.pdf".format(pre_file_name)
+        run_calculation(hdf5_file)
+        example.post_process(hdf5_file)
+        terminal("mv condDC.dat {0}".format(cond_dc_data))
+        make_figure_cond_dc_ss(file_data=cond_dc_data, title="DC Conductivity Phosphorene XX",
+                            file_out=cond_dc_figure)
+
+    if 16 in selection:
+        # Example 16: dccond_phosphorene.py
+        print_command("======= Example 16: DC coductivity for phosphorene in YY         =========")
+        import dccond_phosphorene as example
+        print_command("- - - -            Making the configuration file                 - - - - -")
+        hdf5_file = example.main(direction='yy')
+        pre_file_name = hdf5_file.replace("-output.h5", "")
+        cond_dc_data = "{0}-condDC.dat".format(pre_file_name)
+        cond_dc_figure = "{0}-condDC.pdf".format(pre_file_name)
+        run_calculation(hdf5_file)
+        example.post_process(hdf5_file)
+        terminal("mv condDC.dat {0}".format(cond_dc_data))
+        make_figure_cond_dc_ss(file_data=cond_dc_data, title="DC Conductivity Phosphorene YY",
+                            file_out=cond_dc_figure)
+
+    if 17 in selection:
+        # Example 17: dos_twisted_bilayer.py
+        print_command("======= Example 17: DOS for twisted bilayer graphene at 21.787 degrees ===")
+        import dos_twisted_bilayer as example
+        print_command("- - - -            Making the configuration file                 - - - - -")
+        hdf5_file = example.main()
+        pre_file_name = hdf5_file.replace("-output.h5", "")
+        dos_data = "{0}-dos.dat".format(pre_file_name)
+        dos_figure = "{0}-dos.pdf".format(pre_file_name)
+        run_calculation(hdf5_file)
+        run_tools(hdf5_file)
+        terminal("mv dos.dat {0}".format(dos_data))
+        make_figure_dos(file_data=dos_data, title="DOS Twisted Bilayer graphene at 21.787 degrees",
+                        file_out=dos_figure)
 
     print_title("Ran all the KITE-examples")
 
@@ -333,4 +414,4 @@ def clean():
 
 if __name__ == "__main__":
     clean()
-    main()
+    main([2])

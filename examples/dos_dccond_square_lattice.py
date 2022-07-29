@@ -74,7 +74,7 @@ def main(onsite=[0], t=1):
         boundaries=[mode, mode],
         is_complex=False,
         precision=1,
-        spectrum_range=[-4.1,4.1]
+        spectrum_range=[-4.1, 4.1]
     )
 
     # specify calculation type

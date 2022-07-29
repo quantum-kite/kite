@@ -26,14 +26,13 @@ def cube(onsite=(0, 0)):
     # parameters
     t = 1
 
-
     # define lattice vectors
     a1 = np.array([1, 0, 0])
     a2 = np.array([0, 1, 0])
     a3 = np.array([0, 0, 1])
 
     # create a lattice with 2 primitive vectors
-    lat = pb.Lattice(a1=a1, a2=a2)
+    lat = pb.Lattice(a1=a1, a2=a2, a3=a3)
 
     # add sublattices
     lat.add_sublattices(

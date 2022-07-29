@@ -80,11 +80,16 @@ def analyze_results(filename, lattice):
     xs = np.dot(pos.T, lattice.vectors) + np.dot(orb_tmp, sublattice_position)
 
     # create colors for the different LDOS values
-    colors = values / np.max(np.abs(values))
+    values_max = np.max(np.abs(values))
     
-    plt.figure(figsize=(10, 10))
-    plt.scatter(xs[:, 0], xs[:, 1], c=colors, s=70, vmin=-1.0, vmax=1.0)
-    plt.savefig(filename[:-4]+".png")
+    fig = plt.figure(figsize=(8, 5))
+    ax_sctr = fig.add_axes([0.1, 0.05, 0.7, 0.9])
+    sctr = ax_sctr.scatter(xs[:, 0], xs[:, 1], c=values, s=70, vmin=-values_max, vmax=values_max)
+    plt.colorbar(sctr, cax=fig.add_axes([0.85, 0.1, 0.03, 0.8]))
+    ax_sctr.set_aspect('equal')
+    ax_sctr.set_title(filename)
+    fig.savefig(filename[:-4]+".pdf")
+    plt.close(fig)
 
 
 def main(onsite=(0, 0)):
