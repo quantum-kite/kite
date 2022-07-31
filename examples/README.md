@@ -12,8 +12,11 @@ The following examples are given:
     * On-site disorder
     * Simple square lattice
     * Vacancies
+    * Cubic lattice
 * Optical conductivity
 * XX/YY conductivity
+* Weyl semi-metal calculations
+* Fu-Kane-Mele model calculations
 
 The examples start with the initialization of the Pybinding Lattice in the Python-script.
 The type of calculation is then described in the *main()*-part, with some default parameters associate with this calculation.

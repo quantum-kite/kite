@@ -105,12 +105,12 @@ def main(anderson_w=3.0):
     )
 
     # configure the *.h5 file
-    output_file = "Weyl_Semimetal-output.h5"
+    output_file = "weyl_dos-output.h5"
     kite.config_system(lattice, configuration, calculation, filename=output_file, disorder=disorder)
 
     # for generating the desired output from the generated HDF5-file, run
-    # ../build/KITEx Weyl_Semimetal-output.h5
-    # ../tools/build/KITE-tools Weyl_Semimetal-output.h5
+    # ../build/KITEx weyl_dos-output.h5
+    # ../tools/build/KITE-tools weyl_dos-output.h5
 
     # returning the name of the created HDF5-file
     return output_file

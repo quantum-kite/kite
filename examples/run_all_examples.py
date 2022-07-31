@@ -5,7 +5,7 @@
     #                         Home page: quantum-kite.com                    #
     ##########################################################################
 
-    Last updated: 20/07/2022
+    Last updated: 30/07/2022
 """
 
 import numpy as np
@@ -68,7 +68,7 @@ def make_figure_opt_cond(file_data="optcond.dat", title="Optical conductivity", 
     plt.close(fig)
 
 
-def make_figure_cond_cd(file_data="condDC.dat", title="DC conductivity", xlabel="E (eV)",
+def make_figure_cond_dc(file_data="condDC.dat", title="DC conductivity", xlabel="E (eV)",
                          ylabel=r"$\sigma (2e^2/h)$", file_out="optcond.pdf"):
     """Make a figure for the DOS"""
     optcond = np.loadtxt(file_data)
@@ -89,7 +89,7 @@ def make_figure_cond_dc_ss(file_data="condDC.dat", title="DC conductivity", xlab
     optcond = np.loadtxt(file_data)
     fig = plt.figure()
     ax = fig.subplots()
-    lines = [ax.plot(optcond[:, 0], optcond[:, 3])[0]]
+    lines = [ax.plot(optcond[:, 0], optcond[:, 2])[0]]
     ax.legend(lines, [r"$\sigma_{xx}$"])
     ax.set_title(title)
     ax.set_xlabel(xlabel)
@@ -147,7 +147,7 @@ def main(selection=None):
 
     if 2 in selection:
         # Example 2: dos_cube.py
-        print_command("======= Example 2: DOS for a square lattice                      =========")
+        print_command("======= Example 2: DOS for a cubic lattice                       =========")
         import dos_cube as example
         print_command("- - - -            Making the configuration file                 - - - - -")
         hdf5_file = example.main()
@@ -333,7 +333,7 @@ def main(selection=None):
         terminal("mv condDC.dat {0}".format(cond_dc_data))
         make_figure_dos(file_data=dos_data, title="DOS Square Lattice",
                         file_out=dos_figure)
-        make_figure_cond_cd(file_data=cond_dc_data, title="DC Conductivity Square Lattice",
+        make_figure_cond_dc(file_data=cond_dc_data, title="DC Conductivity Square Lattice",
                             file_out=cond_dc_figure)
 
     if 14 in selection:
@@ -353,10 +353,8 @@ def main(selection=None):
         terminal("mv condDC.dat {0}".format(cond_dc_data))
         make_figure_dos(file_data=dos_data, title="DOS Haldane",
                         file_out=dos_figure)
-        make_figure_cond_cd(file_data=cond_dc_data, title="DC Conductivity Haldane",
+        make_figure_cond_dc(file_data=cond_dc_data, title="DC Conductivity Haldane",
                             file_out=cond_dc_figure)
-
-        print_command("-" * 74 + "\n" + " " * 10 + "Ran all the examples in the kite/examples-folder\n" + "-" * 74 + "\n")
 
     if 15 in selection:
         # Example 15: dccond_phosphorene.py
@@ -368,10 +366,11 @@ def main(selection=None):
         cond_dc_data = "{0}-condDC.dat".format(pre_file_name)
         cond_dc_figure = "{0}-condDC.pdf".format(pre_file_name)
         run_calculation(hdf5_file)
-        example.post_process(hdf5_file)
-        terminal("mv condDC.dat {0}".format(cond_dc_data))
+        from process_single_shot import post_process_singleshot_conductivity_dc as post_process_dccond
+        post_process_dccond(hdf5_file)
+        terminal("mv {hdf5} {data}".format(hdf5=hdf5_file[:-3] + ".dat", data=cond_dc_data))
         make_figure_cond_dc_ss(file_data=cond_dc_data, title="DC Conductivity Phosphorene XX",
-                            file_out=cond_dc_figure)
+                               file_out=cond_dc_figure)
 
     if 16 in selection:
         # Example 16: dccond_phosphorene.py
@@ -383,10 +382,11 @@ def main(selection=None):
         cond_dc_data = "{0}-condDC.dat".format(pre_file_name)
         cond_dc_figure = "{0}-condDC.pdf".format(pre_file_name)
         run_calculation(hdf5_file)
-        example.post_process(hdf5_file)
-        terminal("mv condDC.dat {0}".format(cond_dc_data))
+        from process_single_shot import post_process_singleshot_conductivity_dc as post_process_dccond
+        post_process_dccond(hdf5_file)
+        terminal("mv {hdf5} {data}".format(hdf5=hdf5_file[:-3] + ".dat", data=cond_dc_data))
         make_figure_cond_dc_ss(file_data=cond_dc_data, title="DC Conductivity Phosphorene YY",
-                            file_out=cond_dc_figure)
+                               file_out=cond_dc_figure)
 
     if 17 in selection:
         # Example 17: dos_twisted_bilayer.py
@@ -402,6 +402,50 @@ def main(selection=None):
         terminal("mv dos.dat {0}".format(dos_data))
         make_figure_dos(file_data=dos_data, title="DOS Twisted Bilayer graphene at 21.787 degrees",
                         file_out=dos_figure)
+    if 18 in selection:
+        # Example 18: dos_t_symmetric_cubic_weyl_sm.py
+        print_command("======= Example 18: DOS for T symmetric weyl sm                    =======")
+        import dos_t_symmetric_cubic_weyl_sm as example
+        print_command("- - - -            Making the configuration file                 - - - - -")
+        hdf5_file = example.main()
+        pre_file_name = hdf5_file.replace("-output.h5", "")
+        dos_data = "{0}-dos.dat".format(pre_file_name)
+        dos_figure = "{0}-dos.pdf".format(pre_file_name)
+        run_calculation(hdf5_file)
+        run_tools(hdf5_file)
+        terminal("mv dos.dat {0}".format(dos_data))
+        make_figure_dos(file_data=dos_data, title="DOS for T symmetric weyl semi-metal",
+                        file_out=dos_figure)
+
+    if 19 in selection:
+        # Example 19: optcond_t_symmetric_cubic_weyl_sm.py
+        print_command("======= Example 19: Optical confuctivity  for T symmetric weyl sm    =====")
+        import optcond_t_symmetric_cubic_weyl_sm as example
+        print_command("- - - -            Making the configuration file                 - - - - -")
+        hdf5_file = example.main()
+        pre_file_name = hdf5_file.replace("-output.h5", "")
+        opt_cond_data = "{0}-optcond.dat".format(pre_file_name)
+        opt_cond_figure = "{0}-optcond.pdf".format(pre_file_name)
+        run_calculation(hdf5_file)
+        run_tools(hdf5_file)
+        terminal("mv optcond.dat {0}".format(opt_cond_data))
+        make_figure_opt_cond(file_data=opt_cond_data, title="Optical Conductivity for T symmetric weyl semi-metal",
+                             file_out=opt_cond_figure)
+
+    if 20 in selection:
+        # Example 20: dos_fu_kane_mele_model.py
+        print_command("======= Example 20: DOS Fu-Kane-Mele model                         =======")
+        import dos_fu_kane_mele_model as example
+        print_command("- - - -            Making the configuration file                 - - - - -")
+        hdf5_file = example.main()
+        pre_file_name = hdf5_file.replace("-output.h5", "")
+        dos_data = "{0}-dos.dat".format(pre_file_name)
+        dos_figure = "{0}-dos.pdf".format(pre_file_name)
+        run_calculation(hdf5_file)
+        run_tools(hdf5_file)
+        terminal("mv dos.dat {0}".format(dos_data))
+        make_figure_dos(file_data=dos_data, title="DOS Fu-Kane-Mele model",
+                        file_out=dos_figure)
 
     print_title("Ran all the KITE-examples")
 
@@ -414,4 +458,4 @@ def clean():
 
 if __name__ == "__main__":
     clean()
-    main([2])
+    main([18, 19, 20])
