@@ -1,0 +1,183 @@
+/* ===================================================================
+ * fonts.scss
+ *
+ * ------------------------------------------------------------------- */
+
+
+/*
+
+/*
+ * Muli
+================================================================================ */
+
+@font-face {
+    font-family: "muli-extrabold";
+    src: url("../fonts/muli/muli-extrabold-webfont.woff2") format("woff2"), url("../fonts/muli/muli-extrabold-webfont.woff") format("woff");
+    font-style: normal;
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: "muli-extrabold-italic";
+    src: url("../fonts/muli/muli-extrabolditalic-webfont.woff2") format("woff2"), url("../fonts/muli/muli-extrabolditalic-webfont.woff") format("woff");
+    font-style: normal;
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: "muli-bold";
+    src: url("../fonts/muli/muli-bold-webfont.woff2") format("woff2"), url("../fonts/muli/muli-bold-webfont.woff") format("woff");
+    font-style: normal;
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: "muli-bold-italic";
+    src: url("../fonts/muli/muli-bolditalic-webfont.woff2") format("woff2"), url("../fonts/muli/muli-bolditalic-webfont.woff") format("woff");
+    font-style: normal;
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: "muli-semibold";
+    src: url("../fonts/muli/muli-semibold-webfont.woff2") format("woff2"), url("../fonts/muli/muli-semibold-webfont.woff") format("woff");
+    font-style: normal;
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: "muli-semibold-italic";
+    src: url("../fonts/muli/muli-semibolditalic-webfont.woff2") format("woff2"), url("../fonts/muli/muli-semibolditalic-webfont.woff") format("woff");
+    font-style: normal;
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: "muli-regular";
+    src: url("../fonts/muli/muli-regular-webfont.woff2") format("woff2"), url("../fonts/muli/muli-regular-webfont.woff") format("woff");
+    font-style: normal;
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: "muli-italic";
+    src: url("../fonts/muli/muli-italic-webfont.woff2") format("woff2"), url("../fonts/muli/muli-italic-webfont.woff") format("woff");
+    font-style: normal;
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: "muli-light";
+    src: url("../fonts/muli/muli-light-webfont.woff2") format("woff2"), url("../fonts/muli/muli-light-webfont.woff") format("woff");
+    font-style: normal;
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: "muli-light-italic";
+    src: url("../fonts/muli/muli-lightitalic-webfont.woff2") format("woff2"), url("../fonts/muli/muli-lightitalic-webfont.woff") format("woff");
+    font-style: normal;
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: "muli-extralight";
+    src: url("../fonts/muli/muli-extralight-webfont.woff2") format("woff2"), url("../fonts/muli/muli-extralight-webfont.woff") format("woff");
+    font-style: normal;
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: "muli-extralight-italic";
+    src: url("../fonts/muli/muli-extralightitalic-webfont.woff2") format("woff2"), url("../fonts/muli/muli-extralightitalic-webfont.woff") format("woff");
+    font-style: normal;
+    font-weight: normal;
+}
+
+/*
+ * LatoLatin
+================================================================================ */
+
+@font-face {
+    font-family: "LatoLatin-extrabold";
+    src: url("../fonts/LatoLatin/LatoLatin-Heavy.woff2") format("woff2"), url("../fonts/LatoLatin/LatoLatin-Heavy.woff") format("woff");
+    font-style: normal;
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: "LatoLatin-extrabold-italic";
+    src: url("../fonts/LatoLatin/LatoLatin-Heavyitalic.woff2") format("woff2"), url("../fonts/LatoLatin/LatoLatin-Heavyitalic.woff") format("woff");
+    font-style: normal;
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: "LatoLatin-bold";
+    src: url("../fonts/LatoLatin/LatoLatin-Bold.woff2") format("woff2"), url("../fonts/LatoLatin/LatoLatin-Bold.woff") format("woff");
+    font-style: normal;
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: "LatoLatin-bold-italic";
+    src: url("../fonts/LatoLatin/LatoLatin-Bolditalic.woff2") format("woff2"), url("../fonts/LatoLatin/LatoLatin-Bolditalic.woff") format("woff");
+    font-style: normal;
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: "LatoLatin-semibold";
+    src: url("../fonts/LatoLatin/LatoLatin-Semibold.woff2") format("woff2"), url("../fonts/LatoLatin/LatoLatin-Semibold.woff") format("woff");
+    font-style: normal;
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: "LatoLatin-semibold-italic";
+    src: url("../fonts/LatoLatin/LatoLatin-Semibolditalic.woff2") format("woff2"), url("../fonts/LatoLatin/LatoLatin-Semibolditalic.woff") format("woff");
+    font-style: normal;
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: "LatoLatin-regular";
+    src: url("../fonts/LatoLatin/LatoLatin-Regular.woff2") format("woff2"), url("../fonts/LatoLatin/LatoLatin-Regular.woff") format("woff");
+    font-style: normal;
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: "LatoLatin-italic";
+    src: url("../fonts/LatoLatin/LatoLatin-italic-webfont.woff2") format("woff2"), url("../fonts/LatoLatin/LatoLatin-italic-webfont.woff") format("woff");
+    font-style: normal;
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: "LatoLatin-light";
+    src: url("../fonts/LatoLatin/LatoLatin-light-webfont.woff2") format("woff2"), url("../fonts/LatoLatin/LatoLatin-light-webfont.woff") format("woff");
+    font-style: normal;
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: "LatoLatin-light-italic";
+    src: url("../fonts/LatoLatin/LatoLatin-lightitalic-webfont.woff2") format("woff2"), url("../fonts/LatoLatin/LatoLatin-lightitalic-webfont.woff") format("woff");
+    font-style: normal;
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: "LatoLatin-extralight";
+    src: url("../fonts/LatoLatin/LatoLatin-extralight-webfont.woff2") format("woff2"), url("../fonts/LatoLatin/LatoLatin-extralight-webfont.woff") format("woff");
+    font-style: normal;
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: "LatoLatin-extralight-italic";
+    src: url("../fonts/LatoLatin/LatoLatin-extralightitalic-webfont.woff2") format("woff2"), url("../fonts/LatoLatin/LatoLatin-extralightitalic-webfont.woff") format("woff");
+    font-style: normal;
+    font-weight: normal;
+}

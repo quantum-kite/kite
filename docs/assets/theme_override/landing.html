@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<!--[if lt IE 9 ]>
+<html class="no-js oldie" lang="en"> <![endif]-->
+<!--[if IE 9 ]>
+<html class="no-js oldie ie9" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+
+<head>
+
+    <!--- basic page needs
+   ================================================== -->
+    <meta charset="utf-8">
+    <title>Quantum Kite</title>
+
+    <meta content="" name="description">
+    <meta content="" name="author">
+
+    <!-- mobile specific metas
+   ================================================== -->
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+
+    <!-- CSS
+   ================================================== -->
+    <link href="assets/stylesheets/extra.css" rel="stylesheet">
+    <link href="assets/stylesheets/monokai.css" rel="stylesheet">
+    <link href="assets/stylesheets/colorful.css" rel="stylesheet">
+
+
+    <link href="assets/stylesheets/landing_base.css" rel="stylesheet">
+    <link href="assets/stylesheets/landing_vendor.css" rel="stylesheet">
+    <link href="assets/stylesheets/landing_main.css" rel="stylesheet">
+
+
+    <!-- favicons
+	================================================== -->
+    <link href="assets/images/site/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180">
+    <link href="assets/images/site/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
+    <link href="assets/images/site/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
+    <link href="site.webmanifest" rel="manifest">
+    <link color="#5bbad5" href="assets/images/site/safari-pinned-tab.svg" rel="mask-icon">
+    <meta content="#ffffff" name="msapplication-TileColor">
+    <meta content="#ffffff" name="theme-color">
+
+    <!-- open graph
+	================================================== -->
+    <meta content="446" property="og:image:height">
+    <meta content="852" property="og:image:width">
+    <meta content="kite is a quantum transport software" property="og:description">
+    <meta content="Quantum Kite " property="og:title">
+    <meta content="http://quantum-kite.com" property="og:url">
+
+</head>
+
+<body id="top">
+
+    <!-- header
+================================================== -->
+    <header id="header">
+
+        <div class="header-logo">
+            <a href="index.html">KITE</a>
+        </div>
+
+
+        <nav id="header-nav-wrap">
+            <ul class="header-main-nav">
+                {% for nav_item in nav %}
+                    {% if nav_item.children %}
+                        {% set indexes = [] %}
+                        {% for nav_item in nav_item.children %}
+                            {% if nav_item.is_index and not index is defined %}
+                                {% set _ = indexes.append(nav_item) %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if indexes %}
+                            {% set index = indexes | first %}
+                        {% endif %}
+                    {% else %}
+                        {% set index = nav_item %}
+                    {% endif %}
+                    <li><a href="{{ index.url | url }}" title="{{ nav_item.title }}">{{ nav_item.title }}</a></li>
+                {% endfor %}
+            </ul>
+
+            <a class="button button-primary cta" href="https://github.com/quantum-kite/kite" title="git-hub"><i
+                    class="fa fa-github"></i> GitHub</a>
+        </nav>
+
+        <a class="header-menu-toggle" href="#"><span>Menu</span></a>
+
+    </header> <!-- /header -->
+
+
+    <!-- home
+================================================== -->
+    <section id="home">
+
+
+
+        <div class="home-content">
+
+            <div class="row contents">
+
+                <div class="home-content-left">
+                    <h1 class="home-content-left">
+                        HIGH-PERFORMANCE QUANTUM TRANSPORT SOFTWARE
+
+
+                    </h1>
+
+
+
+                    <div class="buttons" data-aos="fade-up">
+                        <a class="button stroke" href="tutorial/">
+                            Getting Started
+                        </a>
+                        <a class="button stroke" href="about/">
+                            About KITE
+                        </a>
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div> <!-- end home-content -->
+
+
+
+
+
+    </section> <!-- end home -->
+
+
+    <!-- about
+================================================== -->
+    <section id="about">
+
+        <div class="row about-intro">
+
+            <div class="col-four">
+                <h1 class="intro-header">HIGHLIGHTS</h1>
+            </div>
+            <div class="col-eight">
+
+                <p class="lead" data-aos="fade-up">
+                    KITE: accurate modelling of electronic structure and response functions of large molecules, crystals
+                    and
+                    hybrid materials
+                </p>
+            </div>
+
+        </div>
+
+        <div class="row about-features">
+
+            <div class="features-list block-1-3 block-m-1-2 block-mob-full group">
+
+
+                <div class="bgrid feature" data-aos="fade-up">
+
+                    <span class="icon"><i class="mi mi-Bullseye"></i></span>
+
+                    <div class="service-content">
+                        <h3>ACCURACY</h3>
+
+                        <p>Green’s functions of complex molecules and materials are evaluated by means of an accurate
+                            real-space polynomial
+                            (spectral) expansion, which provides fine control over accuracy and energy resolution for
+                            all in-built target functions
+                            in both pristine and disordered systems.
+                        </p>
+
+
+                    </div>
+
+                </div> <!-- /bgrid -->
+
+                <div class="bgrid feature" data-aos="fade-up">
+
+                    <span class="icon"><i class="mi mi-Size"></i></span>
+                    <!--<span class="icon"><i class="icon-paint-size"></i></span>-->
+                    <div class="service-content">
+                        <h3>SCALABILITY & SPEED</h3>
+
+                        <p>KITE boasts a fast and highly-scalable state-of-the-art spectral algorithm, capable to treat
+                            extremely large
+                            computational domains with billions of atomic orbitals at a relatively modest computational
+                            cost. Target functions are
+                            evaluated by means of multi-threaded algorithms that can be easily optimised to specific CPU
+                            architectures.
+                        </p>
+
+                    </div>
+
+                </div> <!-- /bgrid -->
+
+                <div class="bgrid feature" data-aos="fade-up">
+
+                    <span class="icon"><i class="mi mi-Settings"></i></span>
+
+                    <div class="service-content">
+                        <h3>VERSATILITY</h3>
+
+                        <p>KITE calculates a wide range of electronic properties (e.g., local DOS and optical
+                            conductivity) of empirical
+                            tight-tight binding (ETB) models with arbitrary complexity. A friendly python interface
+                            allows to easily define/import
+                            model parameters and select target functions/algorithms.
+                        </p>
+
+                    </div>
+
+                </div> <!-- /bgrid -->
+
+
+            </div> <!-- end features-list -->
+
+        </div> <!-- end about-features -->
+
+
+    </section> <!-- end about -->
+
+
+
+
+    <!-- Testimonials Section
+    ================================================== -->
+    <section id="testimonials">
+
+        <div class="row">
+            <div class="col-twelve">
+                <h1 class="intro-header" data-aos="fade-up">Our Team</h1>
+            </div>
+        </div>
+
+        {% for team_member in config.extra.team %}
+            {% if loop.index % 4 == 1 %}
+            <div class="row owl-wrap">
+                <div id="testimonial-slider" data-aos="fade-up">
+                    <div class="slides owl-carousel">
+                        <div class="row">
+            {% endif %}
+                            <div class="col-1-4 tab-full">
+                                <div class="testimonial-author">
+                                    <img src="assets/images/avatars/{{ team_member.image }}" alt="Image of {{ team_member.name }}">
+                                    <div class="author-info">
+                                        <a href="{{ team_member.link }}" style="text-transform: uppercase;">
+                                            {{ team_member.name }}
+                                        </a>
+                                        <span class="position">{{ team_member.title }}</span>
+                                    </div>
+                                </div>
+                            </div>
+            {% if loop.index % 4 == 0 or loop.index == config.extra.team|length  %}
+                        </div>
+                    </div> <!-- end slides -->
+                </div> <!-- end testimonial-slider -->
+            </div> <!-- end flex-container -->
+
+            {% endif %}
+        {% endfor %}
+
+    </section> <!-- end testimonials -->
+    <div id="preloader">
+        <div id="loader"></div>
+    </div>
+
+    <!-- footer
+    ================================================== -->
+    <footer class="md-footer">
+
+        <!-- Further information -->
+        <div class="md-footer-meta md-typeset">
+            <div class="md-footer-meta__inner md-grid">
+
+                <!-- Copyright and theme information -->
+                <div class="md-footer-copyright md-footer-copyright-wrapper">
+                    <div class="md-footer-copyright__highlight md-footer-copyright__highlight-wrapper">
+                        KITE is a free software: you can redistribute it and/or modify it under the terms of the GNU
+                        General Public License as published by the Free Software Foundation - version 3. Copyright ©
+                        2020 KITE
+                    </div>
+
+                    Website powered by
+                    <a href="https://www.mkdocs.org">MkDocs</a>,
+                    <a href="https://squidfunk.github.io/mkdocs-material/">Material for MkDocs</a> and
+                    <a href="http://www.styleshout.com/">styleshout</a> .
+                </div>
+
+                <!-- Social links -->
+
+
+            </div>
+        </div>
+    </footer>
+    <!-- Java Script
+================================================== -->
+    <script src="assets/javascripts/jquery-2.1.3.min.js"></script>
+    <script src="assets/javascripts/plugins.js"></script>
+    <script src="assets/javascripts/main.js"></script>
+
+</body>
+
+</html>

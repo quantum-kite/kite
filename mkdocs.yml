@@ -1,0 +1,169 @@
+# Project information
+site_name: "KITE - Quantum transport calculations "
+site_description: "KITE: Quantum transport calculations"
+site_author: "KITE"
+
+# Repository
+repo_url: https://github.com/quantum-kite/kite
+edit_uri: https://github.com/quantum-kite/kite/tree/master/docs
+
+# Copyright
+copyright: "KITE is a free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation - version 3
+&copy Copyright 2022, Kite"
+
+# Navigation
+
+nav:
+  - Home: 'index.md'
+  - Installation: 'installation.md'
+  - Tutorial:
+    - Getting Started: 'tutorial/index.md'
+    - 1. Workflow: 'tutorial/workflow.md'
+    - 2. Lattice: 'tutorial/tb_model.md'
+    - 3. Settings: 'tutorial/settings.md'
+    - 4. Calculation: 'tutorial/calculation.md'
+    - 5. Post-processing: 'tutorial/postprocessing.md'
+    - 6. Disorder: 'tutorial/disorder.md'
+    - 7. Editing the HDF5 file: 'tutorial/editing_hdf_files.md'
+    - 8. Parameter optimization: 'tutorial/optimization.md'
+    - Examples:
+      - Graphene: 'tutorial/examples/graphene.md'
+      - Haldane: 'tutorial/examples/haldane.md'
+      - Phosphorene: 'tutorial/examples/phosphorene.md'
+      - Optical Conductivity: 'tutorial/examples/optical_conductivity.md'
+      - Large Systems: 'tutorial/examples/large_systems.md'
+      - Custom Local Potential: 'tutorial/examples/custom_local_potential.md'
+  - Documentation:
+    - Overview: 'documentation/index.md'
+    - Spectral: 'documentation/spectral.md'
+    - Tight-Binding: 'documentation/tight_binding.md'
+  - API:
+    - Overview: 'api/index.md'
+    - KITE (python): 'api/kite.md'
+    - KITEx: 'api/kitex.md'
+    - KITE-tools: 'api/kite-tools.md'
+  - FAQ: 'faq.md'
+  - About: 'about.md'
+
+# Configuration
+site_dir: "../docs/"
+theme:
+  name: material
+  language: "en"
+  logo: "assets/images/site/safari-pinned-tab.svg"
+  favicon: "assets/images/site/favicon.ico"
+  custom_dir: "docs/assets/theme_override/"
+  font:
+    text: Roboto
+    code: Roboto Mono
+
+  primary: "grey"
+  palette:
+    # scheme: Quantum-KITE
+    - media: "(prefers-color-scheme: light)" # (1)!
+      scheme: kite
+      accent: deep orange
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)" # (2)!
+      scheme: slate
+      accent: deep orange
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.top
+    - navigation.sections
+    - navigation.expand
+    - navigation.instant
+    - navigation.tracking
+    - toc.integrate
+    - toc.follow
+  icon:
+    admonition:
+      declaration-function: fontawesome/solid/book
+      declaration-class: fontawesome/solid/book
+
+
+# Customization
+extra_css:
+  - "assets/stylesheets/extra.css"
+  - "assets/stylesheets/monokai.css"
+  - "assets/stylesheets/colorful.css"
+
+extra_javascript:
+  - assets/javascripts/mathjax-config.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+  - https://unpkg.com/mermaid@7.1.2/dist/mermaid.min.js
+
+# Extensions
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - admonition
+  - pymdownx.details
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.arithmatex:
+      generic: true
+  - footnotes
+  - md_in_html
+  - def_list
+  - tables
+  - toc:
+      permalink: true
+      baselevel: 2
+  - attr_list
+  - meta
+
+extra:
+  team:
+    - name: "Aires Ferreira"
+      title: Founder
+      link: https://www.linkedin.com/in/aires-ferreira-52a1404/
+      image: ferreira.jpg
+    - name: "Tatiana G. Rappoport"
+      title: Founder
+      link: https://www.linkedin.com/in/tatiana-rappoport-64242768/
+      image: rappoport.jpg
+    - name: "João M. V. P. Lopes"
+      title: Founder
+      link: https://www.linkedin.com/in/joão-manuel-viana-parente-lopes-0770b34/
+      image: lopes.jpg
+    - name: "Lucian Covaci"
+      title: Founder
+      link: https://www.linkedin.com/in/lucian-covaci-1439388a/
+      image: covaci.jpg
+    - name: "Simão M. João"
+      title: Founder
+      link: https://sigarra.up.pt/fcup/pt/func_geral.formview?p_codigo=647225/
+      image: simao.jpg
+    - name: "Miša Anđelković"
+      title: Founder
+      link: https://www.linkedin.com/in/misaandelkovic/
+      image: misa.jpg
+    - name: "João P. S. Pires"
+      title: Contributor
+      link: https://www.linkedin.com/in/joão-pedro-dos-santos-pires-849898173/
+      image: pires.jpg
+    - name: "Bert Jorissen"
+      title: Contributor
+      link: https://bertjorissen.be
+      image: jorissen.jpg
+    - name: "Emila Aerts"
+      title: Contributor
+      link: https://www.uantwerpen.be/en/staff/emile-aerts_23098/
+      image: aerts.jpg
+    - name: "Robin Smeyers"
+      title: Contributor
+      link: https://be.linkedin.com/in/robin-smeyers-293bb8209/
+      image: smeyers.jpg
+    - name: "David T. S. Perkins"
+      title: Contributor
+      link: https://davidtsperkins.com/"
+      image: perkins.jpg
+
