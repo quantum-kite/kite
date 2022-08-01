@@ -1,3 +1,7 @@
+!!! Info
+
+    This file describes the contents of the `#!bash kite/tools`-folder.
+
 # `kite/tools`-folder
 This folder contains two distinct tools:
 
