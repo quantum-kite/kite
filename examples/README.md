@@ -1,3 +1,7 @@
+!!! Info
+
+    This file describes the contents of the `#!bash kite/examples`-folder.
+
 ## KITE Examples
 This folder contains various examples showing the functionalities of the KITE library. To execute an example, run
 

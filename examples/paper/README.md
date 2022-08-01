@@ -1,7 +1,9 @@
-# Examples from the KITE paper
+!!! Info
 
-Just a startup
+    This file describes the contents of the `#!bash kite/examples/paper`-folder.
 
-Here is the [paper]
+## Examples from the KITE paper
+
+In the subdirectories, you can find the scripts to generate the figures from the [KITE-paper].
 
 [paper]: rsos.191809.pdf
