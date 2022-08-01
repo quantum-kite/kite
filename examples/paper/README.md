@@ -6,4 +6,4 @@
 
 In the subdirectories, you can find the scripts to generate the figures from the [KITE-paper].
 
-[paper]: rsos.191809.pdf
+[KITE-paper]: rsos.191809.pdf
