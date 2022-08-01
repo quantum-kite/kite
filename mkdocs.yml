@@ -32,18 +32,30 @@ nav:
       - Phosphorene: 'tutorial/examples/phosphorene.md'
       - Optical Conductivity: 'tutorial/examples/optical_conductivity.md'
       - Large Systems: 'tutorial/examples/large_systems.md'
-      - Custom Local Potential: 'tutorial/examples/custom_local_potential.md'
+    - More Examples:
+      - Examples-dir: 'tutorial/more_examples/additional_examples.md'
+      - Exampels from the paper: 'tutorial/more_examples/paper.md'
+      - Custom Local Potential: 'tutorial/more_examples/custom_local_potential.md'
+
   - Documentation:
     - Overview: 'documentation/index.md'
     - Spectral: 'documentation/spectral.md'
     - Tight-Binding: 'documentation/tight_binding.md'
   - API:
     - Overview: 'api/index.md'
-    - KITE (python): 'api/kite.md'
-    - KITEx: 'api/kitex.md'
-    - KITE-tools: 'api/kite-tools.md'
+    - KITE (python):
+      - Python package: 'api/kite.md'
+    - KITEx:
+      - Main program: 'api/kitex.md'
+    - KITE-tools:
+      - Toolbox: 'api/kite-tools.md'
+      - Addtitional scripts: 'api/kite_tools_readme.md'
   - FAQ: 'faq.md'
-  - About: 'about.md'
+  - About:
+    - About KITE: 'about/index.md'
+    - LICENSE.md: 'about/LICENSE.md'
+    - README.md: 'about/main_readme.md'
+    - VERSION.md: 'about/VERSION.md'
 
 # Configuration
 site_dir: "../docs/"

@@ -1,11 +1,14 @@
 ## KITE Examples
 This folder contains various examples showing the functionalities of the KITE library. To execute an example, run
 
-    python3 example.py
-    ../build/KITEx example-output.h5
-    ../tools/build/KITE-tools example-output.h5
+``` bash
+python3 example.py
+../build/KITEx example-output.h5
+../tools/build/KITE-tools example-output.h5
+```
 
 The following examples are given:
+
 * A simple DOS calculation of various systems, like
     * Checkerboard lattice
     * Mixed disordered lattice
@@ -27,14 +30,18 @@ Depending on the type of calculation, various output files will be created in th
 
 If the system is installed in the right folder as mentioned in the tutorial, all the results can be generated automatically by running
 
-    python3 run_all_examples.py
+``` bash
+python3 run_all_examples.py
+```
 
 After running this command, all the examples will be executed. This can take several minutes.
 Besides the outputfiles, like *name-dos.dat*, plots will be given for the *DOS*, *optical conductivity* and *DC conductivity*.
 
 To clean up the folder after running all the examples, execute the following commands
 
-    python3
-    >> import run_all_examples
-    >> run_all_examples.clean()
-    >> exit()
+``` bash
+python3
+>>> import run_all_examples
+>>> run_all_examples.clean()
+>>> exit()
+```

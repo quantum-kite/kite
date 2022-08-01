@@ -18,8 +18,8 @@ For further details on the algorithms and the implementation please refer to S. 
 
 ## Getting Started
 
-For understanding the main functionalities, how to setup a TB model and disorder and evaluate the KITE target functions, we suggest you to check the tutorial [Getting Started](tutorial/index.md).
-More advanced calculations are explained in [Examples](tutorial/examples). After downloading the repository, you can find a copy of the tutorial scripts under the examples folder.
+For understanding the main functionalities, how to setup a TB model and disorder and evaluate the KITE target functions, we suggest you to check the tutorial [Getting Started](../tutorial/index.md).
+More advanced calculations are explained in [Examples](../tutorial/examples). After downloading the repository, you can find a copy of the tutorial scripts under the examples folder.
 
 ### Prerequisites
 
@@ -35,7 +35,7 @@ Before installing the code, following prerequisites need to be satisfied:
 
 ### Installing
 
-After meeting prerequisites and downloading the repository, you can compile the KITE code using the already available CMake files. Please check the CMake files first, and if required libraries/packages are installed elsewhere, edit them accordingly. For the full installation procedure, please refer to the [Installation](installation.md) section.
+After meeting prerequisites and downloading the repository, you can compile the KITE code using the already available CMake files. Please check the CMake files first, and if required libraries/packages are installed elsewhere, edit them accordingly. For the full installation procedure, please refer to the [Installation](../installation.md) section.
 
 ## Contact 
 
@@ -52,7 +52,7 @@ Simão M. João, João V. Lopes (Universidade do Porto, Portugal), Tatiana G. Ra
 
 ## License
 
-This project is licensed under the GPL v3 License – see the LICENSE.md file for details
+This project is licensed under the GPL v3 License – see the [LICENSE.md](LICENSE.md) file for details
 
 ## Acknowledgments
 

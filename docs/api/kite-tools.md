@@ -144,5 +144,7 @@ Calculates the DC conductivity using a temperature of 0.4 and 500 equidistant Fe
 
 Calculates the DC conductivity using 30 equidistant Fermi energies in the range `#!python [-1.2, 2.5]` and the optical conductivity using a temperature of 93.
 
+@@include[kite_tools_readme.md](kite_tools_readme.md)
 
 [resources]: ../documentation/index.md
+ 
