@@ -16,8 +16,8 @@ copyright: "KITE is a free software: you can redistribute it and/or modify it un
 nav:
   - Home: 'index.md'
   - Installation: 'installation.md'
-  - Tutorial:
-    - Getting Started: 'tutorial/index.md'
+  - Documentation:
+    - Tutorial: 'tutorial/index.md'
     - 1. Workflow: 'tutorial/workflow.md'
     - 2. Lattice: 'tutorial/tb_model.md'
     - 3. Settings: 'tutorial/settings.md'
@@ -37,7 +37,7 @@ nav:
       - Exampels from the paper: 'tutorial/more_examples/paper.md'
       - Custom Local Potential: 'tutorial/more_examples/custom_local_potential.md'
 
-  - Documentation:
+  - Background:
     - Overview: 'documentation/index.md'
     - Spectral: 'documentation/spectral.md'
     - Tight-Binding: 'documentation/tight_binding.md'
