@@ -115,7 +115,7 @@ def main(onsite=(0, 0), t=1):
         num_random=1,
         num_disorder=1,
         direction='xy',
-        temperature=100
+        temperature=0.05
          )
 
     # configure the *.h5 file
