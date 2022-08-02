@@ -43,6 +43,7 @@ def square_lattice(onsite=[0], t=1):
     )
     return lat
 
+
 def main(onsite=[0], t=1):
     """Prepare the input file for KITEx"""
     # load lattice
@@ -93,11 +94,11 @@ def main(onsite=[0], t=1):
         temperature=0.01
     )
 
-    mod = kite.Modification(magnetic_field = 40)
+    mod = kite.Modification(magnetic_field=40)
 
     # configure the *.h5 file
     output_file = "square_lattice_condDC-output.h5"
-    kite.config_system(lattice, configuration, calculation, odification=mod, filename=output_file)
+    kite.config_system(lattice, configuration, calculation, modification=mod, filename=output_file)
 
     # for generating the desired output from the generated HDF5-file, run
     # ../build/KITEx square_lattice_condDC-output.h5

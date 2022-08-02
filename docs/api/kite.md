@@ -170,7 +170,7 @@ The KITE package for pre-processing is split up in various subclasses and contai
 
 :   **Parameters**
     : <span id="modification-par-magnetic_field">`#!python magnetic_field`: *`#!python float`*</span>
-        : Add the magnetic field to the lattice. The field will point along the second primitive lattice vector of the lattice.
+        : Add the magnetic field to the lattice. The field will point along the second primitive lattice vector of the lattice. The magnetic field is un units of $Tesla$, if the [`#!python pb.Lattice`][lattice] is in units of $nm$.
     : <span id="modification-par-flux">`#!python flux`: *`#!python float`*</span>
         : Add the magnetic flux to the lattice.
 
