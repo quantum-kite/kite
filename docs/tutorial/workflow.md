@@ -25,7 +25,7 @@ The workflow is as follows:
 
 !!! Tip
 
-*It is possible to use a [simple python script][script] for the workflow. *
+**It is possible to use a [simple python script][script] for the whole workflow.** 
 
 <div>
   <figure>
