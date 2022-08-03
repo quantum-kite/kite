@@ -34,9 +34,9 @@ The tutorial is structured as follows:
     from pybinding.repository import graphene
     from os import system as terminal
 
-    conf = kite.Configuration([64, 64], [512, 512], ["periodic", "periodic"])
+    conf = kite.Configuration(divisions=[4, 4], length=[512, 512], boundaries=["periodic", "periodic"])
     calc = kite.Calculation(conf)
-    calc.dos(4000, 512, 2, 1)
+    calc.dos(num_points=4000, num_moments=512, num_random=2, num_disorder=1)
     kite.config_system(graphene.monolayer(), conf, calc, filename="first_calculation.h5")
 
     terminal("build/KITEx first_calculation.h5")
@@ -44,6 +44,8 @@ The tutorial is structured as follows:
 
     dos = np.loadtxt("dos.dat")
     plt.plot(dos[:, 0], dos[:, 1])
+    plt.xlabel("Energy (eV)")
+	plt.ylabel("Density of States (a.u)")
     plt.show()
     ```
   
