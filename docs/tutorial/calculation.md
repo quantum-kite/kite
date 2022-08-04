@@ -7,21 +7,21 @@ The parameters given in the [Examples] already have optimized parameters for a s
 The target function currently available are:
 
 * [`#!python dos`][calculation-dos]
-  : calculate the local dentist of states
+  : calculates the local density of states;
 * [`#!python ldos`][calculation-ldos]
-  : calculate the local dentist of states
+  : calculates the local density of states;
 * [`#!python arpes`][calculation-arpes]
-  : calculate the spectral distribution
+  : calculates the spectral distribution;
 * [`#!python gaussian_wave_packet`][calculation-gaussian_wave_packet]
-  : calculate the propagation of a guassian wave packet
+  : calculates the propagation of a guassian wave packet;
 * [`#!python conductivity_dc`][calculation-conductivity_dc]
-  : calculate the DC conductivity
+  : calculates a component of the DC conductivity tensor;
 * [`#!python conductivity_optical`][calculation-conductivity_optical]
-  : calculate the optical conductivity
+  : calculates a component of the optical conductivity tensor; 
 * [`#!python conductivity_optical_nonlinear`][calculation-conductivity_optical_nonlinear]
-  : calculate the optical nonlinear conductivity
+  : calculate a component of the optical nonlinear conductivity tensor; 
 * [`#!python singleshot_conductivity_dc`][calculation-singleshot_conductivity_dc]
-  : calculate the optical conductivity
+  : calculates the longitudinal DC conductivity for a given Fermi energy.
 
     !!! Info "Processing the output of `#!python singleshot_conductivity_dc()`"
 
@@ -54,12 +54,12 @@ Some parameters are specific for the target function:
 * `#!python direction`
   : direction along which the conductivity is calculated (longitudinal: `#!python 'xx'`, `#!python '*yy'`, transversal: `#!python 'xy'`, `#!python 'yx'`)
 * `#!python temperature`
-  : temperature used in Fermi Dirac distribution that is used for the calculation of optical and DC conductivities.
+  : temperature of the Fermi Dirac distribution that is used for the calculation of optical and DC conductivities.
     If $eV$ is used as unit for the `#!python energy`, the `#!python temperature` has the units of Kelvin.
     Internally, the `#!python temperature` is converted to $eV$ through Boltzmann's constant $k_b$.
     To define the `#!python temperature` in arbitrary units, specify the quantity $K_b * T$, which has units of energy.
 * `#!python num_points`
-  : number of points in the energy axis that is going to be used by the post-processing tool to output the density of states.
+  : number of points in the energy axis that is used by the post-processing tool to output the density of states.
 * `#!python special`
   : simplified form of nonlinear optical conductivity hBN example
 * `#!python energy`
@@ -114,10 +114,10 @@ calculation.conductivity_optical_nonlinear(
 
 !!! note
 
-    The user can decide what functions are used in a calculation.
+    The user can decide what functions are used in a given calculation.
     However, it is not possible to configure the same function twice in the same Python script (HDF5 file).
 
-When these objects are defined, we can export the file that will contain set of input instructions for [KITEx][kitex]
+When these objects are defined, we can export the file that will contain a set of input instructions for [KITEx][kitex]
 using the [`#!python kite.config_system`][config_system] function: function:
 ``` python
 kite.config_system(lattice, configuration, calculation, filename='test.h5')
