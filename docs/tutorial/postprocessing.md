@@ -21,16 +21,26 @@ For this purpose, the user has the flexibility to override the parameters from t
 in the command line interface. As an example, let us consider the example  `#!python dos_optcond_gaussian_disorder.py`: If we consider the setting
 
 ``` bash
-./KITE-tools optcond_gaussian_disorder-output.h5 --CondOpt -F 1.2 -O 0 10 1000 -N optcond0.5.dat
+./KITE-tools optcond_gaussian_disorder-output.h5 --CondOpt -F 1.2 -O 0 10 1000 -N optcond1.2.dat
 ```
 KITE-tools will calculate the optical conductivity with a Fermi energy specified by the option **-F** of 1.2 (in units specified in the configuration file). The option **-O** sets the frequency interval between 0 and 10 (in the same units) and the total number of frequency points (1000). These options will be used to recalculate the optical conductivity even if the original configuration file presents different values. 
 The option **-N** defines the name of the output file.
 
-We can modify the Fermi energy and produce a different optical conductivity without recalculating the Chebyshev moments:  
+We can modify the Fermi energy and produce a different optical conductivities without recalculating the Chebyshev moments:  
 
 ``` bash
 ./KITE-tools optcond_gaussian_disorder-output.h5 --CondOpt -F 0.5 -O 0 10 1000 -N optcond0.5.dat
 ```
+We can now compare the real component of two different optical conductivities  
+<div>
+      <figure>
+        <img src="../assets/images/tutorial/opt_cond_tools.png" width="300" />
+        <figcaption>Comparision between the real components of the optical conductivity of disordered graphene for two Fermi energies.</figcaption>
+      </figure>
+    </div>
+
+
+The same type of strategy can be used to calculate the DC and optical conductivities for different temperatures.
 
 
 !!! Info
@@ -38,11 +48,13 @@ We can modify the Fermi energy and produce a different optical conductivity with
     For a more detailed list of possible commands for [KITE-tools][kitetools], look at the [API].
     
  
- !! Warning
+ !!! Warning
 
     Some functionalities use different postprocessing tools that are not included in KITE-tools. 
        
-   
+  
+ The energy defined calculation of the longitudinal condtuctivity, named `#!python singleshot_conductivity_dc`, does not use the Chebyshev moments stored in the h5 file, as it is calculated directly in KITEx. To extract the calculated DC conductivity in function of the Fermi energy from the h5, we can use a python script located in `#!python tools` directory:  `#!python process_single_shot.py`.
+In the same directory, the user can find another script to plot an ARPES spectrum from the output of an arpes calculation.      
 
 [kitex]: ../api/kitex.md
 [kitetools]: ../api/kite-tools.md
