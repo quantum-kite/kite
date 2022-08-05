@@ -18,7 +18,7 @@ The class [`#!python kite.Configuration`][configuration] carries the following i
 
     !!! Warning
     
-        The laterial sizes `#!python lx/nx`, `#!python ly/ny`, #!python lz/nz` **must be integers**.
+        The laterial sizes `#!python lx/nx`, `#!python ly/ny`, `#!python lz/nz` **must be integers**.
         
 When using a 2D lattice, only `#!python lx, ly, nx, ny ` are needed
 

@@ -18,17 +18,31 @@ For example: if the user wants to compute the optical conductivity at several Fe
 the Chebyshev moments are computed once and [KITE-tools][kitetools] can be used to obtain the optical conductivities for all Fermi energies.
 
 For this purpose, the user has the flexibility to override the parameters from the python script by specifying them
-in the command line interface. As an example, the setting
+in the command line interface. As an example, let us consider the example  `#!python dos_optcond_gaussian_disorder.py`: If we consider the setting
 
 ``` bash
-./KITE-tools archive.h5 --CondOpt -F 1.2 -O -2 3 400
+./KITE-tools optcond_gaussian_disorder-output.h5 --CondOpt -F 1.2 -O 0 10 1000 -N optcond0.5.dat
 ```
-KITE-tools will calculate the optical conductivity with a Fermi energy of 1.2 (in units specified in the configuration file)
-for 400 values of the frequency in the interval -2 and 3 (in the same units), even if the configuration file present a different values.
+KITE-tools will calculate the optical conductivity with a Fermi energy specified by the option **-F** of 1.2 (in units specified in the configuration file). The option **-O** sets the frequency interval between 0 and 10 (in the same units) and the total number of frequency points (1000). These options will be used to recalculate the optical conductivity even if the original configuration file presents different values. 
+The option **-N** defines the name of the output file.
+
+We can modify the Fermi energy and produce a different optical conductivity without recalculating the Chebyshev moments:  
+
+``` bash
+./KITE-tools optcond_gaussian_disorder-output.h5 --CondOpt -F 0.5 -O 0 10 1000 -N optcond0.5.dat
+```
+
 
 !!! Info
 
     For a more detailed list of possible commands for [KITE-tools][kitetools], look at the [API].
+    
+ 
+ !! Warning
+
+    Some functionalities use different postprocessing tools that are not included in KITE-tools. 
+       
+   
 
 [kitex]: ../api/kitex.md
 [kitetools]: ../api/kite-tools.md
