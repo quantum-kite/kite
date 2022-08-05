@@ -33,11 +33,11 @@ We can modify the Fermi energy and produce a different optical conductivities wi
 ```
 We can now compare the real component of two different optical conductivities  
 <div>
-      <figure>
-        <img src="../assets/images/tutorial/opt_cond_tools.png" width="300" />
+     <figure>
+        <img src="../../assets/images/tutorial/opt_cond_tools.png" width="300" />
         <figcaption>Comparision between the real components of the optical conductivity of disordered graphene for two Fermi energies.</figcaption>
       </figure>
-    </div>
+</div>
 
 
 The same type of strategy can be used to calculate the DC and optical conductivities for different temperatures.
@@ -48,7 +48,7 @@ The same type of strategy can be used to calculate the DC and optical conductivi
     For a more detailed list of possible commands for [KITE-tools][kitetools], look at the [API].
     
  
- !!! Warning
+!!! Tip
 
     Some functionalities use different postprocessing tools that are not included in KITE-tools. 
        
