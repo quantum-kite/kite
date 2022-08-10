@@ -881,6 +881,7 @@ void KPM_Vector <T, 3>::build_planewave(Eigen::Matrix<double,-1,1> & k, Eigen::M
     for(std::size_t io = 0; io < r.Orb; io++)
         exp_R(io) = weight(io)*exp(assign_value(0, 2.0*M_PI*orb_a_coords.col(io).transpose()*k))/T(sqrt(r.Nt));
 
+
     // Calculate the exponential related to each unit cell
     for(std::size_t i2 = NGHOSTS; i2 < r.Ld[2] - NGHOSTS; i2++)
       for(std::size_t i1 = NGHOSTS; i1 < r.Ld[1] - NGHOSTS; i1++)
@@ -891,12 +892,12 @@ void KPM_Vector <T, 3>::build_planewave(Eigen::Matrix<double,-1,1> & k, Eigen::M
             
             exp_r = exp(assign_value(0,  2.0*M_PI * position.cast<double>().transpose()*k ));
             
-            for(std::size_t io = 0; io < r.Orb; io++)
-              {
-                local_coords.set({i0,i1,io});
+            for(std::size_t io = 0; io < r.Orb; io++) {
+                local_coords.set({i0,i1,i2,io});
                 v(local_coords.index, 0) = exp_r*exp_R(io);
               }
           }
+
     KPM_VectorBasis<T,3u>::build_defect_planewave(k, weight);
 
 }

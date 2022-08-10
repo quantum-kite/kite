@@ -1750,14 +1750,10 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
             dis.append(single_arpes['num_disorder'])
             spinor.append(single_arpes['weight'])
 
-        # convert to values with respect to b1 and b2 in 2D
+
+        # Get the k vectors written in terms of the reciprocal lattice vectors
         k_vector = np.asmatrix(np.asarray(k_vector))
-
-        b1, b2 = lattice.reciprocal_vectors()
-        k1 = +(k_vector[:, 0] * b2[1] - k_vector[:, 1] * b2[0]) / (b1[0] * b2[1] - b1[1] * b2[0])
-        k2 = -(k_vector[:, 0] * b1[1] - k_vector[:, 1] * b1[0]) / (b1[0] * b2[1] - b1[1] * b2[0])
-
-        k_vector_rel = np.column_stack((k1, k2))
+        k_vector_rel = k_vector@vectors.transpose()/np.pi/2
 
         if len(calculation.get_arpes) > 1:
             raise SystemExit('Only a single function request of each type is currently allowed. Please use another '

@@ -10,6 +10,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import process_arpes as pa
 from os import system as terminal
 from os.path import exists
 
@@ -24,7 +25,7 @@ if not KITEx_exists:
     print("Please make sure the KITEx executable is in the correct place relative to this script: ../build/KITEx")
     exit(1)
 if not tools_exists:
-    print("Please make sure the KITE-tools executable is in the correct place relative to this script: ../tools/build/KITEx")
+    print("Please make sure the KITE-tools executable is in the correct place relative to this script: ../tools/build/KITE-tools")
     exit(1)
 
 
@@ -34,10 +35,10 @@ def run_calculation(input_file="output.h5"):
     terminal("{0}/KITEx {1}".format(_kitex_dir, input_file))
 
 
-def run_tools(input_file="output.h5"):
+def run_tools(input_file="output.h5", options=""):
     """Run KITE-tools to obtain the DOS"""
     print_command("- - - -             Doing the KITE-tools postprocessing        - - - - -")
-    terminal("{0}/KITE-tools {1}".format(_kite_tools_dir, input_file))
+    terminal("{0}/KITE-tools {1} {2}".format(_kite_tools_dir, input_file, options))
 
 
 def make_figure_dos(file_data="dos.dat", title="DOS", xlabel="Energy (ev)", ylabel="DOS (1/eV)", file_out="dos.pdf"):
@@ -191,9 +192,9 @@ def main(selection=None):
                         file_out=dos_figure)
 
     if 5 in selection:
-        # Example 5: dos_graphene.py
+        # Example 5: dos_optcond_graphene.py
         print_command("======= Example 5: DOS for graphene                              =========")
-        import dos_graphene as example
+        import dos_optcond_graphene as example
         print_command("- - - -            Making the configuration file                 - - - - -")
         hdf5_file = example.main()
         pre_file_name = hdf5_file.replace("-output.h5", "")
@@ -447,6 +448,39 @@ def main(selection=None):
         make_figure_dos(file_data=dos_data, title="DOS Fu-Kane-Mele model",
                         file_out=dos_figure)
 
+    if 21 in selection:
+        # Example 21: ARPES in bilayer graphene
+        print_command("======= Example 21: ARPES in bilayer graphene model                         =======")
+        import bilayer_arpes as example
+
+        print_command("- - - -            Making the configuration file                 - - - - -")
+        hdf5_file = example.main()
+
+        pre_file_name = hdf5_file.replace("-output.h5", "")
+        arpes_data = "{0}-image.png".format(pre_file_name)
+
+        run_calculation(hdf5_file)
+        run_tools(hdf5_file, options="--ARPES -K green 0.1 -E -10 10 2048 -F 100")
+        pa.process_arpes("arpes.dat")
+        terminal("mv arpes.png {0}".format(arpes_data))
+
+    if 22 in selection:
+        # Example 22: ARPES in cubic lattice
+        print_command("======= Example 22: ARPES in cubic lattice model                         =======")
+        import arpes_cubic as example
+
+        print_command("- - - -            Making the configuration file                 - - - - -")
+        hdf5_file = example.main()
+
+        pre_file_name = hdf5_file.replace("-output.h5", "")
+        arpes_data = "{0}-image.png".format(pre_file_name)
+
+        run_calculation(hdf5_file)
+        run_tools(hdf5_file, options="--ARPES -K green 0.1 -E -10 10 2048 -F 100")
+        pa.process_arpes("arpes.dat")
+        terminal("mv arpes.png {0}".format(arpes_data))
+
+
     print_title("Ran all the KITE-examples")
 
 
@@ -458,4 +492,6 @@ def clean():
 
 if __name__ == "__main__":
     clean()
-    main([18, 19, 20])
+    # main([18, 19, 20])
+    main([22])
+    # main([i for i in range(20) if i!=5])

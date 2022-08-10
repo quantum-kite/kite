@@ -79,6 +79,7 @@ void Simulation<T,D>::ARPES(int NDisorder, int NMoments, Eigen::Array<double, -1
     // start the kpm iteration
     for(int disorder = 0; disorder < NDisorder; disorder++){
         h.generate_disorder();
+	    h.generate_twists(); // Generates Random or fixed boundaries
 
         for(int k_index = 0; k_index < Nk_vectors; k_index++){
 
@@ -88,6 +89,7 @@ void Simulation<T,D>::ARPES(int NDisorder, int NMoments, Eigen::Array<double, -1
             kpm0.v.setZero();
             kpm0.build_planewave(k, weight); // already sets index=0
             kpm0.Exchange_Boundaries();
+
 
             kpm1.set_index(0);
             kpm1.v.col(0) = kpm0.v.col(0);
@@ -116,8 +118,6 @@ void Simulation<T, DIM>::calc_ARPES(){
     // Checks if ARPES needs to be calculated. If it does, it will search
     // the input .h5 file for the needed parameters for that calculation
     // and then performs the calculation
-
-
 
     bool local_calculate_arpes = false;
 #pragma omp master
@@ -179,17 +179,14 @@ void Simulation<T, DIM>::calc_ARPES(){
       k_vectors = Eigen::Array<double,-1, -1>::Zero(dim_k[1], dim_k[0]);
       weight    = Eigen::Matrix<    T,-1,  1>::Zero(dim_w[1], dim_w[0]);
 
-      //std::cout << "dim_k: " << dim_k[0] << " " << dim_k[1] << "\n";
-      //std::cout << "dim_w: " << dim_w[0] << " " << dim_w[1] << "\n";
-
       // The weights have to be read in doubles before being cast into type T
       Eigen::Matrix<double, -1, 1> weight_test;
       weight_test = Eigen::Matrix<double, -1, 1>::Zero(r.Orb, 1);
       
-      get_hdf5    <int>(&NumDisorder,    file, (char *) "/Calculation/arpes/NumDisorder");
-      get_hdf5    <int>(&NumMoments,     file, (char *) "/Calculation/arpes/NumMoments" );
-      get_hdf5 <double>(weight_test.data(),   file, (char *) "/Calculation/arpes/OrbitalWeights");
-      get_hdf5 <double>(k_vectors.data(), file, (char *) "/Calculation/arpes/k_vector");
+      get_hdf5    <int>(&NumDisorder,       file, (char *) "/Calculation/arpes/NumDisorder");
+      get_hdf5    <int>(&NumMoments,        file, (char *) "/Calculation/arpes/NumMoments" );
+      get_hdf5 <double>(weight_test.data(), file, (char *) "/Calculation/arpes/OrbitalWeights");
+      get_hdf5 <double>(k_vectors.data(),   file, (char *) "/Calculation/arpes/k_vector");
 
       file->close();  
       delete file;
