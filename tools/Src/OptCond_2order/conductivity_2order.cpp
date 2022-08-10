@@ -222,7 +222,7 @@ void conductivity_nonlinear<T, DIM>::set_default_parameters(){
 
   maxFreq     = 7.0/systemInfo.energy_scale; 
   minFreq     = 0.0/systemInfo.energy_scale;
-  N_omegas    = 512;
+  N_omegas    = 128;
   ratio       = 1.0;
 
   default_minfreq = true;
@@ -231,7 +231,7 @@ void conductivity_nonlinear<T, DIM>::set_default_parameters(){
   default_ratio = true;
 
   e_fermi     = (0.0 - shift)/scale;
-  scat        = 0.0166/scale;
+  scat        = 0.1/scale;
   filename    = "nonlinear_cond.dat";  
   
   default_efermi = true;
@@ -411,8 +411,9 @@ template <typename U, unsigned DIM>
 void conductivity_nonlinear<U, DIM>::calculate_general(){
 
   Eigen::Matrix<std::complex<U>, -1, -1> omega_energies3shg1, omega_energies3shg2, omega_energies3shg3;
-  Eigen::Matrix<std::complex<U>, -1, -1> omega_energies2shg, omega_energies1shg;
+  Eigen::Matrix<std::complex<U>, -1, -1> omega_energies2shg, omega_energies1shg, omega_energies0shg;
 
+  omega_energies0shg  = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
   omega_energies1shg  = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
   omega_energies2shg  = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
   omega_energies3shg1 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
@@ -421,15 +422,16 @@ void conductivity_nonlinear<U, DIM>::calculate_general(){
 
 
   Eigen::Matrix<std::complex<U>,1,-1> cond_shg;
-  Eigen::Matrix<std::complex<U>,1,-1> cond3shg1, cond3shg2, cond3shg3, cond1shg, cond2shg;
+  Eigen::Matrix<std::complex<U>,1,-1> cond3shg1, cond3shg2, cond3shg3, cond0shg, cond1shg, cond2shg;
 
+  cond0shg  = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
   cond1shg  = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
   cond2shg  = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
   cond3shg1 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
   cond3shg2 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
   cond3shg3 = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
 
-  cond_shg = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
+  cond_shg  = Eigen::Matrix<std::complex<U>, 1, -1>::Zero(1, N_omegas);
 
   // Contraction of the Gamma matrices with the delta functions and Green's functions
 
@@ -437,6 +439,7 @@ void conductivity_nonlinear<U, DIM>::calculate_general(){
   omega_energies2shg += Gamma2shgcontractAandR();
 
   if(not special){
+    omega_energies0shg  += Gamma0contract();
     omega_energies3shg1 += Gamma3shgContract_RA();
     omega_energies3shg2 += Gamma3shgContract_RR();
     omega_energies3shg3 += Gamma3shgContract_AA();
@@ -450,20 +453,20 @@ void conductivity_nonlinear<U, DIM>::calculate_general(){
     w2 = frequencies2(w,1);
 
     // Energy integration
-
     cond3shg1(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies3shg1.col(w)));
     cond3shg2(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies3shg2.col(w)));
     cond3shg3(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies3shg3.col(w)));
-    cond2shg(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies2shg.col(w)));
-    cond1shg(w) = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies1shg.col(w)));
+    cond2shg(w)  = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies2shg.col(w)));
+    cond1shg(w)  = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies1shg.col(w)));
+    cond0shg(w)  = integrate(energies, Eigen::Matrix<std::complex<U>,-1,1>(omega_energies0shg.col(w)));
 
     // Divide by the frequencies
-
     cond3shg1(w) /= (w1 + imaginary*scat)*(w2 + imaginary*scat);
     cond3shg2(w) /= (w1 + imaginary*scat)*(w2 + imaginary*scat);
     cond3shg3(w) /= (w1 + imaginary*scat)*(w2 + imaginary*scat);
-    cond2shg(w) /= (w1 + imaginary*scat)*(w2 + imaginary*scat);
-    cond1shg(w) /= (w1 + imaginary*scat)*(w2 + imaginary*scat);
+    cond2shg(w)  /= (w1 + imaginary*scat)*(w2 + imaginary*scat);
+    cond1shg(w)  /= (w1 + imaginary*scat)*(w2 + imaginary*scat);
+    cond0shg(w)  /= (w1 + imaginary*scat)*(w2 + imaginary*scat);
   }
 
   U compat_factor = 2.0;//*systemInfo.energy_scale*systemInfo.energy_scale;
@@ -474,13 +477,14 @@ void conductivity_nonlinear<U, DIM>::calculate_general(){
   cond3shg1 *= factor;
   cond3shg2 *= factor;
   cond3shg3 *= factor;
-  cond2shg *= factor;
-  cond1shg *= factor;
+  cond2shg  *= factor;
+  cond1shg  *= factor;
+  cond0shg  *= factor;
 
-  cond_shg = cond1shg + cond2shg + cond3shg1 + cond3shg2 + cond3shg3;
+  cond_shg = cond0shg + cond1shg + cond2shg + cond3shg1 + cond3shg2 + cond3shg3;
 
   std::ofstream myfile_shg;
-  std::ofstream myfile3shg1, myfile3shg2, myfile3shg3, myfile2shg, myfile1shg;
+  std::ofstream myfile3shg1, myfile3shg2, myfile3shg3, myfile2shg, myfile1shg, myfile0shg;
 
   myfile_shg.open(filename);
 
@@ -491,6 +495,7 @@ void conductivity_nonlinear<U, DIM>::calculate_general(){
     myfile3shg3.open(filename + "AA");
     myfile2shg.open(filename + "2");
     myfile1shg.open(filename + "1");
+    myfile0shg.open(filename + "0");
   }
 
 
@@ -502,8 +507,9 @@ void conductivity_nonlinear<U, DIM>::calculate_general(){
       myfile3shg1 << freq << " " << cond3shg1.real()(i) << " " << cond3shg1.imag()(i) << "\n";
       myfile3shg2 << freq << " " << cond3shg2.real()(i) << " " << cond3shg2.imag()(i) << "\n";
       myfile3shg3 << freq << " " << cond3shg3.real()(i) << " " << cond3shg3.imag()(i) << "\n";
-      myfile2shg << freq << " " << cond2shg.real()(i) << " " << cond2shg.imag()(i) << "\n";
-      myfile1shg << freq << " " << cond1shg.real()(i) << " " << cond1shg.imag()(i) << "\n";
+      myfile2shg  << freq << " " << cond2shg.real()(i)  << " " << cond2shg.imag()(i)  << "\n";
+      myfile1shg  << freq << " " << cond1shg.real()(i)  << " " << cond1shg.imag()(i)  << "\n";
+      myfile0shg  << freq << " " << cond0shg.real()(i)  << " " << cond0shg.imag()(i)  << "\n";
     } 
   }
   myfile_shg.close();
@@ -512,6 +518,7 @@ void conductivity_nonlinear<U, DIM>::calculate_general(){
   myfile3shg3.close();
   myfile2shg.close();
   myfile1shg.close();
+  myfile0shg.close();
 }
 
 template <typename U, unsigned DIM>

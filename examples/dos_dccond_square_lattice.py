@@ -91,7 +91,7 @@ def main(onsite=[0], t=1):
         num_moments=1024,
         num_random=1,
         direction='xy',
-        temperature=0.01
+        temperature=0.001
     )
 
     mod = kite.Modification(magnetic_field=40)

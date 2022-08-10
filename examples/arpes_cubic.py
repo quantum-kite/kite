@@ -9,7 +9,7 @@
         #                                                                            #      
         ##############################################################################      
 """
-""" Bilayer Graphene with Rashba SOC """
+""" Simple cubic lattice """
 
 import pybinding as pb
 import kite

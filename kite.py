@@ -1201,6 +1201,17 @@ def config_system(lattice, config, calculation, modification=None, **kwargs):
         config._is_complex = 1
         config.set_type()
 
+    if calculation.get_arpes and complx == 0:
+        print('ARPES is requested but is_complex identifier is 0. Automatically turning is_complex to 1!')
+        config._is_complex = 1
+        config.set_type()
+
+    if calculation.get_gaussian_wave_packet and complx == 0:
+        print('Wavepacket is requested but is_complex identifier is 0. Automatically turning is_complex to 1!')
+        config._is_complex = 1
+        config.set_type()
+
+
     # hamiltonian is complex 1 or real 0
     complx = int(config.comp)
 
