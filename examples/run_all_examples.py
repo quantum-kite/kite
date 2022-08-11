@@ -517,4 +517,4 @@ def clean():
 
 if __name__ == "__main__":
     clean()
-    main([i for i in range(22) if i!=5])
+    main([i for i in range(24)])
