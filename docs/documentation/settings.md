@@ -7,20 +7,18 @@ The class [`#!python kite.Configuration`][configuration] carries the following i
   [KITEx][kitex] implements a domain decomposition technique to divide the lattice into various partitions that are computed in parallel.
   The domain decomposition is optimized at the design level and allows a substantial speed up of multithreaded calculations, it's usage is recommended.
   
-: To activate this feature, set a number of decomposition parts larger than one `#!python nx * ny *nz > 1`.
+: To activate this feature, set a number of decomposition parts larger than one `#!python nx * ny > 1`.
     !!! Warning
     
-        The product `#!python nx * ny *nz` equals the number of threads used by KITEx and thus **must not exceed** the number of **available cores** in the computer.
+        The product `#!python nx * ny` equals the number of threads used by KITEx and thus **must not exceed** the number of **available cores** in the computer.
 
 [Length][configuration-length]
-: The [`#!python length`][configuration-length] is an integer number of unit cells along the direction of lattice vectors `#!python lx, ly, lz = 256, 256, 256`. 
+: The [`#!python length`][configuration-length] is an integer number of unit cells along the direction of lattice vectors `#!python lx, ly = 256, 256`. 
   The lateral size of the decomposed parts are given by `#!python lx/nx` and `#!python ly/ny`.
 
     !!! Warning
     
-        The laterial sizes `#!python lx/nx`, `#!python ly/ny`, `#!python lz/nz` **must be integers**.
-        
-When using a 2D lattice, only `#!python lx, ly, nx, ny ` are needed
+        The laterial sizes `#!python lx/nx`, `#!python ly/ny` **must be integers**.
 
 [Boundaries][configuration-boundaries]
 : The [`#!python boundaries`][configuration-boundaries] is a string, use `#!python 'periodic'` for periodic boundary conditions and `#!python 'open'` for open boundary conditions.
@@ -66,8 +64,8 @@ configuration = kite.Configuration(
 [HDF5]: https://www.hdfgroup.org
 [pybinding]: https://docs.pybinding.site/en/stable
 [lattice]: https://docs.pybinding.site/en/stable/_api/pybinding.Lattice.html
-[documentation]: ../documentation/index.md
-[tightbinding]: ../documentation/tight_binding.md
+[documentation]: ../background/index.md
+[tightbinding]: ../background/tight_binding.md
 
 [lattice-tutorial]: tb_model.md
 

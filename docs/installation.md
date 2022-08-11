@@ -234,7 +234,7 @@ For more details refer to the [Tutorial][tutorial].
 [hdf5]: https://www.hdfgroup.org/
 [homebrew]: https://brew.sh/
 [pybinding]: https://docs.pybinding.site/en/stable/install/quick.html
-[tutorial]: tutorial/index.md
+[tutorial]: documentation/index.md
 [kitepython]: api/kite.md
 [kitex]: api/kitex.md
 [kitetools]: api/kite-tools.md

@@ -9,7 +9,7 @@
     import matplotlib.pyplot as plt
     ```
 
-We will first construct a [`#!python pb.Lattice`][lattice] using [Pybinding]
+We will construct a [`#!python pb.Lattice`][lattice] using [Pybinding]
 and calculate its DOS using [`#!python pb.Solver`][lattice] from [Pybinding].
 
 !!! Info
@@ -20,16 +20,16 @@ and calculate its DOS using [`#!python pb.Solver`][lattice] from [Pybinding].
 The [`#!python pb.Lattice`][lattice]-class from [Pybinding] carries the information about the [TB model][tightbinding].
 This includes
 
-* [Crystal structure (*lattice* and *basis*)][unitcell]
-* [Onsite energies][onsite]
-* [Hopping parameters][hopping]
+* [crystal structure (*lattice* and *basis*)][unitcell]
+* [onsite energies][onsite]
+* [hopping parameters][hopping]
 
-[Pybinding] also provides additional functionalities based on this *real-space* information,
-like provinding the *reciprocal vectors* and the *Brillouin zone*.
+[Pybinding] also provides additional features based on the *real-space* information,
+like the *reciprocal vectors* and the *Brillouin zone*.
 
-### Defining the unit cell
-As an example, we construct a square lattice with a single lattice site.
-The following syntax can be used to define the primitive lattice vectors:
+### Unit-cell
+As an example, we construct a square lattice with a singe lattice site.
+The following syntax can be used to define primitive lattice vectors:
 
 ``` python linenums="1"
 a1 = np.array([1, 0]) # [nm] define the first lattice vector
@@ -38,8 +38,8 @@ a2 = np.array([0, 1]) # [nm] define the second lattice vector
 lat = pb.Lattice(a1=a1, a2=a2) # define a lattice object
 ```
 
-### Adding lattice sites
-We than add the desired lattice sites inside the unit cell (the same syntax can be used to add different orbitals in a given position or more sites in different sublattices):
+### Lattice sites
+Add the desired lattice sites inside the unit cell:
 
 ``` python linenums="1"
 onsite = 0 # onsite potential
@@ -50,7 +50,7 @@ lat.add_sublattices(
 )
 ```
 
-### Adding hoppings
+### Adding Hoppings
 By default, the main cell has the index `#!python [n1,n2] = [0, 0]`.
 The hoppings between neighboring sites can be added with the simple syntax:
 
@@ -63,14 +63,12 @@ lat.add_hoppings(
 )
 ```
 
-Here, the relative indices `#!python n1,n2` represent the number of integer steps - in units of the primitive lattice vector - needed to reach a neighboring cell starting from the main one.
-
-If the lattice has more than one sublattice, the hoppings can connect sites in the same unit cell.
+Here, the relative indices `#!python n1,n2` represent the number of integer steps needed to reach a neighboring cell starting from the main one.
 
 !!! note
 
     When adding the hopping `#!python (n, m)` between sites `#!python n` and `#!python m`,
-    the conjugate hopping term `#!python (m, n)` is added automatically. Pybinding does not allow the user to add them twice.
+    the conjugate hopping term `#!python (m, n)` is added automatically and it is not allowed to add them twice.
 
 ### Visualization
 Now we can plot the [`#!python pb.lattice`][lattice] and visualize the Brillouin zone:
@@ -98,16 +96,15 @@ plt.show()
 
 
 ## Using Pybinding's solver
-[Pybinding] has build-in solvers for
+[Pybinding] as build-in solvers for
 
 * [LAPACK] *(exact diagonalization)* and
 * [ARPACK] (targeted diagonalization of sparse matrices).
-To use any of these solvers, we need to first construct a model.
 
-### Building a `#!python pb.Model`
+### Making a `#!python pb.Model`
 The [`#!python pb.Model`][model]-class contains all the information of the structure we want to calculate.
-This structure can be larger than the unit cell (*stored in the [`#!python pb.Lattice`][lattice]-class). It can also have specific geometries and other possible modifications of the original lattice. 
-Here, we will just double the unit cell in both direction in the [`#!python pb.Model`][model] and add periodic bounadry conditions:
+This structure can be larger than the unit-cell (*stored in the [`#!python pb.Lattice`][lattice]-class).
+We will double the unit cell in both direction in the [`#!python pb.Model`][model] and add periodic bounadry conditions:
 ``` python linenums="1"
 model = pb.Model(
     lat,  # pb.Lattice, use the previously defined unit-cell
@@ -127,7 +124,7 @@ plt.show()
   </figure>
 </div>
 
-### Defining a `#!python pb.Solver`
+### Make a `#!python pb.Solver`
 The [`#!python pb.Solver`][solver]-class takes a [`#!python pb.Model`][model]-class as input and prepares the system
 to do numerical calculation. We will use the [LAPACK]-solver:
 ``` python linenums="1"
@@ -136,10 +133,10 @@ solver = pb.solver.lapack(
 )
 ```
 
-### Band structure calculation
+### Band structure
 As an example, the band structure is calculated using the [`#!python pb.Solver`][solver] defined above.
 
-First, for a two-dimensional plot, we must define a path in the reciprocal space that connects high symmetry points. Using the [`#!python pb.Lattice`][solver] build-in
+First, we must define the path in the reciprocal space to follow. Using the [`#!python pb.Lattice`][solver] build-in
 method, the high symmetry point for the corners of a path can be found easily:
 ``` python linenums="1"
 bz = lat.brillouin_zone()
@@ -233,7 +230,7 @@ For more info about [Pybinding]'s capabilities, look at its [tutorial][tutorial-
 [tutorial-pb]: https://docs.pybinding.site/en/stable/tutorial/index.html
 [api-pb]: https://docs.pybinding.site/en/stable/api.html
 
-[tightbinding]: ../documentation/tight_binding.md
+[tightbinding]: ../background/tight_binding.md
 [Examples]: examples/graphene.md
 
 [kitepython]: ../api/kite.md

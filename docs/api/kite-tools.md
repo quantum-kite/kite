@@ -146,5 +146,5 @@ Calculates the DC conductivity using 30 equidistant Fermi energies in the range 
 
 @@include[kite_tools_readme.md](kite_tools_readme.md)
 
-[resources]: ../documentation/index.md
+[resources]: ../background/index.md
  

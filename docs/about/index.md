@@ -18,8 +18,8 @@ For further details on the algorithms and the implementation please refer to S. 
 
 ## Getting Started
 
-For understanding the main functionalities, how to setup a TB model and disorder and evaluate the KITE target functions, we suggest you to check the tutorial [Getting Started](../tutorial/index.md).
-More advanced calculations are explained in [Examples](../tutorial/examples). After downloading the repository, you can find a copy of the tutorial scripts under the examples folder.
+For understanding the main functionalities, how to setup a TB model and disorder and evaluate the KITE target functions, we suggest you to check the tutorial [Getting Started](../documentation/index.md).
+More advanced calculations are explained in [Examples](../documentation/examples). After downloading the repository, you can find a copy of the tutorial scripts under the examples folder.
 
 ### Prerequisites
 

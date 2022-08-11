@@ -14,4 +14,4 @@ This reference is split-up in the different sub-programs:
 [kitex]: kitex.md
 [kite-tools]: kite-tools.md
 [installation]: ../installation.md
-[tutorial]: ../tutorial/index.md
+[tutorial]: ../documentation/index.md

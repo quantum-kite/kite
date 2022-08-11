@@ -1,1 +1,0 @@
-../../../examples/custom_local_potential/README.md

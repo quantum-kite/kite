@@ -1,1 +1,0 @@
-../../../examples/paper/README.md

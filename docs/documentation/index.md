@@ -1,26 +1,86 @@
-KITE evaluates generic electronic response functions and spectral properties of large-scale molecular and solid-state systems by means of extremely accurate spectral expansions of products of single-particle Green's functions[^1]. KITE's code uses as input lattice models (tight-binding matrices) of arbitrary complexity that can be imported from standard formats or defined directly via its versatile and user-friendly Pybinding interface.
+This tutorial covers the basic parts to start using KITE.
+You will learn about the different steps in the KITE-workflow and how to tweak the different parameters.
 
-At the heart of the KITE software is an exact spectral expansion of broadened lattice Green's functions discovered independently by A. Ferreira (KITE's team) in collaboration with E. Mucciolo (U Central Florida)[^2] and by A. Braun and P. Schmitteckert (Karlsruhe Institute of Technology)[^3]. A large-RAM "single-shot" recursive algorithm developed by by A. Ferreira (with technical assistance from M. D. Costa, National University of Singapore) enables the evaluation of zero-temperature response functions in systems with multi billions of orbitals $N\sim 10^{10}$.
+The tutorial is structured as follows:
 
-In lattice models with small coordination number $[Z=O(1)]$, evaluations of response functions at fixed Fermi energy in large-memory nodes take only a few hours even when billions of spectral coefficients (Chebyshev moments) are retained. This gives access to accuracy and energy resolutions several orders of magnitude beyond previous approaches[^4]. To assess generic response functions at finite temperature/frequency, KITE implements the Green's function spectral approach to carry out a direct evaluation of the Kubo-Bastin formula as proposed by L. Covaci and T. G. Rappoport (KITE's team) in collaboration with J. H. García (ICN2)[^5].
+1. Learn about KITE's workflow
+2. Make a tight-binding model using the [`#!python pb.Lattice`][lattice]
+3. Specify the settings for a calculation
+4. Calculate for different target-functions
+5. Post-process the results with [*KITE-tools*][kitetools]
+6. Add disorder or fields to the tight-binding model
+7. Edit the [HDF5]-file
+8. Optimize the settings for various calculations
 
-The pre-release of KITE contains the following functionalities:
+!!! Info "More examples"
+    
+    In the section [Examples], some applications to different structures are given, including the caluclation.
+    More examples can be found in the KITE-repository under
+    [kite/examples](https://github.com/quantum-kite/kite/tree/master/examples/readme.md).
 
-* Average density of states (DOS) and local DOS;
-* Generic multi-orbital local (on-site) and bond disorder;
-* Generic linear response functions for generic orbital observables;
-* Linear and non-linear optical (AC) conductivity;
+!!! Example "First calculation with KITE"
+    
+    Let's do a simple first calculation with KITE.
+    *(Don't worry about the details, these will be covered later.)*
 
-To optimize multi-threading and speed up spectral expansions,  KITE provides the option to thread pre-defined partitions in real space (i.e., lattice domains) by means of a domain decomposition algorithm developed by J. Lopes (KITE's team).
+    !!! Tip
+    
+        Run this example from the `#!bash kite/`-folder to have acces to [KITE's python package][kitepython].
 
-For more details about the current pre-release (including a to-do list) refer to the documentation section.
+    ``` python linenums="1"
+    import kite
+    import numpy as np
+    import matplotlib.pyplot as plt 
+    from pybinding.repository import graphene
+    from os import system as terminal
 
-[^1]: Kernel polynomial method, A. Weiße, G. Wellein, A. Alvermann and H. Fehske, [Rev. Mod. Phys. 78, 275 (2016)](https://journals.aps.org/rmp/abstract/10.1103/RevModPhys.78.275).
+    conf = kite.Configuration([64, 64], [512, 512], ["periodic", "periodic"])
+    calc = kite.Calculation(conf)
+    calc.dos(4000, 512, 2, 1)
+    kite.config_system(graphene.monolayer(), conf, calc, filename="first_calculation.h5")
 
-[^2]: Critical delocalization of chiral zero energy modes in graphene, A. Ferreira and E. Mucciolo, [Phys. Rev. Lett. 115, 106601 (2015)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.115.106601).
+    terminal("build/KITEx first_calculation.h5")
+    terminal("tools/build/KITE-tools first_calculation.h5")
 
-[^3]: Numerical evaluation of Green's functions based on the Chebyshev expansion, A. Braun and P. Schmitteckert, Phys. [Rev. B 90, 165112 (2014)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.90.165112).
+    dos = np.loadtxt("dos.dat")
+    plt.plot(dos[:, 0], dos[:, 1])
+    plt.show()
+    ```
+  
+    <div>
+      <figure>
+        <img src="../assets/images/getting_started/first_calculation.png" width="300" />
+        <figcaption>The result from your first KITE-calculation: the DOS for graphene.</figcaption>
+      </figure>
+    </div>
 
-[^4]: Efficient multiscale lattice simulations of strained and disordered graphene, N. Leconte, A. Ferreira, and J. Jung. [Semiconductors and Semimetals 95, 35 (2016)](https://www.sciencedirect.com/science/article/abs/pii/S0080878416300047).
 
-[^5]: Real-Space Calculation of the Conductivity Tensor for Disordered Topological Matter, J. H. García, L. Covaci, and T. G. Rappoport, [Phys. Rev. Lett. 114, 116602 (2015)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.114.116602).
+[HDF5]: https://www.hdfgroup.org
+[pybinding]: https://docs.pybinding.site/en/stable
+[lattice]: https://docs.pybinding.site/en/stable/_api/pybinding.Lattice.html
+[documentation]: ../background/index.md
+[tightbinding]: ../background/tight_binding.md
+
+[lattice-tutorial]: tb_model.md
+
+[kitepython]: ../api/kite.md
+[kitex]: ../api/kitex.md
+[kitetools]: ../api/kite-tools.md
+
+[calculation]: calculation.md.md
+[disorder]: disorder.md
+[Examples]: examples/graphene.md
+
+[configuration]: ../api/kite.md#configuration
+[configuration-divisions]: ../api/kite.md#configuration-divisions
+[configuration-length]: ../api/kite.md#configuration-length
+[configuration-boundaries]: ../api/kite.md#configuration-boundaries
+[configuration-is_complex]: ../api/kite.md#configuration-is_complex
+[configuration-precision]: ../api/kite.md#configuration-precision
+[configuration-spectrum_range]: ../api/kite.md#configuration-spectrum_range
+[configuration-angles]: ../api/kite.md#configuration-angles
+[configuration-custom_local]: ../api/kite.md#configuration-custom_local
+[configuration-custom_local_print]: ../api/kite.md#configuration-custom_local_print
+[calculation]: ../api/kite.md#calculation
+
+
