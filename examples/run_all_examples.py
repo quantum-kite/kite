@@ -10,6 +10,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import process_arpes as pa
 from os import system as terminal
 from os.path import exists
 
@@ -191,9 +192,9 @@ def main(selection=None):
                         file_out=dos_figure)
 
     if 5 in selection:
-        # Example 5: dos_graphene.py
+        # Example 5: dos_optcond_graphene.py
         print_command("======= Example 5: DOS for graphene                              =========")
-        import dos_graphene as example
+        import dos_optcond_graphene as example
         print_command("- - - -            Making the configuration file                 - - - - -")
         hdf5_file = example.main()
         pre_file_name = hdf5_file.replace("-output.h5", "")
@@ -328,7 +329,7 @@ def main(selection=None):
         dos_figure = "{0}-dos.pdf".format(pre_file_name)
         cond_dc_figure = "{0}-condDC.pdf".format(pre_file_name)
         run_calculation(hdf5_file)
-        run_tools(hdf5_file)
+        run_tools(hdf5_file, "--CondDC -F -4.5 -2 512 -E 4096")
         terminal("mv dos.dat {0}".format(dos_data))
         terminal("mv condDC.dat {0}".format(cond_dc_data))
         make_figure_dos(file_data=dos_data, title="DOS Square Lattice",
@@ -447,6 +448,64 @@ def main(selection=None):
         make_figure_dos(file_data=dos_data, title="DOS Fu-Kane-Mele model",
                         file_out=dos_figure)
 
+    if 21 in selection:
+        # Example 21: ARPES in bilayer graphene
+        print_command("======= Example 21: ARPES in bilayer graphene model                         =======")
+        import arpes_bilayer as example
+
+        print_command("- - - -            Making the configuration file                 - - - - -")
+        hdf5_file = example.main()
+
+        pre_file_name = hdf5_file.replace("-output.h5", "")
+        arpes_data = "{0}-image.png".format(pre_file_name)
+
+        run_calculation(hdf5_file)
+        run_tools(hdf5_file, options="--ARPES -K green 0.1 -E -10 10 2048 -F 100")
+        pa.process_arpes("arpes.dat")
+        terminal("mv arpes.png {0}".format(arpes_data))
+
+    if 22 in selection:
+        # Example 22: ARPES in cubic lattice
+        print_command("======= Example 22: ARPES in cubic lattice model                         =======")
+        import arpes_cubic as example
+
+        print_command("- - - -            Making the configuration file                 - - - - -")
+        hdf5_file = example.main()
+
+        pre_file_name = hdf5_file.replace("-output.h5", "")
+        arpes_data = "{0}-image.png".format(pre_file_name)
+
+        run_calculation(hdf5_file)
+        run_tools(hdf5_file, options="--ARPES -K green 0.1 -E -10 10 2048 -F 100")
+        pa.process_arpes("arpes.dat")
+        terminal("mv arpes.png {0}".format(arpes_data))
+
+    if 23 in selection:
+        # Example 23: second-order optical conductivity
+        print_command("======= Example 23: second-order photoconductivity in hexagonal Boron Nitride =======")
+        import hbn_optcond2_vacancies as example
+
+        print_command("- - - -            Making the configuration file                 - - - - -")
+        hdf5_file = example.main()
+
+        pre_file_name = hdf5_file.replace("-output.h5", "")
+        opt_cond_data = "{0}-optcond2.dat".format(pre_file_name)
+        opt_cond_figure = "{0}-optcond2.pdf".format(pre_file_name)
+
+        run_calculation(hdf5_file)
+        run_tools(hdf5_file, options="--CondOpt2 -E 512 -R -1.0 -T 0.0001 -S 0.03 -O 0 4.0 256 -F 0.2")
+
+        terminal("mv nonlinear_cond.dat {0}".format(opt_cond_data))
+        make_figure_opt_cond(
+                file_data=opt_cond_data, 
+                title="Nonlinear photoconductivity for hBN", 
+                ylabel=r"$\sigma_{xxy}(\omega, -\omega)$",
+                file_out=opt_cond_figure)
+
+        # make_figure_opt_cond(file_data="optcond.dat", title="Optical conductivity", xlabel=r"$\hbar\omega$ (ev)",
+# ylabel=r"$\sigma_{xx}(\omega)$", file_out="optcond.pdf"):
+
+
     print_title("Ran all the KITE-examples")
 
 
@@ -458,4 +517,4 @@ def clean():
 
 if __name__ == "__main__":
     clean()
-    main([18, 19, 20])
+    main()
