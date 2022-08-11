@@ -83,7 +83,8 @@ def main(onsite=(0, 0)):
         length=[lx, ly],
         boundaries=[mode, mode],
         is_complex=False,
-        precision=1
+        precision=1,
+        spectrum_range=[-10,10]
     )
 
     # specify calculation type
