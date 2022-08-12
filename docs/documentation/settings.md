@@ -45,6 +45,10 @@ The class [`#!python kite.Configuration`][configuration] carries the following i
   By default, [KITEx][kitex] executes an automated rescaling of the Hamiltonian, see the [Documentation][documentation].
   Advanced users can override this feature using `#!python spectrum_range=[Emin,Emax]`, where `#!python Emin, Emax` are the minimum, maximum eigenvalues of the TB matrix.
 
+    !!! Warning
+    
+        Automatic scaling can lead to segmentation-errors due to an error in [pybinding].
+
 The [`#!python kite.Configuration`][configuration] object is thus structured in the following way:
 
 ``` python linenums="1"

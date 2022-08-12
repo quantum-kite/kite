@@ -203,6 +203,11 @@ The KITE package for pre-processing is split up in various subclasses and contai
         : Energy scale which defines the scaling factor of all the energy related parameters.
           The scaling is done automatically in the background after this definition.
           If the term is not specified, a rough estimate of the bounds is found.
+            
+            !!! Warning
+
+                Automatic scaling can lead to segmentation-errors due to an error in [pybinding].
+
     : <span id="configuration-angles">`#!python angles`: *`#!python float` or `#!python tuple(float, float)` or `#!python tuple(float, float, float)`*</span>
         : The angles used for the twisted boundary conditions when `#!python boundary="twist"` is selected.
           The values of `#!python angle`must be in the interval $[0, M \cdot 2 \pi]$.
@@ -483,6 +488,7 @@ The KITE package for pre-processing is split up in various subclasses and contai
 
 [comment]: <> (Classes from Pybinding)
 [lattice]: https://docs.pybinding.site/en/stable/_api/pybinding.Lattice.html
+[pybinding]: https://docs.pybinding.site/
 [shape]: https://docs.pybinding.site/en/stable/api.html#shapes
 
 [comment]: <> (Class StructuralDisorder)
