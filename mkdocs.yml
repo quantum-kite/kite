@@ -39,8 +39,8 @@ nav:
 
   - Background:
     - Overview: 'background/index.md'
-    - Spectral: 'background/spectral.md'
-    - Tight-Binding: 'background/tight_binding.md'
+    - Spectral Methods: 'background/spectral.md'
+    - Tight-Binding Models: 'background/tight_binding.md'
   - API:
     - Overview: 'api/index.md'
     - KITE (python):
