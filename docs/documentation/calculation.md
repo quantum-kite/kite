@@ -109,7 +109,7 @@ calculation.conductivity_optical_nonlinear(
     num_moments=256,
     num_random=1,
     num_disorder=1,
-    direction='xx',
+    direction='xxx',
     temperature=1.0,
     special=1
 )
