@@ -126,7 +126,7 @@ using the [`#!python kite.config_system`][config_system] function: function:
 kite.config_system(lattice, configuration, calculation, filename='test.h5')
 ```
 
-### Running the code
+### Running a Calculation
 
 To [run the code][kitex] and to [post-process][kitetools] it, run from the `#!bash kite/`-directory
 
@@ -143,7 +143,7 @@ To [run the code][kitex] and to [post-process][kitetools] it, run from the `#!ba
     the required target functions.
 
 
-## Visualizing the data
+## Visualizing the Output Data
 
 After calculating the quantity of interest and post-processing the data, we can plot the resulting data with the following script:
 
