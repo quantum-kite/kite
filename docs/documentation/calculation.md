@@ -1,4 +1,5 @@
-The [`#!python kite.Calculation`][calculation] object carries the information about the to be calculated quantities, the *target functions*.
+The [`#!python kite.Calculation`][calculation] object carries the information about the to be calculated quantities,
+the *target functions*.
 For this, parameters related to the Chebyshev expansion are included here.
 The parameters are used by [KITEx] to determine the coefficients that are used by [KITE-tools][kitetools]
 to calculate the required target functions.
@@ -9,8 +10,7 @@ The target function currently available are:
 * [`#!python dos`][calculation-dos]
   : Calculate the global density of states (DoS) as a function of energy.
 * [`#!python ldos`][calculation-ldos]
-  : Calculate the local density of states (LDoS) as a function of
-  energy [for a set of lattice positions].
+  : Calculate the local density of states (LDoS) as a function of energy (for a set of lattice positions).
 * [`#!python arpes`][calculation-arpes]
   : Calculate the ARPES response.
 * [`#!python gaussian_wave_packet`][calculation-gaussian_wave_packet]
@@ -22,8 +22,7 @@ The target function currently available are:
 * [`#!python conductivity_optical_nonlinear`][calculation-conductivity_optical_nonlinear]
   : Calculate the 2nd-order nonlinear optical conductivity.
 * [`#!python singleshot_conductivity_dc`][calculation-singleshot_conductivity_dc]
-  : Calculate the longitudinal DC conductivity for a set of Fermi
-  energies [uses the $\propto\mathcal{O}(N)$ single-shot method].
+  : Calculate the longitudinal DC conductivity for a set of Fermi energies (uses the $\propto\mathcal{O}(N)$ single-shot method).
 
     !!! Info "Processing the output of `#!python singleshot_conductivity_dc()`"
 
@@ -50,19 +49,17 @@ All target functions require the following parameters:
   : Defines the number of random vectors for the stochastic evaluation
   of traces.
 * `#!python num_disorder`
-  : Defines the number of disorder realisations
-  [and boundary twists if the "random" boundary mode is chosen].
+  : Defines the number of disorder realisations (and boundary twists if the `#!python "random"` boundary mode is chosen).
 
 Some parameters are specific for the target function:
 
 * `#!python direction`
-  : Specifies the component of the linear
-  [longitudinal: `#!python 'xx'`, `#!python 'yy'` (, `#!python 'zz'`), transversal: `#!python 'xy'`, `#!python 'yx'` (, `#!python 'xz'`, `#!python 'yz'`)] or the nonlinear conductivity tensor [e.g., `#!python 'xyx'` or `#!python 'xxz'`] to be calculated.
+  : Specifies the component of the linear (longitudinal: `#!python 'xx'`, `#!python 'yy'` (, `#!python 'zz'`), transversal: `#!python 'xy'`, `#!python 'yx'` (, `#!python 'xz'`, `#!python 'yz'`)) or the nonlinear conductivity tensor (e.g., `#!python 'xyx'` or `#!python 'xxz'`) to be calculated.
 * `#!python temperature`
   : Temperature of the Fermi-Dirac distribution used to evaluate
     optical and DC conductivities. If $eV$ is used as a unit of `#!python energy`, then `#!python
-    temperature` is measured in Kelvin. [Internally, the `#!python temperature` is converted to $eV$ through Boltzmann's constant $k_B$.
-    To define the `#!python temperature` in arbitrary units, specify the quantity $k_B T$, which has units of energy.]
+    temperature` is measured in Kelvin. (Internally, the `#!python temperature` is converted to $eV$ through Boltzmann's constant $k_B$.
+    To define the `#!python temperature` in arbitrary units, specify the quantity $k_B T$, which has units of energy.)
 * `#!python num_points`
   : Number of energy points used by the post-processing tool to output the density of states.
 * `#!python special`
