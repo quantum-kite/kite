@@ -15,7 +15,7 @@ but are not well-suited for sequentially processing all records in the database 
 
 ## Editing the file
 
-As discussed Joao in the [Post-processing tools documentation](postprocessing.md), it is possible to calculate a quantity at different conditions with the same moments of an expansion.
+As discussed in the [Post-processing tools documentation](postprocessing.md), it is possible to calculate a quantity at different conditions with the same moments of an expansion.
 In these case, one need to change some parameters in the hdf file that are settings for the post-processing tool.
 By editing the .h5 files, we can change the temperature of a conductivity calculation or the number of points in energy that are wanted.
 
