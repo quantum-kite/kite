@@ -13,7 +13,7 @@ The class [`#!python kite.Configuration`][configuration] carries the following i
   calculations (it's usage is recommended).
   
 : To activate this feature, set a number of decomposition parts larger
-than one `#!python nx * ny (* nz) > 1`.
+  than one `#!python nx * ny (* nz) > 1`.
 
     !!! Warning
     
@@ -26,8 +26,7 @@ than one `#!python nx * ny (* nz) > 1`.
   three) integers that specify the number of unit cells along each of
   the primitive lattice vectors, e.g.,
   `#!python lx, ly = 256, 256` or `#!python lx, ly, lz = 256, 256, 128`. 
-  The lateral size of the decomposed parts are given by `#!python
-  lx/nx` and `#!python ly/ny` (and `#!python lz/nz`).
+  The lateral size of the decomposed parts are given by `#!python lx/nx` and `#!python ly/ny` (and `#!python lz/nz`).
 
     !!! Warning
     
@@ -51,8 +50,7 @@ than one `#!python nx * ny (* nz) > 1`.
 [Precision][configuration-precision]
 : The [`#!python precision`][configuration-precision] is an integer identifier for the used data type.
   [KITEx][kitex] allows users to define the precision of the calculation.
-  Use `#!python 0` for float, `#!python 1` for double, and `#!python
-  2` for long double.
+  Use `#!python 0` for float, `#!python 1` for double, and `#!python 2` for long double.
 
 [Spectrum Range][configuration-spectrum_range]
 : The optional
