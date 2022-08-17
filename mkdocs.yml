@@ -25,7 +25,7 @@ nav:
     - 5. Post-processing: 'documentation/postprocessing.md'
     - 6. Disorder: 'documentation/disorder.md'
     - 7. Editing the HDF5 file: 'documentation/editing_hdf_files.md'
-    - 8. Parameter optimization: 'documentation/optimization.md'
+    - The Ground Rules for Spectral Methods: 'documentation/optimization.md'
     - Examples:
       - Graphene: 'documentation/examples/graphene.md'
       - Haldane: 'documentation/examples/haldane.md'
@@ -34,11 +34,10 @@ nav:
       - Large Systems: 'documentation/examples/large_systems.md'
     - More Examples:
       - Examples-dir: 'documentation/more_examples/additional_examples.md'
-      - Exampels from the paper: 'documentation/more_examples/paper.md'
+      - Examples from the Presentation Paper: 'documentation/more_examples/paper.md'
       - Custom Local Potential: 'documentation/more_examples/custom_local_potential.md'
-
   - Background:
-    - Overview: 'background/index.md'
+    - Overview of KITE: 'background/index.md'
     - Spectral Methods: 'background/spectral.md'
     - Tight-Binding Models: 'background/tight_binding.md'
   - API:
@@ -120,6 +119,11 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+  - pymdownx.critic
+  - pymdownx.caret
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.tilde
   - pymdownx.arithmatex:
       generic: true
   - footnotes
@@ -142,7 +146,7 @@ extra:
       title: Co-Founder
       link: https://www.linkedin.com/in/tatiana-rappoport-64242768/
       image: rappoport.jpg
-    - name: "João M. V. P. Lopes"
+    - name: "João M. Viana Parente Lopes"
       title: Co-Founder
       link: https://www.linkedin.com/in/joão-manuel-viana-parente-lopes-0770b34/
       image: lopes.jpg
@@ -158,7 +162,7 @@ extra:
       title: Co-Founder
       link: https://www.linkedin.com/in/misaandelkovic/
       image: misa.jpg
-    - name: "João P. S. Pires"
+    - name: "João P. Santos Pires"
       title: Contributor
       link: https://www.linkedin.com/in/joão-pedro-dos-santos-pires-849898173/
       image: pires.jpg
