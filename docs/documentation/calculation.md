@@ -8,21 +8,21 @@ The parameters given in the [Examples] already have optimized parameters for a s
 The target function currently available are:
 
 * [`#!python dos`][calculation-dos]
-  : Calculate the global density of states (DoS) as a function of energy.
+  : Calculates the global density of states (DOS) as a function of energy.
 * [`#!python ldos`][calculation-ldos]
-  : Calculate the local density of states (LDoS) as a function of energy (for a set of lattice positions).
+  : Calculate the local density of states (LDOS) as a function of energy (for a set of lattice positions).
 * [`#!python arpes`][calculation-arpes]
   : Calculate the ARPES response.
 * [`#!python gaussian_wave_packet`][calculation-gaussian_wave_packet]
   : Calculate the propagation of a gaussian wave-packet.
 * [`#!python conductivity_dc`][calculation-conductivity_dc]
-  : Calculate the DC conductivity.
+  : Calculates a given component of the DC conductivity tensor.
 * [`#!python conductivity_optical`][calculation-conductivity_optical]
-  : Calculate the linear optical conductivity as a function of frequency.
+  : Calculates a given component of the linear optical conductivity tensor as a function of frequency for a given Fermi energy.
 * [`#!python conductivity_optical_nonlinear`][calculation-conductivity_optical_nonlinear]
-  : Calculate the 2nd-order nonlinear optical conductivity.
+  : Calculates a given component of the 2nd-order nonlinear optical conductivity tensor.
 * [`#!python singleshot_conductivity_dc`][calculation-singleshot_conductivity_dc]
-  : Calculate the longitudinal DC conductivity for a set of Fermi energies (uses the $\propto\mathcal{O}(N)$ single-shot method).
+  : Calculates the longitudinal DC conductivity for a set of Fermi energies (uses the $\propto\mathcal{O}(N)$ single-shot method).
 
     !!! Info "Processing the output of `#!python singleshot_conductivity_dc()`"
 
@@ -46,30 +46,25 @@ All target functions require the following parameters:
 * `#!python num_moments`
   : defines the number of moments of the Chebyshev expansion and hence the energy resolution of the calculation; see [Documentation][documentation].
 * `#!python num_random`
-  : Defines the number of random vectors for the stochastic evaluation
-  of traces.
+  : Defines the number of random vectors for the stochastic evaluation of traces.
 * `#!python num_disorder`
   : Defines the number of disorder realisations (and boundary twists if the `#!python "random"` boundary mode is chosen).
 
-Some parameters are specific for the target function:
+Some parameters are specific of the target function:
 
 * `#!python direction`
   : Specifies the component of the linear (longitudinal: `#!python 'xx'`, `#!python 'yy'` (, `#!python 'zz'`), transversal: `#!python 'xy'`, `#!python 'yx'` (, `#!python 'xz'`, `#!python 'yz'`)) or the nonlinear conductivity tensor (e.g., `#!python 'xyx'` or `#!python 'xxz'`) to be calculated.
 * `#!python temperature`
-  : Temperature of the Fermi-Dirac distribution used to evaluate
-    optical and DC conductivities. If $eV$ is used as a unit of `#!python energy`, then `#!python
-    temperature` is measured in Kelvin. (Internally, the `#!python temperature` is converted to $eV$ through Boltzmann's constant $k_B$.
-    To define the `#!python temperature` in arbitrary units, specify the quantity $k_B T$, which has units of energy.)
+  : Temperature of the Fermi-Dirac distribution used to evaluate optical and DC conductivities.  `#!python temperature` specifies the quantity $k_B T$, which has units of `#!python energy`. If the hoppings are given in $eV$, `#!python temperature`is given in $eV$ . To convert to Kelvin, it is necessary to divide the value by the Boltzmann's constant $k_B$.
+    
 * `#!python num_points`
   : Number of energy points used by the post-processing tool to output the density of states.
 * `#!python special`
   : Simplified form of nonlinear optical conductivity hBN example.
 * `#!python energy`
-  : Selected value of energy at which we want to calculate the `#!python singleshot_conductivity_dc`
+  : Selected values of Fermi energy at which we want to calculate the `#!python singleshot_conductivity_dc`.
 * `#!python eta`
-  : Imaginary energy component used in the Green function's. This
-    provides a controlled broadening or phenomelogical energy-scale
-    for inelastic processes. For technical details, see [Documentation][documentation].
+  : Imaginary term in the denominator of the Green function's that provides a controlled broadening or inelastic energy scale.  For technical details, see [Documentation][documentation].
 
 The `#!python calculation` is structured in the following way:
 
