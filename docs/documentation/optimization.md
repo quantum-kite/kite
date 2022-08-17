@@ -1,7 +1,4 @@
-___
-: $\,$
-
-    !!! Info
+!!! Info
     
         Here, we briefly introduce the **main concepts** that underlie all spectral methods currently implemented in $\texttt{KITE}$. Focus is placed on the role of the simulation parameters that can be adjusted by the end-user in order to suit its specific purposes.
 
