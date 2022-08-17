@@ -19,15 +19,15 @@ For more details about the current release refer to the documentation section.
 
 # A Short Background Story
 
-At the heart of the KITE software is an exact spectral expansion of broadened lattice Green's functions discovered independently by A. Ferreira (KITE's team) in collaboration with E. Mucciolo (U Central Florida)[^3] and by A. Braun and P. Schmitteckert (Karlsruhe Institute of Technology)[^2]. A large-RAM "single-shot" recursive algorithm developed by A. Ferreira (with technical assistance from M. D. Costa, National University of Singapore) enables the evaluation of zero-temperature response functions in systems with multi billions of orbitals $N\sim 10^{10}$.
+The seeds for KITE’s project were laid in 2014, when an exact spectral expansion of the broadened lattice Green's function was discovered by **Aires Ferreira** in collaboration with Eduardo R. Mucciolo (University of Central Florida)[^3] and, independently, by A. Braun and P. Schmitteckert (Karlsruhe Institute of Technology)[^4]. **Aires Ferreira** then developed a large-RAM "single-shot" recursive algorithm (with the technical assistance of M. D. Costa, National University of Singapore) that enabled the efficient evaluation of zero-temperature DC conductivity of huge tight-binding systems (more than 10 billion orbitals) entirely in real-space. At that time, this method proved essential to numerically show that the DC conductivity of graphene indeed attains finite value in the presence of dilute vacancies[^3].
 
-In lattice models with small coordination number $[Z=O(1)]$, evaluations of response functions at fixed Fermi energy in large-memory nodes take only a few hours even when billions of spectral coefficients (Chebyshev moments) are retained. This gives access to accuracy and energy resolutions several orders of magnitude beyond previous approaches[^5]. To assess generic response functions at finite temperature/frequency, KITE implements the Green's function spectral approach to carry out a direct evaluation of the Kubo-Bastin formula as proposed by L. Covaci and T. G. Rappoport (KITE's team) in collaboration with J. H. García (ICN2)[^6].
+In the following years, the usefulness of the above method in generic disordered lattices[5] with small coordination number $[Z=O(1)]$ became ever more clear by the development of similar techniques to  evaluate generic response functions, most notably the linear conductivity tensor  at finite temperature/frequency (proposed by **L. Covaci** and **T. G. Rappoport** in collaboration with José H. García (ICN2)[^6] [^7]) and the non-linear optical response (proposed by **S. M. João** and **J. M. Viana Parente Lopes**[^8]). It was the conjunction of all these proposals that put forward the joint venture that led to the first release of KITE in 2018[^2].
 
-To optimize multi-threading and speed up spectral expansions,  KITE provides the option to thread pre-defined partitions in real space (i.e., lattice domains) by means of a domain decomposition algorithm developed by J. Lopes (KITE's team).
+From its beginnings, KITE was sought to handle real-space lattice models of arbitrary complexity and realistically large sizes. Thereby, its architecture allies the versatility of a user-friendly interface that uses Pybinding’s syntax[^9] to allow the input of arbitrary lattice models with a myriad of tailor-made non-periodic perturbations (disorder, defects, strain, etc…), with a parallelised C++ code that employs a domain-decomposition method (developed by **J. M. Viana Parente Lopes**) which allows spectral calculations to be efficiently carried out for huge system sizes in high-RAM multi-core machines. Conveniently, a post-processing tool (developed by **S. M. João**) was also included in the package to turn KITE into a ready-to-use tool for the end user.
 
 [^1]: Kernel polynomial method, A. Weiße, G. Wellein, A. Alvermann and H. Fehske, [Rev. Mod. Phys. 78, 275 (2016)](https://journals.aps.org/rmp/abstract/10.1103/RevModPhys.78.275).
 
-[^2]: KITE: high-performance accurate modelling of electronic structure and response functions of large molecules, disordered crystals and heterostructures, S. M. João, M. Anđelković, L. Covaci, T. G. Rappoport, João M. Viana Parente Lopes, and A. Ferreira, [R. Soc. open sci. 7, 191809 (2020)](https://royalsocietypublishing.org/doi/10.1098/rsos.191809).
+[^2]: **KITE:** high-performance accurate modelling of electronic structure and response functions of large molecules, disordered crystals and heterostructures, S. M. João, M. Anđelković, L. Covaci, T. G. Rappoport, João M. Viana Parente Lopes, and A. Ferreira, [R. Soc. open sci. 7, 191809 (2020)](https://royalsocietypublishing.org/doi/10.1098/rsos.191809).
 
 [^3]: Critical delocalization of chiral zero energy modes in graphene, A. Ferreira and E. Mucciolo, [Phys. Rev. Lett. 115, 106601 (2015)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.115.106601).
 
@@ -36,5 +36,11 @@ To optimize multi-threading and speed up spectral expansions,  KITE provides the
 [^5]: Efficient multiscale lattice simulations of strained and disordered graphene, N. Leconte, A. Ferreira, and J. Jung. [Semiconductors and Semimetals 95, 35 (2016)](https://www.sciencedirect.com/science/article/abs/pii/S0080878416300047).
 
 [^6]: Real-Space Calculation of the Conductivity Tensor for Disordered Topological Matter, J. H. García, L. Covaci, and T. G. Rappoport, [Phys. Rev. Lett. 114, 116602 (2015)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.114.116602).
+
+[^7]: Numerical calculation of the Casimir-Polder interaction between a graphene sheet with vacancies and an atom, T. P. Cysne, T. G. Rappoport, Aires Ferreira, J. M. Viana Parente Lopes, and N. M. R. Peres, [Phys. Rev. B 94, 235405 (2016)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.94.235405)
+
+[^8]: Basis-independent spectral methods for non-linear optical response in arbitrary tight-binding models, S. M. João and J. M. Viana Parente Lopes, [J. Phys.: Condens. Mat. 32 (12), 125901 (2019)](https://iopscience.iop.org/article/10.1088/1361-648X/ab59ec/meta)
+
+[^9]: D. Moldovan, M. Anđelković, F. M. Peeters, **Pybinding V0.9.4:** a python package for tight-binding calculations [Zenodo (2017)](doi:10.5281/zenodo.826942)
 
 [tutorial]: ../documentation/index.md
