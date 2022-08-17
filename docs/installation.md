@@ -216,13 +216,13 @@ It creates a file named *graphene_lattice-output.h5* that is used as an input fo
 ```
 
 This first example calculates the density of states (DOS) of pure graphene.
-To obtain the file with the DOS-data, you need to [post-process][kitetools] the output:
+To obtain the file with the DOS-data, you need to [post-process][kitetools] the output with a tool 
 
 ``` bash
 ../tools/build/KITE-tools graphene_lattice-output.h5
 ```
 
-For more details refer to the [Tutorial][tutorial].
+that generates the appropriata data file. For more details refer to the [tutorial][tutorial].
 
 !!! info
 
