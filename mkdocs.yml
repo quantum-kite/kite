@@ -67,7 +67,6 @@ theme:
   font:
     text: Roboto
     code: Roboto Mono
-
   primary: "grey"
   palette:
     # scheme: Quantum-KITE
@@ -119,11 +118,6 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
-  - pymdownx.critic
-  - pymdownx.caret
-  - pymdownx.keys
-  - pymdownx.mark
-  - pymdownx.tilde
   - pymdownx.arithmatex:
       generic: true
   - footnotes
