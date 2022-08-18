@@ -63,6 +63,13 @@ $$
 
 : For some target functions, the output of KITE will be a function of energy (such as the DoS or the single-shot dc-conductivity) with maybe additional spacial coordinates (as it happens with the LDoS or the ARPES response). In contrast, response functions (such as the full-spectrum dc-conductivities and optical conductivities) require the raw output of KITE to be integrated in energy with a weight given by the finite temperature Fermi-Dirac distribution. This calculation is always done at the post-processing level (by $\texttt{KITE-tools}$). [TODO: Talk about the effect of number of energy points for the integration.]
 
+    <div>
+      <figure>
+        <img src="../../assets/images/tutorial/conv.png" width="1000" />
+        <figcaption>Convergence of the Chebyshev series for (a) a Dirac-$\delta$ function, (b) a single-particle Green's function (real part as inset), and (c)  the time-evolution operator at two different energies (top: 0.5 and bottom: 0.8).</figcaption>
+      </figure>
+    </div>
+
 [^1]: **KITE:** high-performance accurate modelling of electronic structure and response functions of large molecules, disordered crystals and heterostructures, S. M. João, M. Anđelković, L. Covaci, T. G. Rappoport, João M. Viana Parente Lopes, and A. Ferreira, [R. Soc. open sci. 7, 191809 (2020)](https://royalsocietypublishing.org/doi/10.1098/rsos.191809).
 
 [^2]: Kernel polynomial method, Alexander Weiße, Gerhard Wellein, Andreas Alvermann, and Holger Fehske. [Rev. Mod. Phys. 78, 275 (2006)](https://journals.aps.org/rmp/abstract/10.1103/RevModPhys.78.275).
