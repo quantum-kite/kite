@@ -4,7 +4,12 @@
 
 : The central object to any calculation done in $\text{KITE}$ is the lattice single-particle Hamiltonian (SPH) — $H$ — which is always a sparse $D\!\times\!D$ hermitian matrix ($D$ being the total number of orbitals in the lattice). This fully embodies the simulated system, from its underlying bravais lattice structure and local orbital basis, to all the non-periodic terms that realize disordered potentials, specific boundary conditions, complex structural defects and external magnetic fields.
 
-: Any SPH has a bounded real-valued spectrum which must be shifted and rescaled to suitably fit within $[-1,1]$, the convergence interval of the method. This conversion is performed internally by $\texttt{KITE}$, which transforms $H\to\mathcal{H}=(H\!-\!\varepsilon_{0})/\delta\varepsilon$ and rescales all energy variables by $\delta\varepsilon$. This step requires an early (over)estimation of H's spectral bandwidth, which can be set manually (as $\texttt{spectrum_range}\!=\![\varepsilon_{0}\!-\!\delta\varepsilon/2,\varepsilon_{0}\!+\!\delta\varepsilon/2]$ in $\texttt{kite.Configuration()}$) or, else, it is done automatically upon generation of the $\texttt{hdf5}$ configuration file. At this stage, one must also specify the dimensions of the simulated lattice ($\texttt{lenght}$=[$l_{x}$,$l_{y}$,($l_{z}$)] ), the number of subdivisions for parallelization of the matrix-vector operation ($\texttt{divisions}$=[$n_{x}$,$n_{y}$,($n_{z}$)], where $n_{x}n_{y}n_{z}$ is the available $\texttt{CPU}$-cores), the type of boundary conditions, and the type of data to be handled in internal arithmetic operations (for further information see [Settings](settings.md)).
+: Any finite-dimensional SPH has a bounded real-valued spectrum which must be shifted and rescaled to suitably fit within $[-1,1]$, the convergence interval of the method. This conversion is performed internally by $\texttt{KITE}$, which transforms $H\to\mathcal{H}=(H\!-\!\varepsilon_{0})/\delta\varepsilon$ and rescales all energy variables by $\delta\varepsilon$. This step requires an early (over)estimation of H's spectral bandwidth, which can be set manually (as $\texttt{spectrum_range}\!=\![\varepsilon_{0}\!-\!\delta\varepsilon/2,\varepsilon_{0}\!+\!\delta\varepsilon/2]$ in $\texttt{kite.Configuration()}$) or, else, it is done automatically upon generation of the $\texttt{hdf5}$ configuration file. At this stage, the user must also specify:
+
+: 1. The dimensions of the simulated lattice ($\texttt{lenght}$=[$l_{x}$,$l_{y}$,($l_{z}$)] );
+2. The number of subdivisions for parallelization of the matrix-vector operation ($\texttt{divisions}$=[$n_{x}$,$n_{y}$,($n_{z}$)], where $n_{x}n_{y}n_{z}$ is the available $\texttt{CPU}$-cores);
+3. The type of boundary conditions;
+4. The type of data to be handled in internal arithmetic operations (for further information see [Settings](settings.md)).
 
 : Generally, a target function $\mathcal{Q}$ evaluated by $\texttt{KITEx}$ fits one of the following forms:
 
@@ -41,27 +46,31 @@ $$
 2. Broadened Single-Particle Green's Functions. — $F_{j}(\lambda_{1}^{i},\lambda_{2}^{i};\mathcal{H})\to\left[\lambda+i\eta-\mathcal{H}\right]^{-1}$
 3. Quantum Time-Evolution Operators. — $F_{j}\left(\lambda_{1}^{i},\mathcal{H}\right)\to\exp\left(\frac{i\,t\,\mathcal{H}}{\hbar}\right)$
 
-: For these functions, analytical forms of the Chebyshev expansion coefficients are known [^2][^3][^4][^5][^6][^7] and used in KITE. In the user interface, the truncation order $M$ is specified by the parameter $\texttt{num_moments}$, and always impacts the validity of the expanded results. Nevertheless, its precise effect depends crucially on the specific case, as shown in Figure below, namely one has:
+: For these functions, analytical forms of the Chebyshev expansion coefficients are known [^2][^3][^4][^5][^6][^7] and used in KITE. In the user interface, the truncation order $M$ is specified by the parameter $\texttt{num_moments}$, and always impacts the validity of the expanded results. Nevertheless, its precise effect depends crucially on the specific case, as shown in the Figure below. In particular, one has the following cases:
 
 : - **Dirac-$\delta$ Function.** — An order-$M$ expansion (regularized by the Jackson kernel) produces a gaussian approximation of $\delta(\lambda\!-\!\mathcal{H})$ endowed by a width $\sigma_{\lambda}\!\approx\!\delta \varepsilon\,\pi/M$ in $\lambda$[^2][^7]. The choice of $M$ then fixes the effective spectral broadening, $\sigma_{\lambda}$, which must be sufficiently narrow to accurately describe all relevant features of the calculated curve. However, if it becomes too narrow ($M$ too high), the discrete eigenvalues of the SPH are well-resolved and the obtained data start suffering from large (finite-size) fluctuations. For information on other available kernels see Weisse *et al.*[^2].
 
     !!! Info "Rule of Thumb"
 
-        BlaBla
+        If $\Delta\varepsilon$ is the mean-level spacing of the simulated system (that depends on the system size), then $M$ must be kept **smaller than** $\frac{\pi\,\delta\varepsilon}{\Delta\varepsilon}$ in order to avoid resolving individual energy levels. Simultaneously, for obtaining high-resolution results, the arificial broadening much remain much smaller than the total bandwidth, *i.e.*, $M\gg \pi\,\delta\varepsilon$.
 
 : - **Single-Particle Green's Functions.** — Usually, no kernel is required here [^3][^4], as singularities of the Green's function are naturally broadened by a finite $\eta$. Provided $\eta$ exceeds the spacing between eigenvalues of the SPH, the truncation order may be arbitrarily increased and convergence is achieved when the data ceases to depend on M. Smaller values of $\eta$ typically require higher values of $M$ to converge.
 
     !!! Info "Rule of Thumb"
 
-        BlaBla
+        Since the energy resolution is fixed by $\eta$, the number of polynomials must be larger enough to resolve such a broadening. As shown below, in Figure (b), an apt rule of thumb is to have $M\gtrsim 100/\eta$.
 
-: - **Quantum Time-Evolution Operators.** — The truncation error introduced here translate into a limitation of the available time-interval of accurate unitary time-evolution, $t_{\text{max}}$. An empirical rule of thumb can be stated as $M\!\gtrsim\!8\,\delta\varepsilon\,\hbar^{-1}t_{\text{max}}\!\!$ [^5][^6], where it can be seen that quantum evolution is well reproduced for all $t\!<\!t_{\text{max}}$.
+: - **Quantum Time-Evolution Operators.** — The truncation error introduced here translates into a limitation of the available time-interval of accurate unitary time-evolution. In the panels of Figure~(c) it is demonstrated that the time-evolution operator is converged as long as $t\!\lesssim\!\hbar\,M/\delta\varepsilon$.
 
     !!! Info "Rule of Thumb"
 
-        BlaBla
+        A safe empirical rule of thumb (used in Santos Pires *et al.*[^6]) is to have $M\!\gtrsim\!8\,\delta\varepsilon\,\hbar^{-1}t_{\text{max}}\!\!$, where $t\!<\!t_{\text{max}}$ is the length of the time-interval intended for the evolution.
 
-: For some target functions, the output of KITE will be a function of energy (such as the DoS or the single-shot dc-conductivity) with maybe additional spacial coordinates (as it happens with the LDoS or the ARPES response). In contrast, response functions (such as the full-spectrum dc-conductivities and optical conductivities) require the raw output of KITE to be integrated in energy with a weight given by the finite temperature Fermi-Dirac distribution. This calculation is always done at the post-processing level (by $\texttt{KITE-tools}$). [TODO: Talk about the effect of number of energy points for the integration.]
+: For some target functions, the output of KITE will be a function of energy (*e.g.*, the DoS) with maybe additional spacial coordinates (as it happens with the LDoS or the ARPES response). In contrast, most response functions are not properties of the Fermi level (the zero-temperature longitudinal conductivity is the only exception here) and therefore require that the raw output of $\texttt{KITE}$ is numerically integrated in energy (tipically weighted by the Fermi-Dirac distribution at a given finite temperature). This step is always done at the post-processing level, by $\texttt{KITE-tools}$.
+
+	!!! Warning "Post-Processing Integration"
+	
+		For target functions that require energy integrations, a key parameter is the **number of energy points** for which the integrand is evaluated. In order to adjust it at the post-processing level, the user can use the $\texttt{-E}$ flag of the $\texttt{KITE-tools}$ executable.
 
     <div>
       <figure>
