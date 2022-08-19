@@ -23,8 +23,11 @@ in the command line interface. As an example, let us consider the example  `#!py
 ``` bash
 ./KITE-tools optcond_gaussian_disorder-output.h5 --CondOpt -F 1.2 -O 0 10 1000 -N optcond1.2.dat
 ```
-KITE-tools will calculate the optical conductivity with a Fermi energy specified by the option **-F** of 1.2 (in units specified in the configuration file). The option **-O** sets the frequency interval between 0 and 10 (in the same units) and the total number of frequency points (1000). These options will be used to recalculate the optical conductivity even if the original configuration file presents different values. 
-The option **-N** defines the name of the output file.
+KITE-tools will calculate the optical conductivity with a Fermi energy specified by the option `#!bash -F 1.2`
+(in units specified in the configuration file). The option `#!bash -O` sets the frequency interval between `#!bash 0`and `#!bash 10`
+(in the same units) and the total number of frequency points (`#!bash 1000`). These options will be used to recalculate
+the optical conductivity even if the original configuration file presents different values. 
+The option `#!bash -N` defines the name of the output file.
 
 We can modify the Fermi energy and produce a different optical conductivities without recalculating the Chebyshev moments:  
 

@@ -218,8 +218,8 @@ For more info about [Pybinding]'s capabilities, look at its [tutorial][tutorial-
     plt.show()
     ```
 
-[unitcell]: #unit-cell
-[onsite]: #lattice-sites
+[unitcell]: #defining-the-unit-cell
+[onsite]: #adding-lattice-sites
 [hopping]: #adding-hoppings
 [hdf5]: https://www.hdfgroup.org
 [Pybinding]: https://docs.pybinding.site/en/stable
