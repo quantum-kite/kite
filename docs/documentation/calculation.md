@@ -68,7 +68,7 @@ As such, the results are already available in the [HDF5]-file. You can extract t
 All target functions require the following parameters:
 
 * `#!python num_moments`
-  : defines the number of moments of the Chebyshev expansion and hence the energy resolution of the calculation; see [Documentation][documentation].
+  : defines the number of moments of the Chebyshev expansion and hence the energy resolution of the calculation; see [Background][documentation].
 * `#!python num_random`
   : Defines the number of random vectors for the stochastic evaluation of traces.
 * `#!python num_disorder`
@@ -88,7 +88,7 @@ Some parameters are specific of the target function:
 * `#!python energy`
   : Selected values of Fermi energy at which we want to calculate the `#!python singleshot_conductivity_dc`.
 * `#!python eta`
-  : Imaginary term in the denominator of the Green function's that provides a controlled broadening or inelastic energy scale.  For technical details, see [Documentation][documentation].
+  : Imaginary term in the denominator of the Green function's that provides a controlled broadening or inelastic energy scale.  For technical details, see [Background][documentation].
 
 The `#!python calculation` is structured in the following way:
 

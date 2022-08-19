@@ -22,9 +22,9 @@ The workflow is as follows:
 7. Run the post-processing tools (*using [KITE-tools][kitetools]*)
 8. Visualise the data
 
-!!! Tip
-
-**It is possible to use a [simple python script][script] for the whole workflow.** 
+!!! Tip 
+    
+    It is possible to use a [simple python script][script] for the whole workflow.
 
 <div>
   <figure>
