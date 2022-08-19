@@ -26,15 +26,16 @@ nav:
     - 6. Disorder: 'documentation/disorder.md'
     - 7. Editing the HDF5 file: 'documentation/editing_hdf_files.md'
     - The Ground Rules for Spectral Methods: 'documentation/optimization.md'
-    - Examples:
+    - Examples: 
+      - About the examples: 'documentation/examples/index.md'
       - Graphene: 'documentation/examples/graphene.md'
       - Haldane: 'documentation/examples/haldane.md'
       - Phosphorene: 'documentation/examples/phosphorene.md'
       - Optical Conductivity: 'documentation/examples/optical_conductivity.md'
       - Large Systems: 'documentation/examples/large_systems.md'
     - More Examples:
-      - Examples-dir: 'documentation/more_examples/additional_examples.md'
-      - Examples from the Presentation Paper: 'documentation/more_examples/paper.md'
+      - About Examples-dir: 'documentation/more_examples/additional_examples.md'
+      - Examples from KITE's Paper: 'documentation/more_examples/paper.md'
       - Custom Local Potential: 'documentation/more_examples/custom_local_potential.md'
   - Background:
     - Overview of KITE: 'background/index.md'

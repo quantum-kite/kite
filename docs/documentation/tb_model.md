@@ -231,7 +231,7 @@ For more info about [Pybinding]'s capabilities, look at its [tutorial][tutorial-
 [tutorial-pb]: https://docs.pybinding.site/en/stable/tutorial/index.html
 [api-pb]: https://docs.pybinding.site/en/stable/api.html
 
-[tightbinding]: ../documentation/tight_binding.md
+[tightbinding]: ../background/tight_binding.md
 [Examples]: examples/graphene.md
 
 [kitepython]: ../api/kite.md
