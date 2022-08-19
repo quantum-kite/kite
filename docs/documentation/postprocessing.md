@@ -53,7 +53,7 @@ The same type of strategy can be used to calculate the DC and optical conductivi
     Some functionalities use different postprocessing tools that are not included in KITE-tools. 
        
   
- The energy-defined calculation of the longitudinal conductivity, named `#!python singleshot_conductivity_dc`, does not use the Chebyshev moments stored in the h5 file, as it is calculated directly in KITEx. To extract the calculated DC conductivity in function of the Fermi energy from the .h5 file, we can use a python script located in `#!python tools` directory:  `#!python process_single_shot.py`.
+ The energy-defined longitudinal conductivity named `#!python singleshot_conductivity_dc` does not use the Chebyshev moments stored in the h5 file, as it is calculated directly in KITEx. To extract the calculated DC conductivity in function of the Fermi energy from the .h5 file, we can use a python script located in the `#!python tools` directory:  `#!python process_single_shot.py`.
 In the same directory, the user can find another script to plot an ARPES spectrum from the output of an arpes calculation.      
 
 [kitex]: ../api/kitex.md

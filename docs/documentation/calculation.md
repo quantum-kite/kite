@@ -23,23 +23,47 @@ The target function currently available are:
   : Calculates a given component of the 2nd-order nonlinear optical conductivity tensor.
 * [`#!python singleshot_conductivity_dc`][calculation-singleshot_conductivity_dc]
   : Calculates the longitudinal DC conductivity for a set of Fermi energies (uses the $\propto\mathcal{O}(N)$ single-shot method).
+  
 
-    !!! Info "Processing the output of `#!python singleshot_conductivity_dc()`"
+KITE previous release worked in two dimensions. However, since then, there has been an efford to expand the calculations for three dimensional systems.  In this new release, many of them are implemented in 3D as well. For details, check the table below:
+        
+    
+      
+| Method      | 2D   | 3D |
+| :---------- | :----| :----|
+| `DOS`       | :material-check-all: | :material-check-all: |
+| `LDOS`       | :material-check-all: | :material-check: |
+| `ARPES`       | :material-check: | :material-check: |
+| `conductivity_dc`       | :material-check-all:  | :material-check-all: |
+| `singleshot_conductivity_dc`       | :material-check-all:  | :material-check-all: |
+| `optical conductivity`       | :material-check-all:  | :material-check: |
+| `conductivity_optical_nonlinear`    | :material-check:| :material-close:|
+| `gaussian_wave_packet`       | :material-check: | :material-check: |
+| `external magnetic field`       | :material-check-all:  | :material-close: |
 
-        [`#!python singleshot_conductivity_dc()`][calculation-singleshot_conductivity_dc]
-        works different from the other target-functions in that a
-        single run with [KITEx][kitex] is sufficient. The results don't have to be processed by
-        [KITE-tools][kitetools].
-        As such, the results are already available in the [HDF5]-file. You can extract the results from the
-        [HDF5]-file [as explained in the tutorial][tutorial-hdf5], with `#!python "output.h5"` the name of the
-        [HDF5]-file processed by [KITEx][kitex]:
-                  
-        ``` python linenums="1"
-        import numpy as np
-        from h5py import File
-        condDC = File("output.h5", "r+")['Calculation']['singleshot_conductivity_dc']['SingleShot']
-        np.savetxt("condDC.dat",condDC)                
-        ``` 
+
+
+  :material-check-all: - Extensivelly used and checked
+  
+  :material-check: - Implemented
+  
+  :material-close: - Not implemented
+
+
+!!! Warning
+    
+        Processing the output of `#!python singleshot_conductivity_dc`
+        
+        
+ [`#!python singleshot_conductivity_dc()`][calculation-singleshot_conductivity_dc] works different from the other target-functions in that a single run with [KITEx][kitex] is sufficient. The results don't have to be processed by [KITE-tools][kitetools].
+As such, the results are already available in the [HDF5]-file. You can extract the results from the [HDF5] file [as explained in the tutorial][tutorial-hdf5], with `#!python "output.h5"` the name of the  [HDF5] file processed by [KITEx][kitex]:
+                 
+``` python linenums="1"
+    import numpy as np
+    from h5py import File
+    condDC = File("output.h5", "r+")['Calculation']['singleshot_conductivity_dc']['SingleShot']
+    np.savetxt("condDC.dat",condDC)                
+``` 
 
 All target functions require the following parameters:
 
@@ -55,7 +79,7 @@ Some parameters are specific of the target function:
 * `#!python direction`
   : Specifies the component of the linear (longitudinal: `#!python 'xx'`, `#!python 'yy'` (, `#!python 'zz'`), transversal: `#!python 'xy'`, `#!python 'yx'` (, `#!python 'xz'`, `#!python 'yz'`)) or the nonlinear conductivity tensor (e.g., `#!python 'xyx'` or `#!python 'xxz'`) to be calculated.
 * `#!python temperature`
-  : Temperature of the Fermi-Dirac distribution used to evaluate optical and DC conductivities.  `#!python temperature` specifies the quantity $k_B T$, which has units of `#!python energy`. If the hoppings are given in $eV$, `#!python temperature`is given in $eV$ . To convert to Kelvin, it is necessary to divide the value by the Boltzmann's constant $k_B$.
+  : Temperature of the Fermi-Dirac distribution used to evaluate optical and DC conductivities.  `#!python temperature` specifies the quantity $k_B T$, which has units of `#!python energy`. If the hoppings are given in eV, `#!python temperature`is given in eV . To convert to Kelvin, it is necessary to divide the value by the Boltzmann's constant $k_B$.
     
 * `#!python num_points`
   : Number of energy points used by the post-processing tool to output the density of states.

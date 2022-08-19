@@ -129,6 +129,9 @@ markdown_extensions:
       baselevel: 2
   - attr_list
   - meta
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
 
 extra:
   team:

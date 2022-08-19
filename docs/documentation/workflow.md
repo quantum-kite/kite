@@ -37,7 +37,7 @@ The workflow is as follows:
 [Pybinding]: https://docs.pybinding.site/en/stable
 [lattice]: https://docs.pybinding.site/en/stable/_api/pybinding.Lattice.html
 [script]: index.md
-[tightbinding]: ../documentation/tight_binding.md
+[tightbinding]: ../background/tight_binding.md
 
 [kitepython]: ../api/kite.md
 [kitex]: ../api/kitex.md
