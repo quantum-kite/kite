@@ -6,6 +6,7 @@ on:
     branches:
       - master
       - main
+      - kitedevelop
 jobs:
   deploy:
     runs-on: ubuntu-latest
