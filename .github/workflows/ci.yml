@@ -4,9 +4,7 @@ name: ci
 on:
   push:
     branches:
-      - master
-      - main
-      - kitedevelop
+      - docs
 jobs:
   deploy:
     runs-on: ubuntu-latest
