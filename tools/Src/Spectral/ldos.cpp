@@ -259,7 +259,6 @@ void ldos<U, DIM>::calculate(){
       U factor;
       
       if(kernel == "jackson"){
-	std::cout << "Entered jackson kernel\n";
 	for(int i = 0; i < NumEnergies; i++){
 	  for(int m = 0; m < localN; m++){
 	    factor = 1.0/(1.0 + U((m + thread_id*localN)==0));
