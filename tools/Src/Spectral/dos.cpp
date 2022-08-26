@@ -215,24 +215,23 @@ void dos<U, DIM>::printDOS(){
     }
 }
 
+
 template <typename U, unsigned DIM>
 void dos<U, DIM>::calculate(){
-
+  
   using namespace std::placeholders;  // for _1, _2, _3...
   
-
-
   // First perform the part of the product that only depends on the
   // chebyshev polynomial of the first kind
   GammaE = Eigen::Array<std::complex<U>, -1, -1>::Zero(NEnergies, 1);
-
+  
   U scale = systemInfo->energy_scale;
   U mult = 1.0/scale;
   U factor;
   U shift = systemInfo->energy_shift;
-
+  
   // Choosing the kernel/exact green expansion
-
+  
   if(kernel == "jackson"){
     for(int i = 0; i < NEnergies; i++){
       for(int m = 0; m < NumMoments; m++){
@@ -241,7 +240,7 @@ void dos<U, DIM>::calculate(){
       }
     }
   }
-
+  
   std::complex<U> c_energy;
   if(kernel == "green"){
     for(int i = 0; i < NEnergies; i++){
@@ -252,23 +251,18 @@ void dos<U, DIM>::calculate(){
       }
     }
   }
-
-
-
+  
   // Save the density of states to a file and find its maximum value
   std::ofstream myfile;
   myfile.open(filename);
   for(int i=0; i < NEnergies; i++){
-    myfile  << energies(i)*scale + shift << " " << GammaE.real()(i) << " " << GammaE.imag()(i) << "\n";
+    myfile  << energies(i)*scale + shift << " " << GammaE.real()(i) /*<< " " << GammaE.imag()(i)*/ << "\n";
   }
-
-  myfile.close();
+  myfile.close();     
   dos_finished = true;
-  
-  
-  find_limits();
-
+  find_limits();      
 }
+
 
 template <typename T, unsigned DIM>
 void dos<T,DIM>::find_limits(){

@@ -708,7 +708,6 @@ void KPM_Vector <T, 3u>::initiate_stride(std::size_t & istr)
 }
 
 
-
 template <typename T>
 template < unsigned MULT,bool VELOCITY> 
 void KPM_Vector <T, 3>::build_regular_phases(int i2min, unsigned axis) {
@@ -740,7 +739,6 @@ void KPM_Vector <T, 3>::build_regular_phases(int i2min, unsigned axis) {
         }
     }  
 }
-
 
 
 template <typename T>
@@ -791,7 +789,6 @@ void KPM_Vector <T, 3>::KPM_MOTOR(KPM_Vector<T,3> *kpm_final, unsigned axis)
 
   for(auto vc =  h.hV.vacancies_with_defects.begin(); vc != h.hV.vacancies_with_defects.end(); vc++)
     phi0[*vc] = 0.;
-
     
   /* 
      Broken Imputirities:
@@ -811,43 +808,42 @@ void KPM_Vector <T, 3>::KPM_MOTOR(KPM_Vector<T,3> *kpm_final, unsigned axis)
 
 template <typename T>
 void KPM_Vector <T, 3>::build_site(unsigned long pos){
-    // Builds an initial vector which is zero everywhere except
-    // for a single site, where it is one
-
+  // Builds an initial vector which is zero everywhere except
+  // for a single site, where it is one
   
-    Coordinates<unsigned long, D + 1> thread_coords(r.ld);
-    Coordinates<unsigned long, D + 1> thread_coords_gh(r.Ld);
-    Coordinates<unsigned long, D + 1> thread(r.nd);
-    Coordinates<unsigned long, D + 1> total_coords(r.Lt);
-    bool correct_thread;
-    unsigned long T_thread[D + 1]; // index of the thread
-    unsigned long x_thread[D + 1]; // position within the thread
-
-    index = 0;
+  Coordinates<unsigned long, D + 1> thread_coords(r.ld);
+  Coordinates<unsigned long, D + 1> thread_coords_gh(r.Ld);
+  Coordinates<unsigned long, D + 1> thread(r.nd);
+  Coordinates<unsigned long, D + 1> total_coords(r.Lt);
+  bool correct_thread;
+  unsigned long T_thread[D + 1]; // index of the thread
+  unsigned long x_thread[D + 1]; // position within the thread
+  
+  index = 0;
 #pragma omp critical
-    {
-      total_coords.set_coord(pos);
-      for(unsigned d = 0; d < D; d++){
-        T_thread[d] = total_coords.coord[d]/r.ld[d];
-        x_thread[d] = total_coords.coord[d]%r.ld[d];
+  {
+    total_coords.set_coord(pos);
+    for(unsigned d = 0; d < D; d++)
+      {
+	T_thread[d] = total_coords.coord[d]/r.ld[d];
+	x_thread[d] = total_coords.coord[d]%r.ld[d];
       }
-      
-      T_thread[D] = 0;
-      x_thread[D] = total_coords.coord[2];
-      thread_coords.set_index(x_thread);
-      thread.set_index(T_thread);
-      
-      //convert to coordinates with ghosts
-      r.convertCoordinates(thread_coords_gh, thread_coords); 
-      
-      // check if the site is in the current thread
-      correct_thread = thread.index == r.thread_id;
-    }
-    
-#pragma omp barrier
-    v.setZero();
-    v(thread_coords_gh.index,0) = T(correct_thread);
+    T_thread[D] = 0;
+    x_thread[D] = total_coords.coord[D];
+    thread_coords.set_index(x_thread);
+    thread.set_index(T_thread);
+
+    //convert to coordinates with ghosts
+    r.convertCoordinates(thread_coords_gh, thread_coords); 
+
+    // check if the site is in the current thread
+    correct_thread = thread.index == r.thread_id;
+
+  }
   
+#pragma omp barrier
+  v.setZero();
+  v(thread_coords_gh.index,0) = T(correct_thread);
 }
 
 
@@ -897,10 +893,9 @@ void KPM_Vector <T, 3>::build_planewave(Eigen::Matrix<double,-1,1> & k, Eigen::M
                 v(local_coords.index, 0) = exp_r*exp_R(io);
               }
           }
-
     KPM_VectorBasis<T,3u>::build_defect_planewave(k, weight);
-
 }
+
 
 #define instantiateTYPE(type)               template class KPM_Vector <type,3u>; \
   template void KPM_Vector<type,3u>::template KPM_MOTOR<0u,false>(KPM_Vector<type,3u> * kpm_final, unsigned axis); \
