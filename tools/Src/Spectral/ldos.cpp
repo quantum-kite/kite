@@ -134,159 +134,168 @@ void ldos<T, DIM>::set_default_parameters(){
 
 template <typename T, unsigned DIM>
 bool ldos<T, DIM>::fetch_parameters(){
-	debug_message("Entered ldos::fetch_parameters.\n");
-	//This function reads all the data from the hdf5 file that's needed to 
-    //calculate the LDoS
-	 
-    // Check if the data for the ldos exists
-    if(!isRequired){
-        std::cout << "Data for LDoS does not exist. Exiting.\n";
-        exit(1);
-    }
+  debug_message("Entered ldos::fetch_parameters.\n");
+  //This function reads all the data from the hdf5 file that's needed to 
+  //calculate the LDoS
   
-    H5::DataSet * dataset;
-    H5::DataSpace * dataspace;
-    hsize_t dim[2];
-	H5::H5File file = H5::H5File(name.c_str(), H5F_ACC_RDONLY);
-
-    dataset            = new H5::DataSet(file.openDataSet("/Calculation/ldos/Orbitals")  );
-    dataspace          = new H5::DataSpace(dataset->getSpace());
-    dataspace -> getSimpleExtentDims(dim, NULL);
-    dataspace->close(); delete dataspace;
-    dataset->close();   delete dataset;
-    NumPositions = dim[0];
-
-    dataset            = new H5::DataSet(file.openDataSet("/Calculation/ldos/Energy")  );
-    dataspace          = new H5::DataSpace(dataset->getSpace());
-    dataspace -> getSimpleExtentDims(dim, NULL);
-    dataspace->close(); delete dataspace;
-    dataset->close();   delete dataset;
-    NumEnergies = dim[0];
-
-    ldos_Orbitals = Eigen::Matrix<unsigned long, -1, -1>::Zero(NumPositions,1);
-    ldos_Positions = Eigen::Matrix<unsigned long, -1, -1>::Zero(NumPositions,1);
-    energies = Eigen::Matrix<float, -1, -1>::Zero(NumEnergies,1);
-
-     //Fetch the relevant parameters from the hdf file
-    get_hdf5(&MaxMoments, &file, (char*)(dirName+"NumMoments").c_str());	
-    get_hdf5(ldos_Orbitals.data(), &file, (char*)"/Calculation/ldos/Orbitals");
-    get_hdf5(ldos_Positions.data(), &file, (char*)"/Calculation/ldos/FixPosition");
-    get_hdf5(energies.data(), &file, (char*)"/Calculation/ldos/Energy");
-
-
+  // Check if the data for the ldos exists
+  if(!isRequired){
+    std::cout << "Data for LDoS does not exist. Exiting.\n";
+    exit(1);
+  }
+  
+  H5::DataSet * dataset;
+  H5::DataSpace * dataspace;
+  hsize_t dim[2];
+  H5::H5File file = H5::H5File(name.c_str(), H5F_ACC_RDONLY);
+  
+  dataset            = new H5::DataSet(file.openDataSet("/Calculation/ldos/Orbitals")  );
+  dataspace          = new H5::DataSpace(dataset->getSpace());
+  dataspace -> getSimpleExtentDims(dim, NULL);
+  dataspace->close(); delete dataspace;
+  dataset->close();   delete dataset;
+  NumPositions = dim[0];
+  
+  dataset            = new H5::DataSet(file.openDataSet("/Calculation/ldos/Energy")  );
+  dataspace          = new H5::DataSpace(dataset->getSpace());
+  dataspace -> getSimpleExtentDims(dim, NULL);
+  dataspace->close(); delete dataspace;
+  dataset->close();   delete dataset;
+  NumEnergies = dim[0];
+  
+  ldos_Orbitals = Eigen::Matrix<unsigned long, -1, -1>::Zero(NumPositions,1);
+  ldos_Positions = Eigen::Matrix<unsigned long, -1, -1>::Zero(NumPositions,1);
+  energies = Eigen::Matrix<float, -1, -1>::Zero(NumEnergies,1);
+  
+  //Fetch the relevant parameters from the hdf file
+  get_hdf5(&MaxMoments, &file, (char*)(dirName+"NumMoments").c_str());	
+  get_hdf5(ldos_Orbitals.data(), &file, (char*)"/Calculation/ldos/Orbitals");
+  get_hdf5(ldos_Positions.data(), &file, (char*)"/Calculation/ldos/FixPosition");
+  get_hdf5(energies.data(), &file, (char*)"/Calculation/ldos/Energy");
+  
+  if(DIM == 2){
     global_positions = Eigen::Matrix<unsigned long, -1, -1>::Zero(NumPositions,3);
     for(long i = 0; i < NumPositions; i++){
-      int L = systemInfo->size[0];
-      global_positions(i,0) = ldos_Positions(i)%L;
-      global_positions(i,1) = ldos_Positions(i)/L;
+      int Lx = systemInfo->size[0];
+      global_positions(i,0) = ldos_Positions(i)%Lx;
+      global_positions(i,1) = ldos_Positions(i)/Lx;
       global_positions(i,2) = ldos_Orbitals(i);
     }
-
-
-
+  } else if(DIM ==3){
+    global_positions = Eigen::Matrix<unsigned long, -1, -1>::Zero(NumPositions,4);
+    for(long i = 0; i < NumPositions; i++){
+      int Lx = systemInfo->size[0];
+      int Ly = systemInfo->size[1];
+      
+      global_positions(i,0) = ldos_Positions(i)%(Lx);
+      global_positions(i,1) = (ldos_Positions(i)%(Lx*Ly))/Lx;
+      global_positions(i,2) = ldos_Positions(i)/(Lx*Ly);
+      global_positions(i,3) = ldos_Orbitals(i);
+    }
+  }
+  
   // Check whether the matrices we're going to retrieve are complex or not
   int complex = systemInfo->isComplex;
-
+  
   bool result = false;
   // Retrieve the lmu Matrix
   std::string MatrixName = dirName + "lMU";
   try{
-		debug_message("Filling the lMU matrix.\n");
-		lMU = Eigen::Matrix<std::complex<T>,-1,-1>::Zero(MaxMoments, NumPositions);
-		
-		if(complex)
-			get_hdf5(lMU.data(), &file, (char*)MatrixName.c_str());
-		if(!complex){
-			Eigen::Matrix<T,-1,-1> lMUReal; 
-			lMUReal = Eigen::Matrix<T,-1,-1>::Zero(MaxMoments, NumPositions); 
-			get_hdf5(lMUReal.data(), &file, (char*)MatrixName.c_str()); 
-
+    debug_message("Filling the lMU matrix.\n");
+    lMU = Eigen::Matrix<std::complex<T>,-1,-1>::Zero(MaxMoments, NumPositions);
+    
+    if(complex)
+      get_hdf5(lMU.data(), &file, (char*)MatrixName.c_str());
+    if(!complex){
+      Eigen::Matrix<T,-1,-1> lMUReal; 
+      lMUReal = Eigen::Matrix<T,-1,-1>::Zero(MaxMoments, NumPositions); 
+      get_hdf5(lMUReal.data(), &file, (char*)MatrixName.c_str()); 
+      
       lMU = lMUReal.template cast<std::complex<T>>();
-		}				
-
+    }				
+    
     result = true;
   } catch(H5::Exception& e) {debug_message("lDOS: There is no lMU matrix.\n");}
-	
-
+  
+  
   NumMoments = MaxMoments;
-  //std::cout << "NumMoments: " << NumMoments << "\n";
-
+  
   file.close();
-	debug_message("Left lDOS::fetch_parameters.\n");
+  debug_message("Left lDOS::fetch_parameters.\n");
   return result;
 }
 
+
 template <typename U, unsigned DIM>
 void ldos<U, DIM>::calculate(){
-
+  
   Eigen::Matrix<std::complex<U>, -1, -1> LDOS;
   LDOS = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(NumEnergies, NumPositions);
-
+  
   Eigen::Matrix<std::complex<U>, -1, -1, Eigen::RowMajor> OrderedMU;
   OrderedMU = Eigen::Matrix<std::complex<U>, -1, -1, Eigen::RowMajor>::Zero(NumEnergies, NumPositions);
   OrderedMU = lMU;
-  //std::cout << "lMU: \n" << OrderedMU << "\n";
-
+  
   omp_set_num_threads(systemInfo->NumThreads);
   //omp_set_num_threads(1);
 #pragma omp parallel 
-{
+  {
 #pragma omp critical
-{
-  int localN = NumMoments/systemInfo->NumThreads;
-  //int localN = NumMoments;
-  int thread_id = omp_get_thread_num();
-  //std::cout << "thread_id: " << thread_id << "\n";
-  //std::cout << "NumMoments: " << localN << "\n";
-  //thread_id = 0;
-  long offset = thread_id*localN*NumPositions;
-  Eigen::Map<Eigen::Matrix<std::complex<U>, -1, -1, Eigen::RowMajor>> locallMU(OrderedMU.data() + offset, localN, NumPositions);
-
-  //std::cout << "locallMU: \n" << locallMU << "\n";
-
-  Eigen::Matrix<std::complex<U>, -1, -1> GammaE;
-  GammaE = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(NumEnergies, localN);
-
-  U factor;
-
-  if(kernel == "jackson"){
-    std::cout << "Entered jackson kernel\n";
-    for(int i = 0; i < NumEnergies; i++){
-      for(int m = 0; m < localN; m++){
-        factor = 1.0/(1.0 + U((m + thread_id*localN)==0));
-        GammaE(i,m) += delta(m + thread_id*localN,energies(i))*kernel_jackson<U>(m + thread_id*localN, NumMoments)*factor;
+    {
+      int localN = NumMoments/systemInfo->NumThreads;
+      //int localN = NumMoments;
+      int thread_id = omp_get_thread_num();
+      //std::cout << "thread_id: " << thread_id << "\n";
+      //std::cout << "NumMoments: " << localN << "\n";
+      //thread_id = 0;
+      long offset = thread_id*localN*NumPositions;
+      Eigen::Map<Eigen::Matrix<std::complex<U>, -1, -1, Eigen::RowMajor>> locallMU(OrderedMU.data() + offset, localN, NumPositions);
+      
+      //std::cout << "locallMU: \n" << locallMU << "\n";
+      
+      Eigen::Matrix<std::complex<U>, -1, -1> GammaE;
+      GammaE = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(NumEnergies, localN);
+      
+      U factor;
+      
+      if(kernel == "jackson"){
+	std::cout << "Entered jackson kernel\n";
+	for(int i = 0; i < NumEnergies; i++){
+	  for(int m = 0; m < localN; m++){
+	    factor = 1.0/(1.0 + U((m + thread_id*localN)==0));
+	    GammaE(i,m) += delta(m + thread_id*localN,energies(i))*kernel_jackson<U>(m + thread_id*localN, NumMoments)*factor;
+	  }
+	}
       }
-    }
-  }
-
-
-  if(kernel == "green"){
-    std::complex<U> c_energy;
-    for(int i = 0; i < NumEnergies; i++){
-      c_energy = std::complex<U>(energies(i), kernel_parameter);
-      for(int m = 0; m < localN; m++){
-        factor = 1.0/(1.0 + U((m + thread_id*localN)==0));
-        GammaE(i,m) += -factor*green<std::complex<U>>(m, 1, c_energy).imag();
+      
+      
+      if(kernel == "green"){
+	std::complex<U> c_energy;
+	for(int i = 0; i < NumEnergies; i++){
+	  c_energy = std::complex<U>(energies(i), kernel_parameter);
+	  for(int m = 0; m < localN; m++){
+	    factor = 1.0/(1.0 + U((m + thread_id*localN)==0));
+	    GammaE(i,m) += -factor*green<std::complex<U>>(m, 1, c_energy).imag();
+	  }
+	}
       }
-    }
-  }
-
-  //std::cout << "GammaE: \n" << GammaE << "\n";
-  //for(int m = 0; m < ; m++){
-    //factor = 1.0/(1.0 + U(m==0));
-    //for(int i = 0; i < NumEnergies; i++){
+      
+      //std::cout << "GammaE: \n" << GammaE << "\n";
+      //for(int m = 0; m < ; m++){
+      //factor = 1.0/(1.0 + U(m==0));
+      //for(int i = 0; i < NumEnergies; i++){
       //GammaE(i,m) = delta(m + thread_id*localN, energies(i))*kernel_jackson<U>(m + thread_id*localN, NumMoments)*factor;
-    //}
-  //}
-
-  Eigen::Matrix<std::complex<U>, -1, -1> localLDOS;
-  localLDOS = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(NumEnergies, NumPositions);
-  localLDOS = GammaE*locallMU;
-//#pragma omp critical
-  LDOS += localLDOS;
-}
-}
-
+      //}
+      //}
+      
+      Eigen::Matrix<std::complex<U>, -1, -1> localLDOS;
+      localLDOS = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(NumEnergies, NumPositions);
+      localLDOS = GammaE*locallMU;
+      //#pragma omp critical
+      LDOS += localLDOS;
+    }
+  }
+  
   // Save the density of states to a file
   U mult = 1.0/systemInfo->energy_scale;
   std::ofstream myfile;
@@ -294,18 +303,27 @@ void ldos<U, DIM>::calculate(){
   double shift = systemInfo->energy_shift;
   for(int i=0; i < NumEnergies; i++){
     myfile.open(filename + std::to_string(energies(i)*scale + shift) + ".dat");
-    for(unsigned pos = 0; pos < NumPositions; pos++){
-      int x, y, orb;
-      x = global_positions(pos,0);
-      y = global_positions(pos,1);
-      orb = global_positions(pos,2);
-      myfile  << x << " " << y << " " << orb << " " << LDOS(i,pos).real()*mult << "\n";
+    if(DIM == 2){
+      for(unsigned pos = 0; pos < NumPositions; pos++){
+	int x, y, orb;
+	x = global_positions(pos,0);
+	y = global_positions(pos,1);
+	orb = global_positions(pos,2);
+	myfile  << x << " " << y << " " << orb << " " << LDOS(i,pos).real()*mult << "\n";
+      };
+    } else if(DIM == 3){
+      for(unsigned pos = 0; pos < NumPositions; pos++){
+	int x, y, z, orb;
+	x = global_positions(pos,0);
+	y = global_positions(pos,1);
+	z = global_positions(pos,2);
+	orb = global_positions(pos,3);
+	myfile  << x << " " << y << " " << z << " " << orb << " " << LDOS(i,pos).real()*mult << "\n";
+      };
     }
-  myfile.close();
+    myfile.close();
   }
 }
-
-
 
 
 // Instantiations
