@@ -33,80 +33,79 @@ KPM_Vector<T,2u>::KPM_Vector(int mem, Simulation<T,2> & sim) :
   h(sim.h),
   x(r.Ld),
   std(x.basis[1])
-{
-  unsigned d;
-  Coordinates <std::size_t, 3>     z(r.Ld);
-  Coordinates <int, 3> x(r.nd), dist(r.nd);
-  
-  mult_t1_ghost_cor = new T**[r.Orb];
-  for(unsigned io = 0; io < r.Orb; io++)
-    {
-      mult_t1_ghost_cor[io] = new T*[h.hr.NHoppings(io)];
-      for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
-        mult_t1_ghost_cor[io][ib] = new T[TILE];
-    }
-
-  for(unsigned d = 0; d < 2; d++)
-    for(unsigned b = 0; b < 2; b++)
+  {
+    unsigned d;
+    Coordinates <std::size_t, 3>     z(r.Ld);
+    Coordinates <int, 3> x(r.nd), dist(r.nd);
+    
+    mult_t1_ghost_cor = new T**[r.Orb];
+    for(unsigned io = 0; io < r.Orb; io++)
       {
-        MemIndBeg[d][b] = new std::size_t[r.Orb];
-        MemIndEnd[d][b] = new std::size_t[r.Orb];
+	mult_t1_ghost_cor[io] = new T*[h.hr.NHoppings(io)];
+	for(unsigned ib = 0; ib < h.hr.NHoppings(io); ib++)
+	  mult_t1_ghost_cor[io][ib] = new T[TILE];
       }
     
-    
-  for(unsigned d = 0; d < 2u; d++)
-    for(unsigned edge = 0; edge < 2; edge++)
-      transf_bound[d][edge] = (r.boundary[d][edge] == true ? r.ld[D - 1 - d] : 0);
-    
-  for(unsigned edge = 0 ; edge < 2; edge++)
-    if(r.boundary[1][edge] == 1) // Botton/Top edge Increase the size due left and right corners
-      transf_bound[1][edge] += (r.boundary[0][0] == 1 ? NGHOSTS : 0 ) + (r.boundary[0][1] == 1 ? NGHOSTS : 0 ) ;
+    for(unsigned d = 0; d < 2; d++)
+      for(unsigned b = 0; b < 2; b++)
+	{
+	  MemIndBeg[d][b] = new std::size_t[r.Orb];
+	  MemIndEnd[d][b] = new std::size_t[r.Orb];
+	}
     
     
-  for(std::size_t io = 0; io < r.Orb; io++)
-    {
-      d = 0;
-      // Position of initial corner to copy the source
-      MemIndBeg[d][0][io] = z.set({std::size_t(NGHOSTS),               std::size_t(NGHOSTS), io}).index;   
-      MemIndBeg[d][1][io] = z.set({std::size_t(r.Ld[0] - 2 * NGHOSTS), std::size_t(NGHOSTS), io}).index;   
-      // Position of initial corner to copy to the destiny 
-      MemIndEnd[d][0][io] = z.set({std::size_t(0),                     std::size_t(NGHOSTS), io}).index;   
-      MemIndEnd[d][1][io] = z.set({std::size_t(r.Ld[0] - NGHOSTS),     std::size_t(NGHOSTS), io}).index;   
+    for(unsigned d = 0; d < 2u; d++)
+      for(unsigned edge = 0; edge < 2; edge++)
+	transf_bound[d][edge] = (r.boundary[d][edge] == true ? r.ld[D - 1 - d] : 0);
+    
+    for(unsigned edge = 0 ; edge < 2; edge++)
+      if(r.boundary[1][edge] == 1) // Botton/Top edge Increase the size due left and right corners
+	transf_bound[1][edge] += (r.boundary[0][0] == 1 ? NGHOSTS : 0 ) + (r.boundary[0][1] == 1 ? NGHOSTS : 0 ) ;
+    
+    for(std::size_t io = 0; io < r.Orb; io++)
+      {
+	d = 0;
+	// Position of initial corner to copy the source
+	MemIndBeg[d][0][io] = z.set({std::size_t(NGHOSTS),               std::size_t(NGHOSTS), io}).index;   
+	MemIndBeg[d][1][io] = z.set({std::size_t(r.Ld[0] - 2 * NGHOSTS), std::size_t(NGHOSTS), io}).index;   
+	// Position of initial corner to copy to the destiny 
+	MemIndEnd[d][0][io] = z.set({std::size_t(0),                     std::size_t(NGHOSTS), io}).index;   
+	MemIndEnd[d][1][io] = z.set({std::size_t(r.Ld[0] - NGHOSTS),     std::size_t(NGHOSTS), io}).index;   
 	
-      d = 1;
-      // Bottom edge 
-      MemIndBeg[d][0][io] = z.set({std::size_t(NGHOSTS), std::size_t(NGHOSTS),             io}).index;
-      MemIndEnd[d][0][io] = z.set({std::size_t(NGHOSTS), std::size_t(0),                   io}).index;          
-      if(r.boundary[1][0] == 1 && r.boundary[0][0] == 1) // Add the Left bottom Corner
-        {
-          MemIndBeg[1][0][io] = z.set({std::size_t(0), std::size_t(NGHOSTS),             io}).index;
-          MemIndEnd[1][0][io] = z.set({std::size_t(0), std::size_t(0),                   io}).index;
-        }
-      // Top Edge 
-      MemIndBeg[d][1][io] = z.set({std::size_t(NGHOSTS), std::size_t(r.Ld[1] - 2*NGHOSTS), io}).index;
-      MemIndEnd[d][1][io] = z.set({std::size_t(NGHOSTS), std::size_t(r.Ld[1] - NGHOSTS),   io}).index;
-      if(r.boundary[1][1] == 1 && r.boundary[0][0] == 1) // Add the Left bottom Corner
-        {
-          MemIndBeg[1][1][io] = z.set({std::size_t(0), std::size_t(r.Ld[1] - 2*NGHOSTS), io}).index;
-          MemIndEnd[1][1][io] = z.set({std::size_t(0), std::size_t(r.Ld[1] - NGHOSTS),   io}).index;
-        }
-    }
-       
-  for(d = 0 ; d < D; d++)
-    for(unsigned b  = 0 ; b < 2; b++)
-      {
-        dist.set({0,0,0});
-        dist.coord[d] = int(b) * 2 - 1;
-        block[d][b] = x.set_coord( int(r.thread_id) ).add(dist).index;
+	d = 1;
+	// Bottom edge 
+	MemIndBeg[d][0][io] = z.set({std::size_t(NGHOSTS), std::size_t(NGHOSTS),             io}).index;
+	MemIndEnd[d][0][io] = z.set({std::size_t(NGHOSTS), std::size_t(0),                   io}).index;          
+	if(r.boundary[1][0] == 1 && r.boundary[0][0] == 1) // Add the Left bottom Corner
+	  { 
+	    MemIndBeg[1][0][io] = z.set({std::size_t(0), std::size_t(NGHOSTS),             io}).index;
+	    MemIndEnd[1][0][io] = z.set({std::size_t(0), std::size_t(0),                   io}).index;
+	  } 
+	// Top Edge 
+	MemIndBeg[d][1][io] = z.set({std::size_t(NGHOSTS), std::size_t(r.Ld[1] - 2*NGHOSTS), io}).index;
+	MemIndEnd[d][1][io] = z.set({std::size_t(NGHOSTS), std::size_t(r.Ld[1] - NGHOSTS),   io}).index;
+	if(r.boundary[1][1] == 1 && r.boundary[0][0] == 1) // Add the Left bottom Corner
+	  {
+	    MemIndBeg[1][1][io] = z.set({std::size_t(0), std::size_t(r.Ld[1] - 2*NGHOSTS), io}).index;
+	    MemIndEnd[1][1][io] = z.set({std::size_t(0), std::size_t(r.Ld[1] - NGHOSTS),   io}).index;
+	  }
       }
-
-  // JPPP Calcular os vectores das fases devido às condicoes fronteira
+    
+    for(d = 0 ; d < D; d++)
+      for(unsigned b  = 0 ; b < 2; b++)
+	{
+	  dist.set({0,0,0});
+	  dist.coord[d] = int(b) * 2 - 1;
+	  block[d][b] = x.set_coord( int(r.thread_id) ).add(dist).index;
+	}
+    
+    // JPPP Calcular os vectores das fases devido às condicoes fronteira
     for(unsigned i = 0; i < D; i ++)
       for(unsigned j = 0; j < 3; j ++)
 	Fact_Bnd[i][j] = new T[r.Ld[i]];
-
-  initiate_vector();
-}
+    
+    initiate_vector();
+  }
 
 template <typename T>
 KPM_Vector <T, 2>::~KPM_Vector(void){
@@ -124,7 +123,6 @@ KPM_Vector <T, 2>::~KPM_Vector(void){
     }
   delete mult_t1_ghost_cor;
 }
-
 
 template <typename T>
 void KPM_Vector <T, 2>::initiate_vector() {
@@ -230,6 +228,7 @@ T KPM_Vector <T, 2>::get_point()
   return point;
 }
 
+
 template <typename T>
 void KPM_Vector <T, 2>::build_site(unsigned long pos){
     // Builds an initial vector which is zero everywhere except
@@ -250,7 +249,6 @@ void KPM_Vector <T, 2>::build_site(unsigned long pos){
         T_thread[d] = total_coords.coord[d]/r.ld[d];
         x_thread[d] = total_coords.coord[d]%r.ld[d];
     }
-
     T_thread[2] = 0;
     x_thread[2] = total_coords.coord[2];
     thread_coords.set_index(x_thread);
@@ -262,10 +260,11 @@ void KPM_Vector <T, 2>::build_site(unsigned long pos){
     // check if the site is in the current thread
     correct_thread = thread.index == r.thread_id;
 }
-
+ 
 #pragma omp barrier
-    v.setZero();
-    v(thread_coords_gh.index,0) = T(correct_thread);
+ v.setZero();
+ std::cout << thread_coords_gh.index << std::endl;
+ v(thread_coords_gh.index,0) = T(correct_thread);
 }
 
 template <typename T>
@@ -496,23 +495,20 @@ void inline KPM_Vector <T, 2>::mult_regular_hoppings(const  std::size_t & j0, co
       const std::size_t i_f = j0 + d1;
       hop[0] = (i_f % r.Ld[0] ) - rr[0] +1 ;
       hop[1] = (i_f % (r.Ld[0] * r.Ld[1]))/(r.Ld[0]) - rr[1] + 1;
-#pragma omp critical
-{
       
       count = 0;
       y = 0;
       for(std::size_t j = j0; j < j1; j += std ) {
-          const T t1 = mult_t1_ghost_cor[io][ib][count++] * Fact_Bnd[1][hop[1]][rr[1]+y];
-	      x = 0;
-          for(std::size_t i = j; i < j + TILE ; i++) {
-
-            phi0[i] += t1 * phiM1[i + d1] * Fact_Bnd[0][hop[0]][rr[0]+x];
-            x++;
-          };
-	  y++;
-        };
-}
-    }
+	const T t1 = mult_t1_ghost_cor[io][ib][count++] * Fact_Bnd[1][hop[1]][rr[1]+y];
+	x = 0;
+	for(std::size_t i = j; i < j + TILE ; i++) {
+	  
+	  phi0[i] += t1 * phiM1[i + d1] * Fact_Bnd[0][hop[0]][rr[0]+x];
+	  x++;
+	};
+	y++;
+      };
+  }
 }
 
 template <typename T>
