@@ -263,7 +263,6 @@ void KPM_Vector <T, 2>::build_site(unsigned long pos){
  
 #pragma omp barrier
  v.setZero();
- std::cout << thread_coords_gh.index << std::endl;
  v(thread_coords_gh.index,0) = T(correct_thread);
 }
 
