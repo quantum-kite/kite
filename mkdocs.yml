@@ -8,8 +8,9 @@ repo_url: https://github.com/quantum-kite/kite
 edit_uri: https://github.com/quantum-kite/kite/tree/master/docs
 
 # Copyright
-copyright: "KITE is a free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation - version 3
-&copy Copyright 2022, Kite"
+copyright:  "KITE is a free software: you can redistribute it and/or modify it under the terms of the GNU
+              General Public License as published by the Free Software Foundation - version 3. Copyright ©
+              2022 KITE"
 
 # Navigation
 
