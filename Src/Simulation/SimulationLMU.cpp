@@ -82,10 +82,10 @@ void Simulation<T,D>::LMU(int NDisorder, int NMoments, Eigen::Array<unsigned lon
 	// have a starting vector different from zero
 	pos = positions(pos_index);
 	kpm0.build_site(pos);
-	kpm0.Exchange_Boundaries();
 	
 	kpm1.set_index(0);
 	kpm1.v.col(0) = kpm0.v.col(0);
+	kpm1.Exchange_Boundaries();
 	kpm0.empty_ghosts(0);
 	
 	for(int n = 0; n < NMoments; n+=2)
