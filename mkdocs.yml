@@ -1,6 +1,6 @@
 # Project information
-site_name: "KITE - Quantum transport calculations "
-site_description: "KITE: Quantum transport calculations"
+site_name: "Quantum KITE"
+site_description: "KITE: Real-space quantum transport simulator"
 site_author: "KITE"
 
 # Repository
@@ -10,7 +10,7 @@ edit_uri: https://github.com/quantum-kite/kite/tree/master/docs
 # Copyright
 copyright:  "KITE is a free software: you can redistribute it and/or modify it under the terms of the GNU
               General Public License as published by the Free Software Foundation - version 3. Copyright ©
-              2022 KITE"
+              2023 KITE"
 
 # Navigation
 
