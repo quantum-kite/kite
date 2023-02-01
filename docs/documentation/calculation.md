@@ -1,11 +1,11 @@
-The [`#!python kite.Calculation`][calculation] object carries the information about the to be calculated quantities,
-the *target functions*.
-For this, parameters related to the Chebyshev expansion are included here.
-The parameters are used by [KITEx] to determine the coefficients that are used by [KITE-tools][kitetools]
-to calculate the required target functions.
-The parameters given in the [Examples] already have optimized parameters for a standard desktop computer.
+The [`#!python kite.Calculation`][calculation] object carries the information about the to-be-calculated quantities,
+i.e. the *target functions*.
+For this, key parameters of the Chebyshev expansion are included here.
+These parameters are used by [KITEx] to determine the spectral expansion coefficients subsequently used by [KITE-tools][kitetools]
+at the post-processing stage (see [worflow]).
+The parameters given in the [Examples] are optimized for a standard desktop computer.
 
-The target function currently available are:
+The target functions currently available are:
 
 * [`#!python dos`][calculation-dos]
   : Calculates the global density of states (DOS) as a function of energy.
@@ -25,7 +25,7 @@ The target function currently available are:
   : Calculates the longitudinal DC conductivity for a set of Fermi energies (uses the $\propto\mathcal{O}(N)$ single-shot method).
   
 
-KITE previous release worked in two dimensions. However, since then, there has been an efford to expand the calculations for three dimensional systems.  In this new release, many of them are implemented in 3D as well. For details, check the table below:
+KITE previous release was restricted to two-dimensional systems. However, since then, there has been an efford to expand the functionalties to three dimensional systems. In this new release, most functionalities are compatible with 3D systems. For details, check the table below:
         
     
       
