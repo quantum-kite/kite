@@ -36,21 +36,23 @@ $$
 
 where h is Planck's constant, $e>0$ is the elementary charge and $N_{2}$ is the number of unit cells along the $\mathbf{a}_{2}$ direction (primitive vector of the direct lattice) and $n$ is an integer. The corresponding magnetic field points in the $\mathbf{a}_{3}$ direction.
 
-$$
-\mathbf{B}=\frac{h}{e\Omega_{c}}\frac{n}{N_{2}}\mathbf{a}_{3}
-$$
 
 $$
 \mathbf{B}=\begin{cases}
 \frac{h}{e\Omega_{c}}\frac{n}{N_{2}}\mathbf{a}_{3} & (\textrm{3D})\\
-\frac{h}{e\Omega_{c}}\frac{n}{N_{2}}\mathbf{a}_{3} & (\textrm{3D})
+\\
+\frac{h}{e\Omega_{c}}\frac{n}{N_{2}}\hat{\mathbf{z}} & (\textrm{2D})
 \end{cases}
 $$
 
 and is restricted to be a multiple of a minimum field 
 
 $$
-B_{\textrm{min}}=\frac{h}{e\Omega_{c}}\frac{1}{N_{2}}\left|\mathbf{a}_{3}\right|,
+B_{\textrm{min}}=\frac{h}{e\Omega_{c}}\frac{1}{N_{2}}\times\begin{cases}
+|\mathbf{a}_{3}| & (\textrm{3D})\\
+\\
+1 & (\textrm{2D})
+\end{cases}
 $$
 
 where $\Omega_{c}$ is the volume of the unit cell. When the user requests a magnetic field strength $|\mathbf{B}|$, KITE calculates $B_{\textrm{min}}$ first and then uses that to determine the required n to achieve the closest possible value of $\mathbf{B}$ by rounding $\mathbf{B}|/B_{\textrm{min}}=n$ to the nearest integer. If n rounds down to zero, it means that the system is too small to support the requested magnetic field. When determining $B_{\textrm{min}}$, KITE assumes that the primitive vectors in the Python configuration script are given in nanometers.
