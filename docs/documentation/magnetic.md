@@ -34,7 +34,7 @@ $$
 \mathbf{A}\left(\mathbf{r}\right)=\frac{h}{\left(2\pi\right)^{2}e}\frac{n}{N_{2}}\left(\mathbf{r}\cdot\mathbf{b}_{2}\right)\mathbf{b}_{1}
 $$
 
-where h is Planck's constant, $e>0$ is the elementary charge and $N_{2}$ is the number of unit cells in the $\mathbf{a}_{2}$ direction (primitive vector of the direct lattice), and $n$ is an integer. The corresponding magnetic field points in the $\mathbf{a}_{3}$ direction.
+where h is Planck's constant, $e>0$ is the elementary charge and $N_{2}$ is the number of unit cells along the $\mathbf{a}_{2}$ direction (primitive vector of the direct lattice) and $n$ is an integer. The corresponding magnetic field points in the $\mathbf{a}_{3}$ direction.
 
 $$
 \mathbf{B}=\frac{h}{e\Omega_{c}}\frac{n}{N_{2}}\mathbf{a}_{3}
