@@ -28,7 +28,24 @@ kite.config_system(lattice, configuration, calculation, modification=modificatio
     When using the B-field feature lattice parameters must be given in nanometers (see example "..." in the KITE folder (link here)). 
 !!!
 
-The magnetic fields considered in KITE are uniform, so the corresponding vector potential is linear. It is naturally expressed in terms of the primitive reciprocal lattice vectors ($a=b$)
+The magnetic fields considered in KITE are uniform, so the corresponding vector potential is linear. It is naturally expressed in terms of the primitive reciprocal lattice vectors ($\mathbf{b}_{i=1,2,3}$) in the Landau gauge
 
+$$
+\mathbf{A}\left(\mathbf{r}\right)=\frac{h}{\left(2\pi\right)^{2}e}\frac{n}{N_{2}}\left(\mathbf{r}\cdot\mathbf{b}_{2}\right)\mathbf{b}_{1}
+$$
+
+where h is Planck's constant, $e>0$ is the elementary charge and $N_{2}$ is the number of unit cells in the $\mathbf{a}_{2}$ direction (primitive vector of the direct lattice), and $n$ is an integer. The corresponding magnetic field points in the $\mathbf{a}_{3}$ direction.
+
+$$
+\mathbf{B}=\frac{h}{e\Omega_{c}}\frac{n}{N_{2}}\mathbf{a}_{3}
+$$
+
+and is restricted to be a multiple of a minimum field 
+
+$$
+B_{\textrm{min}}=\frac{h}{e\Omega_{c}}\frac{1}{N_{2}}\left|\mathbf{a}_{3}\right|,
+$$
+
+where $\Omega_{c}$ is the volume of the unit cell. When the user requests a magnetic field strength $\left|\mathbf{B}\right|$, KITE calculates $B_{\textrm{min}}$ first and then uses that to determine the required n to achieve the closest possible value of $\left|\mathbf{B}\right|$ by rounding $\left|\mathbf{B}\right|/B_{\textrm{min}}=n$ to the nearest integer. If n rounds down to zero, it means that the system is too small to support the requested magnetic field. When determining $B_{\textrm{min}}$, KITE assumes that the primitive vectors in the Python configuration script are given in nanometers.
 
 
