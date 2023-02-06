@@ -24,8 +24,7 @@ kite.config_system(lattice, configuration, calculation, modification=modificatio
 
 ## Implementation details
 
-!!! Info "More examples"
-    
-    In the section [Examples], some applications to different structures are given, including the caluclation.
-    More examples can be found in the KITE-repository under
-    [kite/examples](https://github.com/quantum-kite/kite/tree/master/examples/readme.md).
+!!! Info "Units"  
+    When using the B-field feature lattice parameters must be given in nanometers (see example "..." in the KITE folder (link here)). 
+
+
