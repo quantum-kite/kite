@@ -40,6 +40,13 @@ $$
 \mathbf{B}=\frac{h}{e\Omega_{c}}\frac{n}{N_{2}}\mathbf{a}_{3}
 $$
 
+$$
+\mathbf{B}=\begin{cases}
+\frac{h}{e\Omega_{c}}\frac{n}{N_{2}}\mathbf{a}_{3} & (\textrm{3D})\\
+\frac{h}{e\Omega_{c}}\frac{n}{N_{2}}\mathbf{a}_{3} & (\textrm{3D})
+\end{cases}
+$$
+
 and is restricted to be a multiple of a minimum field 
 
 $$
