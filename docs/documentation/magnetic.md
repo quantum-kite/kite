@@ -46,6 +46,6 @@ $$
 B_{\textrm{min}}=\frac{h}{e\Omega_{c}}\frac{1}{N_{2}}\left|\mathbf{a}_{3}\right|,
 $$
 
-where $\Omega_{c}$ is the volume of the unit cell. When the user requests a magnetic field strength $\left|\mathbf{B}\right|$, KITE calculates $B_{\textrm{min}}$ first and then uses that to determine the required n to achieve the closest possible value of $\left|\mathbf{B}\right|$ by rounding $\left|\mathbf{B}\right|/B_{\textrm{min}}=n$ to the nearest integer. If n rounds down to zero, it means that the system is too small to support the requested magnetic field. When determining $B_{\textrm{min}}$, KITE assumes that the primitive vectors in the Python configuration script are given in nanometers.
+where $\Omega_{c}$ is the volume of the unit cell. When the user requests a magnetic field strength $|\mathbf{B}|$, KITE calculates $B_{\textrm{min}}$ first and then uses that to determine the required n to achieve the closest possible value of $\mathbf{B}$ by rounding $\mathbf{B}|/B_{\textrm{min}}=n$ to the nearest integer. If n rounds down to zero, it means that the system is too small to support the requested magnetic field. When determining $B_{\textrm{min}}$, KITE assumes that the primitive vectors in the Python configuration script are given in nanometers.
 
 
