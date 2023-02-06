@@ -26,5 +26,9 @@ kite.config_system(lattice, configuration, calculation, modification=modificatio
 
 !!! Info "Units"  
     When using the B-field feature lattice parameters must be given in nanometers (see example "..." in the KITE folder (link here)). 
+!!!
+
+The magnetic fields considered in KITE are uniform, so the corresponding vector potential is linear. It is naturally expressed in terms of the primitive reciprocal lattice vectors ($a=b$)
+
 
 
