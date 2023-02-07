@@ -15,7 +15,7 @@ modification = kite.Modification(magnetic_field = mag)
 
 where (`#!python mag` ) is the magnetic field strength (in Tesla). When used with periodic boundary conditions, $|\mathbf{B}|$ is restricted to be a multiple of a minimum magnetic field, which is determined internally when generating the configuration file (see details below). 
 
-For example, to compute the DOS of a disordered system subject to the B-field modification discussed above we use
+For example, to compute the DOS of a disordered system subject to the $\mathbf{B}$-field modification discussed above we use
 
 ``` python
 calculation.dos(num_points=100, num_moments= 5000, num_random=10, num_disorder=10)
