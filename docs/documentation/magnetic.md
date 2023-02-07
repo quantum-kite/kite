@@ -2,10 +2,10 @@ Static magnetic fields are an important case of lattice modifications that can b
 
 ## Uniform B-fields in KITE: overview
 
-The automated B-field functionality works by the addition of Peierls phases in the Hamiltonian and can be used in conjunction with other lattice modifications, including disorder. This is a new feature under development that currently allows
+The automated $\mathbf{B}$-field functionality works by the addition of Peierls phases in the Hamiltonian and can be used in conjunction with other lattice modifications, including disorder. This is a new feature under development that currently allows
 
-* uniform B-field in generic 2D lattices (with the B-field perpendicular to the plane)
-* uniform B-field in 3D lattices with cubic symmetry (with the B-field parallel to the third primitive lattice vector)
+* uniform $\mathbf{B}$-field in generic 2D lattices (with the B-field perpendicular to the plane)
+* uniform $\mathbf{B}$-field in 3D lattices (with the B-field collinear to the third primitive lattice vector)
 
 The B-field is added by means of the following KITE modification:
 
@@ -13,7 +13,7 @@ The B-field is added by means of the following KITE modification:
 modification = kite.Modification(magnetic_field = mag)
 ``` 
 
-where (`#!python mag` ) is the magnetic field strength (in Tesla). When used with periodic boundary conditions, B is restricted to be a multiple of a minimum magnetic field, which is determined internally when generating the configuration file (see details below). 
+where (`#!python mag` ) is the magnetic field strength (in Tesla). When used with periodic boundary conditions, $|$\mathbf{B}$|$ is restricted to be a multiple of a minimum magnetic field, which is determined internally when generating the configuration file (see details below). 
 
 For example, to compute the DOS of a disordered system subject to the B-field modification discussed above we use
 
@@ -25,7 +25,7 @@ kite.config_system(lattice, configuration, calculation, modification=modificatio
 ## Implementation details
 
 !!! Info "Units"  
-    When using the B-field feature lattice parameters must be given in nanometers (see example "..." in the KITE folder (link here)). 
+    When using the $\mathbf{B}$-field feature lattice parameters must be given in nanometers (see example "..." in the KITE folder (link here)). 
 !!!
 
 The magnetic fields considered in KITE are uniform, so the corresponding vector potential is linear. It is naturally expressed in terms of the primitive reciprocal lattice vectors ($\mathbf{b}_{i=1,2,3}$) in the Landau gauge
