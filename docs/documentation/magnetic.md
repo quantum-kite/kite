@@ -13,7 +13,7 @@ The B-field is added by means of the following KITE modification:
 modification = kite.Modification(magnetic_field = mag)
 ``` 
 
-where (`#!python mag` ) is the magnetic field strength. When used with periodic boundary conditions, B is restricted to be a multiple of a minimum magnetic field, which is determined internally when generating the configuration file (see details below). 
+where (`#!python mag` ) is the magnetic field strength (in Tesla). When used with periodic boundary conditions, B is restricted to be a multiple of a minimum magnetic field, which is determined internally when generating the configuration file (see details below). 
 
 For example, to compute the DOS of a disordered system subject to the B-field modification discussed above we use
 
@@ -55,6 +55,6 @@ B_{\textrm{min}}=\frac{h}{e\Omega_{c}}\frac{1}{N_{2}}\times\begin{cases}
 \end{cases}
 $$
 
-where $\Omega_{c}$ is the 3D/2D volume of the unit cell.  When the user requests a magnetic field strength $|\mathbf{B}|$, KITE calculates $B_{\textrm{min}}$ first and then uses that to determine the required n to achieve the closest possible value of $\mathbf{B}$ by rounding $\mathbf{B}|/B_{\textrm{min}}=n$ to the nearest integer. If n rounds down to zero, it means that the system is too small to support the requested magnetic field. When determining $B_{\textrm{min}}$, KITE assumes that the primitive vectors in the Python configuration script are given in nanometers.
+where $\Omega_{c}$ is the 3D/2D volume of the unit cell.  When the user requests a magnetic field strength $|\mathbf{B}|$ (in Tesla), KITE calculates $B_{\textrm{min}}$ first and then uses that to determine the required n to achieve the closest possible value of $\mathbf{B}$ by rounding $\mathbf{B}|/B_{\textrm{min}}=n$ to the nearest integer. If n rounds down to zero, it means that the system is too small to support the requested magnetic field. When determining $B_{\textrm{min}}$, KITE assumes that the primitive vectors in the Python configuration script are given in nanometers.
 
 
