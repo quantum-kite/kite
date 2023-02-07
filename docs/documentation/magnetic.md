@@ -5,7 +5,7 @@ Static magnetic fields are an important case of lattice modifications that can b
 The automated B-field functionality works by the addition of Peierls phases in the Hamiltonian and can be used in conjunction with other lattice modifications, including disorder. This is a new feature under development that currently allows
 
 * uniform B-field in generic 2D lattices (with the B-field perpendicular to the plane)
-* uniform B-field in 3D lattices with cubic symmetry (with the B-field parallel to the second primitive lattice vector)
+* uniform B-field in 3D lattices with cubic symmetry (with the B-field parallel to the third primitive lattice vector)
 
 The B-field is added by means of the following KITE modification:
 
