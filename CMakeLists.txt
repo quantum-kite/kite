@@ -11,11 +11,8 @@ if(CMAKE_BUILD_TYPE MATCHES "Debug")
   add_definitions(-DDEBUG=1)
 endif()
 
-project(KITEx)
+project(KITE)
 
-FILE(GLOB_RECURSE SRCFILES Src/*.cpp)
-MESSAGE(STATUS "Files to compile" ${SRCFILES})
-add_executable(${PROJECT_NAME} ${SRCFILES})
 
 find_package(HDF5 COMPONENTS CXX C HL)
 if(${HDF5_FOUND})
@@ -29,8 +26,6 @@ endif()
 MESSAGE(STATUS "Compiler:  ${CMAKE_CXX_COMPILER}")
 include_directories(~/include/)
 
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
-
 find_package(Eigen3)
 if(${EIGEN3_FOUND})
   include_directories(${EIGEN3_INCLUDE_DIR})
@@ -38,7 +33,6 @@ else()
   include_directories(~/include/eigen3)
   MESSAGE(STATUS "Couldn't find Eigen3. Looking in ~/include")
 endif()
-
 
 set (CORRECT_CODING_FLAGS "")
 find_package(OpenMP)
@@ -54,6 +48,15 @@ if (OPENMP_FOUND)
 endif()
 
 
+
+
+
+
+FILE(GLOB_RECURSE SRCFILES Src/*.cpp)
+MESSAGE(STATUS "Files to compile" ${SRCFILES})
+add_executable(KITEx ${SRCFILES})
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
+
 set(compile_wp 1)
 if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.0.0)
     MESSAGE( STATUS "Cannot compile gaussian wavepacket")
@@ -62,8 +65,8 @@ endif()
 add_definitions(-DCOMPILE_WAVEPACKET=${compile_wp})
 
 
-target_link_libraries(${PROJECT_NAME} ${HDF5_CXX_LIBRARIES})
-target_include_directories(${PROJECT_NAME} PRIVATE "Src/"
+target_link_libraries(KITEx ${HDF5_CXX_LIBRARIES})
+target_include_directories(KITEx PRIVATE "Src/"
 "Src/Tools/"
 "Src/Lattice/"
 "Src/Hamiltonian/"
@@ -71,4 +74,24 @@ target_include_directories(${PROJECT_NAME} PRIVATE "Src/"
 "Src/Simulation/"
 )
 
-install (TARGETS ${PROJECT_NAME} DESTINATION bin)
+install (TARGETS KITEx DESTINATION bin)
+
+
+
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
+set(SYSTEM_NAME ${CMAKE_HOST_SYSTEM_NAME})
+cmake_host_system_information(RESULT _host_name QUERY HOSTNAME)
+set(MACHINE_NAME ${_host_name})
+
+include_directories(${PROJECT_BINARY_DIR}/tools/Src)
+FILE(GLOB_RECURSE SRCFILES tools/Src/*.cpp)
+add_executable(KITE-tools ${SRCFILES})
+string(TIMESTAMP TODAY "(yymmdd) %Y-%m-%d %H:%M:%S")
+configure_file (
+  "tools/Src/compiletime_info.h.in"
+  "tools/Src/compiletime_info.h"
+  )
+
+include_directories(${Src})
+target_link_libraries(KITE-tools ${HDF5_CXX_LIBRARIES} )
+install (TARGETS KITE-tools DESTINATION bin)
