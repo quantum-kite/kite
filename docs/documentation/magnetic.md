@@ -21,7 +21,7 @@ For example, to compute the DOS of a disordered system subject to the $\mathbf{B
 calculation.dos(num_points=100, num_moments= 5000, num_random=10, num_disorder=10)
 kite.config_system(lattice, configuration, calculation, modification=modification, disorder=disorder,filename='B_field.h5")
 ``` 
-Here, the configuration file requests a DOS calculation with 5000 Chebyshev moments, 10 random vectors and 10 disorder realizations. The number of energy points for the DOS grid (`#!python num_points`) is a post-processing parameter and can be easily modified using KITE-tools (see section [5. Post-processing](postprocessing.md)).
+Here, the configuration file requests a DOS calculation with 5000 Chebyshev moments, 10 random vectors and 10 disorder realizations. Note the addition of the lattice modification (`#!python modification=modification`) with respect to the settings discussed in [6. Disorder](disorder.md). The number of energy points for the DOS grid (`#!python num_points`) is a post-processing parameter and can be easily modified using KITE-tools (see [5. Post-processing](postprocessing.md)).
 
 ## Implementation details
 
