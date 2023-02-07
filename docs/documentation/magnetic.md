@@ -15,13 +15,13 @@ modification = kite.Modification(magnetic_field = mag)
 
 where (`#!python mag`) is the magnetic field strength (in Tesla). When used with periodic boundary conditions, $|\mathbf{B}|$ is restricted to be a multiple of a minimum magnetic field, which is determined internally when generating the configuration file (see details below). 
 
-For example, to compute the DOS of a disordered system subject to the $\mathbf{B}$-field modification discussed above we use
+For example, to compute the DOS of a disordered system subject to the $\mathbf{B}$-field modification discussed above one may use
 
 ``` python
 calculation.dos(num_points=100, num_moments= 5000, num_random=10, num_disorder=10)
 kite.config_system(lattice, configuration, calculation, modification=modification, disorder=disorder,filename='B_field.h5")
 ``` 
-In this example, the scripts requests a DOS calculation with 5000 Chebyshev moments, 10 random vectors and 10 disorder realizations. The number of energy points for the DOS grid (`#!python num_points`) is a post-processing parameter and can be easily modified using KITE-tools **((link here))**.
+Here, the configuration file requests a DOS calculation with 5000 Chebyshev moments, 10 random vectors and 10 disorder realizations. The number of energy points for the DOS grid (`#!python num_points`) is a post-processing parameter and can be easily modified using KITE-tools [5. Post-processing](postprocessing.md).
 
 ## Implementation details
 
