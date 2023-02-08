@@ -64,28 +64,13 @@
         </div>
 
 
+        {% set class = "" %}
         <nav id="header-nav-wrap">
             <ul class="header-main-nav">
                 {% for nav_item in nav %}
-                    {% if nav_item.children %}
-                        {% set indexes = [] %}
-                        {% for nav_item in nav_item.children %}
-                            {% if nav_item.is_index and not index is defined %}
-                                {% set _ = indexes.append(nav_item) %}
-                            {% endif %}
-                        {% endfor %}
-                        {% if indexes %}
-                            {% set index = indexes | first %}
-                        {% endif %}
-                    {% else %}
-                        {% set index = nav_item %}
-                    {% endif %}
-                    <li><a href="{{ index.url | url }}" title="{{ nav_item.title }}">{{ nav_item.title }}</a></li>
+                {% include "partials/tabs-item.html" %}
                 {% endfor %}
             </ul>
-
-            <a class="button button-primary cta" href="https://github.com/quantum-kite/kite" title="git-hub"><i
-                    class="fa fa-github"></i> GitHub</a>
         </nav>
 
         <a class="header-menu-toggle" href="#"><span>Menu</span></a>

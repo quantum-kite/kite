@@ -26,8 +26,8 @@ Here, the configuration file requests a DOS calculation with 5000 Chebyshev mome
 ## Implementation details
 
 !!! Info "Units"  
-    Lattice parameters must be given in nanometers (see example "..." in the KITE folder (link here)). 
-!!!
+
+    Lattice parameters must be given in nanometers (see example "..." in the KITE folder (link here)).
 
 The magnetic fields considered in KITE are uniform, so the corresponding vector potential is linear. It is naturally expressed in terms of the primitive reciprocal lattice vectors ($\mathbf{b}_{i=1,2,3}$) in the Landau gauge
 

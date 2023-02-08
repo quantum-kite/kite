@@ -18,16 +18,18 @@ nav:
   - Home: 'index.md'
   - Installation: 'installation.md'
   - Documentation:
-    - Tutorial: 'documentation/index.md'
-    - 1. Workflow: 'documentation/workflow.md'
-    - 2. Lattice: 'documentation/tb_model.md'
-    - 3. Settings: 'documentation/settings.md'
-    - 4. Calculation: 'documentation/calculation.md'
-    - 5. Post-processing: 'documentation/postprocessing.md'
-    - 6. Disorder: 'documentation/disorder.md'
-    - 7. Editing the HDF5 file: 'documentation/editing_hdf_files.md'
-    - The Ground Rules for Spectral Methods: 'documentation/optimization.md'
-    - Examples: 
+    - Theory: 'documentation/optimization.md'
+    - Tutorial:
+      - 0. First Calculation: 'documentation/index.md'
+      - 1. Workflow: 'documentation/workflow.md'
+      - 2. Lattice: 'documentation/tb_model.md'
+      - 3. Settings: 'documentation/settings.md'
+      - 4. Calculation: 'documentation/calculation.md'
+      - 5. Post-processing: 'documentation/postprocessing.md'
+      - 6. Disorder: 'documentation/disorder.md'
+      - 7. Magnetic Field: 'documentation/magnetic.md'
+      - 9. Editing the HDF5 file: 'documentation/editing_hdf_files.md'
+    - Examples:
       - About the examples: 'documentation/examples/index.md'
       - Graphene: 'documentation/examples/graphene.md'
       - Haldane: 'documentation/examples/haldane.md'
