@@ -81,8 +81,6 @@ Some parameters are specific of the target function:
     
 * `#!python num_points` _(can be modified at post-processing level)_
 : Number of energy points used by the post-processing tool to output the density of states.
-* `#!python special`
-  : Simplified form of nonlinear optical conductivity (see hBN example).
 * `#!python energy`
   : Selected values of Fermi energy at which we want to calculate the `#!python singleshot_conductivity_dc`.
 * `#!python eta`
