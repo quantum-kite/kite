@@ -3,7 +3,7 @@ The inclusion of disorder in a given system follows a simple recipe:
 the user specifies one or more _disorder patterns_ in the [Python interface][kite-script]
 (disorder patterns are local modifications of the Hamiltonian that can be constricted to one unit cell or can
 connect neighboring unit cells) together with the desired disorder statistics.
-The full Hamiltonian for a given disorder configuration is constructed automically when running [KITEx].
+This information is passed on to [KITEx] and used to perform the required modifications of on-site energies and hopping terms across the whole lattice.
 KITE handles both standard uncorrelated disorder (e.g., random on-site energies) and realistic
 short-range disorder (e.g., vacancies or impurity scattering centers distributed randomly over the
 lattice sites with a specified concentration).
