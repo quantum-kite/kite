@@ -61,7 +61,19 @@ configuration = kite.Configuration(
   precision=1 
 )
 ```
+To manually set the [`#!python spectrum_range`][configuration-spectrum_range], it is necessary to add an extra parameter
+to the [`#!python kite.Configuration`][configuration] class:
 
+``` python
+configuration = kite.Configuration(
+    divisions=[nx, ny],
+    length=[lx, ly],
+    boundaries=["periodic", "periodic"],
+    is_complex=False,
+    precision=1,
+    spectrum_range=[-10, 10]
+)
+```
 
 [HDF5]: https://www.hdfgroup.org
 [pybinding]: https://docs.pybinding.site/en/stable
