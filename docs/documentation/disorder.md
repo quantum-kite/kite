@@ -173,7 +173,7 @@ node4 = [[+0, +1], 'A']
 node5 = [[-1, +1], 'B']
 ```
 
-After the definition of a parent [`#!python kite.StructuralDisorder`][structural_disorder] object, we can select the desired pattern:
+After the definition of a parent [`#!python kite.StructuralDisorder`][structural_disorder] object, we can define the desired pattern:
 
 ``` python
  # define an object based on the lattice with a certain concentration
@@ -304,15 +304,9 @@ lattice, disorder_structural = honeycomb_lattice()
 nx = ny = 1
 # number of unit cells in each direction.
 lx = ly = 512
-# make config object which caries info about
-# - the number of decomposition parts [nx, ny],
-# - lengths of structure [lx, ly]
-# - boundary conditions, setting True as periodic boundary conditions, and False elsewise,
-# - info if the exported hopping and onsite data should be complex,
-# - info of the precision of the exported hopping and onsite data,
-#      0 - float, 1 - double, and 2 - long double.
-# - scaling, if None it's automatic, if present select spectrum_bound=[e_min, e_max]
-configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[True, True],
+# Boundary Mode
+mode = "periodic"
+configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[mode, mode],
                                    is_complex=False, precision=1, spectrum_range=[-15, 15])
 # require the calculation of DOS
 calculation = kite.Calculation(configuration)
