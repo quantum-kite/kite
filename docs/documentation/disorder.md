@@ -19,7 +19,7 @@ in the [python interface][kite-script].
 The interface provides two different classes of disorder:
 
 * [`#!python kite.Disorder`][disorder] - onsite disorder with three possible statistical distributions
-* [`#!python kite.StructuralDisorder`][structural_disorder] - generic short-range disorder, i.e. multi-orbital local disorder (including bond disorder) with a given concentration
+* [`#!python kite.StructuralDisorder`][structural_disorder] - multi-orbital impurities and defects (including bond disorder) with a given concentration
 
 ## Onsite disorder
 
