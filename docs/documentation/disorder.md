@@ -1,9 +1,9 @@
 KITE's disorder implementation — general-purpose and user-friendly — is one of its main features.
-The inclusion of disorder in a given system follows a very simple procedure:
+The inclusion of disorder in a given system follows a simple recipe:
 the user specifies one or more _disorder patterns_ in the [Python interface][kite-script]
-(patterns are local modifications of the Hamiltonian that can be constricted to one unit cell or can
+(disorder patterns are local modifications of the Hamiltonian that can be constricted to one unit cell or can
 connect neighboring unit cells) together with the desired disorder statistics.
-The disorder patterns are then replicated across the lattice automatically when running [KITEx].
+The full Hamiltonian for a given disorder configuration is constructed automically when running [KITEx].
 KITE handles both standard uncorrelated disorder (e.g., random on-site energies) and realistic
 short-range disorder (e.g., vacancies or impurity scattering centers distributed randomly over the
 lattice sites with a specified concentration).
