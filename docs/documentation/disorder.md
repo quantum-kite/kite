@@ -31,7 +31,7 @@ The interface provides two different classes of disorder:
 
 One can select a sublattice type in which the disorder will appear, the mean
 value and the standard deviation of the selected distribution.
-To include onsite disorder following a given statistical distribution, we build the [`#!python pb.lattice`][lattice] and
+To this end, one builds the [`#!python pb.lattice`][lattice] and
 use the following procedure:
 
 ``` python
