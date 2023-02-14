@@ -140,7 +140,8 @@ struc_disorder.add_vacancy('B') # add a vacancy to a selected sublattice
 !!! note
     To distribute the vacancies on both sublattices (compensated or otherwise), one needs to treat each sublattice as a separate
     object of the class [`#!python kite.StructuralDisorder`][structural_disorder]
-    (yet another possibility is to remove several sublattices/orbitals within the unit cell for each vacancy created).
+    
+    Note: It is also possible to remove several sublattices/orbitals within the unit cell for each vacancy created.
 
     ``` python
     struc_disorder_A = kite.StructuralDisorder(lattice, concentration=0.1)
