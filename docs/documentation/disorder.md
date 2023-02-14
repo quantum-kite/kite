@@ -1,14 +1,11 @@
 The disorder implementation — general-purpose and user-friendly — is one of the main features of the KITE code. The inclusion of disorder in a given system follows a very simple procedure: the user specifies one or more _disorder patterns_ in the Python script (patterns are local modifications of the Hamiltonian that can be constricted to one unit cell or can connect neighboring unit cells) together with the desired disorder statistics. The disorder patterns are then replicated 
-across the lattice automatically when unning [KITEx]. KITE handles both standard uncorrelated disorder (e.g., random modifications of on-site energies) and realistic short-range disorder (e.g., vacancies or impurity scattering centers distributed randomly  over the lattice sites with a specified concentration). Several types of disorder can be added simultaneously.
+across the lattice automatically when unning [KITEx]. KITE handles both standard uncorrelated disorder (e.g., random on-site energies) and realistic short-range disorder (e.g., vacancies or impurity scattering centers distributed randomly over the lattice sites with a specified concentration). Several types of disorder can be added simultaneously.
 
-After defining a lattice with the procedure explained in [1. Lattice][tutorial-lattice], we can add disorder to our system.
-Usually, disorder can be modeled either as a modification of onsite potentials appearing on the lattice sites or
-as a combination of onsite potential and bond disorder.
-Hence, KITE allows the user to select between the two types of disorder by choosing between predefined classes in the python interface.
+After defining a regular lattice with the procedure explained in [1. Lattice][tutorial-lattice], disorder can be added to the system. KITE allows the user to select between on-site and structural disorder by choosing between predefined classes in the python interface.
 The interface provides two different classes of disorder:
 
 * [`#!python kite.Disorder`][disorder] - onsite disorder with three possible statistical distributions
-* [`#!python kite.StructuralDisorder`][structural_disorder] - generic structural disorder, the combination of onsite potential and bond disorder.
+* [`#!python kite.StructuralDisorder`][structural_disorder] - generic structural, short-range disorder, i.e. multi-orbital local disorder (including bond disorder) with a given concentration.
 
 ## Onsite disorder
 
