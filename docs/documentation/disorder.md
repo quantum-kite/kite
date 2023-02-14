@@ -66,13 +66,13 @@ distributions on each sublattice is given below:
 import kite
 from pybinding.repository import graphene
 
-""" Onsite disorder
+""" On-site disorder
     Lattice : Monolayer graphene;
     Disorder : Disorder class Deterministic and Uniform at different sublattices,
-    Configuration : size of the system 512×512, without domain decomposition (nx=ny=1),
+    Configuration : System size 512×512, with domain decomposition (nx=ny=2),
                     periodic boundary conditions,
                     double precision, automatic scaling;
-    Calculation : dos;
+    Calculation : Density of States (DSS);
     Modification : magnetic field is off;
 """
 
@@ -154,10 +154,10 @@ struc_disorder.add_vacancy('B') # add a vacancy to a selected sublattice
 ### Example 2: mixed on-site/bond disorder
 
 
-The following example shows a definition of KITE's most general type of disorder, which includes both short-range onsite disorder
-terms and bond modifications.
+The following example illustrates KITE's most general type of short-range disorder, which includes both atomic defects (vacancies)
+and bond modifications.
 This type of disorder can be added as an object of the class [`#!python kite.StructuralDisorder`][structural_disorder].
-The procedure for adding the structural disorder is analogous to adding a hopping term to the
+The procedure is analogous to adding a hopping term to the
 [Pybinding lattice object][lattice].
 
 For the sake of clarity, let us first define sublattices that will compose the disorder.
@@ -210,12 +210,12 @@ The following script has a minimal example of how to configure the structural di
 
 ``` python linenums="1"
 """ Bond disorder
-    Lattice : Honeycomb 1[nm] interatomic distance and t=1[eV] hopping;
-    Disorder : StructuralDisorder class bond and vacancy disorder;
-    Configuration : size of the system 512x512, without domain decomposition (nx=ny=1),
+    Lattice : Lattice : Monolayer graphene;
+    Disorder : Bond disorder + vacancy defects;
+    Configuration : size of the system 512x512, no domain decomposition (nx=ny=1),
                     periodic boundary conditions,
                     double precision, manual scaling;
-    Calculation : dos;
+    Calculation : DOS;
     Modification : magnetic field is off;
 """
 
