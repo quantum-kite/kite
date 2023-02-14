@@ -127,10 +127,10 @@ short-range disorder types, i.e. vacancy defects, randomly distributed with a ce
 and a more generic multi-orbital disorder which may combine of on-site and hopping terms 
 (also distributed with a certain concentration).
 
-### Vacancy disorder
+### Example: Vacancy defects
 
-The vacancies can be defined on a single sublattice with a
-[`#!python concentration`][structuraldisorder-concentration] defined in a parent object:
+To add vacancies on a single sublattice with a given
+[`#!python concentration`][structuraldisorder-concentration] one uses the simple instruction:
 
 ``` python
 struc_disorder = kite.StructuralDisorder(lattice, concentration=0.2)
@@ -138,7 +138,7 @@ struc_disorder.add_vacancy('B') # add a vacancy to a selected sublattice
 ```
 
 !!! note
-    To distribute the vacancies on both sublattices (compensated or otherwise), one needs to add the vacancies on each sublattice as a separate
+    To distribute the vacancies on both sublattices (compensated or otherwise), one needs to treat each sublattice as a separate
     object of the class [`#!python kite.StructuralDisorder`][structural_disorder]
     (yet another possibility is to remove several sublattices/orbitals within the unit cell for each vacancy created).
 
