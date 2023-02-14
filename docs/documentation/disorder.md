@@ -141,7 +141,7 @@ struc_disorder.add_vacancy('B') # add a vacancy to a selected sublattice
     To distribute the vacancies on both sublattices (compensated or otherwise), one needs to treat each sublattice as a separate
     object of the class [`#!python kite.StructuralDisorder`][structural_disorder]
     
-    Note: It is also possible to remove several sublattices/orbitals within the unit cell for each vacancy created.
+   
 
     ``` python
     struc_disorder_A = kite.StructuralDisorder(lattice, concentration=0.1)
@@ -151,22 +151,8 @@ struc_disorder.add_vacancy('B') # add a vacancy to a selected sublattice
     disorder_structural = [struc_disorder_A, struc_disorder_B]
     ```
 
+### More general short-range disorder
 
-### Structural disorder
-
-To manually set the [`#!python spectrum_range`][configuration-spectrum_range], it is necessary to add an extra parameter
-to the [`#!python kite.Configuration`][configuration] class:
-
-``` python
-configuration = kite.Configuration(
-    divisions=[nx, ny],
-    length=[lx, ly],
-    boundaries=["periodic", "periodic"],
-    is_complex=False,
-    precision=1,
-    spectrum_range=[-10, 10]
-)
-```
 
 The following example shows a definition of our most general type of disorder, which includes both onsite disorder
 terms and bond modifications.
