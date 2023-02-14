@@ -1,7 +1,17 @@
-The disorder implementation — general-purpose and user-friendly — is one of the main features of the KITE code. The inclusion of disorder in a given system follows a very simple procedure: the user specifies one or more _disorder patterns_ in the Python script (patterns are local modifications of the Hamiltonian that can be constricted to one unit cell or can connect neighboring unit cells) together with the desired disorder statistics. The disorder patterns are then replicated 
-across the lattice automatically when unning [KITEx]. KITE handles both standard uncorrelated disorder (e.g., random on-site energies) and realistic short-range disorder (e.g., vacancies or impurity scattering centers distributed randomly over the lattice sites with a specified concentration). Several types of disorder can be added simultaneously.
+The disorder implementation — general-purpose and user-friendly — is one of the main features of the KITE code.
+The inclusion of disorder in a given system follows a very simple procedure:
+the user specifies one or more _disorder patterns_ in the [Python interface][kite-script]
+(patterns are local modifications of the Hamiltonian that can be constricted to one unit cell or can
+connect neighboring unit cells) together with the desired disorder statistics.
+The disorder patterns are then replicated across the lattice automatically when running [KITEx].
+KITE handles both standard uncorrelated disorder (e.g., random on-site energies) and realistic
+short-range disorder (e.g., vacancies or impurity scattering centers distributed randomly over the
+lattice sites with a specified concentration).
+Several types of disorder can be added simultaneously.
 
-After defining a regular lattice with the procedure explained in [1. Lattice][tutorial-lattice], disorder can be added to the system. KITE allows the user to select between on-site and structural disorder by choosing between predefined classes in the python interface.
+After defining a [regular lattice][tutorial-lattice], disorder can be added to the system.
+KITE allows the user to select between on-site and structural disorder by choosing between predefined classes
+in the [python interface][kite-script].
 The interface provides two different classes of disorder:
 
 * [`#!python kite.Disorder`][disorder] - onsite disorder with three possible statistical distributions
@@ -45,7 +55,8 @@ After defining the desired disorder, it can be added to the configuration file a
 kite.config_system(..., disorder=disorder)
 ```
 
-A complete example that calculates the density of states of graphene with different on-site disorder distributions for each sublattice can be seen here:
+A complete example that calculates the density of states of graphene with different on-site disorder
+distributions for each sublattice can be seen here:
 
 ``` python linenums="1"
 import kite
@@ -114,7 +125,8 @@ and a more generic structural disorder which is a combination of onsite terms an
 
 ### Vacancy disorder
 
-The vacant site distribution can be selected from a single sublattice with a [`#!python concentration`][structuraldisorder-concentration] defined in a parent object:
+The vacant site distribution can be selected from a single sublattice with a
+[`#!python concentration`][structuraldisorder-concentration] defined in a parent object:
 
 ``` python
 struc_disorder = kite.StructuralDisorder(lattice, concentration=0.2)
@@ -347,6 +359,9 @@ with the resulting density of states:
 [structuraldisorder-add_local_bond_disorder]: ../api/kite.md#structuraldisorder-add_local_bond_disorder
 [structuraldisorder-add_local_onsite_disorder]: ../api/kite.md#structuraldisorder-add_local_onsite_disorder
 [structuraldisorder-map_the_orbital]: ../api/kite.md#structuraldisorder-map_the_orbital
+
+[kite-script]: ../api/kite.md
+[KITEx]: ../api/kitex.md
 
 [comment]: <> (Class Disorder)
 [disorder]: ../api/kite.md#disorder
