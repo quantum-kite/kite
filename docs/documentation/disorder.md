@@ -129,8 +129,8 @@ and a more generic multi-orbital disorder which may combine of on-site and hoppi
 
 ### Example: Vacancy defects
 
-To add vacancies on a single sublattice with a given
-[`#!python concentration`][structuraldisorder-concentration] one uses the simple instruction:
+To add vacancy defects with a given
+[`#!python concentration`][structuraldisorder-concentration] on a single sublattice one uses the simple instruction:
 
 ``` python
 struc_disorder = kite.StructuralDisorder(lattice, concentration=0.2)
