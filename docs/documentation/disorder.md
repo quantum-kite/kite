@@ -11,7 +11,7 @@ This information is passed on to [KITEx] and used to perform the required modifi
 KITE handles both standard uncorrelated disorder (e.g., random on-site energies) and realistic
 short-range disorder (e.g., vacancies or impurity scattering centers distributed randomly over the
 lattice sites with a specified concentration).
-Several types of disorder can be added simultaneously.
+Different types of disorder can be added simultaneously.
 
 After defining a [regular lattice][tutorial-lattice], disorder can be added to the system.
 KITE allows the user to select between on-site and structural disorder by choosing between predefined classes
