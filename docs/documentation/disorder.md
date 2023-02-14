@@ -52,15 +52,15 @@ disorder.add_disorder('C', 'Deterministic', 0.1)
 
 In the case of deterministic disorder, the standard deviation is not set.
 
-After defining the desired disorder, it can be added to the configuration file as an additional parameter in the
+The final step consists of adding the disorder pattern as an additional parameter into the
 [`#!python kite.config_system`][config_system] function:
 
 ``` python
 kite.config_system(..., disorder=disorder)
 ```
 
-A complete example that calculates the density of states of graphene with different on-site disorder
-distributions for each sublattice can be seen here:
+A complete example that calculates the average density of states of graphene with different on-site disorder
+distributions on each sublattice is given below:
 
 ``` python linenums="1"
 import kite
@@ -123,13 +123,13 @@ kite.config_system(lattice, configuration, calculation, filename='on_site_disord
 ## Structural disorder
 
 [`#!python kite.StructuralDisorder`][structural_disorder] class adds the possibility of selecting between two different
-structural disorder types; vacancy, randomly distributed with a certain concentration in sites of a selected sublattice,
-and a more generic structural disorder which is a combination of onsite terms and bond disorder
+short-range disorder types, i.e. vacancy defects, randomly distributed with a certain concentration over lattice sites on a selected sublattice,
+and a more generic multi-orbital disorder which may combine of on-site and hopping terms 
 (also distributed with a certain concentration).
 
 ### Vacancy disorder
 
-The vacant site distribution can be selected from a single sublattice with a
+The vacancies can be defined on a single sublattice with a
 [`#!python concentration`][structuraldisorder-concentration] defined in a parent object:
 
 ``` python
@@ -138,9 +138,9 @@ struc_disorder.add_vacancy('B') # add a vacancy to a selected sublattice
 ```
 
 !!! note
-    To distribute the vacancies in both sublattices, one needs to add the vacancies on each sublattice as a separate
+    To distribute the vacancies on both sublattices (compensated or otherwise), one needs to add the vacancies on each sublattice as a separate
     object of the class [`#!python kite.StructuralDisorder`][structural_disorder]
-    (unless you want precisely the same pattern of disorder in both sublattices).
+    (yet another possibility is to remove several sublattices/orbitals within the unit cell for each vacancy created).
 
     ``` python
     struc_disorder_A = kite.StructuralDisorder(lattice, concentration=0.1)
@@ -153,7 +153,7 @@ struc_disorder.add_vacancy('B') # add a vacancy to a selected sublattice
 
 ### Structural disorder
 
-To manyally set the [`#!python spectrum_range`][configuration-spectrum_range], it is necessary to add an extra parameter
+To manually set the [`#!python spectrum_range`][configuration-spectrum_range], it is necessary to add an extra parameter
 to the [`#!python kite.Configuration`][configuration] class:
 
 ``` python
