@@ -76,7 +76,7 @@ from pybinding.repository import graphene
     Modification : magnetic field is off;
 """
 
-# load graphene lattice and structural_disorder
+# load graphene lattice 
 lattice = graphene.monolayer()
 # add Disorder
 disorder = kite.Disorder(lattice)
@@ -219,10 +219,8 @@ The following script has a minimal example of how to configure the structural di
     Modification : magnetic field is off;
 """
 
-import numpy as np
-import pybinding as pb
 import kite
-
+from pybinding.repository import graphene
 
 def honeycomb_lattice(onsite=(0, 0)):
     """Make a honeycomb lattice with nearest neighbor hopping"""
