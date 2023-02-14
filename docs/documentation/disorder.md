@@ -5,7 +5,7 @@ After defining a regular lattice with the procedure explained in [1. Lattice][tu
 The interface provides two different classes of disorder:
 
 * [`#!python kite.Disorder`][disorder] - onsite disorder with three possible statistical distributions
-* [`#!python kite.StructuralDisorder`][structural_disorder] - generic structural, short-range disorder, i.e. multi-orbital local disorder (including bond disorder) with a given concentration.
+* [`#!python kite.StructuralDisorder`][structural_disorder] - generic short-range disorder, i.e. multi-orbital local disorder (including bond disorder) with a given concentration
 
 ## Onsite disorder
 
