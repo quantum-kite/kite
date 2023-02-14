@@ -1,4 +1,4 @@
-The disorder implementation — general-purpose and user-friendly — is one of the main features of the KITE code.
+KITE's disorder implementation — general-purpose and user-friendly — is one of its main features.
 The inclusion of disorder in a given system follows a very simple procedure:
 the user specifies one or more _disorder patterns_ in the [Python interface][kite-script]
 (patterns are local modifications of the Hamiltonian that can be constricted to one unit cell or can
