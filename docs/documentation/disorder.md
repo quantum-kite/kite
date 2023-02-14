@@ -23,13 +23,13 @@ The interface provides two different classes of disorder:
 
 ## Onsite disorder
 
-[`#!python kite.Disorder`][disorder] adds randomly generated onsite terms at the sites of a desired sublattice based on a certain statistical distribution:
+[`#!python kite.Disorder`][disorder] adds randomly generated on-site terms at the sites of a desired sublattice based on a certain statistical distribution:
 
 * Gaussian
 * Uniform
 * Deterministic
 
-Beside the type of statistical distribution, we can select a sublattice type in which the disorder will appear, the mean
+One can select a sublattice type in which the disorder will appear, the mean
 value and the standard deviation of the selected distribution.
 To include onsite disorder following a given statistical distribution, we build the [`#!python pb.lattice`][lattice] and
 use the following procedure:
