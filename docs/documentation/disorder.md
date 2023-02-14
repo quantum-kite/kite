@@ -1,9 +1,5 @@
-The purpose of this section is to provide a simple overview of the different types of disorder that can be added to
-KITE tight-binding calculations.
-The general character of our disorder implementation is one of the main features of KITE.
-To achieve this generality, the implementation follows a basic structure: the user specifies the disorder pattern to be
-included (that can be constricted to one unit cell or can connect neighboring unit cells) and the disorder pattern
-is reproduced randomly inside the sample, according to a defined concentration and statistical distribution.
+The disorder implementation — general-purpose and user-friendly — is one of the main features of the KITE code. The inclusion of disorder in a given system follows a very simple procedure: the user specifies one or more _disorder patterns_ in the Python script (patterns are local modifications of the Hamiltonian that can be constricted to one unit cell or can connect neighboring unit cells) together with the desired disorder statistics. The disorder patterns are then replicated 
+across the lattice automatically when unning [KITEx]. KITE handles both standard uncorrelated disorder (e.g., random modifications of on-site energies) and realistic short-range disorder (e.g., vacancies or impurity scattering centers distributed randomly  over the lattice sites with a specified concentration). Several types of disorder can be added simultaneously.
 
 After defining a lattice with the procedure explained in [1. Lattice][tutorial-lattice], we can add disorder to our system.
 Usually, disorder can be modeled either as a modification of onsite potentials appearing on the lattice sites or
