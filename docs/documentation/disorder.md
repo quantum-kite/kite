@@ -127,7 +127,7 @@ short-range disorder types, i.e. vacancy defects, randomly distributed with a ce
 and a more generic multi-orbital disorder which may combine of on-site and hopping terms 
 (also distributed with a certain concentration).
 
-### Example: Vacancy defects
+### Example 1: Vacancy defects
 
 To add vacancy defects with a given
 [`#!python concentration`][structuraldisorder-concentration] on a single sublattice one uses the simple instruction:
@@ -151,16 +151,14 @@ struc_disorder.add_vacancy('B') # add a vacancy to a selected sublattice
     disorder_structural = [struc_disorder_A, struc_disorder_B]
     ```
 
-### More general short-range disorder
+### Example 2: mixed on-site/bond disorder
 
 
-The following example shows a definition of our most general type of disorder, which includes both onsite disorder
+The following example shows a definition of KITE's most general type of disorder, which includes both short-range onsite disorder
 terms and bond modifications.
 This type of disorder can be added as an object of the class [`#!python kite.StructuralDisorder`][structural_disorder].
-The procedure for adding the structural disorder is the same of adding a hopping term to the
-[Pybinding lattice object][lattice],
-with a single difference that the bond disorder is not bounded to the hopping term starting from the `#!python [0, 0]` unit cell,
-which is the case of the hopping term in [Pybinding].
+The procedure for adding the structural disorder is analogous to adding a hopping term to the
+[Pybinding lattice object][lattice].
 
 For the sake of clarity, let us first define sublattices that will compose the disorder.
 In this case we are not restricted to a single unit cell:
@@ -196,7 +194,7 @@ struc_disorder.add_structural_disorder(
 
 # It is possible to add multiple different disorder types which
 #  should be forwarded to the config_system function as a list.
-another_struc_disorder = kite.StructuralDisorder(lat, concentration=0.6)
+another_struc_disorder = kite.StructuralDisorder(lattice, concentration=0.6)
 another_struc_disorder.add_structural_disorder(
     (*node0, *node1, 0.05),
     (*node4, *node5, 0.4),
