@@ -6,12 +6,13 @@ KITE has three different layers:
  
 The [tight-binding][tightbinding] (TB) model is first defined with the [user interface][kitepython].
 KITE's user interface is based on [Pybinding]. However,
-it has additional features that modify the model such as complex disorder and fields modifications. It also features the definition of target functions *e.g*., DOS, conductivity, ... 
+it has additional features that modify the model such as complex disorder and fields modifications.
+It also features the definition of target functions *e.g*., DOS, conductivity, ... 
 The model is exported to a [HDF5]-file, together with the settings for the calculation.
 This file is then given as an input to the main program (*[KITEx][kitex]*).
 The *input* and *output* for the main program are written to the same [HDF5] file.
 
-The workflow is as follows:
+## Steps
 
 1. Build a [`#!python pb.Lattice`][lattice] that describes a tight-binding model (*using [Pybinding]*)
 2. Specify any adaptation (such as disorder of magnetic field) to this [`#!python pb.Lattice`][lattice] (*using [KITE's python interface][kitepython]*)

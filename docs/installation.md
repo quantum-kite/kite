@@ -1,7 +1,7 @@
 !!! warning
 
-    KITE runs exclusively on UNIX-based systems, such as GNU/Linux and Mac OS X.
-    Currently, there is **no** Windows support.
+    Currently, KITE has only be tested on UNIX-based systems, such as GNU/Linux and Mac OS X.
+    There is **no** Windows support.
 
 KITE is written in C++ with code optimisation, including multithreading performance. 
 The Python package [Pybinding][pybinding] is used during pre- and post-processing steps.
@@ -33,14 +33,14 @@ KITE dependends on:
 * [Pybinding][pybinding]
 * [Eigen3][eigen3] (version 3.3.7 or newer)
 * [HDF5][hdf5] (version 1.8.13 or newer)
-* CMake (version 3.9 or newer)
-* gcc (version 4.8.1 or newer)
-* h5py
+* [CMake][cmake] (version 3.9 or newer)
+* [gcc][gcc] (version 4.8.1 or newer)
+* [h5py][h5py]
 
-The compiler **must** support *C++11* features and *OpenMP* parallelization.
+The compiler **must** support *C++11* features and [*OpenMP*][openmp] parallelization.
 
 
-To enable KITE's Gaussian wavepacket propagation functionality, compile the source code with a recent gcc version
+To enable KITE's [Gaussian wavepacket propagation][calculation-gaussian_wave_packet] functionality, compile the source code with a recent gcc version
 (gcc 8.0.0 or newer).
 To check the gcc version, you can use the following command in the terminal:
 
@@ -159,6 +159,7 @@ Alternatively, you might prefer to follow the instructions on the [Pybinding][py
 
 Next, download the source code by the command given in section 1.
 Edit *CMakeLists.txt* in the `#!bash kite/`-directory:
+
 * locate the following statements
   ```
   set(CMAKE C COMPILER "gcc")
@@ -166,7 +167,6 @@ Edit *CMakeLists.txt* in the `#!bash kite/`-directory:
   ```
 
 * replace by
-  
   ```
   set(CMAKE CXX COMPILER "gcc-n")
   set(CMAKE CXX COMPILER "g++-n")
@@ -231,7 +231,12 @@ that generates the appropriata data file. For more details refer to the [tutoria
 
 [repository]: https://github.com/quantum-kite/kite
 [eigen3]: https://eigen.tuxfamily.org/
+[cmake]: https://cmake.org/
+[gcc]: https://gcc.gnu.org/
+[h5py]: https://www.h5py.org/
+[calculation-gaussian_wave_packet]: api/kite.md#calculation-gaussian_wave_packet
 [hdf5]: https://www.hdfgroup.org/
+[openmp]: https://gcc.gnu.org/onlinedocs/libgomp/
 [homebrew]: https://brew.sh/
 [pybinding]: https://docs.pybinding.site/en/stable/install/quick.html
 [tutorial]: documentation/index.md

@@ -25,45 +25,43 @@ The target functions currently available are:
   : Calculates the longitudinal DC conductivity for a set of Fermi energies (uses the $\propto\mathcal{O}(N)$ single-shot method).
   
 
-KITE's first release was restricted to two-dimensional systems. However, since then, there has been an efford to expand the functionalties to three dimensional systems. In the current release, most functionalities are compatible with 3D systems. For details, check the table below:
-        
-    
+KITE's first release was restricted to two-dimensional systems.
+However, since then, there has been an efford to expand the functionalties to three-dimensional systems.
+In the current release, most functionalities are compatible with 3D systems.
+For details, check the table below:
       
-| Method      | 2D   | 3D |
-| :---------- | :----| :----|
-| `DOS`       | :material-check-all: | :material-check-all: |
-| `LDOS`       | :material-check-all: | :material-check: |
-| `ARPES`       | :material-check: | :material-check: |
-| `conductivity_dc`       | :material-check-all:  | :material-check-all: |
-| `singleshot_conductivity_dc`       | :material-check-all:  | :material-check-all: |
-| `optical conductivity`       | :material-check-all:  | :material-check: |
-| `conductivity_optical_nonlinear`    | :material-check:| :material-close:|
-| `gaussian_wave_packet`       | :material-check: | :material-check: |
-| `external magnetic field`       | :material-check-all:  | :material-check: |
+| Method                                                                                  | 2D                   | 3D                   |
+|:----------------------------------------------------------------------------------------|:---------------------|:---------------------|
+| [`#!python dos`][calculation-dos]                                                       | :material-check-all: | :material-check-all: |
+| [`#!python ldos`][calculation-ldos]                                                     | :material-check-all: | :material-check:     |
+| [`#!python arpes`][calculation-arpes]                                                   | :material-check:     | :material-check:     |
+| [`#!python gaussian_wave_packet`][calculation-gaussian_wave_packet]                     | :material-check:     | :material-check:     |
+| [`#!python conductivity_dc`][calculation-conductivity_dc]                               | :material-check-all: | :material-check-all: |
+| [`#!python conductivity_optical`][calculation-conductivity_optical]                     | :material-check-all: | :material-check:     |
+| [`#!python conductivity_optical_nonlinear`][calculation-conductivity_optical_nonlinear] | :material-check:     | :material-close:     |
+| [`#!python magnetic_field`][modification-modification-par-magnetic_field]               | :material-check-all: | :material-check:     |
+| [`#!python singleshot_conductivity_dc`][calculation-singleshot_conductivity_dc]         | :material-check-all: | :material-check-all: |
 
 
 
   :material-check-all: - Extensivelly used and checked
-  
+
   :material-check: - Implemented
   
   :material-close: - Not yet implemented
 
 
-!!! Warning
-    
-        Processing the output of `#!python singleshot_conductivity_dc`
-        
-        
- [`#!python singleshot_conductivity_dc()`][calculation-singleshot_conductivity_dc] works different from the other target-functions in that it just requires a single run with [KITEx][kitex]. Post-processing with [KITE-tools][kitetools] is not required, and instead the required single-shot values of the DC-conductivity can be retrieved directly from 
- the [HDF5]-file once [KITEx][kitex] has run. You can extract the results from the [HDF5] file [as explained in the tutorial][tutorial-hdf5], with `#!python "output.h5"` the name of the  [HDF5] file processed by [KITEx][kitex]:
-                 
-``` python linenums="1"
-    import numpy as np
-    from h5py import File
-    condDC = File("output.h5", "r+")['Calculation']['singleshot_conductivity_dc']['SingleShot']
-    np.savetxt("condDC.dat",condDC)                
-``` 
+!!! Warning "Processing the output of `#!python singleshot_conductivity_dc`"
+
+     [`#!python singleshot_conductivity_dc()`][calculation-singleshot_conductivity_dc] works different from the other target-functions in that it just requires a single run with [KITEx][kitex]. Post-processing with [KITE-tools][kitetools] is not required, and instead the required single-shot values of the DC-conductivity can be retrieved directly from 
+     the [HDF5]-file once [KITEx][kitex] has run. You can extract the results from the [HDF5] file [as explained in the tutorial][tutorial-hdf5], with `#!python "output.h5"` the name of the  [HDF5] file processed by [KITEx][kitex]:
+                     
+    ``` python linenums="1"
+        import numpy as np
+        from h5py import File
+        condDC = File("output.h5", "r+")['Calculation']['singleshot_conductivity_dc']['SingleShot']
+        np.savetxt("condDC.dat",condDC)                
+    ``` 
 
 All target functions require the following parameters:
 
@@ -236,5 +234,7 @@ python plot_dos.py                # display the data
 [calculation-conductivity_optical]: ../api/kite.md#calculation-conductivity_optical
 [calculation-conductivity_optical_nonlinear]: ../api/kite.md#calculation-conductivity_optical_nonlinear
 [calculation-singleshot_conductivity_dc]: ../api/kite.md#calculation-singleshot_conductivity_dc
+
+[modification-modification-par-magnetic_field]: ../api/kite.md#modification-par-magnetic_field
 
 [config_system]: ../api/kite.md#config_system

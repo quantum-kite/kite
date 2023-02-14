@@ -166,7 +166,7 @@ The KITE package for pre-processing is split up in various subclasses and contai
 !!! declaration-class "*class* `#!python kite.Modification(magnetic_field=None, flux=None)`"
 
 
-:   Class that modifies the initially built [`#!python pb.Lattice`][lattice] with a magnetic field.
+:   Class that modifies the initially built [`#!python pb.Lattice`][lattice] with a [magnetic field][magnetic-field].
 
 :   **Parameters**
     : <span id="modification-par-magnetic_field">`#!python magnetic_field`: *`#!python float`*</span>
@@ -581,3 +581,5 @@ The KITE package for pre-processing is split up in various subclasses and contai
 [kitetools-output]: kite-tools.md#output
 [HDF5]: https://www.hdfgroup.org
 [tutorial-hdf5]: ../documentation/editing_hdf_files.md
+
+[magnetic-field]: ../documentation/magnetic.md

@@ -1,33 +1,57 @@
-Static magnetic fields are an important case of lattice modifications that can be performed automatically by KITE. This feature is of particular interest to the study of Landau levels, magneto-transport and magneto-optical effects.
+Static magnetic fields are an important case of lattice modifications that can be performed automatically by KITE. 
+his feature is of particular interest to the study of Landau levels, magneto-transport and magneto-optical effects.
 
 ## Uniform B-fields in KITE: overview
 
-The automated $\mathbf{B}$-field functionality works by the addition of Peierls phases in the Hamiltonian and can be used in conjunction with other lattice modifications, including disorder. This is a new feature under development that currently allows
+The automated $\mathbf{B}$-field functionality works by the addition of Peierls phases in the Hamiltonian and can be
+used in conjunction with other lattice modifications, including disorder.
+This is a new feature under development that currently allows
 
 * uniform $\mathbf{B}$-field in generic 2D lattices (with the B-field perpendicular to the plane)
 * uniform $\mathbf{B}$-field in 3D lattices (with the B-field collinear to the third primitive lattice vector)
 
-The B-field is added by means of the following KITE modification:
+The $\mathbf{B}$-field is added by means of the following [KITE modification][modification-par-magnetic_field]:
 
-``` python
+``` py
 modification = kite.Modification(magnetic_field = mag)
 ``` 
 
-where (`#!python mag`) is the magnetic field strength (in Tesla). When used with periodic boundary conditions, $|\mathbf{B}|$ is restricted to be a multiple of a minimum magnetic field, which is determined internally when generating the configuration file (see details below). 
+where (`#!python mag`) is the magnetic field strength (in Tesla).
+When used with [periodic boundary conditions][configuration-boundaries],
+$|\mathbf{B}|$ is restricted to be a multiple of a minimum magnetic field,
+which is determined internally when generating the configuration file (see details below). 
 
-For example, to compute the DOS of a disordered system subject to the $\mathbf{B}$-field modification discussed above one may use
+For example, to compute the DOS of a disordered system subject to the
+$\mathbf{B}$-field modification discussed above one may use
 
-``` python
-calculation.dos(num_points=100, num_moments= 5000, num_random=10, num_disorder=10)
-kite.config_system(lattice, configuration, calculation, modification=modification, disorder=disorder,filename='B_field.h5")
+``` py linenums="1"
+calculation.dos(
+    num_points=100,
+    num_moments=5000,
+    num_random=10,
+    num_disorder=10
+)
+mod_mag_field = kite.Modification(magnetic_field = mag)
+kite.config_system(
+    lattice,
+    configuration,
+    calculation,
+    modification=mod_mag_field,
+    disorder=disorder,
+    filename="B_field.h5"
+)
 ``` 
-Here, the configuration file requests a DOS calculation with 5000 Chebyshev moments, 10 random vectors and 10 disorder realizations. Note the addition of the lattice modification (`#!python modification=modification`) with respect to the settings discussed in [6. Disorder](disorder.md).
+Here, the configuration file requests a DOS calculation with `#!python 5000` Chebyshev moments, `#!python 10`
+random vectors and `#!python 10` disorder realizations.
+Note the addition of the lattice modification (`#!python modification=mod_mag_field`) with respect to the settings
+as discussed in [the section about disorder](disorder.md).
 
 ## Implementation details
 
 !!! Info "Units"  
 
-    Lattice parameters must be given in nanometers (see example "..." in the KITE folder (link here)).
+    Lattice parameters must be given in nanometers (see example `#!python dos_dccond_square_lattice.py`
+    in the [`#! bash kite/examples/`-folder][examples-folder]).
 
 The magnetic fields considered in KITE are uniform, so the corresponding vector potential is linear. It is naturally expressed in terms of the primitive reciprocal lattice vectors ($\mathbf{b}_{i=1,2,3}$) in the Landau gauge
 
@@ -59,3 +83,7 @@ $$
 where $\Omega_{c}$ is the 3D/2D volume of the unit cell.  When the user requests a magnetic field strength $|\mathbf{B}|$ (in Tesla), KITE calculates $B_{\textrm{min}}$ first and then uses that to determine the required $n$ to achieve the closest possible value of $|\mathbf{B}|$ by rounding $\mathbf{B}|/\mathbf{B}_{\textrm{min}}=n$ to the nearest integer. If $n$ rounds down to zero, it means that the system is too small to support the requested magnetic field. When determining $B_{\textrm{min}}$, _KITE assumes that the primitive vectors in the Python configuration script are given in nanometers_.
 
 
+
+[modification-par-magnetic_field]: ../api/kite.md#modification-par-magnetic_field
+[configuration-boundaries]: ../api/kite.md#configuration-boundaries
+[examples-folder]: more_examples/additional_examples.md

@@ -17,12 +17,15 @@ Chebyshev moments, the time-consuming part of the calculations.
 For example: if the user wants to compute the optical conductivity at several Fermi energies,
 the Chebyshev moments are computed once and [KITE-tools][kitetools] can be used to obtain the optical conductivities for all Fermi energies.
 
+## Using the post-processing
+
 For this purpose, the user has the flexibility to override the parameters from the python script by specifying them
 in the command line interface. As an example, let us consider the example  `#!python dos_optcond_gaussian_disorder.py`: If we consider the setting
 
 ``` bash
 ./KITE-tools optcond_gaussian_disorder-output.h5 --CondOpt -F 1.2 -O 0 10 1000 -N optcond1.2.dat
 ```
+
 KITE-tools will calculate the optical conductivity with a Fermi energy specified by the option `#!bash -F 1.2`
 (in units specified in the configuration file). The option `#!bash -O` sets the frequency interval between `#!bash 0`and `#!bash 10`
 (in the same units) and the total number of frequency points (`#!bash 1000`). These options will be used to recalculate

@@ -16,7 +16,7 @@ The tutorial is structured as follows:
     
     In the section [Examples], some applications to different structures are given, including the caluclation.
     More examples can be found in the KITE-repository under
-    [kite/examples](https://github.com/quantum-kite/kite/tree/master/examples/readme.md).
+    [kite/examples/][examples-folder].
 
 !!! Example "First calculation with KITE"
     
@@ -85,4 +85,5 @@ The tutorial is structured as follows:
 [configuration-custom_local_print]: ../api/kite.md#configuration-custom_local_print
 [calculation]: ../api/kite.md#calculation
 
+[examples-folder]: more_examples/additional_examples.md
 
