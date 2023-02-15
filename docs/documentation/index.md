@@ -15,7 +15,7 @@ The tutorial is structured as follows:
 !!! Example "First calculation with KITE"
     
     Let us do a simple first calculation with KITE.
-    *(Do not worry about the details, these will be covered later.)*
+    *(Do not worry about the details just now, these will be covered later in the tutorial.)*
 
     !!! Tip
     
