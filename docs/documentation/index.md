@@ -3,14 +3,14 @@ You will learn about the different steps in KITE's workflow and how to tweak the
 
 The tutorial is structured as follows:
 
-1. Learn about KITE's workflow
-2. Build a tight-binding model using [`#!python pb.Lattice`][lattice]
-3. How to specify the settings for a calculation
-4. How to calculate the different target-functions
-5. Post-process the results with [*KITE-tools*][kitetools]
+1. Learning KITE's workflow
+2. Building a tight-binding model using [`#!python pb.Lattice`][lattice]
+3. How to define the settings for KITE simulations
+4. How to calculate the different target functions 
+5. Post-processing the results with [*KITE-tools*][kitetools]
 6. Adding disorder or magnetic field to the tight-binding model
 7. How to edit the [HDF5]-file
-8. Optimize the settings for various calculations
+8. Optimizing the settings for various calculations
 
 !!! Info "More examples"
     
