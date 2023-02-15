@@ -12,12 +12,6 @@ The tutorial is structured as follows:
 7. How to edit the [HDF5]-file
 8. Optimizing the settings for various calculations
 
-!!! Info "More examples"
-    
-    In the section [Examples], some applications to different structures are given, including the caluclation.
-    More examples can be found in the KITE-repository under
-    [kite/examples/][examples-folder].
-
 !!! Example "First calculation with KITE"
     
     Let us do a simple first calculation with KITE.
@@ -52,9 +46,16 @@ The tutorial is structured as follows:
     <div>
       <figure>
         <img src="../assets/images/getting_started/first_calculation.png" width="300" />
-        <figcaption>The result from your first KITE calculation: the density of states for graphene.</figcaption>
+        <figcaption>The result from your first KITE calculation: the density of states of monolayer graphene.</figcaption>
       </figure>
     </div>
+
+
+
+!!! Info "Examples" and "More Examples"
+    
+    The section [Examples] illustrates the concepts discussed in the Tutorial (Secs. 1-9) with simple examples.
+    Additional resources are available in KITE's repository [kite/examples/][examples-folder], including the scripts used to generate the figures in KITE's presentation paper.   
 
 
 [HDF5]: https://www.hdfgroup.org
