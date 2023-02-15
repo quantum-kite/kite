@@ -48,7 +48,7 @@ disorder.add_disorder('A', 'Gaussian', 0.1, 0.1)
 disorder.add_disorder('B', 'Uniform', 0.2, 0.1)
 ```
 
-The final step consists of adding the disorder pattern(s) as an additional parameter into the
+The final step consists of adding the disorder as an additional parameter into the
 [`#!python kite.config_system`][config_system] function:
 
 ``` python
