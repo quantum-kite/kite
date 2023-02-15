@@ -18,16 +18,15 @@ KITE allows the user to select between on-site and structural disorder by choosi
 in the [python interface][kite-script].
 The interface provides two different classes of disorder:
 
-* [`#!python kite.Disorder`][disorder] - onsite disorder with three possible statistical distributions
+* [`#!python kite.Disorder`][disorder] - onsite disorder with two possible statistical distributions
 * [`#!python kite.StructuralDisorder`][structural_disorder] - multi-orbital impurities and defects (including bond disorder) with a given concentration
 
 ## Onsite disorder
 
-[`#!python kite.Disorder`][disorder] adds randomly generated on-site terms at the sites of a desired sublattice based on a certain statistical distribution:
+[`#!python kite.Disorder`][disorder] adds randomly generated on-site terms at the sites of a desired sublattice drawn from one of the two statistical distributions:
 
 * Gaussian
 * Uniform
-* Deterministic
 
 One can select a sublattice type in which the disorder will appear, the mean
 value and the standard deviation of the selected distribution.
@@ -41,16 +40,13 @@ disorder = kite.Disorder(lattice)
 disorder.add_disorder('A', 'Gaussian', 0.1, 0.1)
 ```
 
-In a single object it is possible to select multiple sublattices, each of one with different disorder distributions
-following the rule [`#!python kite.Disorder.add_disorder('sublattice', 'type', mean, std)`][disorder-add_disorder] :
+In a single object it is possible to select multiple sublattices, each with its own disorder distribution
+following the rule [`#!python kite.Disorder.add_disorder('sublattice', 'type', mean, std)`][disorder-add_disorder]. For example,
 
 ``` python
 disorder.add_disorder('A', 'Gaussian', 0.1, 0.1)
 disorder.add_disorder('B', 'Uniform', 0.2, 0.1)
-disorder.add_disorder('C', 'Deterministic', 0.1)
 ```
-
-In the case of deterministic disorder, the standard deviation is not set.
 
 The final step consists of adding the disorder pattern as an additional parameter into the
 [`#!python kite.config_system`][config_system] function:
@@ -80,7 +76,7 @@ from pybinding.repository import graphene
 lattice = graphene.monolayer()
 # add Disorder
 disorder = kite.Disorder(lattice)
-disorder.add_disorder('B', 'Deterministic', -1.0)
+disorder.add_disorder('B', 'Uniform', +1.5, 1.0)
 disorder.add_disorder('A', 'Uniform', +1.5, 1.0)
     # number of decomposition parts [nx,ny] in each direction of matrix.
 # This divides the lattice into various sections, each of which is calculated in parallel
@@ -104,8 +100,8 @@ configuration = kite.Configuration(
     length=[lx, ly],
     boundaries=[mode, mode],
     is_complex=False,
-    precision=1
-)
+    precision=1)
+    
 # require the calculation of DOS
 calculation = kite.Calculation(configuration)
 calculation.dos(num_points=5000, num_moments=512, num_random=1, num_disorder=1)
