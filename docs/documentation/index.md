@@ -54,8 +54,8 @@ The tutorial is structured as follows:
 
 !!! Info "Examples" and "More Examples"
     
-    The section [Examples] illustrates the concepts discussed in the Tutorial (Secs. 1-9) with simple examples.
-    Additional resources are available in KITE's repository [kite/examples/][examples-folder], including the scripts used to generate the figures in KITE's presentation paper.   
+    Section [Examples] contains step-by-step examples aimed to expand on key concepts covered by the Tutorial.
+    Additional resources are available in the section [More examples][examples-folder].
 
 
 [HDF5]: https://www.hdfgroup.org
