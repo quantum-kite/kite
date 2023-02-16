@@ -16,14 +16,12 @@ The [tight-binding][tightbinding] (TB) model is first defined on a [Python inter
 
 ## Steps
 
-1. Build a [`#!python pb.Lattice`][lattice] that describes a tight-binding model (*using [Pybinding]*)
-2. Specify any adaptation (such as disorder of magnetic field) to this [`#!python pb.Lattice`][lattice] (*using [KITE's python interface][kitepython]*)
-3. Specify the settings (*using [KITE's python interface][kitepython]*)
-4. Specify the quantities to be calculated (*using [KITE's python interface][kitepython]*)
-5. Export the [HDF5] file (*using [KITE's python interface][kitepython]*)
-6. Perform the calculations with the [HDF5] file (*using [KITEx][kitex]*)
-7. Run the post-processing tools (*using [KITE-tools][kitetools]*)
-8. Visualise the data
+1. Build a [`#!python pb.Lattice`][lattice] that describes a regular tight-binding model (*Section 2*)
+2. Add optional terms to the TB Hamiltonian, including disorder patterns and magnetic field modifications (covered in *Section 6 and 7*)
+3. Define the calculations settings (*Section 3*)
+4. Specify the quantities (target functions) to be calculated (*Section 4*)
+5. Export KITE model to the [HDF5] file and run the calculations using [KITEx][kitex] (*Section 4*)
+6. Run the post-processing tools using [KITE-tools][kitetools] and visualise the data (*Section 5*)
 
 !!! Tip 
     
