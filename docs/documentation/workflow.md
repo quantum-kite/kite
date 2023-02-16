@@ -5,7 +5,7 @@ KITE has three different layers:
 * [Post-processing tool (*C++*)][kitetools]
 
  
-The [tight-binding][tightbinding] (TB) model is defined on a [Python interface][kitepython] based on [Pybinding]. The TB parameterisation enjoys from a number of KITE-specific advanced features, including disorder patterns and magnetic-field modifications. The KITE model -- which includes the desired target-function calculations, such as DOS and conductivies -- is exported to a [HDF5]-file, together with the calculation settings (i.e. system size, boundary conditions, parallelization options, number of realizations, etc.). This file is then given as an input to the main program (*[KITEx][kitex]*). The *input* and *output* for the main program are written to the same [HDF5] file. The complete workflow is summarized in the figure below.
+The [tight-binding][tightbinding] (TB) model is defined on a [Python interface][kitepython] based on [Pybinding]. The TB parameterisation enjoys from a number of KITE-specific advanced features, including disorder patterns and magnetic-field modifications. The KITE model -- which includes the desired target-function calculations, such as DOS and conductivies -- is exported to a [HDF5]-file, together with the calculation settings (i.e. system size, boundary conditions, parallelization options, etc.). This file is then given as an input to the main program (*[KITEx][kitex]*). The *input* and *output* for the main program are written to the same [HDF5] file. The complete workflow is summarized in the figure below.
 
 <div>
   <figure>
