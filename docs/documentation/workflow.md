@@ -3,6 +3,13 @@ KITE has three different layers:
 * [User interface (*Python*)][kitepython]
 * [Main program (*C++*)][kitex]
 * [Post-processing tool (*C++*)][kitetools]
+
+<div>
+  <figure>
+    <img src="../../assets/images/getting_started/schematic_kite.png" width="600px" />
+    <figcaption>The different components of KITE and its workflow.</figcaption>
+  </figure>
+</div>
  
 The [tight-binding][tightbinding] (TB) model is first defined with the [user interface][kitepython].
 KITE's user interface is based on [Pybinding]. However,
@@ -27,12 +34,7 @@ The *input* and *output* for the main program are written to the same [HDF5] fil
     
     It is possible to use a [simple python script][script] for the whole workflow.
 
-<div>
-  <figure>
-    <img src="../../assets/images/getting_started/schematic_kite.png" width="600px" />
-    <figcaption>The different components of KITE and its workflow.</figcaption>
-  </figure>
-</div>
+
 
 [HDF5]: https://www.hdfgroup.org
 [Pybinding]: https://docs.pybinding.site/en/stable
