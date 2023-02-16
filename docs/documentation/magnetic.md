@@ -7,7 +7,7 @@ The automated $\mathbf{B}$-field functionality works by the addition of Peierls 
 used in conjunction with other lattice modifications, including disorder.
 This is a new feature under development that currently allows
 
-* uniform $\mathbf{B}$-field in generic 2D lattices (with the B-field perpendicular to the plane)
+* uniform $\mathbf{B}$-field in 2D lattices (with the B-field perpendicular to the plane)
 * uniform $\mathbf{B}$-field in 3D lattices (with the B-field collinear to the third primitive lattice vector)
 
 The $\mathbf{B}$-field is added by means of the following [KITE modification][modification-par-magnetic_field]:
@@ -59,7 +59,7 @@ $$
 \mathbf{A}\left(\mathbf{r}\right)=\frac{h}{\left(2\pi\right)^{2}e}\frac{n}{N_{2}}\left(\mathbf{r}\cdot\mathbf{b}_{2}\right)\mathbf{b}_{1}
 $$
 
-where h is Planck's constant, $e>0$ is the elementary charge and $N_{2}$ is the number of unit cells along the $\mathbf{a}_{2}$ direction (primitive vector of the direct lattice) and $n$ is an integer. The corresponding magnetic field points along the $\mathbf{a}_{3}$ direction for 3D systems and perpendicularly to the basal plane ($\mathbf{e}_{\perp}\equiv\hat{\mathbf{z}}$) direction for 2D systems:
+where h is Planck's constant, $e>0$ is the elementary charge, $N_{2}$ is the number of unit cells along the $\mathbf{a}_{2}$ direction (primitive vector of the direct lattice) and $n$ is an integer. The corresponding magnetic field points along the $\mathbf{a}_{3}$ direction for 3D systems and perpendicularly to the basal plane ($\mathbf{e}_{\perp}\equiv\hat{\mathbf{z}}$) direction for 2D systems:
 
 
 $$
