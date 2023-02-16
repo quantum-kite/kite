@@ -55,7 +55,7 @@ The tutorial is structured as follows:
 !!! Info "Examples" and "More Examples"
     
     Section [Examples] contains step-by-step examples aimed to expand on key concepts covered by the Tutorial.
-    Additional resources are available in the section [More examples][examples-folder].
+    Additional resources are provided in [More examples][examples-folder].
 
 
 [HDF5]: https://www.hdfgroup.org
