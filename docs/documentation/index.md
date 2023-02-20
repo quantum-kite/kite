@@ -45,7 +45,7 @@ The tutorial is structured as follows:
   
     <div>
       <figure>
-        <img src="../assets/images/getting_started/first_calculation.png" width="300" />
+        <img src="../assets/images/getting_started/first_calculation.png" style="width: 40em;" />
         <figcaption>The result from your first KITE calculation: the density of states of monolayer graphene.</figcaption>
       </figure>
     </div>

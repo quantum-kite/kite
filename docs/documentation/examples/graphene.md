@@ -63,7 +63,7 @@ plt.show()
 
 <div>
   <figure>
-    <img src="../../../assets/images/getting_started/graphene_example.png" width="400px"/>
+    <img src="../../../assets/images/getting_started/graphene_example.png" style="width: 40em;"/>
     <figcaption>A visualization for the defined lattice for graphene.</figcaption>
   </figure>
 </div>
@@ -104,7 +104,7 @@ plt.show()
 
 <div>
   <figure>
-    <img src="../../../assets/images/getting_started/first_calculation.png" width="300" />
+    <img src="../../../assets/images/getting_started/first_calculation.png" style="width: 40em;" />
     <figcaption>The DOS for graphene.</figcaption>
   </figure>
 </div>

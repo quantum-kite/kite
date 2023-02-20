@@ -107,7 +107,7 @@ kite.config_system(lattice, configuration, calculation, filename='on_site_disord
 ``` 
 <div>
   <figure>
-    <img src="../../assets/images/disorder/doc_disorder_example_1.png" width="300" style="display: inline-block;"/>
+    <img src="../../assets/images/disorder/doc_disorder_example_1.png" style="width: 40em;"/>
     <figcaption>DOS for the on-site disorder example.</figcaption>
   </figure>
 </div>
@@ -295,7 +295,7 @@ with the resulting density of states:
 
 <div>
   <figure>
-    <img src="../../assets/images/disorder/doc_disorder_example_2.png" width="300" style="display: inline-block;"/>
+    <img src="../../assets/images/disorder/doc_disorder_example_2.png" style="width: 40em;"/>
     <figcaption>DOS for the structural disorder example.</figcaption>
   </figure>
 </div>

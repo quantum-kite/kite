@@ -40,7 +40,7 @@ We can modify the Fermi energy and produce a different optical conductivities wi
 We can now compare the real component of two different optical conductivities  
 <div>
      <figure>
-        <img src="../../assets/images/tutorial/opt_cond_tools.png" width="300" />
+        <img src="../../assets/images/tutorial/opt_cond_tools.png" style="width: 40em" />
         <figcaption>Comparision between the real components of the optical conductivity of disordered graphene for two Fermi energies.</figcaption>
       </figure>
 </div>

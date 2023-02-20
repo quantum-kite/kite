@@ -171,7 +171,7 @@ plt.ylabel('DOS (a.u)')
 ```
 <div>
   <figure>
-    <img src="../../assets/images/getting_started/dos.png" width="400px" style="display: inline-block;"/>
+    <img src="../../assets/images/getting_started/dos.png" style="width: 40em;"/>
     <figcaption> </figcaption>
   </figure>
 </div>

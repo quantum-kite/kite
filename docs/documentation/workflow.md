@@ -9,7 +9,7 @@ The [tight-binding][tightbinding] (TB) model is defined on a [Python interface][
 
 <div>
   <figure>
-    <img src="../../assets/images/getting_started/schematic_kite.png" width="600px" />
+    <img src="../../assets/images/getting_started/schematic_kite.png" style="width: 40em" />
     <figcaption>The different components of KITE and its workflow.</figcaption>
   </figure>
 </div>
