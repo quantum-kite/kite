@@ -45,7 +45,7 @@ The class [`#!python kite.Configuration`][configuration] carries the following i
 ## [Spectrum Range][configuration-spectrum_range]
 : The optional [`#!python spectrum_range`][configuration-spectrum_range] is an array of reals.
   By default, [KITEx][kitex] executes an automated rescaling of the Hamiltonian, see the [Documentation][documentation].
-  Advanced users should avoid the automated rescaling and override this feature using `#!python spectrum_range=[Emin,Emax]`, where `#!python Emin, Emax` are the minimum, maximum eigenvalues of the TB matrix. _Lower/upper bounds on smallest/largest energy eigenvalues should be used if exact eigenvalues are unknown_ _(often the case in systems with disorder); see Sec. [disorder] for more information_. 
+  Advanced users should avoid the automated rescaling and override this feature using `#!python spectrum_range=[Emin,Emax]`, where `#!python Emin, Emax` are the minimum, maximum eigenvalues of the TB matrix. _Lower/upper bounds on smallest/largest energy eigenvalues should be used if exact eigenvalues are unknown_ _(often the case in systems with disorder); see Sec. [Disorder] for more information_. 
 
 The [`#!python kite.Configuration`][configuration] object for a 2D lattice is thus structured in the following way:
 
