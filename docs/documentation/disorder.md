@@ -37,7 +37,7 @@ use the following procedure:
 # define an object based on the lattice
 disorder = kite.Disorder(lattice)
 # add Gaussian distributed disorder at all sites of a selected sublattice
-disorder.add_disorder('A', 'Gaussian', 0.1, 0.1)
+disorder.add_disorder('A', 'Gaussian', mean, std)
 ```
 
 In a single object it is possible to select multiple sublattices, each with its own disorder distribution
