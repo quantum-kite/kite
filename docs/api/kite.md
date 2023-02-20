@@ -8,7 +8,7 @@ The KITE package for pre-processing is split up in various subclasses and contai
 * [*function make_pybinding_model*][make_pybinding_model]
 * [*function estimate_bounds*][estimate_bounds]
 * [*function config_system*][config_system]
-* [*warnind LoudDeprecationWarning*][loud_deprecation_warning]
+* [*warning LoudDeprecationWarning*][loud_deprecation_warning]
 
 ## StructuralDisorder
 
