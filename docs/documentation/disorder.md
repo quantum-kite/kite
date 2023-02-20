@@ -60,39 +60,26 @@ distributions on each sublattice is given below:
 
 ``` python linenums="1"
 import kite
+import numpy as np
 from pybinding.repository import graphene
 
-""" On-site disorder
-    Lattice : Monolayer graphene;
-    Disorder : Disorder class Deterministic and Uniform at different sublattices,
-    Configuration : System size 512×512, with domain decomposition (nx=ny=2),
-                    periodic boundary conditions,
-                    double precision, automatic scaling;
-    Calculation : Density of States (DSS);
-    Modification : magnetic field is off;
-"""
-
 # load graphene lattice 
-lattice = graphene.monolayer()
+lattice = graphene.monolayer(nearest_neighbors=1,onsite=(0,0),t=-2.7)
+
 # add Disorder
 disorder = kite.Disorder(lattice)
-disorder.add_disorder('B', 'Uniform', +1.5, 1.0)
-disorder.add_disorder('A', 'Uniform', +1.5, 1.0)
-    # number of decomposition parts [nx,ny] in each direction of matrix.
-# This divides the lattice into various sections, each of which is calculated in parallel
-nx = ny = 2
-# number of unit cells in each direction.
-lx = ly = 512
+mean = 1.5 # mean
+std  = 1.0 # standard deviation
+disorder.add_disorder('A', 'Uniform', mean, std)
 
-# make config object which caries info about
-# - the number of decomposition parts [nx, ny],
-# - lengths of structure [lx, ly]
-# - boundary conditions [mode,mode, ... ] with modes:
-#   . "periodic"
-#   . "open"
-#   . "twisted" -- this option needs the extra argument angles
-#   . "random"
+# Manual rescaling: lower/upper bounds on smallest/largest energy eigenvalue
+t = -2.7
+Emax = 3*np.abs(t) + mean + np.sqrt(3)*std
+Emin = -3*np.abs(t) + mean - np.sqrt(3)*std
 
+# Calculation settings
+nx = ny = 2    #number of decomposition parts
+lx = ly = 1024 #number of unit cells in each direction
 # Boundary Mode
 mode = "periodic"
 configuration = kite.Configuration(
@@ -100,7 +87,8 @@ configuration = kite.Configuration(
     length=[lx, ly],
     boundaries=[mode, mode],
     is_complex=False,
-    precision=1)
+    precision=1,
+    spectrum_range=[Emin,Emax])
     
 # require the calculation of DOS
 calculation = kite.Calculation(configuration)
