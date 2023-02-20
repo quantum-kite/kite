@@ -91,7 +91,7 @@ configuration = kite.Configuration(
 [DOS]: index.md
 [conductivity]: index.md
 [modifications]: index.md
-[disorder]: index.md
+[Disorder]: disorder.md 
 [Examples]: examples/graphene.md
 
 [configuration]: ../api/kite.md#configuration
