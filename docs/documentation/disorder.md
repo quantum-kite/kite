@@ -59,11 +59,21 @@ A complete example that calculates the average density of states of graphene wit
 distributions on each sublattice is given below:
 
 ``` python linenums="1"
+""" Onsite disorder
+    Lattice : Monolayer graphene (from Pybinding repository);
+    Disorder : Disorder class Deterministic and Uniform at different sublattices,
+    Configuration : size of the system 1024×1024, with domain decomposition (nx=ny=2),
+                    periodic boundary conditions,
+                    double precision, automatic scaling;
+    Calculation : DOS;
+    Modification : magnetic field is off;
+"""
+
 import kite
 import numpy as np
 from pybinding.repository import graphene
 
-# load graphene lattice 
+# load graphene lattice from Pybinding repository 
 lattice = graphene.monolayer(nearest_neighbors=1,onsite=(0,0),t=-2.7)
 
 # add Disorder
@@ -193,10 +203,10 @@ superimposed to the clean system.
 The following script has a minimal example of how to configure the structural disorder
 
 ``` python linenums="1"
-""" Bond disorder
-    Lattice : Lattice : Monolayer graphene;
-    Disorder : Bond disorder + vacancy defects;
-    Configuration : size of the system 512x512, no domain decomposition (nx=ny=1),
+""" Mixed short-range disorder
+    Lattice : Monolayer graphene (from Pybinding repository);
+    Disorder : StructuralDisorder class bond and vacancy disorder;
+    Configuration : size of the system 1024x1024, with domain decomposition (nx=ny=2),
                     periodic boundary conditions,
                     double precision, manual scaling;
     Calculation : DOS;
@@ -204,97 +214,81 @@ The following script has a minimal example of how to configure the structural di
 """
 
 import kite
+import numpy as np
 from pybinding.repository import graphene
 
-def honeycomb_lattice(onsite=(0, 0)):
-    """Make a honeycomb lattice with nearest neighbor hopping"""
+#load graphene lattice from Pybinding repository
+lattice = graphene.monolayer(nearest_neighbors=1,onsite=(0,0),t=-2.7)
 
-    theta = np.pi / 3
-    a1 = np.array([1 + np.cos(theta), np.sin(theta)])
-    a2 = np.array([0, 2 * np.sin(theta)])
+# Add short-range mixed disorder as an object of a class StructuralDisorder.
+# In this manner we can add onsite and bond defects with a specific concentration.
 
-    # create a lattice with 2 primitive vectors
-    lat = pb.Lattice(
-        a1=a1,
-        a2=a2
-    )
+node0 = [[+0, +0], 'A']
+node1 = [[+0, +0], 'B']
+node2 = [[+1, +0], 'A']
+node3 = [[+0, +1], 'B']
+node4 = [[+0, +1], 'A']
+node5 = [[-1, +1], 'B']
 
-    # Add sublattices
-    lat.add_sublattices(
-        # name, position, and onsite potential
-        ('A', [0, 0], onsite[0]),
-        ('B', [1, 0], onsite[1])
-    )
+struc_disorder_one = kite.StructuralDisorder(lattice, concentration=0.05)
+struc_disorder_one.add_structural_disorder(
 
-    # Add hoppings
-    lat.add_hoppings(
-        # inside the main cell, between which atoms, and the value
-        ([0, 0], 'A', 'B', - 1),
-        # between neighboring cells, between which atoms, and the value
-        ([-1, 0], 'A', 'B', - 1),
-        ([-1, 1], 'A', 'B', - 1),
-    )
+# add bond disorder in the form
+# [from unit cell], 'sublattice_from', [to_unit_cell], 'sublattice_to', value:
+(*node0, *node1, 1),
+(*node1, *node2, 1),
+(*node2, *node3, 1),
+(*node3, *node4, 1),
+(*node4, *node5, 1),
+(*node5, *node0, 1),
+# in this way we can add onsite disorder in the form [unit cell], 'sublattice', value
+([+0, +0], 'B', 0.3))
 
-    # Add bond disorder as an object of a class StructuralDisorder.
-    # In this manner we can add onsite and bond defects
-    # with a specific concentration, which will be added to the simulated system.
-    # The procedure for adding is same as adding the hopping, with the difference
-    # that the bond disorded is not bounded to one site in the [0, 0]
-    # unit cell.
-    node0 = [[+0, +0], 'A']
-    node1 = [[+0, +0], 'B']
-    node2 = [[+1, +0], 'A']
-    node3 = [[+0, +1], 'B']
-    node4 = [[+0, +1], 'A']
-    node5 = [[-1, +1], 'B']
+# It is possible to add multiple different disorder type which
+# should be forwarded to the export_lattice function as a list.
 
-    struc_disorder_one = kite.StructuralDisorder(lat, concentration=0.05)
-    struc_disorder_one.add_structural_disorder(
-        # add bond disorder in the form
-        #  [from unit cell], 'sublattice_from', [to_unit_cell], 'sublattice_to', value:
-        (*node0, *node1, 1),
-        (*node1, *node2, 1),
-        (*node2, *node3, 1),
-        (*node3, *node4, 1),
-        (*node4, *node5, 1),
-        (*node5, *node0, 1),
-        # in this way we can add onsite disorder in the form [unit cell], 'sublattice', value
-        ([+0, +0], 'B', 0.3)
-    )
-    # It is possible to add multiple different disorder type which
-    # should be forwarded to the export_lattice function as a list.
-    struc_disorder_two = kite.StructuralDisorder(lat, concentration=0.2)
-    struc_disorder_two.add_structural_disorder(
-        (*node0, *node1, 0.4),
-        (*node4, *node5, 0.4),
-        (*node5, *node0, 0.4),
-        ([+0, +0], 'B', 0.4)
-    )
-    struc_disorder_two.add_vacancy('B')
+struc_disorder_two = kite.StructuralDisorder(lattice, concentration=0.2)
+struc_disorder_two.add_structural_disorder(
+    (*node0, *node1, 0.4),
+    (*node4, *node5, 0.4),
+    (*node5, *node0, 0.4),
+    ([+0, +0], 'B', 0.4))
 
-    struc_disorder_three = kite.StructuralDisorder(lat, concentration=0.01)
-    struc_disorder_three.add_vacancy('A')
+struc_disorder_two.add_vacancy('B')
 
-    # if there is disorder it should be returned separately from the lattice
-    return lat, [struc_disorder_one, struc_disorder_two, struc_disorder_three]
+struc_disorder_three = kite.StructuralDisorder(lattice, concentration=0.01)
+struc_disorder_three.add_vacancy('A')
 
+# if there is disorder it should be returned separately from the lattice
+disorder_structural = [struc_disorder_one, struc_disorder_two, struc_disorder_three]
 
-# load a honeycomb lattice and structural_disorder
-lattice, disorder_structural = honeycomb_lattice()
-# number of decomposition parts in each direction of matrix.
-# This divides the lattice into various sections, each of which is calculated in parallel
-nx = ny = 1
-# number of unit cells in each direction.
-lx = ly = 512
-# Boundary Mode
+# Manual rescaling: lower/upper bounds on smallest/largest energy eigenvalue
+
+t = -2.7
+Emax = 3*np.abs(t)*1.2 
+Emin = -3*np.abs(t)*1.2
+
+#Calculation settings
+
+nx = ny = 2     #number of decomposition parts
+lx = ly = 1024  #number of decomposition parts 
+
+#Boundary mode
 mode = "periodic"
-configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=[mode, mode],
-                                   is_complex=False, precision=1, spectrum_range=[-15, 15])
+configuration = kite.Configuration(
+    divisions=[nx, ny],
+    length=[lx, ly],
+    boundaries=[mode, mode],
+    is_complex=False,
+    precision=1,
+    spectrum_range=[Emin,Emax])
+
 # require the calculation of DOS
 calculation = kite.Calculation(configuration)
-calculation.dos(num_moments=1024, num_random=1, num_disorder=1, num_points=1000)
+calculation.dos(num_points=5000, num_moments=512, num_random=1, num_disorder=1)
+
 # configure the *.h5 file
-kite.config_system(lattice, configuration, calculation, filename='structural_disorder.h5',
+kite.config_system(lattice, configuration, calculation, filename='mixed_disorder.h5',
                    disorder_structural=disorder_structural)
 ```
 
