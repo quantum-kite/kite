@@ -61,7 +61,7 @@ distributions on each sublattice is given below:
 ``` python linenums="1"
 """ Onsite disorder
     Lattice : Monolayer graphene (from Pybinding repository);
-    Disorder : Disorder class Deterministic and Uniform at different sublattices,
+    Disorder : Uncorrelated on-site disorder (uniform PDF) on single sublattice;
     Configuration : size of the system 1024×1024, with domain decomposition (nx=ny=2),
                     periodic boundary conditions,
                     double precision, automatic scaling;
@@ -205,7 +205,7 @@ The following script has a minimal example of how to configure the structural di
 ``` python linenums="1"
 """ Mixed short-range disorder
     Lattice : Monolayer graphene (from Pybinding repository);
-    Disorder : StructuralDisorder class bond and vacancy disorder;
+    Disorder : StructuralDisorder class - bond and vacancy disorder;
     Configuration : size of the system 1024x1024, with domain decomposition (nx=ny=2),
                     periodic boundary conditions,
                     double precision, manual scaling;
