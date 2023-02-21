@@ -1,7 +1,7 @@
 KITE's disorder implementation — general-purpose and user-friendly — is one of its main features.
 The inclusion of disorder in a given system follows a simple recipe:
 the user specifies one or more _disorder patterns_ in the [Python interface][kite-script] together with the desired disorder statistics.
-This information is passed on to [KITEx] and used to perform the required modifications of on-site energies and hopping terms across the whole lattice _on-the-fly_.
+This information is passed on to [KITEx] and used to automatically perform the required modifications of on-site energies and hopping terms across the whole lattice _on-the-fly_.
 
 !!! Info
     Disorder patterns are local modifications of the Hamiltonian that can be constricted to one unit cell or can connect neighboring unit cells.
@@ -9,10 +9,9 @@ This information is passed on to [KITEx] and used to perform the required modifi
 
 KITE handles both standard uncorrelated disorder (e.g., random on-site energies) and realistic
 short-range disorder (e.g., vacancies or impurity scattering centers distributed randomly over the
-lattice sites with a specified concentration).
-Different types of disorder can be added simultaneously. 
+lattice sites with a specified concentration). KITE can handle multiple disorder patterns simultaneously.
 
-After defining a [regular lattice][tutorial-lattice], disorder can be added to the system.
+_Disorder implementation_: After defining a [regular lattice][tutorial-lattice], disorder can be added to the system.
 KITE allows the user to select between on-site and structural disorder by choosing between predefined classes
 in the [python interface][kite-script].
 The interface provides two different classes of disorder:
