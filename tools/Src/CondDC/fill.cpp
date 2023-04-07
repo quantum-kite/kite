@@ -9,6 +9,7 @@
 #include <Eigen/Dense>
 #include <complex>
 #include "H5Cpp.h"
+#include <vector>
 #include "../Tools/parse_input.hpp"
 #include "../Tools/systemInfo.hpp"
 #include "conductivity_dc.hpp"

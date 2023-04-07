@@ -1,0 +1,109 @@
+
++------------------------------------------------------------------------+
+|            Chebyshev Polynomial Green's Function Approach              | 
+|             to Real-Space Quantum Transport Simulations                | 
+|                                                                        | 
+|                     KITE | Release 1.1                                 | 
+|                     Kite home: quantum-kite.com                        | 
+|                                                                        | 
+|    Reference: S. M. Joao et al., R. Soc. Open Sci. 7, 191809 (2020)    | 
+|                                                                        | 
+|    Created by Simao M. Joao, Joao V. Lopes (Universidade do Porto),    | 
+|      Tatiana G. Rappoport (Universidade Federal Rio de Janeiro),       | 
+|        Misa Andelkovic, Lucian Covaci (University of Antwerp)          | 
+|                and Aires Ferreira (University of York)                 | 
+|                                                                        | 
+|            Funded by The Royal Society | royalsociety.org              | 
+|                                                                        | 
+|    Copyright (C) 2018-2022, M. Andelkovic, L. Covaci, A. Ferreira,     | 
+|                S. M. Joao, J. V. Lopes, T. G. Rappoport                | 
+|                                                                        | 
+|  This program is free software: you can redistribute it and/or modify  | 
+|  it under the terms of the GNU General Public License as published by  | 
+|  the Free Software Foundation, either version 3 of the License, or     | 
+|  (at your option) any later version.                                   | 
+|                                                                        | 
+|  This program is distributed in the hope that it will be useful,       | 
+|  but WITHOUT ANY WARRANTY; without even the implied warranty of        | 
+|  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                  | 
+|  See the GNU General Public License for more details.                  | 
++------------------------------------------------------------------------+
+
+------------------------------ INFORMATION ------------------------------
+Linear response functions in units of e^2/h.                              
+To stop these messages, set VERBOSE to 0 in the Makefile.                 
+To see debug messages, set DEBUG to 1 in the Makefile.                    
+------------------------------------------------------------------------- 
+
+------- FLAGS SET -------
+DEBUG: 0
+VERBOSE: 1
+-------------------------
+
+
+Starting program...
+
+Information about the lattice obtained from the configuration file:
+Dimension:           2
+Linear dimension:    512 512
+Complex:             0
+Unit cell volume:    2.59808
+Energy scale:        5
+Energy shift:        0
+Number of threads:   4
+----------------- CALCULATIONS ----------------- 
+ERROR. The density of states was requested but the data needed for its computation was not found in the input .h5 file. Make sure KITEx has processed the file first. Exiting.
++------------------------------------------------------------------------+
+|            Chebyshev Polynomial Green's Function Approach              | 
+|             to Real-Space Quantum Transport Simulations                | 
+|                                                                        | 
+|                     KITE | Release 1.1                                 | 
+|                     Kite home: quantum-kite.com                        | 
+|                                                                        | 
+|    Reference: S. M. Joao et al., R. Soc. Open Sci. 7, 191809 (2020)    | 
+|                                                                        | 
+|    Created by Simao M. Joao, Joao V. Lopes (Universidade do Porto),    | 
+|      Tatiana G. Rappoport (Universidade Federal Rio de Janeiro),       | 
+|        Misa Andelkovic, Lucian Covaci (University of Antwerp)          | 
+|                and Aires Ferreira (University of York)                 | 
+|                                                                        | 
+|            Funded by The Royal Society | royalsociety.org              | 
+|                                                                        | 
+|    Copyright (C) 2018-2022, M. Andelkovic, L. Covaci, A. Ferreira,     | 
+|                S. M. Joao, J. V. Lopes, T. G. Rappoport                | 
+|                                                                        | 
+|  This program is free software: you can redistribute it and/or modify  | 
+|  it under the terms of the GNU General Public License as published by  | 
+|  the Free Software Foundation, either version 3 of the License, or     | 
+|  (at your option) any later version.                                   | 
+|                                                                        | 
+|  This program is distributed in the hope that it will be useful,       | 
+|  but WITHOUT ANY WARRANTY; without even the implied warranty of        | 
+|  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                  | 
+|  See the GNU General Public License for more details.                  | 
++------------------------------------------------------------------------+
+
+------------------------------ INFORMATION ------------------------------
+Linear response functions in units of e^2/h.                              
+To stop these messages, set VERBOSE to 0 in the Makefile.                 
+To see debug messages, set DEBUG to 1 in the Makefile.                    
+------------------------------------------------------------------------- 
+
+------- FLAGS SET -------
+DEBUG: 0
+VERBOSE: 1
+-------------------------
+
+
+Starting program...
+
+Information about the lattice obtained from the configuration file:
+Dimension:           2
+Linear dimension:    512 512
+Complex:             0
+Unit cell volume:    2.59808
+Energy scale:        5
+Energy shift:        0.990991
+Number of threads:   4
+----------------- CALCULATIONS ----------------- 
+ERROR. The density of states was requested but the data needed for its computation was not found in the input .h5 file. Make sure KITEx has processed the file first. Exiting.

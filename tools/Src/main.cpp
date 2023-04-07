@@ -18,7 +18,7 @@
 #include "Tools/calculate.hpp"
 #include "macros.hpp"
 #include "Tools/messages.hpp"
-#include "compiletime_info.h"
+//#include "compiletime_info.h"
 
 int main(int argc, char *argv[]){
   if(argc < 2){

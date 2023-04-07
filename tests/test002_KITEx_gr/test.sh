@@ -1,4 +1,6 @@
 #!/bin/bash
+
+S=ones
  
 # This script will compare the .h5 file
 if [[ "$1" == "redo" ]]; then
