@@ -52,16 +52,7 @@ Energy scale:        5
 Energy shift:        0
 Number of threads:   4
 ----------------- CALCULATIONS ----------------- 
-The density of states will be calculated with these parameters: (eV)
-   Energy range: [-4.950000, 4.950000] (default)
-   Number of energies: 1000
-   Filename: dos_sym.dat
-   Number of moments: 128
-   Kernel: jackson (default)
------------------------------------------------- 
-
-Complete.
-
+ERROR. The density of states was requested but the data needed for its computation was not found in the input .h5 file. Make sure KITEx has processed the file first. Exiting.
 +------------------------------------------------------------------------+
 |            Chebyshev Polynomial Green's Function Approach              | 
 |             to Real-Space Quantum Transport Simulations                | 
@@ -115,12 +106,4 @@ Energy scale:        5
 Energy shift:        0.990991
 Number of threads:   4
 ----------------- CALCULATIONS ----------------- 
-The density of states will be calculated with these parameters: (eV)
-   Energy range: [-3.959009, 5.940991] (default)
-   Number of energies: 1000
-   Filename: dos.dat
-   Number of moments: 128
-   Kernel: jackson (default)
------------------------------------------------- 
-
-Complete.
+ERROR. The density of states was requested but the data needed for its computation was not found in the input .h5 file. Make sure KITEx has processed the file first. Exiting.
