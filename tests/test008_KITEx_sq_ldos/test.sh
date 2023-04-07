@@ -1,7 +1,5 @@
 #!/bin/bash
  
-S=3
-
 # This script will compare the .h5 file
 if [[ "$1" == "redo" ]]; then
     # Recreate all the .h5 configuration files from scratch
@@ -9,7 +7,8 @@ if [[ "$1" == "redo" ]]; then
     chmod 755 config.h5
     cp config.h5 configORIG.h5 
 
-    SEED=$S ../KITEx config.h5 > log_KITEx
+    # Seed doesn't need to be specified in LDOS
+    ../KITEx config.h5 > log_KITEx
     cp config.h5 configREF.h5
 
     python test.py

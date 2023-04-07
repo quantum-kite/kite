@@ -12,21 +12,21 @@ if [[ "$1" == "redo" ]]; then
     SEED=$S ../KITEx config.h5 > log_KITEx
     cp config.h5 configREF.h5
 
-    python test.py
+    ../KITE-tools config.h5 --ARPES -K green 0.1 -E -10 10 2048 -F 100
+    python ../../tools/process_arpes.py arpes.dat
+
+    #python test.py
     rm -r __pycache__
 fi
 
-if [[ "$1" == "script" ]]; then
-    # Create the configuration file from scratch. Does not recreate ORIG and REF
-    python config.py > log_config
-    python test.py
-    rm -r __pycache__
-fi
 
 if [[ "$1" == "quick" ]]; then
     # Run KITEx immediately on the existing configuration file
     cp configORIG.h5 config.h5
-    python test.py
+    SEED=$S ../KITEx config.h5 > log_KITEx
+    ../KITE-tools config.h5 --ARPES -K green 0.1 -E -10 10 2048 -F 100
+    python ../../tools/process_arpes.py arpes.dat
+    #python test.py
 
 fi
 
