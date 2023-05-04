@@ -53,7 +53,7 @@ Defect_Operator<T,D>::Defect_Operator( Hamiltonian<T,D> & h1,  std::string & def
       if(x.index == r.thread_id)
         {
           r.convertCoordinates(latt, LATT);
-          if(!any_of(positions_fixed.begin(), positions_fixed.end(), std::bind2nd(std::equal_to<std::size_t>(), latt.index )))
+	  if(!any_of(positions_fixed.begin(), positions_fixed.end(), [latt](std::size_t x) { return x == latt.index;}))
             positions_fixed.push_back(latt.index);
         }
     }
@@ -213,8 +213,8 @@ void Defect_Operator<T,D>::generate_disorder()  {
       r.convertCoordinates(Latt,latt);
       r.convertCoordinates(latStr,latt);
       auto & st = position.at(latStr.index);
-      
-      if( !any_of(st.begin(), st.end(), std::bind2nd(std::equal_to<std::size_t>(), Latt.index)))
+
+      if( !any_of(st.begin(), st.end(), [Latt](std::size_t x) {return x == Latt.index ; }))
         {	    
           st.push_back(Latt.index);
           count++;
@@ -312,8 +312,8 @@ void Defect_Operator<T,D>::generate_disorder()  {
           r.convertCoordinates(Latt, LATT);
           r.convertCoordinates(latStr, Latt);
 	    
-          auto & st = h.hV.position.at(latStr.index); 
-          if( !any_of(st.begin(), st.end(), std::bind2nd(std::equal_to<std::size_t>(), Latt.index)))
+          auto & st = h.hV.position.at(latStr.index);
+	  if( !any_of(st.begin(), st.end(), [Latt](std::size_t x ) {return Latt.index == x;} ))
             {     
               border_element1.push_back( Latt.index );	    
               border_element2.push_back(Latt.index + Global.element2_diff[i]);
@@ -329,7 +329,7 @@ void Defect_Operator<T,D>::generate_disorder()  {
           r.convertCoordinates(Latt, LATT );
           r.convertCoordinates(latStr, Latt);
           auto & st = h.hV.position.at(latStr.index); 
-          if( !any_of(st.begin(), st.end(), std::bind2nd(std::equal_to<std::size_t>(), Latt.index)))
+	  if( !any_of(st.begin(), st.end(), [Latt](std::size_t x ) {return x == Latt.index;}))
             {
               border_element.push_back(Latt.index );	    
               border_U.push_back(Global.U[i] );

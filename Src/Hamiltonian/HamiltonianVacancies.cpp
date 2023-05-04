@@ -50,7 +50,7 @@ void Vacancy_Operator<T,D>::generate_disorder()
           r.convertCoordinates(latStr,latt);                  // Get tile position
           r.convertCoordinates(Latt,latt);                    // Get Domain coordinates
           auto & pos = position.at(latStr.index);
-          if(!any_of(pos.begin(), pos.end(), std::bind2nd(std::equal_to<std::size_t>(), Latt.index )))
+	  if(!any_of(pos.begin(), pos.end(), [Latt](std::size_t x) { return x == Latt.index;}))
             {
               for(auto o = orbitals.at(k).begin(); o != orbitals.at(k).end(); o++)
                 {
@@ -85,7 +85,7 @@ void Vacancy_Operator<T,D>::add_model(double p, std::vector <int> & orb, std::ve
       if(x.index == r.thread_id)
         {
           r.convertCoordinates(latt, LATT);
-          if(!any_of(tmp.begin(), tmp.end(), std::bind2nd(std::equal_to<std::size_t>(), latt.index )))
+	  if(!any_of(tmp.begin(), tmp.end(), [latt](std::size_t x) {return x == latt.index;}))
             tmp.push_back(latt.index);
         }
     };
@@ -111,7 +111,7 @@ bool Vacancy_Operator<T,D>::test_vacancy(Coordinates<std::size_t,D + 1> & Latt)
   Coordinates<std::size_t,D + 1> latStr(r.lStr);
   r.convertCoordinates(latStr, Latt);
   auto & vc = position.at(latStr.index);
-  if( !any_of(vc.begin(), vc.end(), std::bind2nd(std::equal_to<std::size_t>(), Latt.index)))
+  if( !any_of(vc.begin(), vc.end(), [Latt](std::size_t x) {return x == Latt.index;}))
     return 0;
   else
     return 1;
