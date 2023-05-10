@@ -21,9 +21,8 @@ git clone https://github.com/quantum-kite/kite.git
 ```
 
 !!! info
-
-    If git is not installed on your Mac OS X device, come back later to this step.
-    A description of the installation process for Git will be given in the next section.
+   
+    Git's installation process for Mac users is outlined in section 2.2.
 
 
 ## 2. Get dependencies
@@ -37,7 +36,7 @@ KITE dependends on:
 * [gcc][gcc] (version 4.8.1 or newer)
 * [h5py][h5py]
 
-The compiler **must** support *C++11* features and [*OpenMP*][openmp] parallelization.
+The compiler **must** support *C++17* (or newer) features and [*OpenMP*][openmp] parallelization.
 
 
 To enable KITE's [Gaussian wavepacket propagation][calculation-gaussian_wave_packet] functionality, compile the source code with a recent gcc version
@@ -48,7 +47,7 @@ To check the gcc version, you can use the following command in the terminal:
 g++ --version
 ```
 
-### 2.1 For Ubuntu
+### 2.1 For Ubuntu users
 
 Install *Eigen3* for various linear algebra tools:
 
@@ -88,9 +87,11 @@ To construct the HDF5-files, KITE requires *h5py*:
 pip3 install h5py
 ```
 
-### 2.2 For Mac OS X
+### 2.2 For Mac OS X users
 
-Install the *Xcode* command-line tools from Apple Developer, install these using the terminal:
+The installation of KITE's dependencies on Apple machines is slightly more evolved, mainly due to the need to enforce usage of the  correct C++ standard when compiling HDF5. We provide below a recipe that should work in all Apple machines, but users are encouraged to contact the KITE team shall they encounter any difficulties.  
+
+The *Xcode* command-line tools from Apple Developer are required.  Install these using the terminal:
 
 ``` bash
 xcode-select --install
@@ -103,16 +104,15 @@ xcode-select --install
     a few remaining incompatibility issues are resolved.
     *Rosetta* simulates an *Intel-x64* system and translates existing software for use with *Apple Silicon*.
     
-    To load *Rosetta*, run `#!bash arch -x86_64 zsh` **each time** when starting a **new terminal**.
+    To load *Rosetta*, run `#!bash arch -x86_64 zsh` when starting a **new terminal**.
 
-Kite requires an open-source software package management system like [Homebrew][homebrew].
-Run the following command in the terminal and follow the subsequent instructions provided by Homebrew.
+KITE requires an open-source software package management system like [Homebrew][homebrew] or [MacPorts][ports]. We provide here step-by-step instructions for Homebrew (pointers for MacPorts users are given below). To install HomeBrew, run the following command in the terminal and follow the subsequent instructions provided by software:
 
 ``` bash
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 ```
 
-Install a C++ compiler via Homebrew:
+Install an up-to-date C++ compiler via Homebrew:
 
 ``` bash
 brew install gcc
@@ -120,27 +120,34 @@ brew install gcc
 
 Now **close** the terminal window, and open a **new terminal** window.
 
-Hierarchical Data Format (*HDF5*) is used to store the inputs/outputs of the program.
-
-!!! info
-    
-    In the following sections, replace **n** with the version of gcc installed by Homebrew as given by `#!bash brew info gcc`.
-
-Install *HDF5* from source:
-
-``` bash
-brew install hdf5 --build-from-source --cc=gcc-n
-```
-
 !!! info
     
     The default directory for Homebrew is */usr/local/bin/*.
     Change this path to the right location if Homebrew was installed in a different directory
 
+!!! info
+    
+    In the following sections, replace **n** with the version of gcc installed by Homebrew as given by `#!bash brew info gcc`.
+
+
+The hierarchical Data Format (*HDF5*) is used to store the inputs/outputs of the program. Install *HDF5* from source, _whilst enforcing the C++17 standard_, using:
+
+``` bash
+HOMEBREW_CC=gcc-n HOMEBREW_CXX=g++-n HOMEBREW_CXXFLAGS="-std=c++17" brew install hdf5 --build-from-source
+```
+
+!!! info
+    
+    Macport users can use the following command:
+
+``` bash
+sudo port -v install hdf5 +gcc-n +cxx +hl configure.ldflags="-stdlib=libstdc++" configure.cxx_stdlib="libstdc++" configure.cxxflags="-std=c++17" 
+```
+
 Install *Eigen3* for various linear algebra tools, CMake and Python:
 
 ``` bash
-CXX=g++-n brew install eigen python Cmake git
+brew install eigen python Cmake git
 ```
 
 Calculations on KITE are configured using a python script which interfaces with Pybinding.
@@ -152,7 +159,7 @@ Pybinding also requires the SciPy packages but pip will resolve all the SciPy de
     You can find the Homebrew-python binary at `#!bash /opt/homebrew/bin/python3.
 
 ``` bash
-CXX=g++-n /usr/local/bin/python3 -m pip install numpy h5py pybinding
+/usr/local/bin/python3 -m pip install numpy h5py pybinding
 ```
 
 Alternatively, you might prefer to follow the instructions on the [Pybinding][pybinding] webpage.
@@ -238,6 +245,7 @@ that generates the appropriata data file. For more details refer to the [tutoria
 [hdf5]: https://www.hdfgroup.org/
 [openmp]: https://gcc.gnu.org/onlinedocs/libgomp/
 [homebrew]: https://brew.sh/
+[ports]: https://www.macports.org 
 [pybinding]: https://docs.pybinding.site/en/stable/install/quick.html
 [tutorial]: documentation/index.md
 [kitepython]: api/kite.md
