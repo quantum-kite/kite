@@ -94,7 +94,7 @@ $$
 
     <div>
       <figure>
-        <img src="../../assets/images/tutorial/conv.png" width="1000" />
+        <img src="../../assets/images/tutorial/conv.png" style="width: 40em;" />
         <figcaption>Convergence of the Chebyshev series for (a) a Dirac-$\delta$ function, (b) a single-particle Green's function (real part as inset), and (c)  the time-evolution operator at two different energies (top: 0.5 and bottom: 0.8).</figcaption>
       </figure>
     </div>

@@ -1,0 +1,4 @@
+The tests are separated into three categories:
+ - quick KITEx tests: detailed comparison of a very small number of Chebyshev moments
+ - quick KITE-tools tests: uses predetermined configuration file to test KITE-tools functionality
+ - long tests: combines KITEx and KITE-tools to check if certain quantities are being well calculated

@@ -120,7 +120,7 @@ plt.show()
 
 <div>
   <figure>
-    <img src="../../../assets/images/haldane/cond.png" width="600px" />
+    <img src="../../../assets/images/haldane/cond.png" style="width: 40em;" />
     <figcaption> </figcaption>
   </figure>
 </div>
@@ -132,7 +132,7 @@ This is illustrated in Fig. 2.
 
 <div>
   <figure>
-    <img src="../../../assets/images/haldane/trans_cond.png" width="800px" />
+    <img src="../../../assets/images/haldane/trans_cond.png" style="width: 40em;" />
     <figcaption> </figcaption>
   </figure>
 </div>

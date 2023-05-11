@@ -1,19 +1,32 @@
 
 ## Do I need to use the python script to generate the HDF file?
 
-No. Advanced users can analyse the structure of the HDF file and construct their own hdf file as an input to run KITE. 
+No.
+Advanced users can analyse the structure of the HDF file and construct their own HDF file as an input to run KITE. 
 
 ## Why do we need a post-processing tool? It could be easier to have a single code to directly calculate the quantities.
 
-One of the main advantages of a Chebyshev expansion is the possibility to obtain new values of a given quantity without having to recalculate the Chebyshev expansion. This is the case, for example, of the DC and optical conductivities. One can use the same Chebyshev expansion to obtain these two quantities at different temperatures or the optical conductivity for a set of Fermi energies. KITE is structured to take advantage of this possibility. KITEx calculates the Chebyshev expansion while KITE-tools uses the expansion to obtain these quantities while allowing the user to change several parameters without the need to recalculate the terms of the expansion.
+One of the main advantages of a Chebyshev expansion is the possibility to obtain new values of a given quantity without
+having to recalculate the Chebyshev expansion.
+This is the case, for example, of the DC and optical conductivities.
+One can use the same Chebyshev expansion to obtain these two quantities at different temperatures or the optical
+conductivity for a set of Fermi energies.
+KITE is structured to take advantage of this possibility.
+[KITEx][kitex] calculates the Chebyshev expansion while [KITE-tools][kitetools] uses the expansion to obtain
+these quantities while allowing
+the user to change several parameters without the need to recalculate the terms of the expansion.
 
 ## What are the units of the magnetic field?  
 
-KITE assumes the lattice constants of the tight-binding model are provided in nanometers (nm) and the magnetic field is given in Tesla. If the user consider other units for the lattice constant, the magnetic field is rescaled according to the definition of magnetic flux per unit cell. 
+KITE assumes the lattice constants of the tight-binding model are provided in nanometers (nm)
+and the magnetic field is given in Tesla.
+If the user consider other units for the lattice constant, the magnetic field is rescaled according
+to the definition of magnetic flux per unit cell. 
 
 
 ## What are the units of the temperature? 
-For KITE, the temperature parameter is given in units of energy ($k_B T$) and follows the definition of the hopping parameters. To convert to Kelvins, the user needs to devide KITE's temperature by $k_B T$.
+For KITE, the temperature parameter is given in units of energy ($k_B T$) and follows the definition
+of the hopping parameters. To convert to Kelvins, the user needs to devide KITE's temperature by $k_B T$.
 
 ## How to cite KITE:
 
@@ -35,3 +48,6 @@ For KITE, the temperature parameter is given in units of energy ($k_B T$) and fo
   language  = "en"}
 ```
 
+
+[kitex]: api/kitex.md
+[kitetools]: api/kite-tools.md

@@ -1,6 +1,6 @@
 !!! Info
 
-    This file describes the contents of the `#!bash kite/examples`-folder.
+    This file describes the contents of the [`#!bash kite/examples/`][examples-folder-github]-folder.
 
 ## KITE Examples
 This folder contains various examples showing the functionalities of the KITE library. To execute an example, run
@@ -49,3 +49,5 @@ python3
 >>> run_all_examples.clean()
 >>> exit()
 ```
+
+[examples-folder-github]: https://github.com/quantum-kite/kite/tree/master/examples

@@ -1,6 +1,7 @@
 !!! Info
 
-    This file describes the contents of the `#!bash kite/examples/custom_local_potential`-folder.
+    This file describes the contents of the
+    [`#!bash kite/examples/custom_local_potential/`][examples-clp-github]-folder.
 
 This example shows how to use the custom local potential functionality in KITE. 
 
@@ -65,3 +66,5 @@ g++ -Wall -fPIC -c aux.cpp
 g++ -shared -Wl,-soname,libaux.so.1 -o libaux.so aux.o
 ln -sf libaux.so libaux.so.1
 ```
+
+[examples-clp-github]: https://github.com/quantum-kite/kite/tree/master/examples/custom_local_potential

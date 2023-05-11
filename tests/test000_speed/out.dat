@@ -1,0 +1,95 @@
+
++------------------------------------------------------------------------+
+|            Chebyshev Polynomial Green's Function Approach              | 
+|             to Real-Space Quantum Transport Simulations                | 
+|                                                                        | 
+|                     KITE | Release 1.1                                 | 
+|                     Kite home: quantum-kite.com                        | 
+|                                                                        | 
+|    Reference: S. M. Joao et al., R. Soc. Open Sci. 7, 191809 (2020)    | 
+|                                                                        | 
+|    Created by Simao M. Joao, Joao V. Lopes (Universidade do Porto),    | 
+|      Tatiana G. Rappoport (Universidade Federal Rio de Janeiro),       | 
+|        Misa Andelkovic, Lucian Covaci (University of Antwerp)          | 
+|                and Aires Ferreira (University of York)                 | 
+|                                                                        | 
+|            Funded by The Royal Society | royalsociety.org              | 
+|                                                                        | 
+|    Copyright (C) 2018-2022, M. Andelkovic, L. Covaci, A. Ferreira,     | 
+|                S. M. Joao, J. V. Lopes, T. G. Rappoport                | 
+|                                                                        | 
+|  This program is free software: you can redistribute it and/or modify  | 
+|  it under the terms of the GNU General Public License as published by  | 
+|  the Free Software Foundation, either version 3 of the License, or     | 
+|  (at your option) any later version.                                   | 
+|                                                                        | 
+|  This program is distributed in the hope that it will be useful,       | 
+|  but WITHOUT ANY WARRANTY; without even the implied warranty of        | 
+|  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                  | 
+|  See the GNU General Public License for more details.                  | 
++------------------------------------------------------------------------+
+
+------------------------------ INFORMATION ------------------------------
+Linear response functions in units of e^2/h.                              
+To stop these messages, set VERBOSE to 0 in the Makefile.                 
+To see debug messages, set DEBUG to 1 in the Makefile.                    
+------------------------------------------------------------------------- 
+
+------- FLAGS SET -------
+Flags set at compilation:
+DEBUG: 0
+VERBOSE: 1
+-------------------------
+
+Starting program...
+
+HDF5-DIAG: Error detected in HDF5 (1.14.0) thread 0:
+  #000: H5F.c line 836 in H5Fopen(): unable to synchronously open file
+    major: File accessibility
+    minor: Unable to open file
+  #001: H5F.c line 796 in H5F__open_api_common(): unable to open file
+    major: File accessibility
+    minor: Unable to open file
+  #002: H5VLcallback.c line 3863 in H5VL_file_open(): open failed
+    major: Virtual Object Layer
+    minor: Can't open object
+  #003: H5VLcallback.c line 3675 in H5VL__file_open(): open failed
+    major: Virtual Object Layer
+    minor: Can't open object
+  #004: H5VLnative_file.c line 128 in H5VL__native_file_open(): unable to open file
+    major: File accessibility
+    minor: Unable to open file
+  #005: H5Fint.c line 1809 in H5F_open(): unable to open file: name = 'config.h5', tent_flags = 0
+    major: File accessibility
+    minor: Unable to open file
+  #006: H5FD.c line 769 in H5FD_open(): open failed
+    major: Virtual File Layer
+    minor: Unable to initialize object
+  #007: H5FDsec2.c line 338 in H5FD__sec2_open(): unable to open file: name = 'config.h5', errno = 2, error message = 'No such file or directory', flags = 0, o_flags = 0
+    major: File accessibility
+    minor: Unable to open file
+terminate called after throwing an instance of 'H5::FileIException'
+Command terminated by signal 6
+	Command being timed: "../KITEx config.h5"
+	User time (seconds): 0.01
+	System time (seconds): 0.00
+	Percent of CPU this job got: 3%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.43
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 8144
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 345
+	Voluntary context switches: 106
+	Involuntary context switches: 0
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 0
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

@@ -91,12 +91,12 @@ void Simulation<T,D>::ARPES(int NDisorder, int NMoments, Eigen::Array<double, -1
             kpm0.Exchange_Boundaries();
 
 
+	        kpm1.initiate_phases();   //Initiates the Hopping Phases in kpm1
             kpm1.set_index(0);
             kpm1.v.col(0) = kpm0.v.col(0);
             kpm0.empty_ghosts(0);
 
-            for(int n = 0; n < NMoments; n+=2)
-              {
+            for(int n = 0; n < NMoments; n+=2) {
                 for(int i = n; i < n + 2; i++)
                   kpm1.cheb_iteration(i);
                 

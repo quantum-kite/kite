@@ -84,8 +84,8 @@ plt.show()
 
 <div>
   <figure>
-    <img src="../../assets/images/getting_started/lattice.png" width="300" style="display: inline-block;"/>
-    <img src="../../assets/images/getting_started/brillouin.png" width="300" style="display: inline-block;"/>
+    <img src="../../assets/images/getting_started/lattice.png" style="width: 20em; max-width: 48%; display: inline-block;"/>
+    <img src="../../assets/images/getting_started/brillouin.png" style="width: 20em; max-width: 48%; display: inline-block;"/>
     <figcaption>The visualization of the lattice and its Brillouin zone.</figcaption>
   </figure>
 </div>
@@ -121,7 +121,7 @@ plt.show()
 ```
 <div>
   <figure>
-    <img src="../../assets/images/getting_started/model.png" width="300" style="display: inline-block;"/>
+    <img src="../../assets/images/getting_started/model.png" style="width: 40em;"/>
     <figcaption>The visualization of the model.</figcaption>
   </figure>
 </div>
@@ -158,8 +158,8 @@ plt.show()
 ```
 <div>
   <figure>
-    <img src="../../assets/images/getting_started/bands.png" width="300" style="display: inline-block;"/>
-    <img src="../../assets/images/getting_started/k_path.png" width="300" style="display: inline-block;"/>
+    <img src="../../assets/images/getting_started/bands.png" style="width: 20em; max-width: 48%; display: inline-block;"/>
+    <img src="../../assets/images/getting_started/k_path.png" style="width: 20em; max-width: 48%; display: inline-block;"/>
     <figcaption>The visualization of the band structure and its path in the reciprocal space.</figcaption>
   </figure>
 </div>

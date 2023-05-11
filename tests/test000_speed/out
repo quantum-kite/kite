@@ -43,23 +43,48 @@ VERBOSE: 1
 
 Starting program...
 
-Calculating DOS.
-Done.
+HDF5-DIAG: Error detected in HDF5 (1.14.0) thread 0:
+  #000: H5F.c line 836 in H5Fopen(): unable to synchronously open file
+    major: File accessibility
+    minor: Unable to open file
+  #001: H5F.c line 796 in H5F__open_api_common(): unable to open file
+    major: File accessibility
+    minor: Unable to open file
+  #002: H5VLcallback.c line 3863 in H5VL_file_open(): open failed
+    major: Virtual Object Layer
+    minor: Can't open object
+  #003: H5VLcallback.c line 3675 in H5VL__file_open(): open failed
+    major: Virtual Object Layer
+    minor: Can't open object
+  #004: H5VLnative_file.c line 128 in H5VL__native_file_open(): unable to open file
+    major: File accessibility
+    minor: Unable to open file
+  #005: H5Fint.c line 1809 in H5F_open(): unable to open file: name = 'config.h5', tent_flags = 0
+    major: File accessibility
+    minor: Unable to open file
+  #006: H5FD.c line 769 in H5FD_open(): open failed
+    major: Virtual File Layer
+    minor: Unable to initialize object
+  #007: H5FDsec2.c line 338 in H5FD__sec2_open(): unable to open file: name = 'config.h5', errno = 2, error message = 'No such file or directory', flags = 0, o_flags = 0
+    major: File accessibility
+    minor: Unable to open file
+terminate called after throwing an instance of 'H5::FileIException'
+Command terminated by signal 6
 	Command being timed: "../KITEx config.h5"
-	User time (seconds): 5.88
-	System time (seconds): 0.02
-	Percent of CPU this job got: 394%
-	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:01.49
+	User time (seconds): 0.00
+	System time (seconds): 0.00
+	Percent of CPU this job got: 4%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.39
 	Average shared text size (kbytes): 0
 	Average unshared data size (kbytes): 0
 	Average stack size (kbytes): 0
 	Average total size (kbytes): 0
-	Maximum resident set size (kbytes): 23924
+	Maximum resident set size (kbytes): 8272
 	Average resident set size (kbytes): 0
-	Major (requiring I/O) page faults: 12
-	Minor (reclaiming a frame) page faults: 3992
-	Voluntary context switches: 371
-	Involuntary context switches: 68
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 349
+	Voluntary context switches: 111
+	Involuntary context switches: 3
 	Swaps: 0
 	File system inputs: 0
 	File system outputs: 0

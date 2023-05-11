@@ -3,25 +3,19 @@ You will learn about the different steps in KITE's workflow and how to tweak the
 
 The tutorial is structured as follows:
 
-1. Learn about KITE's workflow
-2. Build a tight-binding model using [`#!python pb.Lattice`][lattice]
-3. How to specify the settings for a calculation
-4. How to calculate the different target-functions
-5. Post-process the results with [*KITE-tools*][kitetools]
+1. Learning KITE's workflow
+2. Building a tight-binding model using [`#!python pb.Lattice`][lattice]
+3. How to define the settings for KITE simulations
+4. How to calculate the different target functions 
+5. Post-processing the results with [*KITE-tools*][kitetools]
 6. Adding disorder or magnetic field to the tight-binding model
 7. How to edit the [HDF5]-file
-8. Optimize the settings for various calculations
-
-!!! Info "More examples"
-    
-    In the section [Examples], some applications to different structures are given, including the caluclation.
-    More examples can be found in the KITE-repository under
-    [kite/examples](https://github.com/quantum-kite/kite/tree/master/examples/readme.md).
+8. Optimizing the settings for various calculations
 
 !!! Example "First calculation with KITE"
     
     Let us do a simple first calculation with KITE.
-    *(Do not worry about the details, these will be covered later.)*
+    *(Do not worry about the details just now, these will be covered later in the tutorial.)*
 
     !!! Tip
     
@@ -51,10 +45,17 @@ The tutorial is structured as follows:
   
     <div>
       <figure>
-        <img src="../assets/images/getting_started/first_calculation.png" width="300" />
-        <figcaption>The result from your first KITE calculation: the density of states for graphene.</figcaption>
+        <img src="../assets/images/getting_started/first_calculation.png" style="width: 40em;" />
+        <figcaption>The result from your first KITE calculation: the density of states of monolayer graphene.</figcaption>
       </figure>
     </div>
+
+
+
+!!! Info "Examples" and "More Examples"
+    
+    Section [Examples] contains step-by-step examples aimed to expand on key concepts covered by the Tutorial.
+    Additional resources are provided in [More examples][examples-folder].
 
 
 [HDF5]: https://www.hdfgroup.org
@@ -85,4 +86,5 @@ The tutorial is structured as follows:
 [configuration-custom_local_print]: ../api/kite.md#configuration-custom_local_print
 [calculation]: ../api/kite.md#calculation
 
+[examples-folder]: more_examples/additional_examples.md
 
