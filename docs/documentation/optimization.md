@@ -3,6 +3,8 @@
     Here, we briefly introduce the **main concepts** that underlie all spectral methods currently implemented in KITE.
     Focus is placed on the role of the simulation parameters that can be adjusted by the end-user in order to suit its specific purposes.
 
+# The Ground Rules for Spectral Methods
+
 The central object to any calculation done in KITE is the lattice single-particle Hamiltonian (SPH) — $H$ — which is
 always a sparse $D\!\times\!D$ hermitian matrix ($D$ being the total number of orbitals in the lattice).
 This fully embodies the simulated system, from its underlying bravais lattice structure and local orbital basis,
@@ -29,7 +31,7 @@ $$
 
 where $\mathcal{O}_{j}$ are sparse lattice operators (identities, velocity operators or spin operators) and $F_{j}$ are functions of $\mathcal{H}$, as well as other scalar parameters $\left\{ \lambda_{i}^{j}\right\} _{i}$, such as the energy or a frequency. Furthermore, the $\left|\Psi\right\rangle$ in the above equation is a specific state vector of the system that depends on the observable that is being computed. Hence, there are two district categories of observables that can be computed with  [`#!bash KITEx`](../api/kitex.md), namely
 
-**Traces Over The Entire Hilbert Space**
+## Traces Over The Entire Hilbert Space
 
 :  This includes global observables such as the Density of States (DoS) and DC-conductivity, as well as the $1^{\text{st}}$- and $2^{\text{nd}}$-order optical conductivity (see João *et al.*[^1] for further details). For all these cases, the trace is evaluated stochastically as an average of expectation values for $R$ normalized random vectors[^2], i.e.,
 
@@ -39,7 +41,7 @@ $$
 
 :  Within the user interface, the number of independent random vectors is specified by the parameter `#!python num_random`, which must be large enough to ensure a well-estimated trace. The associated error scales as $1/\sqrt{R\,D}$, and thus requires very few random vectors if the simulated system is very large[^2]. On top of this averaging, if $\mathcal{H}$ has a random component (by hosting disorder or featuring randomly twisted boundaries), it is often the case that the results are to be averaged over an ensemble of random Hamiltonians. Such averaging is also done inside  [`#!bash KITEx`](../api/kitex.md) and the number of random configurations is specified by user with the parameter `#!python num_disorder`.
 
-**Diagonal Matrix Elements**
+## Diagonal Matrix Elements
 
 : This class of target functions includes local observables such as the local density of states (LDoS) and the $\mathbf{k}$-space spectral function (for ARPES's response), as well as the time-evolution of Gaussian wave-packets. Note that `#!python num_random` is no longer a relevant parameter for these target functions.
 
@@ -60,7 +62,7 @@ $$
 
 : For these functions, analytical forms of the Chebyshev expansion coefficients are known[^2][^3][^4][^5][^6][^7] and used in KITE. In the user interface, the truncation order $M$ is specified by the parameter `#!python num_moments`, and always impacts the validity of the expanded results. Nevertheless, its precise effect depends crucially on the specific case, as shown in the Figure below. In particular, one has the following cases:
 
-**Dirac-$\delta$ Function**
+## Dirac-$\delta$ Function
 
 : An order-$M$ expansion (regularized by the Jackson kernel) produces a Gaussian approximation of $\delta(\lambda\!-\!\mathcal{H})$ endowed by a width $\sigma_{\lambda}\!\approx\!\delta \varepsilon\,\pi/M$ in $\lambda$[^2][^7]. The choice of $M$ then fixes the effective spectral broadening, $\sigma_{\lambda}$, which must be sufficiently narrow to accurately describe all relevant features of the calculated curve. However, if it becomes too narrow ($M$ too high), the discrete eigenvalues of the SPH are well-resolved and the obtained data start suffering from large (finite-size) fluctuations. For information on other available kernels see Weisse *et al.*[^2].
 
@@ -68,7 +70,7 @@ $$
 
         If $\Delta\varepsilon$ is the mean-level spacing of the simulated system (that depends on the system size), then $M$ must be kept **smaller than** $\frac{\pi\,\delta\varepsilon}{\Delta\varepsilon}$ in order to avoid resolving individual energy levels. Simultaneously, for obtaining high-resolution results, the arificial broadening much remain much smaller than the total bandwidth, *i.e.*, $M\gg \pi\,\delta\varepsilon$.
 
-**Single-Particle Green's Functions**
+## Single-Particle Green's Functions
 
 : Usually, no kernel is required here[^3][^4] as singularities of the Green's function are naturally broadened by a finite $\eta$. Provided $\eta$ exceeds the spacing between eigenvalues of the SPH, the truncation order may be arbitrarily increased and convergence is achieved **when the data ceases to depend on M**. Smaller values of $\eta$ typically require higher values of $M$ to converge.
 
@@ -76,7 +78,7 @@ $$
 
         Since the energy resolution is fixed by $\eta$, the number of polynomials must be larger enough to resolve such a broadening. As shown below, in Figure (b), an apt rule of thumb is to have $M\gtrsim 100/\eta$.
 
-**Quantum Time-Evolution Operators**
+## Quantum Time-Evolution Operators
 
 : The truncation error introduced here translates into a limitation of the available time-interval of accurate unitary time-evolution. In the panels of Figure (c) it is demonstrated that the time-evolution operator is converged as long as $t\!\lesssim\!\hbar\,M/\delta\varepsilon$.
 
@@ -92,7 +94,7 @@ $$
 
     <div>
       <figure>
-        <img src="../../assets/images/tutorial/conv.png" width="1000" />
+        <img src="../../assets/images/tutorial/conv.png" style="width: 40em;" />
         <figcaption>Convergence of the Chebyshev series for (a) a Dirac-$\delta$ function, (b) a single-particle Green's function (real part as inset), and (c)  the time-evolution operator at two different energies (top: 0.5 and bottom: 0.8).</figcaption>
       </figure>
     </div>

@@ -28,7 +28,7 @@ For further details on the algorithms and the implementation please refer to S. 
 ## Getting Started
 
 For installation instructions and an overview of the main functionalities of **KITE**, please refer the documentation online [Getting Started](https://quantum-kite.com/category/getting-started/).
-Advanced examples are explained in [Examples](https://quantum-kite.com/category/examples/). After downloading the repository, you can find a copy of the tutorial scripts under the examples folder.
+Advanced examples are explained in [Examples][kite-examples]. After downloading the repository, you can find a copy of the tutorial scripts under the examples folder.
 
 ### Prerequisites
 
@@ -70,3 +70,5 @@ If you would like to collaborate with us on the KITE project, please email a tea
 ## Acknowledgments
 
 The inception of KITE's open-source project was funded by **The Royal Society** through grant NA150043 "*Efficient Numerical Solver for Spin, Charge and Optical Conductivity*" (T. Rappoport and A. Ferreira). The KITE team is also grateful for the support received from EPSRC (A. Ferreira), The Royal Society (UF130385, A. Ferreira) and FLAG-ERA (TRANS2DTMD, M. Anđelković and L. Covaci). We thank Miguel Dias Costa (HPC at NUS, Singapore), Killian Murphy (HPC at University of York, UK) and Julia Giannella (Web Design) for the technical support provided in the early stages of the KITE project.
+
+[kite-examples]: https://quantum-kite.com/documentation/examples/

@@ -1,4 +1,4 @@
-""" Run all the examples in the kite/examples-folder
+""" Run all the examples in the kite/examples-folder/
 
     ##########################################################################
     #                         Copyright 2022, KITE                           #
@@ -129,7 +129,7 @@ def main(selection=None):
     print_command("#                         Home page: quantum-kite.com                    #")
     print_command("##########################################################################")
     print_command()
-    print_title("Run all the examples in the kite/examples-folder")
+    print_title("Run all the examples in the kite/examples-folder/")
 
     if 1 in selection:
         # Example 1: dos_square_lattice.py

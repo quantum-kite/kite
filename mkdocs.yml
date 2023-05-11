@@ -1,6 +1,6 @@
 # Project information
-site_name: "KITE - Quantum transport calculations "
-site_description: "KITE: Quantum transport calculations"
+site_name: "Quantum KITE"
+site_description: "KITE: Real-space quantum transport simulator"
 site_author: "KITE"
 
 # Repository
@@ -8,8 +8,9 @@ repo_url: https://github.com/quantum-kite/kite
 edit_uri: https://github.com/quantum-kite/kite/tree/master/docs
 
 # Copyright
-copyright: "KITE is a free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation - version 3
-&copy Copyright 2022, Kite"
+copyright:  "KITE is a free software: you can redistribute it and/or modify it under the terms of the GNU
+              General Public License as published by the Free Software Foundation - version 3. Copyright ©
+              2023 KITE"
 
 # Navigation
 
@@ -25,8 +26,8 @@ nav:
     - 5. Post-processing: 'documentation/postprocessing.md'
     - 6. Disorder: 'documentation/disorder.md'
     - 7. Editing the HDF5 file: 'documentation/editing_hdf_files.md'
-    - The Ground Rules for Spectral Methods: 'documentation/optimization.md'
-    - Examples: 
+    - 8. Ground Rules: 'documentation/optimization.md'
+    - Examples:
       - About the examples: 'documentation/examples/index.md'
       - Graphene: 'documentation/examples/graphene.md'
       - Haldane: 'documentation/examples/haldane.md'
@@ -52,9 +53,8 @@ nav:
       - Addtitional scripts: 'api/kite_tools_readme.md'
   - FAQ: 'faq.md'
   - About:
-    - About KITE: 'about/index.md'
+    - README.md: 'about/index.md'
     - LICENSE.md: 'about/LICENSE.md'
-    - README.md: 'about/main_readme.md'
     - VERSION.md: 'about/VERSION.md'
 
 # Configuration
