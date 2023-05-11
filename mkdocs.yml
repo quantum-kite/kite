@@ -25,7 +25,7 @@ nav:
     - 5. Post-processing: 'documentation/postprocessing.md'
     - 6. Disorder: 'documentation/disorder.md'
     - 7. Editing the HDF5 file: 'documentation/editing_hdf_files.md'
-    - The Ground Rules for Spectral Methods: 'documentation/optimization.md'
+    - 8. Ground Rules: 'documentation/optimization.md'
     - Examples: 
       - About the examples: 'documentation/examples/index.md'
       - Graphene: 'documentation/examples/graphene.md'
