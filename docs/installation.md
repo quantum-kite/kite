@@ -122,12 +122,10 @@ Now **close** the terminal window, and open a **new terminal** window.
 
 !!! info
     
-    The default directory for Homebrew is */usr/local/bin/*.
-    Change this path to the right location if Homebrew was installed in a different directory
-
-!!! info
+    1.  The default directory for Homebrew is */usr/local/bin/*.
+        Change this path to the right location if Homebrew was installed in a different directory
     
-    In the following sections, replace **n** with the version of gcc installed by Homebrew as given by `#!bash brew info gcc`.
+    2.  In the following sections, replace **n** with the version of gcc installed by Homebrew as given by `#!bash brew info gcc`.
 
 
 The hierarchical Data Format (*HDF5*) is used to store the inputs/outputs of the program. Install *HDF5* from source, _whilst enforcing the C++17 standard_, using:
@@ -138,11 +136,11 @@ HOMEBREW_CC=gcc-n HOMEBREW_CXX=g++-n HOMEBREW_CXXFLAGS="-std=c++17" brew install
 
 !!! info
     
-    Macport users can use the following command:
+    [MacPorts][ports] users can use the following command:
 
-``` bash
-sudo port -v install hdf5 +gcc-n +cxx +hl configure.ldflags="-stdlib=libstdc++" configure.cxx_stdlib="libstdc++" configure.cxxflags="-std=c++17" 
-```
+    ``` bash
+    sudo port -v install hdf5 +gcc-n +cxx +hl configure.ldflags="-stdlib=libstdc++" configure.cxx_stdlib="libstdc++" configure.cxxflags="-std=c++17" 
+    ```
 
 Install *Eigen3* for various linear algebra tools, CMake and Python:
 
@@ -156,7 +154,7 @@ Pybinding also requires the SciPy packages but pip will resolve all the SciPy de
 !!! warning
 
     To install the pyhton requirements, you **must** run the Homebrew-python version.
-    You can find the Homebrew-python binary at `#!bash /opt/homebrew/bin/python3.
+    You can find the Homebrew-python binary at `#!bash /opt/homebrew/bin/python3`.
 
 ``` bash
 /usr/local/bin/python3 -m pip install numpy h5py pybinding
