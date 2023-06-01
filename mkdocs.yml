@@ -15,7 +15,7 @@ copyright:  "KITE is a free software: you can redistribute it and/or modify it u
 # Navigation
 
 nav:
-  - Home: 'https://quantum-kite.com/'
+  - Home: 'index.md'
   - Installation: 'installation.md'
   - Documentation:
     - Tutorial: 'documentation/index.md'
@@ -89,7 +89,7 @@ theme:
     - navigation.top
     - navigation.sections
     - navigation.expand
-    - navigation.instant
+#    - navigation.instant problem with the homepage
     - navigation.tracking
     - toc.integrate
     - toc.follow
