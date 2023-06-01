@@ -24,12 +24,48 @@ template<>
 H5::DataType DataTypeFor<long double>::value = H5::PredType::NATIVE_LDOUBLE;
 
 
+template <typename T>
+typename std::enable_if<is_tt<std::complex, T>::value, void>::type get_hdf5(T * l, H5::H5File *  file,  char * name) { 
+  H5::DataSet dataset = H5::DataSet(file->openDataSet(name));
+  H5::CompType complex_data_type(sizeof(l[0]));
+  typedef typename extract_value_type<T>::value_type value_type;
+  
+  complex_data_type.insertMember("r", 0, DataTypeFor<value_type>::value);
+  complex_data_type.insertMember( "i", sizeof(value_type), DataTypeFor<value_type>::value);
+  dataset.read(l, complex_data_type);
+}
+
+template <typename T>
+typename std::enable_if<!is_tt<std::complex, T>::value, void>::type get_hdf5(T * l, H5::H5File *  file, char *  name) {  
+  H5::DataSet dataset = H5::DataSet(file->openDataSet(name));
+  dataset.read(l, DataTypeFor<T>::value);
+}
 
 
 template <typename T>
-typename std::enable_if<!is_tt<std::complex, T>::value, void>::type write_hdf5(const Eigen::Array<T, -1, -1 > & mu,
-                                                                                             H5::H5File *  file,
-                                                                                             const std::string  name) {
+typename std::enable_if<is_tt<std::complex, T>::value, void>::type get_hdf5(T * l, H5::H5File *  file,  std::string & name) {
+  H5::DataSet dataset = H5::DataSet(file->openDataSet(name));
+  H5::CompType complex_data_type(sizeof(l[0]));
+  typedef typename extract_value_type<T>::value_type value_type;
+  
+  complex_data_type.insertMember("r", 0, DataTypeFor<value_type>::value);
+  complex_data_type.insertMember( "i", sizeof(value_type), DataTypeFor<value_type>::value);
+  dataset.read(l, complex_data_type);
+}
+
+template <typename T>
+typename std::enable_if<!is_tt<std::complex, T>::value, void>::type get_hdf5(T * l, H5::H5File *  file,  std::string & name) {
+  H5::DataSet dataset = H5::DataSet(file->openDataSet(name));
+  dataset.read(l, DataTypeFor<T>::value);
+}
+
+
+
+
+template <typename T>
+typename std::enable_if<!is_tt<std::complex, T>::value, void>::type
+write_hdf5(const Eigen::Array<T, -1, -1 > & mu, H5::H5File *  file, const std::string  name)
+{
   hsize_t    dims[2], chunk_dims[2]; // dataset dimensions
   dims[0] = chunk_dims[0] = mu.cols();
   dims[1] = chunk_dims[1] = mu.rows();      
@@ -52,9 +88,9 @@ typename std::enable_if<!is_tt<std::complex, T>::value, void>::type write_hdf5(c
 
 
 template <typename T>
-typename std::enable_if<is_tt<std::complex, T>::value, void>::type write_hdf5(const Eigen::Array<T, -1, -1 > & mu,
-									      H5::H5File * file,
-                                                                                        const std::string name) {
+typename std::enable_if<is_tt<std::complex, T>::value, void>::type
+write_hdf5(const Eigen::Array<T, -1, -1 > & mu, H5::H5File * file, const std::string name)
+{
   hsize_t    dims[2], chunk_dims[2]; // dataset dimensions
   dims[0] = chunk_dims[0] = mu.cols();
   dims[1] = chunk_dims[1] = mu.rows();      
@@ -81,49 +117,20 @@ typename std::enable_if<is_tt<std::complex, T>::value, void>::type write_hdf5(co
 }
 
 
-
-template <typename T> 
-void instantiateHDF<T>:: get_hdf5A(T *l, H5::H5File *file,  std::string & name) {
-  get_hdf5<T>(l, file, name);
-}
-
-template <typename T> 
-void instantiateHDF<T>:: get_hdf5A(T * l, H5::H5File * file,  char *name) {
-  get_hdf5<T>(l, file, name);
-}
-
-template <typename T> 
-void instantiateHDF<T>:: write_hdf5A(const Eigen::Array<T, -1, -1 > & mu, H5::H5File * file, const std::string name) {
-  write_hdf5<T>(mu, file, name);
-}
-
-template struct instantiateHDF<int>;
-template struct instantiateHDF<unsigned>;
-template struct instantiateHDF<unsigned long>;
-template struct instantiateHDF<float>;
-template struct instantiateHDF<double>;
-template struct instantiateHDF<long double>;
-template struct instantiateHDF<std::complex<float>>;
-template struct instantiateHDF<std::complex<double>>;
-template struct instantiateHDF<std::complex<long double>>;
-
-template void get_hdf5<int>(int*, H5::H5File*, char*);
-template void get_hdf5<unsigned>(unsigned*, H5::H5File*, char*);
-template void get_hdf5<unsigned long>(unsigned long*, H5::H5File*, char*);
-template void get_hdf5<float>(float*, H5::H5File*, char*);
-template void get_hdf5<double>(double*, H5::H5File*, char*);
-template void get_hdf5<long double>(long double*, H5::H5File*, char*);
-template void get_hdf5<std::complex<float>>(std::complex<float>*, H5::H5File*, char*);
-template void get_hdf5<std::complex<double>>(std::complex<double>*, H5::H5File*, char*);
-template void get_hdf5<std::complex<long double>>(std::complex<long double>*, H5::H5File*, char*);
+#define instantiateTYPE(type)              template void get_hdf5<type>(type *, H5::H5File *, char * ); \
+  template void get_hdf5<type>(type *, H5::H5File*, std::string &);	\
+  template void write_hdf5(const Eigen::Array<type, -1, -1 > & , H5::H5File * , const std::string );
 
 
-template void get_hdf5<int>(int*, H5::H5File*, std::string &);
-template void get_hdf5<unsigned>(unsigned*, H5::H5File*, std::string &);
-template void get_hdf5<unsigned long>(unsigned long*, H5::H5File*, std::string &);
-template void get_hdf5<float>(float*, H5::H5File*, std::string &);
-template void get_hdf5<double>(double*, H5::H5File*, std::string &);
-template void get_hdf5<long double>(long double*, H5::H5File*, std::string &);
-template void get_hdf5<std::complex<float>>(std::complex<float>*, H5::H5File*, std::string &);
-template void get_hdf5<std::complex<double>>(std::complex<double>*, H5::H5File*, std::string &);
-template void get_hdf5<std::complex<long double>>(std::complex<long double>*, H5::H5File*, std::string &);
+
+instantiateTYPE(float)
+instantiateTYPE(double)
+instantiateTYPE(long double)
+
+instantiateTYPE(std::complex<float>)
+instantiateTYPE(std::complex<double>)
+instantiateTYPE(std::complex<long double>)
+
+instantiateTYPE(int)
+instantiateTYPE(unsigned)
+instantiateTYPE(unsigned long)
