@@ -45,6 +45,8 @@ class shell_input{
         int DOS_NumMoments;
         std::string DOS_kernel;
         double DOS_kernel_parameter;
+        double DOS_Emin;
+        double DOS_Emax;
         std::string DOS_Name;
         bool DOS_Exclusive;
         bool DOS_is_required;
@@ -91,12 +93,12 @@ class shell_input{
         // Help menu
         bool help;
 
-        // function names
         std::vector<std::string> valid_keys;
         int len;
         std::vector<int> keys_pos;
         std::vector<int> keys_len;
 
+        // function names
         shell_input(int, char**);
         shell_input();
         void printHelp();

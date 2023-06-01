@@ -104,15 +104,30 @@ void dos<T, DIM>::set_default_parameters(){
 	
 template <typename T, unsigned DIM>
 void dos<T, DIM>::override_parameters(){
+
     // Overrides the current parameters with the ones from the shell input.
     // These parameters are in eV or Kelvin, so they must scaled down
     // to the KPM units. This includes the temperature
 
+    double scale = systemInfo->energy_scale;
+    double shift = systemInfo->energy_shift;
 
     if(variables.DOS_NumEnergies != -1){
         NEnergies           = variables.DOS_NumEnergies;
         default_NEnergies   = false;
     }
+
+
+    if(variables.DOS_Emin != 8888.8){
+        Emin  = (variables.DOS_Emin - shift)/scale;
+        default_NEnergies   = false;
+    }
+
+    if(variables.DOS_Emax != -8888.8){
+        Emax  = (variables.DOS_Emax - shift)/scale;
+        default_NEnergies   = false;
+    }
+
 
     if(variables.DOS_NumMoments != -1){
         NumMoments         = variables.DOS_NumMoments;
@@ -145,10 +160,10 @@ void dos<T, DIM>::override_parameters(){
 
 template <typename T, unsigned DIM>
 bool dos<T, DIM>::fetch_parameters(){
-	debug_message("Entered conductivit_dc::read.\n");
 	//This function reads all the data from the hdf5 file that's needed to 
-    //calculate the dc conductivity
-	 
+    //calculate the density of states
+	debug_message("Entered conductivit_dc::read.\n");
+
 
     std::string name = systemInfo->filename;
 	H5::H5File file = H5::H5File(name.c_str(), H5F_ACC_RDONLY);
@@ -183,16 +198,25 @@ bool dos<T, DIM>::fetch_parameters(){
 			MU = MUReal.template cast<std::complex<T>>();
 		}				
 
-    result = true;
-  } catch(H5::Exception& e) {debug_message("DOS: There is no MU matrix.\n");}
-	
+        result = true;
+    } catch(H5::Exception& e) {debug_message("DOS: There is no MU matrix.\n");}
+    NumMoments = MaxMoments;
 
-  NumMoments = MaxMoments;
+    // Check if the energy window has been specified
+    double scale = systemInfo->energy_scale;
+    double shift = systemInfo->energy_shift;
+    try{
+		debug_message("Fetching DoS energy window.\n");
+		get_hdf5(&Emin, &file, (char*)"dos_Emin");
+		get_hdf5(&Emax, &file, (char*)"dos_Emax");
+        Emin = (Emin-shift)/scale;
+        Emax = (Emax-shift)/scale;
+    } catch(H5::Exception& e) {debug_message("DOS: Energy window was not specified.\n");}
 
 
 	file.close();
 	debug_message("Left DOS::fetch_parameters.\n");
-  return result;
+    return result;
 }
 
 template <typename U, unsigned DIM>

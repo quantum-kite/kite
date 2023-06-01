@@ -347,8 +347,8 @@ template <typename U, unsigned DIM>
 void conductivity_dc<U, DIM>::calculate2(){
 
     // Make sure number of energies is odd to use with the Simpson integration method
-    if(N_energies % 2 != 1)
-        N_energies += 1;
+    if(NEnergies % 2 != 1)
+        NEnergies += 1;
 
     energies = Eigen::Matrix<U, -1, 1>::LinSpaced(NEnergies, minEnergy, maxEnergy);
     fermiEnergies = Eigen::Matrix<U, -1, 1>::LinSpaced(NFermiEnergies, minFermiEnergy, maxFermiEnergy);

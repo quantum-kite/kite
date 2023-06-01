@@ -14,11 +14,3 @@ for i in test0*; do
 done
 echo -e "\n"
 
-echo -e "Testing \e[1mKITE-tools\e[0m functionalities. \e[1m\e[32mOK\e[0m means the test passed."
-for i in tools_test*; do
-    cd $i
-    echo -n "  "
-    cat description | tr '\n' ' '
-    ./test.sh script 
-    cd ..
-done

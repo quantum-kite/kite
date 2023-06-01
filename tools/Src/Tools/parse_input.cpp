@@ -10,12 +10,11 @@
 #include <vector>
 #include <string>
 #include <complex>
-#include "ComplexTraits.hpp"
 #include "H5Cpp.h"
-#include "myHDF5.hpp"
+#include "../Tools/ComplexTraits.hpp"
+#include "../Tools/myHDF5.hpp"
 #include "../macros.hpp"
 #include "parse_input.hpp"
-//#include "compiletime_info.h"
 
 
 void shell_input::printDC(){
@@ -178,7 +177,7 @@ void shell_input::printHelp(){
     std::cout << "    ./KITE-tools h5_file.h --CondDC -F -1.2 2.5 30 --CondOpt -T 93\n";
     std::cout << "    Calculates the DC conductivity using 30 equidistant Fermi energies in the range [-1.2, 2.5] and the optical conductivity using a temperature of 93.\n";
     std::cout << "\n";
-    std::cout << "Copyright (C) 2018-2021, M. Andelkovic, L. Covaci, A. Ferreira, S. M. Joao, J. V. Lopes, T. G. Rappoport\n\n";
+    std::cout << "Copyright (C) 2018-2023, M. Andelkovic, L. Covaci, A. Ferreira, S. M. Joao, J. V. Lopes, T. G. Rappoport\n\n";
     std::cout << "This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.\n\n";
     std::cout << "This program is distributed in the hope that it will be useful but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.\n";
     }
@@ -197,10 +196,14 @@ shell_input::shell_input(int argc, char *argv[]){
     keys_pos = std::vector<int>(len, -1);
     keys_len = std::vector<int>(len, -1);
 
-    int m = 0;
+    // Iterate over all the command line arguments from last to first, and check
+    // which ones match the allowed keys
+    int m = 0; // amount of arguments between keys
     for(int i = argc-1; i >= 0; i--){
         m++;
         std::string arguments = std::string(argv[i]);
+
+        // Iterate over the allowed keys to check which one matches the command line
         for(int j = 0; j < len; j++){
             if(arguments == "--help" or arguments == "-h"){
                 printHelp();
@@ -467,23 +470,24 @@ void shell_input::parse_CondOpt2(int argc, char* argv[]){
 }
 
 void shell_input::parse_DOS(int argc, char* argv[]){
-    // This function looks at the command-line input pertaining to CondDC and
-    // finds the parameters for the temperature "t", number of energy points "E", 
-    // scattering parameter "S" and Fermi energy min, max and num "F"
+    // This function looks at the command-line input pertaining to the DoS and
+    // finds all the relevant parameters
     
     DOS_NumEnergies = -1;
     DOS_NumMoments = -1;
+    DOS_Emin = 8888.8;
+    DOS_Emax = -8888.8;
     DOS_kernel = "";
     DOS_Name = "";
     DOS_Exclusive = false;
     DOS_kernel_parameter = -8888.8;
-    int pos = keys_pos.at(0);
+
+    int pos = keys_pos.at(0); // Position of the DoS (0) in the list of command line arguments
     if(pos != -1){
+        // Iterate over the arguments inside the --DOS section: --DOS -N 1024 -K green
         for(int k = 1; k < keys_len.at(0); k++){
             std::string name = argv[k + pos];
             std::string n1 = argv[k + pos + 1];
-            if(name == "-E")
-                DOS_NumEnergies = atoi(n1.c_str());
             if(name == "-N")
                 DOS_Name = n1;
             if(name == "-M")
@@ -491,10 +495,38 @@ void shell_input::parse_DOS(int argc, char* argv[]){
             if(name == "-K"){
                 DOS_kernel = n1;
                 if(n1 == "green"){
-                  std::string n2 = argv[k + pos + 2];
-                  DOS_kernel_parameter = atof(n2.c_str());
+                    std::string n2 = argv[k + pos + 2];
+                    DOS_kernel_parameter = atof(n2.c_str());
                 }
             }
+
+            // Fetch the number of energy points, and the energy window. The energy 
+            // window is optional, so we need to check whether it exists
+            if(name == "-E"){
+
+                // Check if -E only has 1 argument or 3. To check if it has one element, 
+                // we need to check if it's the penultimate key of the DoS section, 
+                // or if there are any of the other keys two indices down
+                if(k == keys_len.at(0) - 1){
+                    DOS_NumEnergies = atoi(n1.c_str());
+                    continue;
+                }
+
+                // If the DoS is not the penultimate element, then there are other
+                // keys after it, so accessing k+pos+2 will be allowed
+                std::string n2 = argv[k + pos + 2];
+                if(n2=="-N" or n2=="-M" or n2=="-K" or n2=="-X"){
+                    DOS_NumEnergies = atoi(n1.c_str());
+                    continue;
+                }
+
+                // If the code made it so far, it means there are three arguments
+                std::string n3 = argv[k + pos + 3];
+                DOS_Emin = atof(n1.c_str());
+                DOS_Emax = atof(n2.c_str());
+                DOS_NumEnergies = atoi(n3.c_str());
+            }
+
             if(name == "-X" or n1 == "-X")
                 DOS_Exclusive = true;
         }
@@ -511,13 +543,12 @@ void shell_input::parse_DOS(int argc, char* argv[]){
       exit(1);
     }
       
+    std::cout << DOS_Emin << " " << DOS_Emax << " " << DOS_NumEnergies <<"\n" << std::flush;
 }
 
 
 void shell_input::parse_lDOS(int argc, char* argv[]){
-    // This function looks at the command-line input pertaining to CondDC and
-    // finds the parameters for the temperature "t", number of energy points "E", 
-    // scattering parameter "S" and Fermi energy min, max and num "F"
+    // This function looks at the command-line input pertaining to LDoS
     
     lDOS_Name = "";
     lDOS_Exclusive = false;

@@ -14,8 +14,8 @@
 #include <omp.h>
 
 #include "H5Cpp.h"
-#include "../../../Src/Tools/ComplexTraits.hpp"
-#include "../../../Src/Tools/myHDF5.hpp"
+#include "../Tools/ComplexTraits.hpp"
+#include "../Tools/myHDF5.hpp"
 
 #include "../Tools/parse_input.hpp"
 #include "../Tools/systemInfo.hpp"
@@ -28,7 +28,7 @@ template <typename T, unsigned DIM>
 conductivity_optical<T, DIM>::conductivity_optical(system_info<T, DIM>& info, shell_input & vari){
     name = info.filename;
 
-		// Functions to calculate. They will require the objects present in
+	// Functions to calculate. They will require the objects present in
     // the configuration file
     units = unit_scale;
     systemInfo = info;   // retrieve the information about the Hamiltonian

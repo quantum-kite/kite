@@ -10,10 +10,10 @@
 #include <complex>
 #include <string>
 #include <Eigen/Dense>
-#include "Tools/ComplexTraits.hpp"
 #include "H5Cpp.h"
 
-#include "Tools/myHDF5.hpp"
+#include "../../Src/Tools/ComplexTraits.hpp"
+#include "../../Src/Tools/myHDF5.hpp"
 #include "Tools/parse_input.hpp"
 #include "Tools/calculate.hpp"
 #include "macros.hpp"

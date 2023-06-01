@@ -8,9 +8,9 @@
 #include <Eigen/Dense>
 #include <iostream>
 
-#include "ComplexTraits.hpp"
 #include "H5Cpp.h"
-#include "myHDF5.hpp"
+#include "../Tools/ComplexTraits.hpp"
+#include "../Tools/myHDF5.hpp"
 
 #include <complex>
 #include <string>
