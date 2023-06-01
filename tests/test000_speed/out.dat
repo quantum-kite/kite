@@ -72,19 +72,19 @@ terminate called after throwing an instance of 'H5::FileIException'
 Command terminated by signal 6
 	Command being timed: "../KITEx config.h5"
 	User time (seconds): 0.00
-	System time (seconds): 0.01
-	Percent of CPU this job got: 2%
-	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.71
+	System time (seconds): 0.00
+	Percent of CPU this job got: 4%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.37
 	Average shared text size (kbytes): 0
 	Average unshared data size (kbytes): 0
 	Average stack size (kbytes): 0
 	Average total size (kbytes): 0
-	Maximum resident set size (kbytes): 8320
+	Maximum resident set size (kbytes): 8448
 	Average resident set size (kbytes): 0
 	Major (requiring I/O) page faults: 0
-	Minor (reclaiming a frame) page faults: 351
-	Voluntary context switches: 112
-	Involuntary context switches: 2
+	Minor (reclaiming a frame) page faults: 353
+	Voluntary context switches: 111
+	Involuntary context switches: 3
 	Swaps: 0
 	File system inputs: 0
 	File system outputs: 0
