@@ -1,4 +1,4 @@
-*(This example details the calculation from the [Tutorial/Getting Started][tutorial]*)
+*(This example uses graphene to show how to construct a lattice with sublattices and perform a basic calculation using KITE.)*
 ## The TB-model for Graphene
 
 The electronic structure of graphene is well described by a simple tight-binding model that only uses one $p_z$ orbital
@@ -10,7 +10,7 @@ Though the model is relative simple, it is used suite often in the literature.
 ### Lattice
 The code below illustrates the building of the [`#!python pb.lattice`][lattice] for graphene:
 
-* define the parameter ($t$ in $eV$)
+* define the parameter ($t$ in eV)
 * define the vectors of the unit-cell ($\vec a_1$ and $\vec a_2$ in units of $a$, length of the unit-cell)
 * create a [`#!python pb.lattice`][lattice]-object
 * define the on-site energies

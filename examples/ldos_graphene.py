@@ -160,7 +160,7 @@ def main(onsite=(0, 0)):
             sub_matrix.append('B')
 
     calculation.ldos(
-        energy=np.linspace(-1, 1, 101),
+        energy=np.linspace(-0.4, 0.4, 41),
         num_moments=64,
         num_disorder=1,
         position=pos_matrix,
