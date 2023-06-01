@@ -15,7 +15,7 @@ copyright:  "KITE is a free software: you can redistribute it and/or modify it u
 # Navigation
 
 nav:
-  - Home: 'index.md'
+  - Home: 'https://quantum-kite.com/'
   - Installation: 'installation.md'
   - Documentation:
     - Tutorial: 'documentation/index.md'
@@ -25,8 +25,9 @@ nav:
     - 4. Calculation: 'documentation/calculation.md'
     - 5. Post-processing: 'documentation/postprocessing.md'
     - 6. Disorder: 'documentation/disorder.md'
-    - 7. Editing the HDF5 file: 'documentation/editing_hdf_files.md'
-    - 8. Ground Rules: 'documentation/optimization.md'
+    - 7. Magnetic Field: 'documentation/magnetic.md'
+    - 8. Editing the HDF5 file: 'documentation/editing_hdf_files.md'
+    - 9. Ground Rules: 'documentation/optimization.md'
     - Examples:
       - About the examples: 'documentation/examples/index.md'
       - Graphene: 'documentation/examples/graphene.md'
@@ -53,7 +54,7 @@ nav:
       - Addtitional scripts: 'api/kite_tools_readme.md'
   - FAQ: 'faq.md'
   - About:
-    - README.md: 'about/index.md'
+    - About KITE: 'about/index.md'
     - LICENSE.md: 'about/LICENSE.md'
     - VERSION.md: 'about/VERSION.md'
 
