@@ -79,6 +79,14 @@ Pybinding also requires the SciPy packages but pip will resolve all the SciPy de
 pip3 install pybinding
 ```
 
+!!! info
+
+    Due to outdated dependencies, the installation of pybinding might fail.
+    You can install the development version of Pybinding with:
+    ``` bash
+    pip3 install git+https://github.com/BertJorissen/pybinding
+    ```
+
 Alternatively, you might prefer to follow the instructions on the [Pybinding][pybinding] webpage.
 
 To construct the HDF5-files, KITE requires *h5py*: 
@@ -159,6 +167,14 @@ Pybinding also requires the SciPy packages but pip will resolve all the SciPy de
 ``` bash
 /usr/local/bin/python3 -m pip install numpy h5py pybinding
 ```
+
+!!! info
+
+    Due to outdated dependencies, the installation of pybinding might fail.
+    You can install the development version of Pybinding with:
+    ``` bash
+    pip3 install git+https://github.com/BertJorissen/pybinding
+    ```
 
 Alternatively, you might prefer to follow the instructions on the [Pybinding][pybinding] webpage.
 

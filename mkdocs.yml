@@ -27,17 +27,18 @@ nav:
     - 6. Disorder: 'documentation/disorder.md'
     - 7. Editing the HDF5 file: 'documentation/editing_hdf_files.md'
     - 8. Ground Rules: 'documentation/optimization.md'
-    - Examples:
+    - In Depth Examples:
       - About the examples: 'documentation/examples/index.md'
       - Graphene: 'documentation/examples/graphene.md'
       - Haldane: 'documentation/examples/haldane.md'
       - Phosphorene: 'documentation/examples/phosphorene.md'
       - Optical Conductivity: 'documentation/examples/optical_conductivity.md'
-      - Large Systems: 'documentation/examples/large_systems.md'
-    - More Examples:
+    - KITE scripts v.1.1:
       - About Examples-dir: 'documentation/more_examples/additional_examples.md'
-      - Examples from KITE's Paper: 'documentation/more_examples/paper.md'
+    - Advanced Examples:
+      - Large Systems: 'documentation/more_examples/large_systems.md'
       - Custom Local Potential: 'documentation/more_examples/custom_local_potential.md'
+      - Examples from KITE's Paper: 'documentation/more_examples/paper.md'
   - Background:
     - Overview of KITE: 'background/index.md'
     - Spectral Methods: 'background/spectral.md'
@@ -53,7 +54,7 @@ nav:
       - Addtitional scripts: 'api/kite_tools_readme.md'
   - FAQ: 'faq.md'
   - About:
-    - README.md: 'about/index.md'
+    - About KITE: 'about/index.md'
     - LICENSE.md: 'about/LICENSE.md'
     - VERSION.md: 'about/VERSION.md'
 
@@ -88,7 +89,7 @@ theme:
     - navigation.top
     - navigation.sections
     - navigation.expand
-    - navigation.instant
+#    - navigation.instant problem with the homepage
     - navigation.tracking
     - toc.integrate
     - toc.follow

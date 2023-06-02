@@ -15,8 +15,7 @@ import matplotlib.pyplot as plt
 import sys
 from matplotlib import rc
 
-rc('font',size=30)
-rc('axes',labelsize=30,linewidth=4)
+
 
 def process_arpes(name):
     # open file and read from it
