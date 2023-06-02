@@ -25,20 +25,20 @@ nav:
     - 4. Calculation: 'documentation/calculation.md'
     - 5. Post-processing: 'documentation/postprocessing.md'
     - 6. Disorder: 'documentation/disorder.md'
-    - 7. Magnetic Field: 'documentation/magnetic.md'
-    - 8. Editing the HDF5 file: 'documentation/editing_hdf_files.md'
-    - 9. Ground Rules: 'documentation/optimization.md'
-    - Examples:
+    - 7. Editing the HDF5 file: 'documentation/editing_hdf_files.md'
+    - 8. Ground Rules: 'documentation/optimization.md'
+    - In Depth Examples:
       - About the examples: 'documentation/examples/index.md'
       - Graphene: 'documentation/examples/graphene.md'
       - Haldane: 'documentation/examples/haldane.md'
       - Phosphorene: 'documentation/examples/phosphorene.md'
       - Optical Conductivity: 'documentation/examples/optical_conductivity.md'
-      - Large Systems: 'documentation/examples/large_systems.md'
-    - More Examples:
+    - KITE scripts v.1.1:
       - About Examples-dir: 'documentation/more_examples/additional_examples.md'
-      - Examples from KITE's Paper: 'documentation/more_examples/paper.md'
+    - Advanced Examples:
+      - Large Systems: 'documentation/more_examples/large_systems.md'
       - Custom Local Potential: 'documentation/more_examples/custom_local_potential.md'
+      - Examples from KITE's Paper: 'documentation/more_examples/paper.md'
   - Background:
     - Overview of KITE: 'background/index.md'
     - Spectral Methods: 'background/spectral.md'
