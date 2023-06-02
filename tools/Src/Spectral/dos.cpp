@@ -207,8 +207,8 @@ bool dos<T, DIM>::fetch_parameters(){
     double shift = systemInfo->energy_shift;
     try{
 		debug_message("Fetching DoS energy window.\n");
-		get_hdf5(&Emin, &file, (char*)"dos_Emin");
-		get_hdf5(&Emax, &file, (char*)"dos_Emax");
+		get_hdf5(&Emin, &file, (char*)(dirName+"dos_Emin").c_str());
+		get_hdf5(&Emax, &file, (char*)(dirName+"dos_Emax").c_str());
         Emin = (Emin-shift)/scale;
         Emax = (Emax-shift)/scale;
     } catch(H5::Exception& e) {debug_message("DOS: Energy window was not specified.\n");}
