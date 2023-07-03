@@ -184,12 +184,12 @@ Edit *CMakeLists.txt* in the `#!bash kite/`-directory:
 * locate the following statements
   ```
   set(CMAKE C COMPILER "gcc")
-  set(CMAKE C COMPILER "g++")
+  set(CMAKE CXX COMPILER "g++")
   ```
 
 * replace by
   ```
-  set(CMAKE CXX COMPILER "gcc-n")
+  set(CMAKE C COMPILER "gcc-n")
   set(CMAKE CXX COMPILER "g++-n")
   ```
 
