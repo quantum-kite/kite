@@ -19,14 +19,15 @@ nav:
   - Installation: 'installation.md'
   - Documentation:
     - Tutorial: 'documentation/index.md'
+    - 0. Ground Rules: 'documentation/optimization.md'
     - 1. Workflow: 'documentation/workflow.md'
     - 2. Lattice: 'documentation/tb_model.md'
     - 3. Settings: 'documentation/settings.md'
     - 4. Calculation: 'documentation/calculation.md'
     - 5. Post-processing: 'documentation/postprocessing.md'
     - 6. Disorder: 'documentation/disorder.md'
-    - 7. Editing the HDF5 file: 'documentation/editing_hdf_files.md'
-    - 8. Ground Rules: 'documentation/optimization.md'
+    - 7. Magnetic Field: 'documentation/magnetic.md'
+    - 8. Editing the HDF5 file: 'documentation/editing_hdf_files.md'
     - In Depth Examples:
       - About the examples: 'documentation/examples/index.md'
       - Graphene: 'documentation/examples/graphene.md'
