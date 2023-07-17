@@ -5,6 +5,9 @@
 /*                                                         */
 /***********************************************************/
 
+#define EIGEN_DONT_PARALLELIZE
+#define EIGEN_STACK_ALLOCATION_LIMIT 0
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <omp.h>
@@ -28,6 +31,7 @@
 #include <math.h>
 #include <initializer_list>
 
+  
 // Set of compilation parameters chosen in the Makefile
 // MEMORY is the number of KPM vectors stored in the memory while calculating Gamma2D
 // TILE is the size of the memory blocks used in the program

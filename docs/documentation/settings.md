@@ -1,6 +1,20 @@
 KITE uses the classes [`#!python kite.Configuration`][configuration] and [`#!python kite.Calculation`][calculation] to define the calculation settings.
 
-The class [`#!python kite.Configuration`][configuration] carries the following information:
+This is what a typical [`#!python kite.Configuration`][configuration] object (for a 2D lattice) looks like:
+
+``` python linenums="1"
+nx = ny = 2
+lx = ly = 128
+mode = 'periodic'
+configuration = kite.Configuration(
+  divisions=[nx, ny],
+  length=[lx, ly],
+  boundaries=[mode, mode],
+  is_complex=False,
+  precision=1 
+)
+```
+Below, we explain each of the arguments in the [`#!python kite.Configuration`][configuration] object.
 
 ## [Divisions][configuration-divisions]
 : The [`#!python divisions`][configuration-divisions] is an integer number that defines the number of decomposition parts in each spatial direction.
@@ -23,11 +37,42 @@ The class [`#!python kite.Configuration`][configuration] carries the following i
 : When using a 2D lattice, only `#!python lx, ly, nx, ny ` are needed.
 
 ## [Boundaries][configuration-boundaries]
-: The [`#!python boundaries`][configuration-boundaries] is a string, use `#!python 'periodic'` for periodic boundary conditions and `#!python 'open'` for open boundary conditions.
-  Additionally, *twisted* and *random twisted* boundary conditions can be implemented using `#!python 'twisted'` and `#!python 'random'` respectively.
-  If *twisted* boundary conditions are used, the twist [`#!python angles`][configuration-angles] must be included in radians. If open boundary conditions are used, the system has the geometry of the unit cell, which is replicated `#!python lx, ly, lz ` times in the directions of the unit vectors. It is possible to use open boundary conditions in one direction to build ribbons in 2D and slabs in 3D.
+:  KITE has 3 standard types of boundary conditions (BCs) implemented, namely: periodic, open, and twisted. Moreover, a "random BCs" option is available, whereby statistical averages over ensembles of random vectors (or disorder configurations) are done with the help of random twist angles drawn from a uniform distribution. This special option is particularly useful to simulate the infinite-size “bulk", since it efficiently eliminates finite size effects.  
+
 
     !!! Info
+        
+        It is possible to impose open BCs along one spatial direction to build ribbons in 2D and slabs in 3D. 
+    
+    
+    The [`#!python boundaries`][configuration-boundaries] is a string, use `#!python 'periodic'` for *periodic* BCs, `#!python 'open'` for *open* BCs, `#!python 'twisted'` for *twisted* BCs and `#!python 'random'` for *random* BCs. In all cases, the system has the geometry of the unit cell, which is replicated `#!python lx, ly, lz ` times in the directions of the unit vectors. Different BCs can be used along the `#!python x, y` and `#!python z` axis. If *twisted* boundary conditions are used, the twist [`#!python angles`][configuration-angles] must be included in radians.
+    
+    ### Twisted BC
+
+    For twisted BCs, the twist phase angles need to be specified by the user. This is done by means of an extra argument `#!python ' angles=[phi_1,..,phi_DIM]'` where `#!python ' phi_i \in [0, 2*M_PI]'`. The syntax is simple:
+    
+    ``` python linenums="1"
+    nx = ny = 2
+    lx = ly = 128
+    mode = 'twisted'
+    twsx = twsy = np.pi/2.0
+    
+    configuration = kite.Configuration(
+      divisions=[nx, ny],
+      length=[lx, ly],
+      boundaries=[mode, mode],
+      angles = [twsx,twsy]
+      is_complex=False,
+      precision=1 
+    )
+    ```
+
+    ### Random BC
+
+    Random BCs are defined using `mode = 'random'`. No extra arguments are required, but this option implicitely assumes that many random vectors (and/or disorder configurations) will be used. For a single system realization (Sec. [calculation] for calculation settings), this option is equivalent to a mere twisted-BC simulation with randomly chosen twist-angles along `#!python x, y` and `#!python z` axis.
+
+
+    !!! Warning
     
         The usage of `#!python True` or `#!python False` for the boundaries is *deprecated*.
 
@@ -47,33 +92,20 @@ The class [`#!python kite.Configuration`][configuration] carries the following i
   By default, [KITEx][kitex] executes an automated rescaling of the Hamiltonian, see the [Documentation][documentation].
   Advanced users should avoid the automated rescaling and override this feature using `#!python spectrum_range=[Emin,Emax]`, where `#!python Emin, Emax` are the minimum, maximum eigenvalues of the TB matrix. _Lower/upper bounds on smallest/largest energy eigenvalues should be used if exact eigenvalues are unknown_ _(often the case in systems with disorder); see Sec. [Disorder] for more information_. 
 
-The [`#!python kite.Configuration`][configuration] object for a 2D lattice is thus structured in the following way:
 
-``` python linenums="1"
-nx = ny = 2
-lx = ly = 128
-mode = 'periodic'
-configuration = kite.Configuration(
-  divisions=[nx, ny],
-  length=[lx, ly],
-  boundaries=[mode, mode],
-  is_complex=False,
-  precision=1 
-)
-```
-To manually set the [`#!python spectrum_range`][configuration-spectrum_range], it is necessary to add an extra parameter
-to the [`#!python kite.Configuration`][configuration] class:
-
-``` python
-configuration = kite.Configuration(
-    divisions=[nx, ny],
-    length=[lx, ly],
-    boundaries=["periodic", "periodic"],
-    is_complex=False,
-    precision=1,
-    spectrum_range=[-10, 10]
-)
-```
+    To manually set the [`#!python spectrum_range`][configuration-spectrum_range], it is necessary to add an extra parameter
+    to the [`#!python kite.Configuration`][configuration] class:
+    
+    ``` python
+    configuration = kite.Configuration(
+        divisions=[nx, ny],
+        length=[lx, ly],
+        boundaries=["periodic", "periodic"],
+        is_complex=False,
+        precision=1,
+        spectrum_range=[-10, 10]
+    )
+    ```
 
 [HDF5]: https://www.hdfgroup.org
 [pybinding]: https://docs.pybinding.site/en/stable

@@ -37,6 +37,7 @@ if [[ "$1" == "quick" ]]; then
     #echo Testing DoS for the same Hamiltonian with and without energy shift.
     $tools config_sym.h5 --DOS -N dos_sym.dat -X > log
     $tools config.h5 --DOS -N dos.dat -X >> log
+    echo Done
 
 fi
 

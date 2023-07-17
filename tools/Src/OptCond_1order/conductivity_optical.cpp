@@ -28,7 +28,7 @@ template <typename T, unsigned DIM>
 conductivity_optical<T, DIM>::conductivity_optical(system_info<T, DIM>& info, shell_input & vari){
     name = info.filename;
 
-		// Functions to calculate. They will require the objects present in
+	// Functions to calculate. They will require the objects present in
     // the configuration file
     units = unit_scale;
     systemInfo = info;   // retrieve the information about the Hamiltonian
@@ -46,15 +46,16 @@ conductivity_optical<T, DIM>::conductivity_optical(system_info<T, DIM>& info, sh
             printOpt();                  // Print all the parameters used
 
             if(default_Convergence_D and default_Convergence_G){
-            calculate();
+                calculate();
             } else {
-              calculateBlocks();
+                calculateBlocks();
             }
 
         } else {
-          std::cout << "ERROR. The optical conductivity was requested but the data " "needed for its computation was not found in the input .h5 file. "
-              "Make sure KITEx has processed the file first. Exiting.";
-          exit(1);
+            std::cout << "ERROR. The optical conductivity was requested but the data " 
+                "needed for its computation was not found in the input .h5 file. "
+                "Make sure KITEx has processed the file first. Exiting.";
+            exit(1);
 
         }
     }
@@ -109,7 +110,7 @@ void conductivity_optical<T, DIM>::set_default_parameters(){
     scat = 0.0166/scale;
     default_scat = true;
 
-    N_energies = 512;
+    N_energies = 513; // Has to be odd for usage with Simpson integration
     default_NEnergies = true;
 
     N_omegas = 512;
@@ -190,9 +191,6 @@ bool conductivity_optical<T, DIM>::fetch_parameters(){
 
   // Check whether the matrices we're going to retrieve are complex or not
   int complex = systemInfo.isComplex;
-
-
-  
 
   // Retrieve the Gamma Matrix
   std::string MatrixName = dirName + "Gamma" + dirString;
@@ -363,13 +361,19 @@ void conductivity_optical<U, DIM>::calculateBlocks(){
    * convergence.*/
 	debug_message("Entered conductivity_optical::calculateBlocks.\n");
 	std::complex<U> imaginary(0.0, 1.0);
-  omp_set_num_threads(systemInfo.NumThreads);
+    omp_set_num_threads(systemInfo.NumThreads);
 
-  unsigned Nmax, Mmax;
-  Nmax = Convergence_D; // lines, Dirac delta
-  Mmax = Convergence_G; // columns, Green's function
-  unsigned nmax = Moments_D/Nmax;
-  unsigned mmax = Moments_G/Mmax;
+    unsigned Nmax, Mmax;
+    Nmax = Convergence_D; // lines, Dirac delta
+    Mmax = Convergence_G; // columns, Green's function
+    unsigned nmax = Moments_D/Nmax;
+    unsigned mmax = Moments_G/Mmax;
+
+
+    // Make sure number of energies is odd to use with the Simpson integration method
+    if(N_energies % 2 != 1)
+        N_energies += 1;
+
 
 
 
@@ -595,35 +599,37 @@ void conductivity_optical<U, DIM>::calculate(){
 	//the temperature is already in the KPM scale, but not the broadening or the Fermi Energy
 
 
-  if(!isPossible){
-    std::cout << "Cannot calculate the conductivity because there is no matching Gamma matrix"
-      "Exiting\n";
-    exit(0);
-  }
+    if(!isPossible){
+        std::cout << "Cannot calculate the conductivity because there is no matching Gamma matrix. Exiting\n";
+        exit(0);
+    }
+
+    // Make sure number of energies is odd to use with the Simpson integration method
+    if(N_energies % 2 != 1)
+        N_energies += 1;
 
 
-
-  Eigen::Matrix<U, -1, 1> energies;
-  Eigen::Matrix<U, -1, 1> frequencies;
-  energies  = Eigen::Matrix<U, -1, 1>::LinSpaced(N_energies, -lim, lim);
-  frequencies = Eigen::Matrix<U, -1, 1>::LinSpaced(N_omegas, minFreq, maxFreq);
+    Eigen::Matrix<U, -1, 1> energies;
+    Eigen::Matrix<U, -1, 1> frequencies;
+    energies  = Eigen::Matrix<U, -1, 1>::LinSpaced(N_energies, -lim, lim);
+    frequencies = Eigen::Matrix<U, -1, 1>::LinSpaced(N_omegas, minFreq, maxFreq);
 
 	std::complex<U> imaginary(0.0, 1.0);
 
 
   
-  // Functions that are going to be used by the contractor
-  int NumMoments1 = Moments_D;
-  U beta1 = beta;
-  U e_fermi1 = e_fermi;
-  std::function<U(int, U)> deltaF = [beta1, e_fermi1, NumMoments1](int n, U energy)->U{
-    return delta(n, energy)*U(1.0/(1.0 + U(n==0)))*fermi_function(energy, e_fermi1, beta1)*kernel_jackson<U>(n, NumMoments1);
-  };
+    // Functions that are going to be used by the contractor
+    int NumMoments1 = Moments_D;
+    U beta1 = beta;
+    U e_fermi1 = e_fermi;
+    std::function<U(int, U)> deltaF = [beta1, e_fermi1, NumMoments1](int n, U energy)->U{
+        return delta(n, energy)*U(1.0/(1.0 + U(n==0)))*fermi_function(energy, e_fermi1, beta1)*kernel_jackson<U>(n, NumMoments1);
+    };
 
 
-  Eigen::Matrix<std::complex<U>, -1, 1> cond; 
-  cond = Eigen::Matrix<std::complex<U>, -1, 1>::Zero(N_omegas, 1);
-  std::complex<U> temp3 = 0; 
+    Eigen::Matrix<std::complex<U>, -1, 1> cond; 
+    cond = Eigen::Matrix<std::complex<U>, -1, 1>::Zero(N_omegas, 1);
+    std::complex<U> temp3 = 0; 
 
 
   // Delta matrix of chebyshev moments and energies

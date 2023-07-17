@@ -120,7 +120,7 @@ void conductivity_dc<T, DIM>::set_default_parameters(){
     NumThreads          = systemInfo.NumThreads;
     default_NumThreads  = true;
 
-    NEnergies           = 512;              // Number of energies used in the energy integration
+    NEnergies           = 513;              // Number of energies used in the energy integration
     default_NEnergies   = true;
 
     deltascat           = 0.01/scale;       // scattering parameter in the delta function
@@ -345,8 +345,13 @@ void conductivity_dc<U, DIM>::printDC(){
 
 template <typename U, unsigned DIM>
 void conductivity_dc<U, DIM>::calculate2(){
-  energies = Eigen::Matrix<U, -1, 1>::LinSpaced(NEnergies, minEnergy, maxEnergy);
-  fermiEnergies = Eigen::Matrix<U, -1, 1>::LinSpaced(NFermiEnergies, minFermiEnergy, maxFermiEnergy);
+
+    // Make sure number of energies is odd to use with the Simpson integration method
+    if(NEnergies % 2 != 1)
+        NEnergies += 1;
+
+    energies = Eigen::Matrix<U, -1, 1>::LinSpaced(NEnergies, minEnergy, maxEnergy);
+    fermiEnergies = Eigen::Matrix<U, -1, 1>::LinSpaced(NFermiEnergies, minFermiEnergy, maxFermiEnergy);
 
 
   // Imaginary part of the Green's function: Dirac delta (greenR)

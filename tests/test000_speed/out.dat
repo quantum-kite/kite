@@ -43,7 +43,7 @@ VERBOSE: 1
 
 Starting program...
 
-HDF5-DIAG: Error detected in HDF5 (1.14.0) thread 0:
+HDF5-DIAG: Error detected in HDF5 (1.14.1-2) thread 0:
   #000: H5F.c line 836 in H5Fopen(): unable to synchronously open file
     major: File accessibility
     minor: Unable to open file
@@ -59,7 +59,7 @@ HDF5-DIAG: Error detected in HDF5 (1.14.0) thread 0:
   #004: H5VLnative_file.c line 128 in H5VL__native_file_open(): unable to open file
     major: File accessibility
     minor: Unable to open file
-  #005: H5Fint.c line 1809 in H5F_open(): unable to open file: name = 'config.h5', tent_flags = 0
+  #005: H5Fint.c line 1844 in H5F_open(): unable to open file: name = 'config.h5', tent_flags = 0
     major: File accessibility
     minor: Unable to open file
   #006: H5FD.c line 769 in H5FD_open(): open failed
@@ -71,20 +71,20 @@ HDF5-DIAG: Error detected in HDF5 (1.14.0) thread 0:
 terminate called after throwing an instance of 'H5::FileIException'
 Command terminated by signal 6
 	Command being timed: "../KITEx config.h5"
-	User time (seconds): 0.01
+	User time (seconds): 0.00
 	System time (seconds): 0.00
-	Percent of CPU this job got: 3%
-	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.43
+	Percent of CPU this job got: 4%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.37
 	Average shared text size (kbytes): 0
 	Average unshared data size (kbytes): 0
 	Average stack size (kbytes): 0
 	Average total size (kbytes): 0
-	Maximum resident set size (kbytes): 8144
+	Maximum resident set size (kbytes): 8448
 	Average resident set size (kbytes): 0
 	Major (requiring I/O) page faults: 0
-	Minor (reclaiming a frame) page faults: 345
-	Voluntary context switches: 106
-	Involuntary context switches: 0
+	Minor (reclaiming a frame) page faults: 353
+	Voluntary context switches: 111
+	Involuntary context switches: 3
 	Swaps: 0
 	File system inputs: 0
 	File system outputs: 0

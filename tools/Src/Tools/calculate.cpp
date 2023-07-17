@@ -14,8 +14,8 @@
 #include <omp.h>
 
 #include "H5Cpp.h"
-#include "ComplexTraits.hpp"
-#include "myHDF5.hpp"
+#include "../Tools/ComplexTraits.hpp"
+#include "../Tools/myHDF5.hpp"
 
 #include "parse_input.hpp"
 #include "systemInfo.hpp"

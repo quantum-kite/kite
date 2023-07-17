@@ -13,10 +13,12 @@ import matplotlib.pyplot as plt
 import process_arpes as pa
 from os import system as terminal
 from os.path import exists
-
+from matplotlib import rc
+rc('font',size=14)
+rc('axes',labelsize=14,linewidth=2)
 
 _kitex_dir = "../build"
-_kite_tools_dir = "../tools/build"
+_kite_tools_dir = "../build"
 
 KITEx_exists = exists(_kitex_dir)
 tools_exists = exists(_kite_tools_dir)
@@ -45,11 +47,10 @@ def make_figure_dos(file_data="dos.dat", title="DOS", xlabel="Energy (ev)", ylab
     """Make a figure for the DOS"""
     dos = np.loadtxt(file_data)
     fig = plt.figure()
-    ax = fig.subplots()
-    ax.plot(dos[:, 0], dos[:, 1])
-    ax.set_title(title)
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
+    plt.plot(dos[:, 0], dos[:, 1])
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
     fig.savefig(file_out)
     plt.close(fig)
 
@@ -59,12 +60,12 @@ def make_figure_opt_cond(file_data="optcond.dat", title="Optical conductivity", 
     """Make a figure for the DOS"""
     optcond = np.loadtxt(file_data)
     fig = plt.figure()
-    ax = fig.subplots()
-    lines = [ax.plot(optcond[:, 0], optcond[:, 1])[0], ax.plot(optcond[:, 0], optcond[:, 2])[0]]
-    ax.legend(lines, [r"$\mathcal{R}[\sigma_{xy}]$", r"$\mathcal{I}[\sigma_{xy}]$"])
-    ax.set_title(title)
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
+    plt.plot(optcond[:, 0], optcond[:, 1], label=r"$\mathcal{R}[\sigma_{xy}]$")
+    plt.plot(optcond[:, 0], optcond[:, 2], label=r"$\mathcal{I}[\sigma_{xy}]$")
+    plt.legend()
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
     fig.savefig(file_out)
     plt.close(fig)
 
@@ -73,7 +74,7 @@ def make_figure_cond_dc(file_data="condDC.dat", title="DC conductivity", xlabel=
                          ylabel=r"$\sigma (2e^2/h)$", file_out="optcond.pdf"):
     """Make a figure for the DOS"""
     optcond = np.loadtxt(file_data)
-    fig = plt.figure()
+    fig = plt.figure(figsize=(8, 6))
     ax = fig.subplots()
     lines = [ax.plot(optcond[:, 0], optcond[:, 1])[0], ax.plot(optcond[:, 0], optcond[:, 2])[0]]
     ax.legend(lines, [r"$\sigma_{xx}$", r"$\sigma_{xy}$"])
@@ -88,10 +89,24 @@ def make_figure_cond_dc_ss(file_data="condDC.dat", title="DC conductivity", xlab
                          ylabel=r"$\sigma (2e^2/h)$", file_out="optcond.pdf"):
     """Make a figure for the DOS"""
     optcond = np.loadtxt(file_data)
-    fig = plt.figure()
+    fig = plt.figure(figsize=(8, 6))
     ax = fig.subplots()
     lines = [ax.plot(optcond[:, 0], optcond[:, 2])[0]]
     ax.legend(lines, [r"$\sigma_{xx}$"])
+    ax.set_title(title)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    fig.savefig(file_out)
+    plt.close(fig)
+def make_figure_cond_dc_2(file_data1="condDC.dat",file_data2="condDC.dat", title="DC conductivity", xlabel="E (eV)",
+                         ylabel=r"$\sigma (2e^2/h)$", file_out="optcond.pdf"):
+    """Make a figure for the DOS"""
+    cond1 = np.loadtxt(file_data1)
+    cond2 = np.loadtxt(file_data2)
+    fig = plt.figure()
+    ax = fig.subplots()
+    lines = [ax.plot(cond1[:, 0], cond1[:, 2],'-o')[0],ax.plot(cond2[:, 0], cond2[:, 2], '-o')[0]]
+    ax.legend(lines, [r"$\sigma_{xx}$", r"$\sigma_{yy}$"])
     ax.set_title(title)
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
@@ -109,19 +124,13 @@ def print_title(text=""):
 
 def main(selection=None):
     if selection is None:
-        selection = np.arange(17, dtype=np.int) + 1
-    import matplotlib as mpl
-    import seaborn as sns
+        selection = np.arange(17, dtype=int) + 1
+        #selection =[1]
+   
 
-    mpl.rcParams['figure.dpi'] = 100
-    mpl.rcParams['savefig.dpi'] = 100
-    sns.set_style("white")
 
-    colors = ["dusty purple", "faded green","windows blue", "amber", "greyish"]
-    current_palette = sns.xkcd_palette(colors)
-    sns.set_palette(current_palette)
-    sns.set_style("ticks")
-    sns.set_context("talk", font_scale=1.1)
+    colors = ['#A95C8E', '#7BB274','#357EDD','#FFC107','#A0A0A0']
+
 
     # Header
     print_command("##########################################################################")
@@ -364,32 +373,24 @@ def main(selection=None):
         print_command("- - - -            Making the configuration file                 - - - - -")
         hdf5_file = example.main()
         pre_file_name = hdf5_file.replace("-output.h5", "")
-        cond_dc_data = "{0}-condDC.dat".format(pre_file_name)
-        cond_dc_figure = "{0}-condDC.pdf".format(pre_file_name)
+        cond_dc_data1 = "{0}-XXcondDC.dat".format(pre_file_name)
+        cond_dc_figure = "phxx-yy-condDC.pdf"
         run_calculation(hdf5_file)
         from process_single_shot import post_process_singleshot_conductivity_dc as post_process_dccond
         post_process_dccond(hdf5_file)
-        terminal("mv {hdf5} {data}".format(hdf5=hdf5_file[:-3] + ".dat", data=cond_dc_data))
-        make_figure_cond_dc_ss(file_data=cond_dc_data, title="DC Conductivity Phosphorene XX",
-                               file_out=cond_dc_figure)
-
-    if 16 in selection:
-        # Example 16: dccond_phosphorene.py
-        print_command("======= Example 16: DC coductivity for phosphorene in YY         =========")
-        import dccond_phosphorene as example
-        print_command("- - - -            Making the configuration file                 - - - - -")
+        terminal("mv {hdf5} {data}".format(hdf5=hdf5_file[:-3] + ".dat", data=cond_dc_data1))
         hdf5_file = example.main(direction='yy')
         pre_file_name = hdf5_file.replace("-output.h5", "")
-        cond_dc_data = "{0}-condDC.dat".format(pre_file_name)
-        cond_dc_figure = "{0}-condDC.pdf".format(pre_file_name)
+        cond_dc_data2 = "{0}-YYcondDC.dat".format(pre_file_name)
         run_calculation(hdf5_file)
         from process_single_shot import post_process_singleshot_conductivity_dc as post_process_dccond
         post_process_dccond(hdf5_file)
-        terminal("mv {hdf5} {data}".format(hdf5=hdf5_file[:-3] + ".dat", data=cond_dc_data))
-        make_figure_cond_dc_ss(file_data=cond_dc_data, title="DC Conductivity Phosphorene YY",
+        terminal("mv {hdf5} {data}".format(hdf5=hdf5_file[:-3] + ".dat", data=cond_dc_data2))
+        make_figure_cond_dc_2(file_data1=cond_dc_data1, file_data2=cond_dc_data2, title="DC Conductivity Phosphorene XX/YY",
                                file_out=cond_dc_figure)
 
-    if 17 in selection:
+
+    if 16 in selection:
         # Example 17: dos_twisted_bilayer.py
         print_command("======= Example 17: DOS for twisted bilayer graphene at 21.787 degrees ===")
         import dos_twisted_bilayer as example
@@ -403,7 +404,7 @@ def main(selection=None):
         terminal("mv dos.dat {0}".format(dos_data))
         make_figure_dos(file_data=dos_data, title="DOS Twisted Bilayer graphene at 21.787 degrees",
                         file_out=dos_figure)
-    if 18 in selection:
+    if 17 in selection:
         # Example 18: dos_t_symmetric_cubic_weyl_sm.py
         print_command("======= Example 18: DOS for T symmetric weyl sm                    =======")
         import dos_t_symmetric_cubic_weyl_sm as example
@@ -418,7 +419,7 @@ def main(selection=None):
         make_figure_dos(file_data=dos_data, title="DOS for T symmetric weyl semi-metal",
                         file_out=dos_figure)
 
-    if 19 in selection:
+    if 18 in selection:
         # Example 19: optcond_t_symmetric_cubic_weyl_sm.py
         print_command("======= Example 19: Optical confuctivity  for T symmetric weyl sm    =====")
         import optcond_t_symmetric_cubic_weyl_sm as example
@@ -433,7 +434,7 @@ def main(selection=None):
         make_figure_opt_cond(file_data=opt_cond_data, title="Optical Conductivity for T symmetric weyl semi-metal",
                              file_out=opt_cond_figure)
 
-    if 20 in selection:
+    if 19 in selection:
         # Example 20: dos_fu_kane_mele_model.py
         print_command("======= Example 20: DOS Fu-Kane-Mele model                         =======")
         import dos_fu_kane_mele_model as example
@@ -448,7 +449,7 @@ def main(selection=None):
         make_figure_dos(file_data=dos_data, title="DOS Fu-Kane-Mele model",
                         file_out=dos_figure)
 
-    if 21 in selection:
+    if 20 in selection:
         # Example 21: ARPES in bilayer graphene
         print_command("======= Example 21: ARPES in bilayer graphene model                         =======")
         import arpes_bilayer as example
@@ -464,7 +465,7 @@ def main(selection=None):
         pa.process_arpes("arpes.dat")
         terminal("mv arpes.png {0}".format(arpes_data))
 
-    if 22 in selection:
+    if 21 in selection:
         # Example 22: ARPES in cubic lattice
         print_command("======= Example 22: ARPES in cubic lattice model                         =======")
         import arpes_cubic as example
@@ -480,7 +481,7 @@ def main(selection=None):
         pa.process_arpes("arpes.dat")
         terminal("mv arpes.png {0}".format(arpes_data))
 
-    if 23 in selection:
+    if 22 in selection:
         # Example 23: second-order optical conductivity
         print_command("======= Example 23: second-order photoconductivity in hexagonal Boron Nitride =======")
         import hbn_optcond2_vacancies as example

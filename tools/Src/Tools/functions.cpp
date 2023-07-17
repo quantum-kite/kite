@@ -9,19 +9,32 @@
 
 template <typename T>	
 std::complex<T> integrate(Eigen::Matrix<T, -1, 1> energies, Eigen::Matrix<std::complex<T>, -1, 1> integrand){
+    // Integration routine to be used in all the response functions. This is Simpson 1/3
+
+
+    // Check that the x and y arrays have the same ammount of elements
 	if(energies.rows() != integrand.rows() or energies.cols() != integrand.cols()){
 		std::cout << "x and y arrays in the integrator must have the same number of elements. Exiting.\n";
 		exit(1);
 	}
 	
+    // Check that the number of integration points is odd for usage with Simpson
 	int N = energies.cols()*energies.rows();
+    if(N % 2 != 1) {
+        std::cout << "Number of energies in the final integraton process must be odd. Exiting.\n";
+        exit(1);
+    }
+
+    
+    T dE = energies(1) - energies(0);
+
+    // Simpson integral
 	std::complex<T> sum(0,0);
+    sum += integrand(0) + integrand(N-2)*T(4.0) + integrand(N-1);
+	for(int i = 0; i < (N-3)/2; i++)
+        sum += T(4.0)*integrand(1+i*2) + T(2.0)*integrand(i*2+2);
 	
-	for(int i = 0; i < N - 1; i++){
-		sum += (energies(i) - energies(i+1))*(integrand(i) + integrand(i+1))/T(2.0);
-	}
-	
-	return sum;
+	return sum/T(3.0)*dE;
 }
 
 // Instantiations

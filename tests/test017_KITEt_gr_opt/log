@@ -1,3 +1,4 @@
+8888.8 -8888.8 -1
 
 +------------------------------------------------------------------------+
 |            Chebyshev Polynomial Green's Function Approach              | 
@@ -52,7 +53,8 @@ Energy scale:        5
 Energy shift:        0
 Number of threads:   4
 ----------------- CALCULATIONS ----------------- 
-ERROR. The density of states was requested but the data needed for its computation was not found in the input .h5 file. Make sure KITEx has processed the file first. Exiting.
+ERROR. The density of states was requested but the data needed for its computation was not found in the input .h5 file. Make sure KITEx has processed the file first. Exiting.8888.8 -8888.8 -1
+
 +------------------------------------------------------------------------+
 |            Chebyshev Polynomial Green's Function Approach              | 
 |             to Real-Space Quantum Transport Simulations                | 

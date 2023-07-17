@@ -2,8 +2,8 @@
 
     This file describes the contents of the [`#!bash kite/examples/`][examples-folder-github]-folder.
 
-## KITE Examples
-This folder contains various examples showing the functionalities of the KITE library. To execute an example, run
+## KITE Scripts
+This folder contains various scripts with examples showing the functionalities of the KITE library. To execute a script, run
 
 ``` bash
 python3 example.py

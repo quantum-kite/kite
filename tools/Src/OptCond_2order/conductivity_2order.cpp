@@ -13,8 +13,8 @@
 #include <vector>
 #include <omp.h>
 
-#include "../Tools/ComplexTraits.hpp"
 #include "H5Cpp.h"
+#include "../Tools/ComplexTraits.hpp"
 #include "../Tools/myHDF5.hpp"
 
 #include "../Tools/parse_input.hpp"
@@ -215,7 +215,7 @@ void conductivity_nonlinear<T, DIM>::set_default_parameters(){
 
 
   print_all   = 0;
-  N_energies  = 512; 
+  N_energies  = 513; 
   default_NEnergies = true;
 
   lim         = 0.995;
@@ -316,7 +316,8 @@ bool conductivity_nonlinear<T, DIM>::fetch_parameters(){
 
 template <typename U, unsigned DIM>
 void conductivity_nonlinear<U, DIM>::calculate_photo(){
-  Eigen::Matrix<std::complex<U>, -1, -1> omega_energies0, omega_energies1, omega_energies2, omega_energies3, omega_energies4;
+    Eigen::Matrix<std::complex<U>, -1, -1> omega_energies0, omega_energies1, omega_energies2, omega_energies3, omega_energies4;
+
   omega_energies0 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
   omega_energies1 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
   omega_energies2 = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
@@ -410,8 +411,9 @@ void conductivity_nonlinear<U, DIM>::calculate_photo(){
 template <typename U, unsigned DIM>
 void conductivity_nonlinear<U, DIM>::calculate_general(){
 
-  Eigen::Matrix<std::complex<U>, -1, -1> omega_energies3shg1, omega_energies3shg2, omega_energies3shg3;
-  Eigen::Matrix<std::complex<U>, -1, -1> omega_energies2shg, omega_energies1shg, omega_energies0shg;
+    Eigen::Matrix<std::complex<U>, -1, -1> omega_energies3shg1, omega_energies3shg2, omega_energies3shg3;
+    Eigen::Matrix<std::complex<U>, -1, -1> omega_energies2shg, omega_energies1shg, omega_energies0shg;
+
 
   omega_energies0shg  = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
   omega_energies1shg  = Eigen::Matrix<std::complex<U>, -1, -1>::Zero(N_energies, N_omegas);
@@ -523,18 +525,22 @@ void conductivity_nonlinear<U, DIM>::calculate_general(){
 
 template <typename U, unsigned DIM>
 void conductivity_nonlinear<U, DIM>::calculate(){
-  debug_message("Entered calc_nonlinear_cond.\n");
-  //Calculates the nonlinear conductivity for a set of frequencies in the range [-sigma, sigma].
-  //These frequencies are in the KPM scale, that is, the scale where the energy is in the range ]-1,1[.
-  //the temperature is already in the KPM scale, but not the broadening or the Fermi Energy
+    debug_message("Entered calc_nonlinear_cond.\n");
+    //Calculates the nonlinear conductivity for a set of frequencies in the range [-sigma, sigma].
+    //These frequencies are in the KPM scale, that is, the scale where the energy is in the range ]-1,1[.
+    //the temperature is already in the KPM scale, but not the broadening or the Fermi Energy
 
-  int photo = 0;
-  if(ratio == -1.0) photo = 1;
+    int photo = 0;
+    if(ratio == -1.0) photo = 1;
 
 
-  energies     = Eigen::Matrix<U, -1, 1>::LinSpaced(N_energies, -lim, lim);
-  frequencies  = Eigen::Matrix<U, -1, 1>::LinSpaced(N_omegas, minFreq, maxFreq);
-  frequencies2 = Eigen::Matrix<U, -1, 2>::Zero(N_omegas, 2);
+    // Make sure number of energies is odd to use with the Simpson integration method
+    if(N_energies % 2 != 1)
+        N_energies += 1;
+
+    energies     = Eigen::Matrix<U, -1, 1>::LinSpaced(N_energies, -lim, lim);
+    frequencies  = Eigen::Matrix<U, -1, 1>::LinSpaced(N_omegas, minFreq, maxFreq);
+    frequencies2 = Eigen::Matrix<U, -1, 2>::Zero(N_omegas, 2);
 
 
   for(int w = 0; w < N_omegas; w++){

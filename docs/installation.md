@@ -79,6 +79,14 @@ Pybinding also requires the SciPy packages but pip will resolve all the SciPy de
 pip3 install pybinding
 ```
 
+!!! info
+
+    Due to outdated dependencies, the installation of pybinding might fail.
+    You can install the development version of Pybinding with:
+    ``` bash
+    pip3 install git+https://github.com/BertJorissen/pybinding
+    ```
+
 Alternatively, you might prefer to follow the instructions on the [Pybinding][pybinding] webpage.
 
 To construct the HDF5-files, KITE requires *h5py*: 
@@ -122,12 +130,10 @@ Now **close** the terminal window, and open a **new terminal** window.
 
 !!! info
     
-    The default directory for Homebrew is */usr/local/bin/*.
-    Change this path to the right location if Homebrew was installed in a different directory
-
-!!! info
+    1.  The default directory for Homebrew is */usr/local/bin/*.
+        Change this path to the right location if Homebrew was installed in a different directory
     
-    In the following sections, replace **n** with the version of gcc installed by Homebrew as given by `#!bash brew info gcc`.
+    2.  In the following sections, replace **n** with the version of gcc installed by Homebrew as given by `#!bash brew info gcc`.
 
 
 The hierarchical Data Format (*HDF5*) is used to store the inputs/outputs of the program. Install *HDF5* from source, _whilst enforcing the C++17 standard_, using:
@@ -138,11 +144,11 @@ HOMEBREW_CC=gcc-n HOMEBREW_CXX=g++-n HOMEBREW_CXXFLAGS="-std=c++17" brew install
 
 !!! info
     
-    Macport users can use the following command:
+    [MacPorts][ports] users can use the following command:
 
-``` bash
-sudo port -v install hdf5 +gcc-n +cxx +hl configure.ldflags="-stdlib=libstdc++" configure.cxx_stdlib="libstdc++" configure.cxxflags="-std=c++17" 
-```
+    ``` bash
+    sudo port -v install hdf5 +gcc-n +cxx +hl configure.ldflags="-stdlib=libstdc++" configure.cxx_stdlib="libstdc++" configure.cxxflags="-std=c++17" 
+    ```
 
 Install *Eigen3* for various linear algebra tools, CMake and Python:
 
@@ -156,11 +162,19 @@ Pybinding also requires the SciPy packages but pip will resolve all the SciPy de
 !!! warning
 
     To install the pyhton requirements, you **must** run the Homebrew-python version.
-    You can find the Homebrew-python binary at `#!bash /opt/homebrew/bin/python3.
+    You can find the Homebrew-python binary at `#!bash /opt/homebrew/bin/python3`.
 
 ``` bash
 /usr/local/bin/python3 -m pip install numpy h5py pybinding
 ```
+
+!!! info
+
+    Due to outdated dependencies, the installation of pybinding might fail.
+    You can install the development version of Pybinding with:
+    ``` bash
+    pip3 install git+https://github.com/BertJorissen/pybinding
+    ```
 
 Alternatively, you might prefer to follow the instructions on the [Pybinding][pybinding] webpage.
 
@@ -170,12 +184,12 @@ Edit *CMakeLists.txt* in the `#!bash kite/`-directory:
 * locate the following statements
   ```
   set(CMAKE C COMPILER "gcc")
-  set(CMAKE C COMPILER "g++")
+  set(CMAKE CXX COMPILER "g++")
   ```
 
 * replace by
   ```
-  set(CMAKE CXX COMPILER "gcc-n")
+  set(CMAKE C COMPILER "gcc-n")
   set(CMAKE CXX COMPILER "g++-n")
   ```
 
