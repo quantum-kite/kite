@@ -1,0 +1,23 @@
+<!--
+  Copyright (c) 2022 KITE <support@quantum-kite.com>
+
+  KITE is a free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as
+  published by the Free Software Foundation - version 3
+-->
+
+<!-- Copyright and theme information -->
+
+<div class="md-copyright">
+  {% if config.copyright %}
+  <div class="md-copyright__highlight">
+    {{ config.copyright }}
+  </div>
+  {% endif %}
+  {% if not config.extra.generator == false %}
+
+  Website powered by
+  <a href="https://www.mkdocs.org" target="_blank" rel="noopener">MkDocs</a>,
+  <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">Material for MkDocs</a> and
+  <a href="http://www.styleshout.com/" target="_blank" rel="noopener">styleshout</a>.
+  {% endif %}
+</div>
