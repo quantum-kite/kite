@@ -509,7 +509,7 @@ void conductivity_optical<U, DIM>::calculateBlocks(){
 
   Eigen::Matrix<std::complex<U>, -1, -1>** partial_cond;
   partial_cond = new Eigen::Matrix<std::complex<U>, -1, -1>*[Nmax*Mmax];
-  std::complex<U> factor = imaginary*U(systemInfo.num_orbitals*systemInfo.spin_degeneracy/systemInfo.unit_cell_area/units);
+  std::complex<U> factor = -imaginary*U(systemInfo.num_orbitals*systemInfo.spin_degeneracy/systemInfo.unit_cell_area/units);
   
   for(unsigned n = 0; n < Nmax; n++){
     for(unsigned m = 0; m < Mmax; m++){
