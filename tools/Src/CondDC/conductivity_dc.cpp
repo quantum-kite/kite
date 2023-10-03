@@ -376,7 +376,7 @@ void conductivity_dc<U, DIM>::calculate2(){
 
   // integrate over the whole energy range for each Fermi energy
   Eigen::Matrix<std::complex<U>, -1, 1> condDC;
-  U den = -systemInfo.num_orbitals*systemInfo.spin_degeneracy/systemInfo.unit_cell_area/units; 
+  U den = systemInfo.num_orbitals*systemInfo.spin_degeneracy/systemInfo.unit_cell_area/units; 
   condDC = calc_cond(GammaE)*den;
 
   // save to a file

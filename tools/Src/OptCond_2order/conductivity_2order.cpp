@@ -365,7 +365,7 @@ void conductivity_nonlinear<U, DIM>::calculate_photo(){
   }
 
   U compat_factor = 2.0;//*systemInfo.energy_scale*systemInfo.energy_scale;
-  std::complex<U> factor = imaginary*U(systemInfo.num_orbitals*
+  std::complex<U> factor = -imaginary*U(systemInfo.num_orbitals*
       systemInfo.spin_degeneracy/systemInfo.unit_cell_area/systemInfo.energy_scale)*compat_factor;
 
   cond0 *= factor;
