@@ -723,7 +723,7 @@ void conductivity_optical<U, DIM>::calculate(){
     cond(i) += temp3;
     cond(i) /= freq;
   }
-  cond *= imaginary*U(systemInfo.num_orbitals*systemInfo.spin_degeneracy/systemInfo.unit_cell_area/units);
+  cond *= -imaginary*U(systemInfo.num_orbitals*systemInfo.spin_degeneracy/systemInfo.unit_cell_area/units);
 
 	
   
