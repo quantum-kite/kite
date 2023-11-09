@@ -388,6 +388,8 @@ void Defect_Operator<T,D>::build_velocity(std::vector<unsigned> & components, un
     v.push_back(std::vector<value_type>(hopping.size()));
   if ( n == border_v.size())
     border_v.push_back(std::vector<value_type>(border_hopping.size()));
+  else
+    border_v.at(n).resize(border_hopping.size() );
   if(n > v.size())
     std::cout << "Simao esta a fazer asneira" << std::endl;
     
