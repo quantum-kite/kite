@@ -16,7 +16,7 @@ This step requires an early (over)estimation of $H$'s spectral bandwidth, which 
 
 1. The dimensions of the simulated lattice, `#!python length=[lx,ly,(lz)]`;
 2. The number of subdivisions for parallelization of the matrix-vector operation, `#!python divisions=[nx,ny,(nz)]`,
-   where $n_{x}n_{y}n_{z}$ is the available CPU-cores;
+   where $n_{x}n_{y}n_{z}$ (or $n_{x}n_{y}$ for 2D models) is the available CPU-cores;
 3. The type of boundary conditions;
 4. The type of data to be handled in internal arithmetic operations (for further information see [Settings](settings.md)).
 
@@ -24,12 +24,12 @@ Generally, a target function $\mathcal{Q}$ evaluated by [`#!bash KITEx`](../api/
 
 $$
     \mathcal{Q}\left(\left\{ \lambda_{i}^{j}\right\} \right)=\begin{cases}
-\text{Tr}\left[F_{1}\left(\left\{ \lambda_{i}^{1}\right\} _{i};\mathcal{H}\right)\mathcal{O}_{1}F_{2}\left(\left\{ \lambda_{i}^{2}\right\} _{i};\mathcal{H}\right)\mathcal{O}_{2}\cdots\mathcal{O}_{N}F_{N}\left(\left\{ \lambda_{i}^{N}\right\} _{i};\mathcal{H}\right)\right]\\
-\left\langle \Psi\right|F_{1}\left(\left\{ \lambda_{i}^{1}\right\} _{i};\mathcal{H}\right)\mathcal{O}_{1}F_{2}\left(\left\{ \lambda_{i}^{2}\right\} _{i};\mathcal{H}\right)\mathcal{O}_{2}\cdots\mathcal{O}_{N}F_{N}\left(\left\{ \lambda_{i}^{N}\right\} _{i};\mathcal{H}\right)\left|\Psi\right\rangle 
+\text{Tr}\left[F_{1}\left(\left\{ \lambda_{i}^{1}\right\};\mathcal{H}\right)\mathcal{O}_{1}F_{2}\left(\left\{ \lambda_{i}^{2}\right\};\mathcal{H}\right)\mathcal{O}_{2}\cdots\mathcal{O}_{N}F_{N}\left(\left\{ \lambda_{i}^{N}\right\};\mathcal{H}\right)\right]\\
+\left\langle \Psi\right|F_{1}\left(\left\{ \lambda_{i}^{1}\right\};\mathcal{H}\right)\mathcal{O}_{1}F_{2}\left(\left\{ \lambda_{i}^{2}\right\};\mathcal{H}\right)\mathcal{O}_{2}\cdots\mathcal{O}_{N}F_{N}\left(\left\{ \lambda_{i}^{N}\right\};\mathcal{H}\right)\left|\Psi\right\rangle 
 \end{cases}\,\,\, ,
 $$
 
-where $\mathcal{O}_{j}$ are sparse lattice operators (identities, velocity operators or spin operators) and $F_{j}$ are functions of $\mathcal{H}$, as well as other scalar parameters $\left\{ \lambda_{i}^{j}\right\} _{i}$, such as the energy or a frequency. Furthermore, the $\left|\Psi\right\rangle$ in the above equation is a specific state vector of the system that depends on the observable that is being computed. Hence, there are two district categories of observables that can be computed with  [`#!bash KITEx`](../api/kitex.md), namely
+where $\mathcal{O}_{j}$ are sparse lattice operators (e.g., identities, velocity operators or spin operators) and $F_{j}$ are functions of $\mathcal{H}$, as well as other scalar parameters $\left\{ \lambda_{i}^{j}\right\} _{i=i_{min},...,i_{max}}^{j=1,...,N}$, such as the temperature or a frequency. Furthermore, the $\left|\Psi\right\rangle$ in the second line of the above equation is a specific state/basis vector that depends on the observable that is being computed. Hence, there are two district categories of observables that can be computed with  [`#!bash KITEx`](../api/kitex.md), namely
 
 ## Traces Over The Entire Hilbert Space
 
@@ -49,22 +49,22 @@ $$
 
 $$
 \mathcal{Q}\left(\left\{ \lambda_{i}^{j}\right\} \right)\!=\!\begin{cases}
-\sum_{n_{1}=1}^{M}\!\cdots\!\sum_{n_{N}=1}^{M}G_{1}\!\left(\left\{ \lambda_{i}^{1}\right\} _{i};M\right)\cdots G_{N}\!\left(\left\{ \lambda_{i}^{N}\right\} _{i};M\right)\,\,\text{Tr}\left[T_{n_{1}}\!\left(\mathcal{H}\right)\mathcal{O}_{1}\cdots\mathcal{O}_{N}T_{n_{N}}\!\left(\mathcal{H}\right)\right]\\
-\sum_{n_{1}=1}^{M}\!\cdots\!\sum_{n_{N}=1}^{M}G_{1}\!\left(\left\{ \lambda_{i}^{1}\right\} _{i};M\right)\cdots G_{N}\!\left(\left\{ \lambda_{i}^{N}\right\} _{i};M\right)\left\langle\Psi\right|T_{n_{1}}\!\left(\mathcal{H}\right)\mathcal{O}_{1}\cdots\mathcal{O}_{N}T_{n_{N}}\!\left(\mathcal{H}\right)\left|\Psi\right\rangle
+\sum_{n_{1}=0}^{M-1}\!\cdots\!\sum_{n_{N}=0}^{M-1}G_{1}\!\left(\left\{ \lambda_{i}^{1}\right\};n_1\right)\cdots G_{N}\!\left(\left\{ \lambda_{i}^{N}\right\};n_N\right)\,\,\text{Tr}\left[T_{n_{1}}\!\left(\mathcal{H}\right)\mathcal{O}_{1}\cdots\mathcal{O}_{N}T_{n_{N}}\!\left(\mathcal{H}\right)\right]\\
+\sum_{n_{1}=0}^{M-1}\!\cdots\!\sum_{n_{N}=0}^{M-1}G_{1}\!\left(\left\{ \lambda_{i}^{1}\right\};n_1\right)\cdots G_{N}\!\left(\left\{ \lambda_{i}^{N}\right\};n_N\right)\left\langle\Psi\right|T_{n_{1}}\!\left(\mathcal{H}\right)\mathcal{O}_{1}\cdots\mathcal{O}_{N}T_{n_{N}}\!\left(\mathcal{H}\right)\left|\Psi\right\rangle
 \end{cases}\,\,,
 $$
 
 : where $T_{n}(x)$ are Chebyshev polynomials of the $1^{\text{st}}$-kind and $G_{j}$ are the expansion coefficients of $F_{j}$. The advantage gained by using the Chebyshev expansion is that both $\text{Tr}\left[\cdots\right]$ and $\left\langle\Psi\right|\cdots \left|\Psi\right\rangle$ can be evaluated recursively using only matrix-vector operations[^1]. For all observables implemented in KITE, the functions $F_{j}$ are of three types: 
 
-: 1. Single-Parameter Dirac-$\delta$ Functions.—$F_{j}(\lambda_{1}^{i};\mathcal{H})\to\delta\left(\lambda-\mathcal{H}\right)$
-  2. Broadened Single-Particle Green's Functions.—$F_{j}(\lambda_{1}^{i},\lambda_{2}^{i};\mathcal{H})\to\left[\lambda+i\eta-\mathcal{H}\right]^{-1}$
-  3. Quantum Time-Evolution Operators.—$F_{j}\left(\lambda_{1}^{i},\mathcal{H}\right)\to\exp\left(\frac{i\,t\,\mathcal{H}}{\hbar}\right)$
+: 1. Single-Parameter Dirac-$\delta$ Functions.—$F_{j}(\lambda_{1}^{j};\mathcal{H})\to\delta\left(\lambda-\mathcal{H}\right)$
+  2. Broadened Single-Particle Green's Functions.—$F_{j}(\lambda_{1}^{j},\lambda_{2}^{j};\mathcal{H})\to\left[\lambda+i\eta-\mathcal{H}\right]^{-1}$
+  3. Quantum Time-Evolution Operators.—$F_{j}\left(\lambda_{1}^{j},\mathcal{H}\right)\to\exp\left(\frac{i\,t\,\mathcal{H}}{\hbar}\right)$
 
 : For these functions, analytical forms of the Chebyshev expansion coefficients are known[^2][^3][^4][^5][^6][^7] and used in KITE. In the user interface, the truncation order $M$ is specified by the parameter `#!python num_moments`, and always impacts the validity of the expanded results. Nevertheless, its precise effect depends crucially on the specific case, as shown in the Figure below. In particular, one has the following cases:
 
 ## Dirac-$\delta$ Function
 
-: An order-$M$ expansion (regularized by the Jackson kernel) produces a Gaussian approximation of $\delta(\lambda\!-\!\mathcal{H})$ endowed by a width $\sigma_{\lambda}\!\approx\!\delta \varepsilon\,\pi/M$ in $\lambda$[^2][^7]. The choice of $M$ then fixes the effective spectral broadening, $\sigma_{\lambda}$, which must be sufficiently narrow to accurately describe all relevant features of the calculated curve. However, if it becomes too narrow ($M$ too high), the discrete eigenvalues of the SPH are well-resolved and the obtained data start suffering from large (finite-size) fluctuations. For information on other available kernels see Weisse *et al.*[^2].
+: An order-$M$ expansion (regularized by the Jackson kernel) produces a Gaussian approximation of $\delta(\lambda\!-\!\mathcal{H})$ endowed by a width $\sigma_{\lambda}\!\approx\!\delta \varepsilon\,\pi/M$ in $\lambda$[^2][^7]. The choice of $M$ then fixes the effective spectral broadening, $\sigma_{\lambda}$, which must be sufficiently narrow to accurately describe all relevant features of the calculated property. However, if it becomes too narrow ($M$ too high), the discrete eigenvalues of the SPH are well-resolved and the obtained data start suffering from large (finite-size) fluctuations. For information on other available kernels see Weisse *et al.*[^2].
 
     !!! Info "Rule of Thumb"
 
@@ -72,7 +72,7 @@ $$
 
 ## Single-Particle Green's Functions
 
-: Usually, no kernel is required here[^3][^4] as singularities of the Green's function are naturally broadened by a finite $\eta$. Provided $\eta$ exceeds the spacing between eigenvalues of the SPH, the truncation order may be arbitrarily increased and convergence is achieved **when the data ceases to depend on M**. Smaller values of $\eta$ typically require higher values of $M$ to converge.
+: No kernel is required here[^3][^4] as singularities of the Green's function must be broadened by a finite $\eta$ due to discrete nature of the energy spectrum of lattice models with a finite number of sites. An exact spectral decomposition of broadened lattice Green's functions exists and is the basis of the Chebyshev polynomial Green's function method [^3] implemented in KITE. Provided $\eta$ exceeds the spacing between eigenvalues of the SPH, the truncation order may be arbitrarily increased and convergence is achieved **when the data ceases to depend on M**. Calculations with fine values of $\eta$ approaching the mean level spacing typically require higher values of $M$ to converge, but are crucial in some problems.
 
     !!! Info "Rule of Thumb"
 
@@ -86,7 +86,7 @@ $$
 
         A safe empirical rule of thumb (used in Santos Pires *et al.*[^6]) is to have $M\!\gtrsim\!8\,\delta\varepsilon\,\hbar^{-1}t_{\text{max}}\!\!$, where $t\!<\!t_{\text{max}}$ is the length of the time-interval intended for the evolution.
 
-: For some target functions, the output of KITE will be a function of energy (*e.g.*, the DoS) with maybe additional spacial coordinates (as it happens with the LDoS or the ARPES response). In contrast, most response functions are not properties of the Fermi level (the zero-temperature longitudinal conductivity is the only exception here) and therefore require that the raw output of KITE is numerically integrated in energy (typically weighted by the Fermi-Dirac distribution at a given finite temperature). This step is always done at the post-processing level by [`#!python KITE-tools`](../api/kite-tools.md).
+: For some target functions, the output of KITE will be a function of energy (*e.g.*, the DoS) with maybe additional spacial coordinates (as it happens with the LDoS or the ARPES response). In contrast, most response functions are not properties of the Fermi level (zero-temperature DC conductivities and other pure Fermi-surface properties are an exception here) and therefore require that the raw output of KITE is numerically integrated in energy (typically weighted by the Fermi-Dirac distribution at a given finite temperature). This step is always done at the post-processing level by [`#!python KITE-tools`](../api/kite-tools.md).
 
 	!!! Warning "Post-Processing Integration"
 	
