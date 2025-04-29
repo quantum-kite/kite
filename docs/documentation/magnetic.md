@@ -1,5 +1,5 @@
 Static magnetic fields are an important case of lattice modifications that can be performed automatically by KITE. 
-This feature is of particular interest to the study of Landau levels, magneto-transport and magneto-optical effects.
+This feature is of particular interest to the study of Landau levels, magneto-transport and magneto-optical effects, among others.
 
 ## Uniform B-fields in KITE: overview
 
