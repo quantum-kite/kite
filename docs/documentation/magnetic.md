@@ -1,14 +1,14 @@
 Static magnetic fields are an important case of lattice modifications that can be performed automatically by KITE. 
-This feature is of particular interest to the study of Landau levels, magneto-transport and magneto-optical effects.
+This feature is of particular interest to the study of Landau levels, magneto-transport and magneto-optical effects, among others.
 
 ## Uniform B-fields in KITE: overview
 
 The automated $\mathbf{B}$-field functionality works by the addition of Peierls phases in the Hamiltonian and can be
 used in conjunction with other lattice modifications, including disorder.
-This is a new feature under development that currently allows
+This is a new feature under development that currently allows for
 
-* uniform $\mathbf{B}$-field in 2D lattices (with the B-field perpendicular to the plane)
-* uniform $\mathbf{B}$-field in 3D lattices (with the B-field collinear to the third primitive lattice vector)
+* uniform $\mathbf{B}$ fields in 2D lattices (with the B-field perpendicular to the plane)
+* uniform $\mathbf{B}$ fields in 3D lattices (with the B-field collinear to the third primitive lattice vector)
 
 The $\mathbf{B}$-field is added by means of the following [KITE modification][modification-par-magnetic_field]:
 
@@ -59,7 +59,7 @@ $$
 \mathbf{A}\left(\mathbf{r}\right)=\frac{h}{\left(2\pi\right)^{2}e}\frac{n}{N_{2}}\left(\mathbf{r}\cdot\mathbf{b}_{2}\right)\mathbf{b}_{1}
 $$
 
-where h is Planck's constant, $e>0$ is the elementary charge, $N_{2}$ is the number of unit cells along the $\mathbf{a}_{2}$ direction (primitive vector of the direct lattice) and $n$ is an integer. The corresponding magnetic field points along the $\mathbf{a}_{3}$ direction for 3D systems and perpendicularly to the basal plane ($\mathbf{e}_{\perp}\equiv\hat{\mathbf{z}}$) direction for 2D systems:
+where h is Planck's constant, $e>0$ is the elementary charge, $N_{2}$ is the number of unit cells along the $\mathbf{a}_{2}$ direction (primitive vector of the direct lattice) and $n$ is an integer. The corresponding magnetic field points along the $\mathbf{a}_{3}$ direction for 3D systems and perpendicularly to the basal plane ($\mathbf{e}_{\perp}\equiv\hat{\mathbf{z}}$) for 2D systems:
 
 
 $$
@@ -80,7 +80,7 @@ B_{\textrm{min}}=\frac{h}{e\Omega_{c}}\frac{1}{N_{2}}\times\begin{cases}
 \end{cases}
 $$
 
-where $\Omega_{c}$ is the 3D/2D volume of the unit cell.  When the user requests a magnetic field strength $|\mathbf{B}|$ (in Tesla), KITE calculates $B_{\textrm{min}}$ first and then uses that to determine the required $n$ to achieve the closest possible value of $|\mathbf{B}|$ by rounding $\mathbf{B}|/\mathbf{B}_{\textrm{min}}=n$ to the nearest integer. If $n$ rounds down to zero, it means that the system is too small to support the requested magnetic field. When determining $B_{\textrm{min}}$, _KITE assumes that the primitive vectors in the Python configuration script are given in nanometers_.
+where $\Omega_{c}$ is the 3D/2D volume of the unit cell.  When the user requests a magnetic field strength $|\mathbf{B}|$ (in Tesla), KITE calculates $B_{\textrm{min}}$ first and then uses that to determine the required $n$ to achieve the closest possible value of $|\mathbf{B}|$ by rounding $|\mathbf{B}|/\mathbf{B}_{\textrm{min}}=n$ to the nearest integer. If $n$ rounds down to zero, it means that the system is too small to support the requested magnetic field. When determining $B_{\textrm{min}}$, _KITE assumes that the primitive vectors in the Python configuration script are given in nanometers_.
 
 
 

@@ -156,7 +156,7 @@ extra:
       image: covaci.jpg
     - name: "Simão M. João"
       title: Co-Founder
-      link: https://sigarra.up.pt/fcup/pt/func_geral.formview?p_codigo=647225/
+      link: https://scholar.google.pt/citations?user=yvY5oYcAAAAJ&hl=en
       image: simao.jpg
     - name: "Miša Anđelković"
       title: Co-Founder
@@ -164,7 +164,7 @@ extra:
       image: misa.jpg
     - name: "João P. Santos Pires"
       title: Contributor
-      link: https://www.linkedin.com/in/joão-pedro-dos-santos-pires-849898173/
+      link: https://scholar.google.com/citations?user=pmnNcFMAAAAJ&hl=pt-PT
       image: pires.jpg
     - name: "Bert Jorissen"
       title: Contributor
@@ -172,14 +172,12 @@ extra:
       image: jorissen.jpg
     - name: "Emile Aerts"
       title: Contributor
-      link: https://www.uantwerpen.be/en/staff/emile-aerts_23098/
       image: aerts.jpg
     - name: "Robin Smeyers"
       title: Contributor
       link: https://be.linkedin.com/in/robin-smeyers-293bb8209/
       image: smeyers.jpg
-    - name: "David T. S. Perkins"
+    - name: "João Pinho"
       title: Contributor
-      link: https://davidtsperkins.com/"
-      image: perkins.jpg
+      image: pinho.jpg
 
