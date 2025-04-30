@@ -1,5 +1,3 @@
-## Structure
-
 KITE has three different layers:
 
 * [User interface (*Python*)][kitepython] 
