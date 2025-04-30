@@ -1,9 +1,9 @@
 The [`#!python kite.Calculation`][calculation] object carries the information about the to-be-calculated quantities,
 i.e. the *target functions*.
-Key parameters of the calculation are included here, such as number of Chebyshev moments and number of disorder realizations.
+Key parameters of the calculation are included here, such as the Chebyshev expansion order and number of disorder realizations.
 These are used by [KITEx] to calculate the spectral coefficients subsequently used by [KITE-tools][kitetools]
 at the post-processing stage, e.g. to reconstruct the full energy dependence of the desired target function (see [worflow]).
-The parameters given in the [Examples] are optimized for a standard desktop computer.
+The parameters given in the [Examples] are optimized for relatively small systems and thus ideal to run KITE on a standard desktop computer or laptop.
 
 The target functions currently available are:
 
@@ -14,21 +14,18 @@ The target functions currently available are:
 * [`#!python arpes`][calculation-arpes]
   : Calculates the one-particle spectral function of relevance to ARPES.
 * [`#!python gaussian_wave_packet`][calculation-gaussian_wave_packet]
-  : Calculates the propagation of a gaussian wave-packet.
+  : Simulates the propagation of a gaussian wave-packet.
 * [`#!python conductivity_dc`][calculation-conductivity_dc]
   : Calculates a given component of the DC conductivity tensor.
 * [`#!python conductivity_optical`][calculation-conductivity_optical]
-  : Calculates a given component of the linear optical conductivity tensor as a function of frequency for a given Fermi energy.
+  : Calculates a given component of the linear optical conductivity tensor.
 * [`#!python conductivity_optical_nonlinear`][calculation-conductivity_optical_nonlinear]
   : Calculates a given component of the 2nd-order nonlinear optical conductivity tensor.
 * [`#!python singleshot_conductivity_dc`][calculation-singleshot_conductivity_dc]
   : Calculates the longitudinal DC conductivity for a set of Fermi energies (uses the $\propto\mathcal{O}(N)$ single-shot method).
   
 
-KITE's first release was restricted to two-dimensional systems.
-However, since then, there has been an efford to expand the functionalties to three-dimensional systems.
-In the current release, most functionalities are compatible with 3D systems.
-For details, check the table below:
+The table below shows to which level the KITE target functions have been implemented and tested at the time of writing (May, 2025). Note the non-linear optical conductivity functionality is currently restricted to 2D systems.
       
 | Method                                                                                  | 2D                   | 3D                   |
 |:----------------------------------------------------------------------------------------|:---------------------|:---------------------|
@@ -44,7 +41,7 @@ For details, check the table below:
 
 
 
-  :material-check-all: - Extensivelly used and checked
+  :material-check-all: - Extensively used and checked
 
   :material-check: - Implemented
   
@@ -53,7 +50,7 @@ For details, check the table below:
 
 !!! Warning "Processing the output of `#!python singleshot_conductivity_dc`"
 
-     [`#!python singleshot_conductivity_dc()`][calculation-singleshot_conductivity_dc] works different from the other target-functions in that it just requires a single run with [KITEx][kitex]. Post-processing with [KITE-tools][kitetools] is not required, and instead the required single-shot values of the DC-conductivity can be retrieved directly from 
+     [`#!python singleshot_conductivity_dc()`][calculation-singleshot_conductivity_dc] works different from the other target-functions in that it just requires a single run with [KITEx][kitex]. That is, the post-processing with [KITE-tools][kitetools] is not required, and instead the requested single-shot values of the DC-conductivity can be retrieved directly from 
      the [HDF5]-file once [KITEx][kitex] has run. You can extract the results from the [HDF5] file [as explained in the tutorial][tutorial-hdf5], with `#!python "output.h5"` the name of the  [HDF5] file processed by [KITEx][kitex]:
                      
     ``` python linenums="1"
@@ -63,7 +60,7 @@ For details, check the table below:
         np.savetxt("condDC.dat",condDC)                
     ``` 
 
-All target functions require the following parameters:
+Most target functions require the following parameters:
 
 * `#!python num_moments`
   : Defines the number of moments of the Chebyshev expansion and hence the energy resolution of the calculation; see [Documentation][documentation].
@@ -72,7 +69,7 @@ All target functions require the following parameters:
 * `#!python num_disorder`
   : Defines the number of disorder realizations (and specifies the boundary twist angles if the `#!python "random"` boundary mode is chosen).
 
-Some parameters are specific of the target function:
+Some parameters are more specific, such as:
 
 * `#!python direction`
   : Specifies the component of the linear (longitudinal: (`#!python 'xx'`, `#!python 'yy'`, `#!python 'zz'`), transversal: (`#!python 'xy'`, `#!python 'yx'`, `#!python 'xz'`, `#!python 'yz'`)) or the nonlinear conductivity tensor (e.g., `#!python 'xyx'` or `#!python 'xxz'`) to be calculated.
