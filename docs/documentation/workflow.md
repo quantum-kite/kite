@@ -2,7 +2,7 @@
 
 KITE has three different layers:
 
-* [User interface (*Python*)][kitepython]
+* [User interface (*Python*)][kitepython] 
 * [Main program (*C++*)][kitex]
 * [Post-processing tool (*C++*)][kitetools]
 
