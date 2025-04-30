@@ -94,7 +94,7 @@ Below, we explain each of the arguments in the [`#!python kite.Configuration`][c
 ## [Spectrum Range][configuration-spectrum_range]
 : The optional [`#!python spectrum_range`][configuration-spectrum_range] is an array of reals.
   By default, [KITEx][kitex] executes an automated rescaling of the Hamiltonian, see the [Documentation][documentation].
-  Advanced users are encouraged to override this feature using `#!python spectrum_range=[Emin,Emax]`, where `#!python Emin, Emax` are the minimum, maximum eigenvalues of the TB matrix. _Lower/upper bounds on smallest/largest energy eigenvalues should be used if exact eigenvalues are unknown_ _(often the case in systems with disorder); see Sec. [Disorder] for more information_. 
+  Advanced users are encouraged to override this feature using `#!python spectrum_range=[Emin,Emax]`, where `#!python Emin, Emax` are the minimum, maximum energy eigenvalues. _Lower/upper bounds on smallest/largest energy eigenvalues should be used if exact eigenvalues are unknown_ _(often the case in systems with disorder); see Sec. [Disorder] for more information_. 
 
 
     To manually set the [`#!python spectrum_range`][configuration-spectrum_range], it is necessary to add an extra parameter
