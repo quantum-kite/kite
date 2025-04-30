@@ -16,7 +16,7 @@ The [tight-binding][tightbinding] (TB) model is defined on a [Python interface][
 
 ## Steps
 
-1. Build a [`#!python pb.Lattice`][lattice] that describes a regular tight-binding model (*Section 2*)
+1. Start by building a [`#!python pb.Lattice`][lattice] that describes a regular tight-binding model (*Section 2*)
 2. Add optional terms to the TB Hamiltonian, including disorder patterns and magnetic field modifications (covered in *Section 6 and 7*)
 3. Define the calculations settings (*Section 3*) and target-functions to be calculated (*Section 4*)
 4. Export your KITE model to the [HDF5] file and perform the calculations using [KITEx][kitex] (*Section 4*)
