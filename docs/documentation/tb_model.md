@@ -140,7 +140,7 @@ solver = pb.solver.lapack(
 ### Band structure calculation
 As an example, the band structure is calculated using the [`#!python pb.Solver`][solver] defined above.
 
-First, for a simple two-dimensional plot, we define a path in the reciprocal space that connects the high symmetry points. Using the [`#!python pb.Lattice`][solver] build-in
+First, for a two-dimensional plot, we define a path in the reciprocal space that connects the high symmetry points. Using the [`#!python pb.Lattice`][solver] build-in
 method, the high symmetry points for the corners of a path can be found easily:
 ``` python linenums="1"
 bz = lat.brillouin_zone()
