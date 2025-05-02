@@ -2,7 +2,7 @@ The [`#!python kite.Calculation`][calculation] object carries the information ab
 i.e. the *target functions*.
 Key parameters of the calculation are included here, such as the Chebyshev expansion order and number of disorder realizations.
 These are used by [KITEx] to calculate the spectral coefficients subsequently used by [KITE-tools][kitetools]
-at the post-processing stage, e.g. to reconstruct the full energy dependence of the desired target function (see [worflow]).
+at the post-processing stage, e.g. to reconstruct the full energy dependence of the desired target function (see [workflow]).
 The parameters given in the [Examples] are optimized for relatively small systems and thus ideal to run KITE on a standard desktop computer or laptop.
 
 The target functions currently available are:
@@ -17,7 +17,7 @@ The target functions currently available are:
   : Simulates the propagation of a gaussian wave-packet.
 * [`#!python conductivity_dc`][calculation-conductivity_dc]
   : Calculates a given component of the DC conductivity tensor.
-* [`#!python conductivity_optical`][calculation-conductivity_optical]
+* [`#!python conductivity_optical`][calculatio  n-conductivity_optical]
   : Calculates a given component of the linear optical conductivity tensor.
 * [`#!python conductivity_optical_nonlinear`][calculation-conductivity_optical_nonlinear]
   : Calculates a given component of the 2nd-order nonlinear optical conductivity tensor.
@@ -195,6 +195,7 @@ python plot_dos.py                # display the data
 [lattice]: https://docs.pybinding.site/en/stable/_api/pybinding.Lattice.html
 [documentation]: ../background/index.md
 [tightbinding]: ../background/tight_binding.md
+[workflow]: ../background/workflow.md
 
 [lattice-tutorial]: tb_model.md
 [tutorial-hdf5]: editing_hdf_files.md
