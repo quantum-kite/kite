@@ -196,7 +196,7 @@ Edit *CMakeLists.txt* in the `#!bash kite/`-directory:
 where **n** is the version number as used previously.
 
 ## 3. KITEx & KITE-tools
-From within the `#!bash kite/` directory (containing *CMakeLists.txt* and [*kite.py*][kitepython]), run the following commands for [KITEx][kitex]:
+From within the `#!bash kite/` directory (containing *CMakeLists.txt* and [*kite.py*][kitepython]), run the following commands:
 
 ``` bash
 mkdir build
@@ -209,17 +209,8 @@ make
 
     Any warnings appearing during the compilation process can typically be ignored.
 
-For [KITE-tools][kitetools], run the following commands from the `#!bash kite/tools/` directory
-
-``` bash
-mkdir build
-cd build
-cmake ..
-make
-```
-
 If these commands have run successfully, you will now find [KITEx][kitex] in the `#!bash kite/build/` directory and [KITE-tools][kitetools in the
-`#!bash kite/tools/build/` directory, which are now ready to use!
+`#!bash kite/build/` directory, which are now ready to use!
 
 
 ## 4. Test KITE
@@ -240,7 +231,7 @@ This first example calculates the density of states (DOS) of pure graphene.
 To obtain the file with the DOS-data, you need to [post-process][kitetools] the output with a tool 
 
 ``` bash
-../tools/build/KITE-tools graphene_lattice-output.h5
+../build/KITE-tools graphene_lattice-output.h5
 ```
 
 that generates the appropriata data file. For more details refer to the [tutorial][tutorial].
@@ -248,7 +239,7 @@ that generates the appropriata data file. For more details refer to the [tutoria
 !!! info
 
     The three command above were run from the `#!bash kite/examples/`-directory. If you didn't build [KITEx][kitex] or [KITE-tools][kitetools] in the
-    `#!bash kite/build/` and `#!bash kite/tools/build/` directories respectively, the commands won't work.
+    `#!bash kite/build/` and `#!bash kite/build/` directories respectively, the commands won't work.
 
 [repository]: https://github.com/quantum-kite/kite
 [eigen3]: https://eigen.tuxfamily.org/
