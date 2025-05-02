@@ -209,8 +209,7 @@ make
 
     Any warnings appearing during the compilation process can typically be ignored.
 
-If these commands have run successfully, you will now find [KITEx][kitex] in the `#!bash kite/build/` directory and [KITE-tools][kitetools in the
-`#!bash kite/build/` directory, which are now ready to use!
+If these commands have run successfully, you will now find [KITEx][kitex] and [KITE-tools][kitetools]  in the `#!bash kite/build/` directory, which are now ready to use!
 
 
 ## 4. Test KITE
