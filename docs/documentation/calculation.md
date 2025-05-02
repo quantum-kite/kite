@@ -2,7 +2,7 @@ The [`#!python kite.Calculation`][calculation] object carries the information ab
 i.e. the *target functions*.
 Key parameters of the calculation are included here, such as the Chebyshev expansion order and number of disorder realizations.
 These are used by [KITEx] to calculate the spectral coefficients subsequently used by [KITE-tools][kitetools]
-at the post-processing stage, e.g. to reconstruct the full energy dependence of the desired target function (see [workflow]).
+at the post-processing stage, e.g. to reconstruct the full energy dependence of the desired target function (see [Workflow][Workflow]).
 The parameters given in the [Examples] are optimized for relatively small systems and thus ideal to run KITE on a standard desktop computer or laptop.
 
 The target functions currently available are:
@@ -195,7 +195,7 @@ python plot_dos.py                # display the data
 [lattice]: https://docs.pybinding.site/en/stable/_api/pybinding.Lattice.html
 [documentation]: ../background/index.md
 [tightbinding]: ../background/tight_binding.md
-[workflow]: ../background/workflow.md
+[workflow]: ../documentation/workflow.md
 
 [lattice-tutorial]: tb_model.md
 [tutorial-hdf5]: editing_hdf_files.md
