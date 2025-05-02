@@ -196,7 +196,7 @@ python plot_dos.py                # display the data
 [documentation]: ../background/index.md
 [tightbinding]: ../background/tight_binding.md
 [workflow]: ../documentation/workflow.md
-[Documentation]: ../documentation/optimization.md   
+[optimization]: ../documentation/optimization.md   
 
 [lattice-tutorial]: tb_model.md
 [tutorial-hdf5]: editing_hdf_files.md
