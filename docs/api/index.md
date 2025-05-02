@@ -8,7 +8,7 @@ This reference is split-up in the different sub-programs:
 
 * [The KITE python package][kite-python] *(for pre-processing)*
 * [The KITEx executable][kitex] *(for doing the calculation)*
-* [The KITE-tools execuatble][kite-tools] *(for post-processing)*
+* [The KITE-tools executable][kite-tools] *(for post-processing)*
 
 [kite-python]: kite.md
 [kitex]: kitex.md
