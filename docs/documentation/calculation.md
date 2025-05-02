@@ -25,7 +25,8 @@ The target functions currently available are:
   : Calculates the longitudinal DC conductivity for a set of Fermi energies (uses the $\propto\mathcal{O}(N)$ single-shot method).
   
 
-The table below shows to which level the KITE target functions have been implemented and tested at the time of writing (May, 2025). Note the non-linear optical conductivity functionality is currently restricted to 2D systems.
+The table below shows to which level the KITE target functions have been implemented and tested at the time of writing (May, 2025). 
+Note that the non-linear optical conductivity functionality is currently restricted to 2D systems.
       
 | Method                                                                                  | 2D                   | 3D                   |
 |:----------------------------------------------------------------------------------------|:---------------------|:---------------------|
