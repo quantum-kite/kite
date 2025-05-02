@@ -1,10 +1,10 @@
+KITE is written in C++ with code optimisation, including multithreading performance. 
+The Python package [Pybinding][pybinding] is used during pre- and post-processing steps.
+
 !!! warning
 
     Currently, KITE has only be tested on UNIX-based systems, such as GNU/Linux and Mac OS X.
     There is **no** Windows support.
-
-KITE is written in C++ with code optimisation, including multithreading performance. 
-The Python package [Pybinding][pybinding] is used during pre- and post-processing steps.
 
 !!! tip
 
