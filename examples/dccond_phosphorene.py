@@ -162,7 +162,7 @@ def main(direction='xx', num_hoppings=4):
 
     # for generating the desired output from the generated HDF5-file, run
     # ../build/KITEx phxx-output.h5
-    # python ../tools/ProcessSingleShot.py phxx-output.h5 (extracts a data file with Energy | Re Sigma | Im Sigma)
+    # python ../tools/process_single_shot.py phxx-output.h5 (extracts a data file with Energy | Re Sigma | Im Sigma)
 
     # returning the name of the created HDF5-file
     return output_file

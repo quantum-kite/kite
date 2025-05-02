@@ -75,7 +75,7 @@ def main(onsite=(0, 0)):
 
     # for generating the desired output from the generated HDF5-file, run
     # ../build/KITEx on_site_disorder-output.h5
-    # ../tools/build/KITE-tools on_site_disorder-output.h5
+    # ../build/KITE-tools on_site_disorder-output.h5
 
     # returning the name of the created HDF5-file
     return output_file

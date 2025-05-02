@@ -110,7 +110,7 @@ def main(anderson_w=3.0):
 
     # for generating the desired output from the generated HDF5-file, run
     # ../build/KITEx weyl_dos-output.h5
-    # ../tools/build/KITE-tools weyl_dos-output.h5
+    # ../build/KITE-tools weyl_dos-output.h5
 
     # returning the name of the created HDF5-file
     return output_file

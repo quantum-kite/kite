@@ -8,18 +8,20 @@ This folder contains various scripts with examples showing the functionalities o
 ``` bash
 python3 example.py
 ../build/KITEx example-output.h5
-../tools/build/KITE-tools example-output.h5
+../build/KITE-tools example-output.h5
 ```
 
-The following examples are given:
+Several examples are given, including
 
-* A simple DOS calculation of various systems, like
+* A simple DOS calculation of various systems, such as
     * Checkerboard lattice
-    * Mixed disordered lattice
-    * On-site disorder
-    * Simple square lattice
-    * Vacancies
+    * Graphene
     * Cubic lattice
+  
+* Two types of disorder:
+  * On-site (uncorrelated) disorder
+  * Vacancies
+  
 * Optical conductivity
 * XX/YY conductivity
 * Weyl semi-metal calculations

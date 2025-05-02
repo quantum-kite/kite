@@ -94,7 +94,7 @@ def main(onsite=(0, 0, 0), t=1):
 
     # for generating the desired output from the generated HDF5-file, run
     # ../build/KITEx cubic_lattice-output.h5
-    # ../tools/build/KITE-tools cubic_lattice-output.h5
+    # ../build/KITE-tools cubic_lattice-output.h5
 
     # returning the name of the created HDF5-file
     return output_file

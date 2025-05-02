@@ -108,7 +108,7 @@ def main(anderson_w=0):
 
     # for generating the desired output from the generated HDF5-file, run
     # ../build/KITEx weyl_optical-output.h5
-    # ../tools/build/KITE-tools weyl_optical-output.h5 --CondOpt -O 0.02 1 401 -E 1000 -F 0.25 -S 0.005
+    # ../build/KITE-tools weyl_optical-output.h5 --CondOpt -O 0.02 1 401 -E 1000 -F 0.25 -S 0.005
 
     # returning the name of the created HDF5-file
     return output_file

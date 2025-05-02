@@ -167,8 +167,7 @@ Pybinding also requires the SciPy packages but pip will resolve all the SciPy de
     ``` bash
     pip3 install git+https://github.com/BertJorissen/pybinding
     ```
-
-Alternatively, you might prefer to follow the instructions on the [Pybinding][pybinding] webpage.
+    Alternatively, you might prefer to follow the instructions on the [Pybinding][pybinding] webpage.
 
 Next, download the source code by the command given in section 1.
 Edit *CMakeLists.txt* in the `#!bash kite/`-directory:
