@@ -114,7 +114,7 @@ Below, we explain each of the arguments in the [`#!python kite.Configuration`][c
 [HDF5]: https://www.hdfgroup.org
 [pybinding]: https://docs.pybinding.site/en/stable
 [lattice]: https://docs.pybinding.site/en/stable/_api/pybinding.Lattice.html
-[documentation]: ../documentation/index.md
+[documentation]: ../documentation/optimization.md
 [tightbinding]: ../documentation/tight_binding.md
 
 [lattice-tutorial]: tb_model.md
