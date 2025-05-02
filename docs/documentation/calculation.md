@@ -42,9 +42,9 @@ Note that the non-linear optical conductivity functionality is currently restric
 
 
 
-  :material-check-all: - Extensively used and checked
+  :material-check-all: - Checked and extensively used
 
-  :material-check: - Implemented
+  :material-check: - Implemented and checked
   
   :material-close: - Not yet implemented
 
