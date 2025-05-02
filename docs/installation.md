@@ -123,7 +123,7 @@ Now **close** the terminal window, and open a **new terminal** window.
 !!! info
     
     1.  The default directory for Homebrew is */usr/local/bin/*.
-        Change this path to the right location if Homebrew was installed in a different directory
+        Correct this path if Homebrew was installed in a different directory
     
     2.  In the following sections, replace **n** with the version of gcc installed by Homebrew as given by `#!bash brew info gcc`.
 
