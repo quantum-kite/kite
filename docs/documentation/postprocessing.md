@@ -23,7 +23,7 @@ For this purpose, the user has the flexibility to override the parameters from t
 in the command line interface. As an example, let us consider the example  `#!python dos_optcond_gaussian_disorder.py`: If we consider the setting
 
 ``` bash
-./KITE-tools optcond_gaussian_disorder-output.h5 --CondOpt -F 1.2 -O 0 10 1000 -N optcond1.2.dat
+./build/KITE-tools optcond_gaussian_disorder-output.h5 --CondOpt -F 1.2 -O 0 10 1000 -N optcond1.2.dat
 ```
 
 KITE-tools will calculate the optical conductivity with a Fermi energy specified by the option `#!bash -F 1.2`
@@ -35,7 +35,7 @@ The option `#!bash -N` defines the name of the output file.
 We can modify the Fermi energy and produce a different optical conductivities without recalculating the Chebyshev moments:  
 
 ``` bash
-./KITE-tools optcond_gaussian_disorder-output.h5 --CondOpt -F 0.5 -O 0 10 1000 -N optcond0.5.dat
+./build/KITE-tools optcond_gaussian_disorder-output.h5 --CondOpt -F 0.5 -O 0 10 1000 -N optcond0.5.dat
 ```
 We can now compare the real component of two different optical conductivities  
 <div>

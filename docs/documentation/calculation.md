@@ -83,7 +83,7 @@ Some parameters are more specific, such as:
 * `#!python energy`
   : Selected values of Fermi energy at which we want to calculate the `#!python singleshot_conductivity_dc`.
 * `#!python eta`
-  : Imaginary term in the denominator of the Green's function required for lattice calculations of finite-size systems, i.e. an energy resolution (can also be seen as a controlled broadening or inelastic energy scale). For technical details, see [Documentation][documentation].
+  : Imaginary term in the denominator of the Green's function required for lattice calculations of finite-size systems, i.e. an energy resolution (can also be seen as a controlled broadening or inelastic energy scale). For technical details, see [Documentation][optimization].
 
 The `#!python calculation` is structured in the following way:
 
@@ -146,7 +146,7 @@ To [run the code][kitex] and to [post-process][kitetools] it, run from the `#!ba
 
 ``` bash
 ./build/KITEx test.h5
-./tools/build/KITE-tools test.h5
+./build/KITE-tools test.h5
 ```
 
 !!! Info "KITE-tools output"
@@ -184,9 +184,9 @@ file_out=example1                 # name of python script that exports the HDF5-
 file_in=example1                  # name of the exported HDF5-file
 
 python ${file_out}.py             # make a model
-./KITEx ${file_in}.h5             # run Kite
+./build/KITEx ${file_in}.h5             # run Kite
 
-./tools/KITE-tools ${file_in}.h5  # run the post-processing steps
+./build/KITE-tools ${file_in}.h5  # run the post-processing steps
 python plot_dos.py                # display the data
 ```
 
