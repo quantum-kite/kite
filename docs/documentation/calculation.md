@@ -60,6 +60,7 @@ Note that the non-linear optical conductivity functionality is currently restric
         condDC = File("output.h5", "r+")['Calculation']['singleshot_conductivity_dc']['SingleShot']
         np.savetxt("condDC.dat",condDC)                
     ``` 
+    Alternatively, you can simply use the python script ('process_single_shot.py') in the `#!bash kite/tools/`-directory.
 
 Most target functions require the following parameters:
 
