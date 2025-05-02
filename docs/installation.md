@@ -1,16 +1,11 @@
-KITE is written in C++ with code optimisation, including multithreading performance. 
-The Python package [Pybinding][pybinding] is used during pre- and post-processing steps.
+KITE is written in C++ with code optimized for large systems and optimal multithreading performance. 
+[Pybinding][pybinding] is KITE's default interface, 
+which is primarily used to build the configuration (HDF5) file for [KITEx].
 
-!!! warning
+The KITE team endeavours to assist researchers run KITE on UNIX-based systems, such as GNU/Linux and Mac OS X.
+Thus, feel free to contact any of our team members if you have any queries (contacts can be found at the bottom of the landing page). 
 
-    Currently, KITE has only be tested on UNIX-based systems, such as GNU/Linux and Mac OS X.
-    There is **no** Windows support.
-
-!!! tip
-
-    To run the pre-processing tools using Python, run the Python-script from the `#!bash kite/`-directory.
-    By default, [KITE's python interface][kitepython] is only avaible within the `#!bash kite/`-directory.
-
+In what follows, we provide detailed installation instructions and additional tips for both Linux and MAC users. 
 
 ## 1. Download KITE
 
@@ -26,8 +21,6 @@ git clone https://github.com/quantum-kite/kite.git
 
 
 ## 2. Get dependencies
-
-KITE dependends on:
 
 * [Pybinding][pybinding]
 * [Eigen3][eigen3] (version 3.3.7 or newer)
@@ -55,8 +48,7 @@ Install *Eigen3* for various linear algebra tools:
 sudo apt-get install libeigen3-dev
 ```
 
-Ubuntu may not provide the required version of Eigen3, retrieve the [latest stable release][eigen3] of Eigen3.
-Unzip the file and copy the *Eigen* directory to */usr/include/*.
+Make sure you retrieve the [latest stable release][eigen3] of Eigen3. Unzip the file and copy the *Eigen* directory to */usr/include/*.
 
 Hierarchical Data Format (*HDF5*) is used to store the inputs/outputs of the program:
 
