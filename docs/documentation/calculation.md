@@ -64,7 +64,7 @@ Note that the non-linear optical conductivity functionality is currently restric
 Most target functions require the following parameters:
 
 * `#!python num_moments`
-  : Defines the number of moments of the Chebyshev expansion and hence the energy resolution of the calculation; see [KITE-tools][optimization].
+  : Defines the number of moments of the Chebyshev expansion and hence the energy resolution of the calculation; see [Documentation][optimization].
 * `#!python num_random`
   : Defines the number of random vectors used in the stochastic trace evaluation.
 * `#!python num_disorder`
@@ -196,7 +196,7 @@ python plot_dos.py                # display the data
 [documentation]: ../background/index.md
 [tightbinding]: ../background/tight_binding.md
 [workflow]: ../documentation/workflow.md
-[optimization]  ../documentation/workflow.md 
+[Documentation]: ../documentation/optimization.md   
 
 [lattice-tutorial]: tb_model.md
 [tutorial-hdf5]: editing_hdf_files.md
