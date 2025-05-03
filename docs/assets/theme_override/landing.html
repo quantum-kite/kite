@@ -49,7 +49,7 @@
     <meta content="852" property="og:image:width">
     <meta content="kite is a quantum transport software" property="og:description">
     <meta content="Quantum Kite " property="og:title">
-    <meta content="http://quantum-kite.com" property="og:url">
+    <meta content="https://quantum-kite.com" property="og:url">
 
 </head>
 
@@ -67,8 +67,9 @@
         {% set class = "" %}
         <nav id="header-nav-wrap">
             <ul class="header-main-nav">
+                {% import "partials/tabs-item.html" as item with context %}
                 {% for nav_item in nav %}
-                {% include "partials/tabs-item.html" %}
+                    {{ item.render(nav_item) }}
                 {% endfor %}
             </ul>
         </nav>
@@ -98,11 +99,14 @@
 
 
                     <div class="buttons" data-aos="fade-up">
-                        <a class="button stroke" href="documentation/">
+                        <a class="button strokefill" href="documentation/">
                             Getting Started
                         </a>
                         <a class="button stroke" href="about/">
                             About KITE
+                        </a>
+                        <a class="button stroke" href="about/">
+                            Recent publications
                         </a>
                     </div>
 
@@ -250,6 +254,7 @@
         {% endfor %}
 
     </section> <!-- end testimonials -->
+    <br>
     <div id="preloader">
         <div id="loader"></div>
     </div>
@@ -271,7 +276,7 @@
                     Website powered by
                     <a href="https://www.mkdocs.org">MkDocs</a>,
                     <a href="https://squidfunk.github.io/mkdocs-material/">Material for MkDocs</a> and
-                    <a href="http://www.styleshout.com/">styleshout</a> .
+                    <a href="https://www.styleshout.com/">styleshout</a> .
                 </div>
 
                 <!-- Social links -->
