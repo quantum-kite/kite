@@ -69,7 +69,7 @@ plt.show()
 </div>
 
 ## KITEx calculation
-### Settings
+### Settings and Calculation
 We can make the [`#!python kite.Calculation`][calculation]-object
 ``` python linenums="1"
 configuration = kite.Configuration(
@@ -87,9 +87,11 @@ calculation.dos(
   num_disorder=1
 )
 ```
-
-### Calculation
-Now, run the [KITEx][kitex] program and the [KITE-tools][kitetools].
+Set up the `#!python kite.config_system` as detailed in Sec. [Calculation][calculation] and export the KITE model running
+``` bash
+python3 script_name_here.py
+```
+which then creates the necessary HDF file. Next, run the [KITEx][kitex] program and the [KITE-tools][kitetools].
 
 ### Visualization
 

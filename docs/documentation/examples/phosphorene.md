@@ -1,15 +1,15 @@
 ## Phosphorene
 This is a small tutorial to illustrate the use of KITE to investigate materials with anisotropic electrical conductivity.
-To this end, we consider a simplified tight-binding model for single layer phosphorene[^1].
+To this end, we consider a simplified tight-binding model for single layer phosphorene [^1].
 Even though this model is very simple, it captures the anisotropic band structure of phosphorene, which is Dirac like in one direction and Schrödinger like in the other direction.
-This behaviour results in highly anisotropic transport properties along the different directions[^2].
+This behaviour results in highly anisotropic transport properties [^2].
 
-We calculate the single energy longitudinal conductivity (`singleshot_conductivity_dc`) in the vicinity of the band gap.
+We calculate the longitudinal conductivity (`singleshot_conductivity_dc`) via the efficient single-shot algorithm [^3] in the vicinity of the band gap.
 This is a fast numerical calculation, that is set to run in a normal laptop for about 3-4 minutes.
 It can reproduce qualitatively the expected anisotropic conductivity along xx and yy directions.
 
 Here, we highlight parts of the python scripts.
-The complete scripts can be downloaded [for the xx conductivity](https://gist.github.com/quantum-kite/74fe8e72c5be3c3caf74b7620a9ffa7f) and [for the yy conductivity](https://gist.github.com/quantum-kite/b5ea92e6be62c8095efbed2fa8a98587).
+The complete scripts can be retrieved from [KITE's Github repository ](https://github.com/quantum-kite/kite/blob/80a028026956c088f0c8fa4a019155b3b1bdcb78/examples/dccond_phosphorene.py).
 
 ### Lattice
 
@@ -78,16 +78,16 @@ lat.min_neighbors = 2
 return lat
 ```
 
-This model, as defined above, can be used with different number of hoppings.
+Note that this lattice model, as given above, can be used with different number of hoppings.
 The user can decide the number that is used in the calculation when defining the lattice:
 
 ``` python
 lattice=monolayer_4band(num_hoppings=4)
 ```
 
-## KITE-part
+## KITEx part
 ### Settings
-To use the large-scale single-shot algorithm for direct evaluation of zero-temperature DC conductivities, the resolvent operator requires a nonzero broadening (resolution) parameter `eta`, which is given in eV.
+To use the large-scale single-shot algorithm for direct evaluation of zero-temperature DC conductivities, the resolvent operator requires a nonzero broadening (resolution) parameter `eta`, which is given in the specified units (eV in the example above).
 As this type of calculation is energy dependent, it is also necessary to provide a list of desired energy points to the calculation object.
 In the single shot calculations, the computational time scales linearly with the energy points.
 For this example, that is intended to run in a normal desktop, we consider a small number of points and the energy range is set in the vicinity of the band gap.
@@ -112,7 +112,15 @@ Now it is time to save the configuration in a hdf file:
     kite.config_system(lattice, configuration, calculation, filename='phxx.h5')
 ```
 
+Export the KITE model to an HDF file:
+
+``` bash
+python3 script_name_here.py
+```
+
 ### Calculation
+
+Run the [KITEx][kitex] program.
 
 ### Visualization
 After running KITEx no post-processing is required for the singleshot conductivity calculation. The result can be extracted and plotted with the following script:
@@ -153,10 +161,10 @@ plt.show()
 
 ![cond](../../assets/images/phosphorene/cond.png)
 
-It is not possible to request the same type of calculation in a single call.
-In this case, we want to calculate the conductivity in xx and yy directions where the type of the calculation is the same, which means we need another hdf file for yy conductivity.
+It is not possible to request the same type of calculation (target function) in a single call.
+In this case, we want to calculate the conductivity in xx and yy directions where the type of the calculation is the same, which means we need another HDF file for yy conductivity.
 
-Let's repeat the procedure for another direction:
+Let's repeat the procedure for another direction (or alternative use the streamlined approach of the example on the [KITE repository](https://github.com/quantum-kite/kite/blob/80a028026956c088f0c8fa4a019155b3b1bdcb78/examples/dccond_phosphorene.py)):
 
 ``` python linenums="1"
     calculation.singleshot_conductivity_dc(epoints,
@@ -168,7 +176,7 @@ Let's repeat the procedure for another direction:
     kite.config_system(lattice, configuration, calculation, filename='phyy.h5')
 ```
 
-The result of this fast calculation can be seen in the figure below, for ``l1=512``, ``l2=512``.
+The result of this fast calculation can be seen in the figure below, for ``lx=ly=512``.
 To get a feeling of how KITE works, we suggest modifying parameters like ``eta`` and ``num_random``.
 
 ![cond_xx_yy](../../assets/images/phosphorene/cond_xx_yy.png)
@@ -177,6 +185,15 @@ In the next figure, we repeat the calculation for 300 energy points and 10 rando
 
 ![cond_xx_yy_large](../../assets/images/phosphorene/cond_xx_yy_large.png)
 
-[^1] Alexander N. Rudenko, Mikhail I. Katsnelson, [Phys. Rev. B 89, 201408 (2014)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.89.201408).
+[^1]: Alexander N. Rudenko, Mikhail I. Katsnelson, [Phys. Rev. B 89, 201408 (2014)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.89.201408).
 
-[^2] H. Liu, A. T. Neal, Z. Zhu, X. Xu , D. Tomanek and P. D. Ye, [ACS Nano 8, 4033 (2014)](https://pubs.acs.org/doi/abs/10.1021/nn501226z)
+[^2]: H. Liu, A. T. Neal, Z. Zhu, X. Xu , D. Tomanek and P. D. Ye, [ACS Nano 8, 4033 (2014)](https://pubs.acs.org/doi/abs/10.1021/nn501226z)
+
+[^3]: A. Ferreira and E. R. Mucciolo, [Phys. Rev. Lett. 115, 106601 (2015)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.115.106601).
+
+[tutorial]: ../index.md
+[calculation]: ../../api/kite.md#calculation
+[getting_started]: ../index.md
+[lattice]: https://docs.pybinding.site/en/stable/_api/pybinding.Lattice.html
+[kitex]: ../../api/kitex.md
+[kitetools]: ../../api/kite-tools.md

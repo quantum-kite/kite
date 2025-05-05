@@ -13,28 +13,29 @@ python3 example.py
 
 Several examples are given, including
 
-* A simple DOS calculation of various systems, such as
-    * Checkerboard lattice
-    * Graphene
-    * Cubic lattice
-  
-* Two types of disorder:
-  * On-site (uncorrelated) disorder
-  * Vacancies
-  
-* Optical conductivity
-* XX/YY conductivity
-* Weyl semi-metal calculations
-* Fu-Kane-Mele model calculations
+A simple DOS calculation of various systems, such as
 
-The examples start with the initialization of the Pybinding Lattice in the Python-script.
-The type of calculation is then described in the *main()*-part, with some default parameters associate with this calculation.
-The python-script returns a HDF5-file.
-This file can then be passed to the KITEx-executable to do the core calculation.
-Finally, the raw calculations are analyzed using the KITE-tools-executable.
+* Checkerboard lattice
+* Graphene
+* Cubic lattice
+
+Two types of disorder:
+   
+* On-site (uncorrelated) disorder
+* Vacancies
+
+More advanced examples covering:
+
+  * Optical conductivity
+  * XX/YY conductivity
+  * Weyl semi-metal calculations
+  * Fu-Kane-Mele model calculations
+
+These python scripts return a HDF5-file. These files can then be passed to the KITEx-executable to do the core calculation.
+Finally, the raw output data are analyzed using the KITE-tools-executable.
 Depending on the type of calculation, various output files will be created in the folder where the code was executed from.
 
-If the system is installed in the right folder as mentioned in the tutorial, all the results can be generated automatically by running
+All the results can be generated automatically by running
 
 ``` bash
 python3 run_all_examples.py

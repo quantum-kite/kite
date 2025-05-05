@@ -137,10 +137,14 @@ calculation.conductivity_optical_nonlinear(
     The user can decide what functions are used in a calculation.
     However, it is not possible to configure the same function twice in the same configuration file.
 
-When these objects are defined, we can finally export the file that will contain set of input instructions for [KITEx][kitex]
+When these objects are defined, we can set up the I/O instructions for [KITEx][kitex]
 using the [`#!python kite.config_system`][config_system] function:  
 ``` python
 kite.config_system(lattice, configuration, calculation, filename='test.h5')
+```
+Export the KITE model to the I/O HDF file, by running 
+``` bash
+python3 script_name_here.py
 ```
 
 ### Running a Calculation

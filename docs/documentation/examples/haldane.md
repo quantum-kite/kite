@@ -88,7 +88,10 @@ disorder.add_disorder('A', 'Uniform', +0.0, 0.4)
 disorder.add_disorder('B', 'Uniform', +0.0, 0.4)
 ```
 
-### Calculation
+### Calculation and post-processing
+
+Export the KITE model to an HDF file as costumary (see Sec. [Calculation][calculation]) and run the [KITEx][kitex] program.
+
 This is a _full spectral_ calculation where KITEx calculates the coefficients of the Chebyshev expansion and KITE-tools
 uses those moments to retrieve the transverse conductivity over the full energy range.
 Both `#!python temperature` and `#!python num_points` are parameters used by KITE-tools and is possible to modify
@@ -105,13 +108,13 @@ KITEx captures the anomalous quantum Hall plateau extremely well, with a relativ
 But it is also clear that the transverse conductivity presents significantly more fluctuations outside the plateau than the longitudinal conductivity, and we already considered 50 random vectors. 
 Better results can be easily obtained by running the simulation for larger systems and/or increasing the number of random vectors used in the STE (see below).
 
-This figure can be reproduced using KITE-tools while specifying some additional parameters as explained in example 4 of [Post-processing tools documentation](../postprocessing.md):
+This figure can be reproduced using KITE-tools while specifying some additional parameters (refer to the [post-processing tools documentation](../postprocessing.md) if you need more details). To this end, run the following line
 
 ``` bash
 ./build/KITE-tools haldane.h5 --CondDC -F -4 4 1000
 ```
 
-Which calculates the DC conductivity for 1000 equidistant Fermi energies in the range `#!python [-4, 4]`.
+which calculates the DC conductivity for 1000 equidistant Fermi energies in the range `#!python [-4, 4]`.
 The result can be plotted by using the minimal python script below.
 This script can be easily modified to plot both the longitudinal and transverse conductivity on one figure. 
 
@@ -160,7 +163,10 @@ In the present case, where we primarily wanted to see the quantum anomalous Hall
 
 [^3]: S. G. de Castro, J. M. V. P. Lopes, A. Ferreira, and D. A. Bahamon, [Phys. Rev. Lett. **132**, 076302  (2024)](https://doi.org/10.1103/PhysRevLett.132.076302)  
 
+[kitex]: ../../api/kitex.md
+[kitetools]: ../../api/kite-tools.md
 [disorder]: ../disorder.md
 [repository_example]: https://github.com/quantum-kite/kite/tree/master/examples/dos_dccond_haldane.py
 [getting_started]: ../index.md
 [settings]:../settings.md
+[calculation]: ../../api/kite.md#calculation
