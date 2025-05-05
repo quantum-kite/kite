@@ -17,7 +17,7 @@ The target functions currently available are:
   : Simulates the propagation of a gaussian wave-packet.
 * [`#!python conductivity_dc`][calculation-conductivity_dc]
   : Calculates a given component of the DC conductivity tensor.
-* [`#!python conductivity_optical`][calculatio  n-conductivity_optical]
+* [`#!python conductivity_optical`][calculation-conductivity_optical]
   : Calculates a given component of the linear optical conductivity tensor.
 * [`#!python conductivity_optical_nonlinear`][calculation-conductivity_optical_nonlinear]
   : Calculates a given component of the 2nd-order nonlinear optical conductivity tensor.
