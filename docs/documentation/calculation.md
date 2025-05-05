@@ -62,16 +62,19 @@ Note that the non-linear optical conductivity functionality is currently restric
     ``` 
     Alternatively, you can simply use the python script ('process_single_shot.py') in the `#!bash kite/tools/`-directory.
 
-Most target functions require the following parameters:
+All target functions require the following parameter:
 
 * `#!python num_moments`
-  : Defines the number of moments of the Chebyshev expansion and hence the energy resolution of the calculation; see [Documentation][optimization].
+  : Defines the order of Chebyshev expansions and hence the effective energy resolution of the calculation; see [Documentation][optimization].
+
+Other common parameters are:
+
 * `#!python num_random`
   : Defines the number of random vectors used in the stochastic trace evaluation.
 * `#!python num_disorder`
-  : Defines the number of disorder realizations (and specifies the boundary twist angles if the `#!python "random"` boundary mode is chosen).
+  : Defines the number of disorder realizations (and automatically specifies the boundary twist angles if the `#!python "random"` boundary mode is chosen).
 
-Some parameters are more specific, such as:
+Some functions also require the following parameters:
 
 * `#!python direction`
   : Specifies the component of the linear (longitudinal: (`#!python 'xx'`, `#!python 'yy'`, `#!python 'zz'`), transversal: (`#!python 'xy'`, `#!python 'yx'`, `#!python 'xz'`, `#!python 'yz'`)) or the nonlinear conductivity tensor (e.g., `#!python 'xyx'` or `#!python 'xxz'`) to be calculated.
@@ -79,11 +82,11 @@ Some parameters are more specific, such as:
 : Temperature of the Fermi-Dirac distribution used to evaluate optical and DC conductivities.  `#!python temperature` specifies the quantity $k_B T$, which has units of `#!python energy`. For example, if the hoppings are given in eV, `#!python temperature` must be given in eV. 
     
 * `#!python num_points` _(can be modified at post-processing level)_
-: Number of energy points used by the post-processing tool to output the density of states.
+  : Number of energy points used by the post-processing tool to output the `#!python dos` and other target functions.
 * `#!python energy`
   : Selected values of Fermi energy at which we want to calculate the `#!python singleshot_conductivity_dc`.
 * `#!python eta`
-  : Imaginary term in the denominator of the Green's function required for lattice calculations of finite-size systems, i.e. an energy resolution (can also be seen as a controlled broadening or inelastic energy scale). For technical details, see [Documentation][optimization].
+  : Imaginary constant (scalar self energy) in the denominator of the Green's function required for lattice calculations of finite-size systems, i.e. an energy resolution (can also be seen as a controlled broadening or inelastic energy scale). For technical details, see [Documentation][optimization].
 
 The `#!python calculation` is structured in the following way:
 
@@ -132,10 +135,10 @@ calculation.conductivity_optical_nonlinear(
 !!! note
 
     The user can decide what functions are used in a calculation.
-    However, it is not possible to configure the same function twice in the same Python script (HDF5 file).
+    However, it is not possible to configure the same function twice in the same configuration file.
 
-When these objects are defined, we can export the file that will contain set of input instructions for [KITEx][kitex]
-using the [`#!python kite.config_system`][config_system] function: function:
+When these objects are defined, we can finally export the file that will contain set of input instructions for [KITEx][kitex]
+using the [`#!python kite.config_system`][config_system] function:  
 ``` python
 kite.config_system(lattice, configuration, calculation, filename='test.h5')
 ```
@@ -151,9 +154,9 @@ To [run the code][kitex] and to [post-process][kitetools] it, run from the `#!ba
 
 !!! Info "KITE-tools output"
 
-    The [output][kitetools-output] of [KITE-tools][kitetools] is dependent on the target function.
+    The [output][kitetools-output] of [KITE-tools][kitetools] is dependent on the target function specified by the user.
     Each specific case is described in the [API][kitetools-output].
-    The [output][kitetools-output] is generally a `#!python "*.dat"`-file where the various columns of data contain
+    This [output][kitetools-output] is generally a `#!python "*.dat"`-file where the various columns of data contain
     the required target functions.
 
 
@@ -184,7 +187,7 @@ file_out=example1                 # name of python script that exports the HDF5-
 file_in=example1                  # name of the exported HDF5-file
 
 python ${file_out}.py             # make a model
-./build/KITEx ${file_in}.h5             # run Kite
+./build/KITEx ${file_in}.h5       # run Kite
 
 ./build/KITE-tools ${file_in}.h5  # run the post-processing steps
 python plot_dos.py                # display the data

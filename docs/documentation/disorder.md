@@ -1,6 +1,6 @@
 KITE's disorder implementation — general-purpose and user-friendly — is one of its main features.
 The inclusion of disorder in a given system follows a simple recipe:
-the user specifies one or more _disorder patterns_ in the [Python interface][kite-script] together with the desired disorder statistics.
+users select a default disorder (e.g., uncorrelated on-site potential and random vacancy defects) or define their own bespoke _disorder patterns_ in the [Python interface][kite-script] to simulate a specific disorder landscape.
 This information is passed on to [KITEx] and used to automatically perform the required modifications of on-site energies and hopping terms across the whole lattice _on-the-fly_.
 
 !!! Info
