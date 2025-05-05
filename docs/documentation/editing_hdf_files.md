@@ -1,6 +1,6 @@
 ## What is an HDF file?
 
-Some extracts from the HDF group [HDF](https://support.hdfgroup.org/HDF5/Tutor/HDF5Intro.pdf):
+Some extracts from the HDF group [HDF](https://support.hdfgroup.org/documentation/index.html):
 
 Hierarchical Data Format 5 (HDF5) is a unique open source technology suite for managing data collections of all sizes and complexity.
 
