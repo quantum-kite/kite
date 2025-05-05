@@ -68,7 +68,7 @@ plt.show()
   </figure>
 </div>
 
-## KITE part
+## KITEx calculation
 ### Settings
 We can make the [`#!python kite.Calculation`][calculation]-object
 ``` python linenums="1"
