@@ -4,13 +4,11 @@ The Haldane Hamiltonian is a single-orbital tight-binding model on a honeycomb l
 on-site potential (orbital mass) and complex hoppings between next-nearest-neighbor sites that produce a staggered
 magnetic field configuration with vanishing total flux through the unit cell [^1].
 
-This model is a Chern insulator, or a quantum anomalous Hall insulator because it hosts integer quantum Hall effect
-in the absence of an external magnetic field.
-
-This characteristic makes Haldane model ideal for illustrating another capability of KITE: the calculation of transverse conductivities.
+This model describes a Chern insulator (or a quantum anomalous Hall insulator) because it hosts an integer quantum Hall effect
+in the absence of any applied external magnetic fields. This characteristic makes Haldane model ideal for illustrating another capability of KITE: the calculation of transverse conductivities reflecting the quantum geometry of wavefunctions [^2] [^3].
 
 ### Lattice
-Let us begin with the definition of the Hamiltonian for the case of pure imaginary next-nearest-neighbor hoppings:
+Let us begin with the definition of the Hamiltonian for the case of purely imaginary next-nearest-neighbor hoppings:
 
 ``` python linenums="1"
 def haldane(onsite=(0, 0), t=1):
@@ -52,24 +50,32 @@ def haldane(onsite=(0, 0), t=1):
     return lat
 ```
 
-## KITE part
+## KITEx part
 ### Settings
-In the following section explain the steps to calculate the Hall coductivity.
-After defining `#!python kite.configuration`, as explained in [Getting Started documentation][getting_started], we can set `#!python kite.calculation`.
-The post-processing tool uses the energy bounds from the density of state to perform the integration in energy.
-It is better to couple conductivity with DOS:
+The following explains the steps to calculate the Hall conductivity.
+The first step is to define `#!python kite.configuration`, as explained in [Settings][settings]. For example,
 
 ``` python
-calculation.dos(num_points=1000,
-                num_moments=512,
-                num_random=10,
-                num_disorder=1)
+configuration = kite.Configuration(
+divisions=[2, 2],
+length=[128, 128],
+boundaries=['periodic', 'periodic'],
+is_complex=True,
+precision=0,
+spectrum_range=[-10, 10]
+)
+```
+
+Then, we can set `#!python kite.calculation`. We note that the the post-processing tool uses the energy spectrum limits in the HDF file (`#!python [-10,10]` in the example above) to perform the integration over the energy of occupied states.
+
+
+``` python
 calculation.conductivity_dc(num_points=1000,
                             num_moments=256,
                             num_random=50,
                             num_disorder=1,
                             direction='xy',
-                            temperature=100)
+                            temperature=0.05)
 ```
 
 ### Disorder
@@ -83,25 +89,26 @@ disorder.add_disorder('B', 'Uniform', +0.0, 0.4)
 ```
 
 ### Calculation
-This is a full spectral calculation where KITEx calculates the coefficients of the Chebyshev expansion and KITE-tools
-uses that moments to calculate the transverse conductivity.
-Both `#!python temperature` and `#!python num_points` are parameters used by KITE-tools and it is possible to modif
+This is a _full spectral_ calculation where KITEx calculates the coefficients of the Chebyshev expansion and KITE-tools
+uses those moments to retrieve the transverse conductivity over the full energy range.
+Both `#!python temperature` and `#!python num_points` are parameters used by KITE-tools and is possible to modify
 them without running KITEx again.
 This type of calculation typically requires more RAM memory than DOS or single-shot DC conductivity,
 which imposes limitations to the sizes of the systems (that still can reach large scales with available memory).
-The relative errors of the stochastic trace evaluation (STE) scales with the inverse of the system size,
-which means that full spectrum conductivities typically require more random vectors to decrease the relative error of the STE.
-The relative error of the STE also depends on the Hamiltonian and the calculated quantities.
+This has implications for the stochastic trace evaluation (STE) done by KITE, whose relative error typically scales with `#!python 1/\sqrt(NR * D)` (here, 
+`#!python NR` is the number of random vectors and `#!python D` is the total number of sites). The STE errors 
+ can thus be significant, especially at large Chebyshev orders (required to achieve fine energy resolutions). More generally, the relative error of the STE also depends on the lattice model, type of disorder and the calculated quantities.
 Transverse conductivities have more fluctuations, at least in part of the spectrum outside the topological gap, and this tutorial illustrates this issue.
 
-Fig. 1 shows the longitudinal and transverse conductivity for a small lattice of Haldane model in a calculation that took 3 minutes on a laptop.
+Figure 1 below shows the longitudinal and transverse conductivity for a small lattice of Haldane model in a calculation that took only 3 minutes on a standard laptop.
 KITEx captures the anomalous quantum Hall plateau extremely well, with a relative error of less than 0.1%.
-But it is also clear that the transverse conductivity presents significantly more fluctuations outside the plateau than the longitudinal conductivity, and we already considered 50 random vectors.
+But it is also clear that the transverse conductivity presents significantly more fluctuations outside the plateau than the longitudinal conductivity, and we already considered 50 random vectors. 
+Better results can be easily obtained by running the simulation for larger systems and/or increasing the number of random vectors used in the STE (see below).
 
 This figure can be reproduced using KITE-tools while specifying some additional parameters as explained in example 4 of [Post-processing tools documentation](../postprocessing.md):
 
 ``` bash
-./KITE-tools haldane.h5 --CondDC -F -4 4 1000
+./build/KITE-tools haldane.h5 --CondDC -F -4 4 1000
 ```
 
 Which calculates the DC conductivity for 1000 equidistant Fermi energies in the range `#!python [-4, 4]`.
@@ -137,9 +144,9 @@ This is illustrated in Fig. 2.
   </figure>
 </div>
 
-Finally, there are other physical ways of damping them: temperature and disorder.
-The use of these last two resources depend on the goals of the numerical calculation.
-In the present case, where we wanted to see the quantum anomalous Hall plateau, we can simply consider Anderson disorder and work with intermediate temperatures.
+Finally, there are other ways of damping the STE fluctuations, e.g. via a simple thermal averaging effect (temperature) or the use of uncorrelated disorder.
+The use of such strategies depend on the goals of the numerical calculation.
+In the present case, where we primarily wanted to see the quantum anomalous Hall plateau, we can simply consider a moderate Anderson disorder and work with intermediate temperatures.
 
 
 !!! example
@@ -147,10 +154,13 @@ In the present case, where we wanted to see the quantum anomalous Hall plateau, 
     Get more familiar with KITE: tweak the [full script for this calculation][repository_example]
     and play with variations of system size, number of random vectors, disorder and temperature.
 
-[^1]: F. D. M. Haldane, [Phys. Rev. Lett. **61**, 2015 (1988)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.61.2015).
+[^1]: F. D. M. Haldane, [Phys. Rev. Lett. **61**, 2015 (1988)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.61.2015)
 
 [^2]: J. H. García, L. Covaci, and T. G. Rappoport, [Phys. Rev. Lett. **114**, 116602 (2015)](https://doi.org/10.1103/PhysRevLett.114.116602) (Supplementary material)
+
+[^3]: S. G. de Castro, J. M. V. P. Lopes, A. Ferreira, and D. A. Bahamon, [Phys. Rev. Lett. **132**, 076302  (2024)](https://doi.org/10.1103/PhysRevLett.132.076302)  
 
 [disorder]: ../disorder.md
 [repository_example]: https://github.com/quantum-kite/kite/tree/master/examples/dos_dccond_haldane.py
 [getting_started]: ../index.md
+[settings]:../settings.md
