@@ -243,7 +243,7 @@ struc_disorder_one.add_structural_disorder(
 # in this way we can add onsite disorder in the form [unit cell], 'sublattice', value
 ([+0, +0], 'B', 0.3))
 
-# It is possible to add multiple different disorder type which
+# It is possible to add multiple different disorder types which
 # should be forwarded to the export_lattice function as a list.
 
 struc_disorder_two = kite.StructuralDisorder(lattice, concentration=0.2)
