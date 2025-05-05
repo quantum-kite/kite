@@ -1,6 +1,6 @@
 <img src=https://user-images.githubusercontent.com/39924384/41094707-9e4ead6e-6a25-11e8-9e16-070a3236c8da.png width="100">
 
-**KITE** is an open-source Python/C++ software suite for efficient real-space tight-binding (TB) simulations of electronic structure and bulk quantum transport properties of disordered systems scalable to multi billions of atomic orbitals.
+**Quantum KITE** is an open-source Python/C++ software suite for efficient real-space tight-binding (TB) simulations of electronic structure and bulk quantum transport properties of disordered systems scalable to multi billions of atomic orbitals.
 
 KITE v1.1 (this version) is shipped with the following capabilities:
 
