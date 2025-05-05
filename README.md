@@ -65,7 +65,7 @@ This project is licensed under the GPL v3 License - see the [LICENSE.md](LICENSE
 * KITEx/KITE-tools development: **João P. Santos Pires** (Porto)
 * Python interface / documentation: **Bert Jorissen** (Antwerp), **Emile Aerts** (Antwerp), **Robin Smeyers** (Antwerp), **David T. S. Perkins** (York)
 
-If you would like to collaborate with us on the KITE project, please email a team member directly or send us a message through the [Contact](https://quantum-kite.com/contact/) form.
+If you would like to collaborate with us on the KITE project, please email a team member directly.
 
 ## Acknowledgments
 
