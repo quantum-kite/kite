@@ -6,7 +6,7 @@
 Its default usage is very simple:
 
 ``` bash
-./KITE-tools archive.h5
+./build/KITE-tools archive.h5
 ```
 
 where archive.h5 is the HDF file that stores the output of KITE. If KITE-tools does not find this output, it will return an error. The output of KITE-tools is a set of .dat files, one for each of the requested quantities. KITE-tools may be executed without any additional parameters; all the unspecified parameters required for the calculation will be set to sensible default values. At the moment, KITE-tools is able to compute the following quantities:
@@ -26,7 +26,7 @@ The SingleShot DC conductivity does not require the post-processing through KITE
 KITE-tools supports a set of command-line instructions to force it to use user-specified parameters for each of the quantities mentioned in the previous section. The syntax is as following:
 
 ``` bash
-./KITE-tools archive.h5 --quantity_to_compute1 -key_1 value_1 -key_2 value_2 --quantity_to_compute2 -key_3 value_3 ...
+./build/KITE-tools archive.h5 --quantity_to_compute1 -key_1 value_1 -key_2 value_2 --quantity_to_compute2 -key_3 value_3 ...
 ```
 
 Each function to compute is specified after the double hyphens — and the parameters of each function is specified after the single hyphen -. The list of available commands is as follows:

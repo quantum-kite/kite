@@ -41,7 +41,7 @@ python3 run_all_examples.py
 ```
 
 After running this command, all the examples will be executed. This can take several minutes.
-Besides the outputfiles, like *name-dos.dat*, plots will be given for the *DOS*, *optical conductivity* and *DC conductivity*.
+Besides the output files, like *name-dos.dat*, plots will be given for the *DOS*, *optical conductivity* and *DC conductivity*.
 
 To clean up the folder after running all the examples, execute the following commands
 
