@@ -50,7 +50,7 @@ The same type of strategy can be used to calculate the optical conductivity for 
 
 !!! Info
 
-    For a more detailed list of possible commands for [KITE-tools][kitetools], look at the [API].
+    For a more detailed list of possible commands/options for [KITE-tools][kitetools], we strongly recommend you look at the [API].
 
 ## Other cases: bespoke post processing
 
