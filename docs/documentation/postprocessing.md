@@ -79,3 +79,5 @@ In the same `#!python tools` directory, users can find another bespoke script wh
 [calculation-conductivity_dc]: ../api/kite.md#calculation-conductivity_dc
 [calculation-conductivity_optical]: ../api/kite.md#calculation-conductivity_optical
 [calculation-singleshot_conductivity_dc]: ../api/kite.md#calculation-singleshot_conductivity_dc
+[lattice-tutorial]: tb_model.md
+[tutorial-hdf5]: editing_hdf_files.md
