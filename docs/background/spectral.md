@@ -145,7 +145,7 @@ $$
     \rho_{\mathrm{STE}}(E)=\sum_{r=1}^{R}\langle r|\delta(E-\hat{H})| r\rangle,  \quad\quad (9)  \label{eq9}
 $$
 
-with random vectors $|r\rangle=\sum_{i=1}^{D} \chi_{r, i}|i\rangle$. Here, $\{|i\rangle\}$ ($i=1,...,D$) are a complete basis set of the lattice model.
+with random vectors $|r\rangle=\sum_{i=1}^{D} \chi_{r, i}|i\rangle$. Here, $\{|i\rangle\}$ ($i=1,...,D$) are a complete orthonormal basis set of the lattice model (typically position kets).
 The random variables $\chi_{r,i}$ can be real- or complex-valued and fulfill "white noise" statistics:
 $\left\langle\left\langle\chi_{r, i}\right\rangle\right\rangle=0, \quad\left\langle\left\langle\chi_{r, i} \chi_{r^{\prime}, i^{\prime}}\right\rangle\right\rangle=0$ and $\left\langle\left\langle\chi_{r, i}^{*} \chi_{r^{\prime}, i^{\prime}}\right\rangle\right\rangle=\delta_{r, r^{\prime}} \delta_{i, i^{\prime}}$.
 The STE is extremely accurate for sparse matrices of large dimension (only a few random vectors are needed to converge to many decimal places),
