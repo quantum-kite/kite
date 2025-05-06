@@ -63,7 +63,7 @@ $$
 
 </span>
 
-The spectral decomposition [$(4)$][eq-4] allows straightforward determination of several important quantities, for example, the density of states (DOS):
+A spectral decomposition into Chebyshev polynomials [$(4)$][eq-4] allows straightforward determination of several important quantities, for example, the density of states (DOS):
 
 $$
     \rho(E) \equiv \frac{1}{D} \operatorname{Tr} \delta(E-\hat{H}) \simeq \frac{1}{\pi \sqrt{1-E^{2}}} \sum_{n=0}^{M-1} \mu_{n} T_{n}(E), \quad\quad (7)  \label{eq:7}
