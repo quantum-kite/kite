@@ -167,7 +167,7 @@ $$
     P_{\mathrm{DOS}} \propto N^{1+1 / d}, \text { for } N \gg 1,  \quad\quad (11)  \label{eq:11}
 $$
 
-allowing a significant reduction in computational time w.r.t. direct diagonalization techniques, especially in $D \geq 2$.
+allowing a significant reduction in computational time w.r.t. direct diagonalization techniques, especially in $d \geq 2$.
 
 [^1]: Chebyshev and Fourier spectral methods, John P. Boyd, [2nd Ed. Dover 5, New York (2001)](https://depts.washington.edu/ph506/Boyd.pdf).
 
