@@ -91,7 +91,7 @@ def main(angle_index=3):
 
     # for generating the desired output from the generated HDF5-file, run (replace 0 with the value of angle_index)
     # ../build/KITEx tblg_0-output.h5
-    # ../tools/build/KITE-tools tblg_0-output.h5
+    # ../build/KITE-tools tblg_0-output.h5
 
     # Note: for a quick check, make a Pybinding model and check the DOS
     #   model = pb.Model(lattice, pb.rectangle(100, 100), pb.translational_symmetry(a1=50, a2=50))

@@ -125,11 +125,11 @@ def main(onsite=(0, 0), t=1):
 
     # for generating the desired output from the generated HDF5-file, run
     # ../build/KITEx haldane-output.h5
-    # ../tools/build/KITE-tools haldane-output.h5
+    # ../build/KITE-tools haldane-output.h5
 
     # note: to generate  the conductivity data file for a desired window of Fermi energies, please use
-    # ../tools/build/KITE-tools h5_file.h --CondDC -F Emin Emax NumPoints
-    # Run ../tools/build/KITE-tools --help for more options
+    # ../build/KITE-tools h5_file.h --CondDC -F Emin Emax NumPoints
+    # Run ../build/KITE-tools --help for more options
 
     # returning the name of the created HDF5-file
     return output_file

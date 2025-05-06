@@ -8,38 +8,41 @@ This folder contains various scripts with examples showing the functionalities o
 ``` bash
 python3 example.py
 ../build/KITEx example-output.h5
-../tools/build/KITE-tools example-output.h5
+../build/KITE-tools example-output.h5
 ```
 
-The following examples are given:
+Several examples are given, including
 
-* A simple DOS calculation of various systems, like
-    * Checkerboard lattice
-    * Mixed disordered lattice
-    * On-site disorder
-    * Simple square lattice
-    * Vacancies
-    * Cubic lattice
-* Optical conductivity
-* XX/YY conductivity
-* Weyl semi-metal calculations
-* Fu-Kane-Mele model calculations
+A simple DOS calculation of various systems, such as
 
-The examples start with the initialization of the Pybinding Lattice in the Python-script.
-The type of calculation is then described in the *main()*-part, with some default parameters associate with this calculation.
-The python-script returns a HDF5-file.
-This file can then be passed to the KITEx-executable to do the core calculation.
-Finally, the raw calculations are analyzed using the KITE-tools-executable.
+* Checkerboard lattice
+* Graphene
+* Cubic lattice
+
+Two types of disorder:
+   
+* On-site (uncorrelated) disorder
+* Vacancies
+
+More advanced examples covering:
+
+  * Optical conductivity
+  * XX/YY conductivity
+  * Weyl semi-metal calculations
+  * Fu-Kane-Mele model calculations
+
+These python scripts return a HDF5-file. These files can then be passed to the KITEx-executable to do the core calculation.
+Finally, the raw output data are analyzed using the KITE-tools-executable.
 Depending on the type of calculation, various output files will be created in the folder where the code was executed from.
 
-If the system is installed in the right folder as mentioned in the tutorial, all the results can be generated automatically by running
+All the results can be generated automatically by running
 
 ``` bash
 python3 run_all_examples.py
 ```
 
 After running this command, all the examples will be executed. This can take several minutes.
-Besides the outputfiles, like *name-dos.dat*, plots will be given for the *DOS*, *optical conductivity* and *DC conductivity*.
+Besides the output files, like *name-dos.dat*, plots will be given for the *DOS*, *optical conductivity* and *DC conductivity*.
 
 To clean up the folder after running all the examples, execute the following commands
 

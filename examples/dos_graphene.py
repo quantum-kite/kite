@@ -1,4 +1,4 @@
-""" Density of states of graphene with On-site and vacancy disorder
+""" Density of states of monolayer graphene
 
     ##########################################################################
     #                         Copyright 2022, KITE                           #
@@ -6,40 +6,61 @@
     ##########################################################################
 
     Units: Energy in eV
-    Lattice: Honeycomb
+    Lattice: honeycomb
     Configuration: Periodic boundary conditions, double precision,
-                    manual scaling, size of the system 256x256, without domain decomposition (nx=ny=1),
-    Disorder: Disorder class Deterministic and Uniform at different sublattices,
-               StructuralDisorder class vacancy and bond disorder
+                    manual rescaling, size of the system 512x512, with domain decomposition (nx=ny=2)
     Calculation type: Average DOS
-    Note: automatic scaling is not supported when bond disorder is present
-    Last updated: 28/07/2022
+    Last updated: 02/05/2025
 """
 
 __all__ = ["main"]
 
 import kite
+import numpy as np
+import pybinding as pb
 
-from pybinding.repository import graphene
+
+def graphene_lattice(onsite=(0, 0)):
+    """Return lattice specification for a honeycomb lattice with nearest neighbor hoppings"""
+
+    # parameters
+    a = 0.24595  # [nm] unit cell length
+    a_cc = 0.142  # [nm] carbon-carbon distance
+    t = 2.8  # eV
+
+    # define lattice vectors
+    a1 = a * np.array([1, 0])
+    a2 = a * np.array([1 / 2, 1 / 2 * np.sqrt(3)])
+
+    # create a lattice with 2 primitive vectors
+    lat = pb.Lattice(a1=a1, a2=a2)
+
+    # add sublattices
+    lat.add_sublattices(
+        # name, position, and onsite potential
+        ('A', [0, -a_cc/2], onsite[0]),
+        ('B', [0,  a_cc/2], onsite[1])
+    )
+
+    # Add hoppings
+    lat.add_hoppings(
+        # inside the main cell, between which atoms, and the value
+        ([0, 0], 'A', 'B', -t),
+        # between neighboring cells, between which atoms, and the value
+        ([1, -1], 'A', 'B', -t),
+        ([0, -1], 'A', 'B', -t)
+    )
+    return lat
 
 
 def main(onsite=(0, 0)):
     """Prepare the input file for KITEx"""
-    # load a monolayer graphene lattice
-    lattice = graphene.monolayer(onsite=onsite)
-
-    # add Disorder
-    disorder = kite.Disorder(lattice)
-    disorder.add_disorder('B', 'Deterministic', -0.7)
-    disorder.add_disorder('A', 'Uniform', 0.0, 0.5)
-
-    # add vacancy StructuralDisorder
-    disorder_structural = kite.StructuralDisorder(lattice, concentration=0.05)
-    disorder_structural.add_vacancy('A')
+    # load lattice
+    lattice = graphene_lattice(onsite)
 
     # number of decomposition parts [nx,ny] in each direction of matrix.
     # This divides the lattice into various sections, each of which is calculated in parallel
-    nx = ny = 1
+    nx = ny = 2
     # number of unit cells in each direction.
     lx = ly = 512
 
@@ -63,26 +84,25 @@ def main(onsite=(0, 0)):
         boundaries=[mode, mode],
         is_complex=False,
         precision=1,
-        spectrum_range=[-10, 10]
+        spectrum_range=[-3.01*t, 3.01*t]
     )
 
     # specify calculation type
     calculation = kite.Calculation(configuration)
     calculation.dos(
-        num_points=10000,
-        num_moments=1024,
+        num_points=4000,
+        num_moments=512,
         num_random=1,
         num_disorder=1
     )
 
     # configure the *.h5 file
-    output_file = "mixed_disorder-output.h5"
-    kite.config_system(lattice, configuration, calculation, filename=output_file,
-                       disorder=disorder, disorder_structural=disorder_structural)
+    output_file = "graphene_lattice-output.h5"
+    kite.config_system(lattice, configuration, calculation, filename=output_file)
 
     # for generating the desired output from the generated HDF5-file, run
-    # ../build/KITEx mixed_disorder-output.h5
-    # ../build/KITE-tools mixed_disorder-output.h5
+    # ../build/KITEx graphene_lattice-output.h5
+    # ../build/KITE-tools graphene_lattice-output.h5
 
     # returning the name of the created HDF5-file
     return output_file

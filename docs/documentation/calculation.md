@@ -1,9 +1,9 @@
 The [`#!python kite.Calculation`][calculation] object carries the information about the to-be-calculated quantities,
 i.e. the *target functions*.
-Key parameters of the calculation are included here, such as number of Chebyshev moments and number of disorder realizations.
+Key parameters of the calculation are included here, such as the Chebyshev expansion order and number of disorder realizations.
 These are used by [KITEx] to calculate the spectral coefficients subsequently used by [KITE-tools][kitetools]
-at the post-processing stage, e.g. to reconstruct the full energy dependence of the desired target function (see [worflow]).
-The parameters given in the [Examples] are optimized for a standard desktop computer.
+at the post-processing stage, e.g. to reconstruct the full energy dependence of the desired target function (see [Workflow][Workflow]).
+The parameters given in the [Examples] are optimized for relatively small systems and thus ideal to run KITE on a standard desktop computer or laptop.
 
 The target functions currently available are:
 
@@ -14,21 +14,19 @@ The target functions currently available are:
 * [`#!python arpes`][calculation-arpes]
   : Calculates the one-particle spectral function of relevance to ARPES.
 * [`#!python gaussian_wave_packet`][calculation-gaussian_wave_packet]
-  : Calculates the propagation of a gaussian wave-packet.
+  : Simulates the propagation of a gaussian wave-packet.
 * [`#!python conductivity_dc`][calculation-conductivity_dc]
   : Calculates a given component of the DC conductivity tensor.
 * [`#!python conductivity_optical`][calculation-conductivity_optical]
-  : Calculates a given component of the linear optical conductivity tensor as a function of frequency for a given Fermi energy.
+  : Calculates a given component of the linear optical conductivity tensor.
 * [`#!python conductivity_optical_nonlinear`][calculation-conductivity_optical_nonlinear]
   : Calculates a given component of the 2nd-order nonlinear optical conductivity tensor.
 * [`#!python singleshot_conductivity_dc`][calculation-singleshot_conductivity_dc]
   : Calculates the longitudinal DC conductivity for a set of Fermi energies (uses the $\propto\mathcal{O}(N)$ single-shot method).
   
 
-KITE's first release was restricted to two-dimensional systems.
-However, since then, there has been an efford to expand the functionalties to three-dimensional systems.
-In the current release, most functionalities are compatible with 3D systems.
-For details, check the table below:
+The table below shows to which level the KITE target functions have been implemented and tested at the time of writing (May, 2025). 
+Note that the non-linear optical conductivity functionality is currently restricted to 2D systems.
       
 | Method                                                                                  | 2D                   | 3D                   |
 |:----------------------------------------------------------------------------------------|:---------------------|:---------------------|
@@ -44,35 +42,25 @@ For details, check the table below:
 
 
 
-  :material-check-all: - Extensivelly used and checked
+  :material-check-all: - Checked and extensively used
 
-  :material-check: - Implemented
+  :material-check: - Implemented and checked
   
   :material-close: - Not yet implemented
 
-
-!!! Warning "Processing the output of `#!python singleshot_conductivity_dc`"
-
-     [`#!python singleshot_conductivity_dc()`][calculation-singleshot_conductivity_dc] works different from the other target-functions in that it just requires a single run with [KITEx][kitex]. Post-processing with [KITE-tools][kitetools] is not required, and instead the required single-shot values of the DC-conductivity can be retrieved directly from 
-     the [HDF5]-file once [KITEx][kitex] has run. You can extract the results from the [HDF5] file [as explained in the tutorial][tutorial-hdf5], with `#!python "output.h5"` the name of the  [HDF5] file processed by [KITEx][kitex]:
-                     
-    ``` python linenums="1"
-        import numpy as np
-        from h5py import File
-        condDC = File("output.h5", "r+")['Calculation']['singleshot_conductivity_dc']['SingleShot']
-        np.savetxt("condDC.dat",condDC)                
-    ``` 
-
-All target functions require the following parameters:
+All target functions require the following parameter:
 
 * `#!python num_moments`
-  : Defines the number of moments of the Chebyshev expansion and hence the energy resolution of the calculation; see [Documentation][documentation].
+  : Defines the order of Chebyshev expansions and hence the effective energy resolution of the calculation; see [Documentation][optimization].
+
+Other common parameters are:
+
 * `#!python num_random`
   : Defines the number of random vectors used in the stochastic trace evaluation.
 * `#!python num_disorder`
-  : Defines the number of disorder realizations (and specifies the boundary twist angles if the `#!python "random"` boundary mode is chosen).
+  : Defines the number of disorder realizations (and automatically specifies the boundary twist angles if the `#!python "random"` boundary mode is chosen).
 
-Some parameters are specific of the target function:
+Some functions also require the following parameters:
 
 * `#!python direction`
   : Specifies the component of the linear (longitudinal: (`#!python 'xx'`, `#!python 'yy'`, `#!python 'zz'`), transversal: (`#!python 'xy'`, `#!python 'yx'`, `#!python 'xz'`, `#!python 'yz'`)) or the nonlinear conductivity tensor (e.g., `#!python 'xyx'` or `#!python 'xxz'`) to be calculated.
@@ -80,11 +68,11 @@ Some parameters are specific of the target function:
 : Temperature of the Fermi-Dirac distribution used to evaluate optical and DC conductivities.  `#!python temperature` specifies the quantity $k_B T$, which has units of `#!python energy`. For example, if the hoppings are given in eV, `#!python temperature` must be given in eV. 
     
 * `#!python num_points` _(can be modified at post-processing level)_
-: Number of energy points used by the post-processing tool to output the density of states.
+  : Number of energy points used by the post-processing tool to output the `#!python dos` and other target functions.
 * `#!python energy`
   : Selected values of Fermi energy at which we want to calculate the `#!python singleshot_conductivity_dc`.
 * `#!python eta`
-  : Imaginary term in the denominator of the Green's function required for lattice calculations of finite-size systems, i.e. an energy resolution (can also be seen as a controlled broadening or inelastic energy scale). For technical details, see [Documentation][documentation].
+  : Imaginary constant (scalar self energy) in the denominator of the Green's function required for lattice calculations of finite-size systems, i.e. an energy resolution (can also be seen as a controlled broadening or inelastic energy scale). For technical details, see [Documentation][optimization].
 
 The `#!python calculation` is structured in the following way:
 
@@ -133,12 +121,16 @@ calculation.conductivity_optical_nonlinear(
 !!! note
 
     The user can decide what functions are used in a calculation.
-    However, it is not possible to configure the same function twice in the same Python script (HDF5 file).
+    However, it is not possible to configure the same function twice in the same configuration file.
 
-When these objects are defined, we can export the file that will contain set of input instructions for [KITEx][kitex]
-using the [`#!python kite.config_system`][config_system] function: function:
+When these objects are defined, we can set up the I/O instructions for [KITEx][kitex]
+using the [`#!python kite.config_system`][config_system] function:  
 ``` python
 kite.config_system(lattice, configuration, calculation, filename='test.h5')
+```
+Export the KITE model to the I/O HDF file, by running 
+``` bash
+python3 script_name_here.py
 ```
 
 ### Running a Calculation
@@ -147,14 +139,14 @@ To [run the code][kitex] and to [post-process][kitetools] it, run from the `#!ba
 
 ``` bash
 ./build/KITEx test.h5
-./tools/build/KITE-tools test.h5
+./build/KITE-tools test.h5
 ```
 
 !!! Info "KITE-tools output"
 
-    The [output][kitetools-output] of [KITE-tools][kitetools] is dependent on the target function.
+    The [output][kitetools-output] of [KITE-tools][kitetools] is dependent on the target function specified by the user.
     Each specific case is described in the [API][kitetools-output].
-    The [output][kitetools-output] is generally a `#!python "*.dat"`-file where the various columns of data contain
+    This [output][kitetools-output] is generally a `#!python "*.dat"`-file where the various columns of data contain
     the required target functions.
 
 
@@ -185,9 +177,9 @@ file_out=example1                 # name of python script that exports the HDF5-
 file_in=example1                  # name of the exported HDF5-file
 
 python ${file_out}.py             # make a model
-./KITEx ${file_in}.h5             # run Kite
+./build/KITEx ${file_in}.h5       # run Kite
 
-./tools/KITE-tools ${file_in}.h5  # run the post-processing steps
+./build/KITE-tools ${file_in}.h5  # run the post-processing steps
 python plot_dos.py                # display the data
 ```
 
@@ -197,6 +189,8 @@ python plot_dos.py                # display the data
 [lattice]: https://docs.pybinding.site/en/stable/_api/pybinding.Lattice.html
 [documentation]: ../background/index.md
 [tightbinding]: ../background/tight_binding.md
+[workflow]: ../documentation/workflow.md
+[optimization]: ../documentation/optimization.md   
 
 [lattice-tutorial]: tb_model.md
 [tutorial-hdf5]: editing_hdf_files.md

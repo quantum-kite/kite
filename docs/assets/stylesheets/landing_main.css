@@ -150,6 +150,7 @@ h2,
 .h02 {
     font-size: 2.4rem;
     line-height: 1.25;
+    color: #404040;
 }
 
 h3,
@@ -783,23 +784,23 @@ button,
 input[type="submit"],
 input[type="reset"],
 input[type="button"] {
+    font-size: 2.4rem;
+    height: 7.6rem;
+    line-height: calc(7.6rem - .6rem);
+    padding: 0 6rem;
+    margin: 1.3rem 3rem;
+    border-radius: 1.5rem;
+    border: .2rem solid #c5c5c5;
     display: inline-block;
     font-family: "LatoLatin-regular", sans-serif;
-    font-size: 1.5rem;
-    height: 5.4rem;
-    line-height: calc(5.4rem - .6rem);
-    padding: 0 3rem;
-    margin: 0 .3rem 1.2rem 0;
     color: #222222;
     text-decoration: none;
     cursor: pointer;
     text-align: center;
     white-space: nowrap;
-    border-radius: .5rem;
     -webkit-transition: all 0.3s ease-in-out;
     transition: all 0.3s ease-in-out;
     background-color: #c5c5c5;
-    border: .3rem solid #c5c5c5;
 }
 
 .button:hover,
@@ -867,7 +868,9 @@ button.stroke,
 }
 
 button.stroke:hover,
-.button.stroke:hover {
+.button.stroke:hover,
+button.strokefill:hover,
+.button.strokefill:hover {
     border: 0.3rem solid #89a314;
     color: #89a314;
 }
@@ -1366,7 +1369,7 @@ h1.intro-header::before {
 
 #header-nav-wrap .header-main-nav li a:hover,
 #header-nav-wrap .header-main-nav li a:focus {
-    color: #ffffff;
+    color: #822855;
 }
 
 #header-nav-wrap .header-main-nav li.current a {
@@ -1503,7 +1506,7 @@ h1.intro-header::before {
 }
 
 .home-content-left {
-    padding: 15rem 0 12rem 40px;
+    padding: 10rem 0 12rem 40px;
     position: relative;
     width: 100%;
 }
@@ -1535,12 +1538,13 @@ h1.intro-header::before {
     text-align: center;
 }
 
-.home-content-left .button.stroke {
-    color: rgba(255, 255, 255, 0.8) !important;
-    border-color: rgba(255, 255, 255, 0.8);
-    margin: 4rem 0rem 0rem;
-    padding: 0 2.2rem;
+.home-content-left .button.stroke,
+.home-content-left .button.strokefill {
     min-width: 188px;
+}
+
+.home-content-left .button.stroke{
+    color: rgba(255, 255, 255, 0.8) !important;
 }
 
 .home-content-left .button.stroke span[class*="icon"] {
@@ -1550,7 +1554,9 @@ h1.intro-header::before {
 }
 
 .home-content-left .button.stroke:hover,
-.home-content-left .button.stroke:focus {
+.home-content-left .button.stroke:focus,
+.home-content-left .button.strokefill:hover,
+.home-content-left .button.strokefill:focus {
     background-color: rgb(182, 195, 7) !important;
     border-color: transparent;
     color: #000000 !important;
@@ -1761,7 +1767,7 @@ html[data-useragent*='MSIE 10.0'] .home-scrolldown,
     }
 
     .home-content-left {
-        padding: 18rem 0 12rem 40px;
+        padding: 12rem 2.5rem 5rem;
     }
 
     .home-content-left h3 {
@@ -1780,6 +1786,16 @@ html[data-useragent*='MSIE 10.0'] .home-scrolldown,
         vertical-align: top;
         width: 70%;
     }
+    
+    .home-content-left .button.stroke,
+    .home-content-left .button.strokefill {
+        font-size: 1.5rem;
+        height: 5.4rem;
+        line-height: calc(5.4rem - .6rem);
+        padding: 0 3rem;
+        margin: .6rem 1.2rem;
+        border-radius: .5rem;
+    }
 }
 
 @media only screen and (max-width: 1100px) {
@@ -1794,8 +1810,7 @@ html[data-useragent*='MSIE 10.0'] .home-scrolldown,
 
 @media only screen and (max-width: 1024px) {
     .home-content-left {
-        width: 60%;
-        padding: 18rem 6rem 12rem 4rem;
+        width: 100%;
     }
 
     .home-content-left h3 {
@@ -1830,9 +1845,7 @@ html[data-useragent*='MSIE 10.0'] .home-scrolldown,
     }
 
     .home-content-left {
-        width: 94%;
         position: static;
-        padding: 15rem 6rem 366px;
         margin: 0 auto;
     }
 
@@ -1869,15 +1882,12 @@ html[data-useragent*='MSIE 10.0'] .home-scrolldown,
 }
 
 @media only screen and (max-width: 600px) {
-    .home-content-left {
-        padding: 12rem 6rem 366px;
-    }
-
     .home-content-left h1 {
         font-size: 3.3rem;
     }
 
-    .home-content-left .button.stroke {
+    .home-content-left .button.stroke,
+    .home-content-left .button.strokefill {
         width: 100%;
         min-width: 0;
         max-width: 280px;
@@ -1894,34 +1904,8 @@ html[data-useragent*='MSIE 10.0'] .home-scrolldown,
 }
 
 @media only screen and (max-width: 500px) {
-
-    .home-social-list,
-    .home-scrolldown {
-        display: none;
-    }
-
-    .home-content-left {
-        padding: 12rem 2.5rem 366px;
-        width: 100%;
-    }
-
     .home-content-left h1 {
         font-size: 3rem;
-    }
-}
-
-@media only screen and (max-width: 400px) {
-    .home-content-left {
-        padding: 12rem 0 300px;
-    }
-
-    .home-content-left .button.stroke {
-        margin: 1.2 0 1.2 0;
-    }
-
-    .home-image-right {
-        width: 320px;
-        margin-bottom: -298px;
     }
 }
 
@@ -1935,7 +1919,7 @@ html[data-useragent*='MSIE 10.0'] .home-scrolldown,
     min-height: 786px;
     background: #1e1f20;
     background: white;
-    padding-top: 18rem;
+    padding-top: 6rem;
     overflow: hidden;
 }
 

@@ -150,7 +150,7 @@ def main(dt_plus=0.1, dt_minus=0.1):
 
     # for generating the desired output from the generated HDF5-file, run
     # ../build/KITEx FKM_Model-output.h5
-    # ../tools/build/KITE-tools FKM_Model-output.h5
+    # ../build/KITE-tools FKM_Model-output.h5
 
     # returning the name of the created HDF5-file
     return output_file

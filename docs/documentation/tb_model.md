@@ -1,6 +1,16 @@
+The aim of the current section is to help us gain familiarity with the lattice model of KITE. 
+Thus, we will being by constructing a periodic [`#!python pb.Lattice`][lattice] using [Pybinding]
+and calculate its band structure using [`#!python pb.Solver`][lattice] (also from [Pybinding]). 
+In the following sections, we will then see how to use [KITEx][kitex] to both being able to significantly scale up the simulations and make interesting modifications to the lattice model. 
+
+
+!!! Info
+
+    If you are familiar with [Pybinding], you can go directly to the next tutorial page.
+
 !!! Note
 
-    A python script that generates KITE's input file  requires few python packages that can be included with the following aliases
+    The python script that generates KITE's input file requires a few packages that can be included with the following aliases
     
     ``` python
     import kite
@@ -8,13 +18,6 @@
     import numpy as np
     import matplotlib.pyplot as plt
     ```
-
-We will first construct a [`#!python pb.Lattice`][lattice] using [Pybinding]
-and calculate its density of states (DOS) using [`#!python pb.Solver`][lattice] from [Pybinding].
-
-!!! Info
-
-    If you are familiar with [Pybinding], you can go directly to the next tutorial page.
 
 ## Making a `#!python pb.Lattice`
 The [`#!python pb.Lattice`][lattice] class from [Pybinding] carries the information about the [TB model][tightbinding].
@@ -27,7 +30,7 @@ This includes
 [Pybinding] also provides additional functionalities based on this *real-space* information. It can provide, for example, the *reciprocal vectors* and the *Brillouin zone*.
 
 ### Defining the unit cell
-As a simple example, let us construct a square lattice with a single lattice site.
+As a simple example, let us construct a square lattice with a single orbital per unit cell.
 The following syntax can be used to define the primitive lattice vectors:
 
 ``` python linenums="1"
@@ -38,7 +41,7 @@ lat = pb.Lattice(a1=a1, a2=a2) # defines a lattice object
 ```
 
 ### Adding lattice sites
-We than add the desired lattice sites inside the unit cell (the same syntax can be used to add different orbitals in a given position or more sites in different sublattices):
+We than add the desired lattice sites/orbitals inside the unit cell (the same syntax can be used to add different orbitals in a given position or more sites in different sublattices):
 
 ``` python linenums="1"
 onsite = 0 # onsite potential
@@ -105,7 +108,7 @@ To use any of these solvers, we need to first construct a model.
 
 ### Building a `#!python pb.Model`
 The [`#!python pb.Model`][model] class contains all the information of the structure we want to use in our calculation.
-This structure can be larger than the unit cell (*stored in the [`#!python pb.Lattice`][lattice]-class). It can also have specific geometries and other possible modifications of the original lattice. 
+This structure can be significantly larger than the unit cell (*stored in the [`#!python pb.Lattice`][lattice]-class). It can also have specific geometries and other possible modifications of the original lattice. 
 Here, we will just double the unit cell in both directions in the [`#!python pb.Model`][model] and add periodic boundary conditions:
 ``` python linenums="1"
 model = pb.Model(
@@ -137,7 +140,7 @@ solver = pb.solver.lapack(
 ### Band structure calculation
 As an example, the band structure is calculated using the [`#!python pb.Solver`][solver] defined above.
 
-First, for a two-dimensional plot, we must define a path in the reciprocal space that connects the high symmetry points. Using the [`#!python pb.Lattice`][solver] build-in
+First, for a two-dimensional plot, we define a path in the reciprocal space that connects the high symmetry points. Using the [`#!python pb.Lattice`][solver] build-in
 method, the high symmetry points for the corners of a path can be found easily:
 ``` python linenums="1"
 bz = lat.brillouin_zone()
@@ -235,3 +238,4 @@ For more info about [Pybinding]'s capabilities, look at its [tutorial][tutorial-
 [Examples]: examples/graphene.md
 
 [kitepython]: ../api/kite.md
+[kitex]: ../api/kitex.md

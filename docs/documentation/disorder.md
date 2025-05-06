@@ -1,15 +1,16 @@
 KITE's disorder implementation — general-purpose and user-friendly — is one of its main features.
-The inclusion of disorder in a given system follows a simple recipe:
-the user specifies one or more _disorder patterns_ in the [Python interface][kite-script] together with the desired disorder statistics.
+The inclusion of disorder in a given system follows a simple but effective recipe:
+users select a default disorder type or define their own  _disorder patterns_ in the [Python interface][kite-script] to create a bespoke disorder landscape.
 This information is passed on to [KITEx] and used to automatically perform the required modifications of on-site energies and hopping terms across the whole lattice _on-the-fly_.
 
 !!! Info
-    Disorder patterns are local modifications of the Hamiltonian that can be constricted to one unit cell or can connect neighboring unit cells.
+    Disorder patterns are local modifications of the Hamiltonian that can be constricted to one unit cell or can connect neighboring unit cells. 
+    The local patterns are randomly distributed over the whole lattice with a desired concentration. This framework is thus ideal to simulate systems with random impurities/defects of specified types. 
 
 
 KITE handles both standard uncorrelated disorder (e.g., random on-site energies) and realistic
 short-range disorder (e.g., vacancies or impurity scattering centers distributed randomly over the
-lattice sites with a specified concentration). KITE can handle multiple disorder patterns simultaneously.
+lattice sites with a specified concentration). KITE can even handle multiple disorder patterns simultaneously.
 
 _Disorder implementation_: After defining a [regular lattice][tutorial-lattice], disorder can be added to the system.
 KITE allows the user to select between on-site and structural disorder by choosing between predefined classes
@@ -34,7 +35,7 @@ use the following procedure:
 ``` python
 # define an object based on the lattice
 disorder = kite.Disorder(lattice)
-# add Gaussian distributed disorder at all sites of a selected sublattice
+# add Gaussian distributed disorder at all sites of a selected sublattice (A in this example)
 disorder.add_disorder('A', 'Gaussian', mean, std)
 ```
 
@@ -117,7 +118,7 @@ kite.config_system(lattice, configuration, calculation, filename='on_site_disord
 [`#!python kite.StructuralDisorder`][structural_disorder] class adds the possibility of selecting between two different
 short-range disorder types, i.e. vacancy defects, randomly distributed with a certain concentration over lattice sites on a selected sublattice,
 and a more generic multi-orbital disorder which may combine of on-site and hopping terms 
-(also distributed with a certain concentration).
+(also randomly distributed with a certain concentration).
 
 ### Example 1: Vacancy defects
 
@@ -242,7 +243,7 @@ struc_disorder_one.add_structural_disorder(
 # in this way we can add onsite disorder in the form [unit cell], 'sublattice', value
 ([+0, +0], 'B', 0.3))
 
-# It is possible to add multiple different disorder type which
+# It is possible to add multiple different disorder types which
 # should be forwarded to the export_lattice function as a list.
 
 struc_disorder_two = kite.StructuralDisorder(lattice, concentration=0.2)

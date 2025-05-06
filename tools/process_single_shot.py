@@ -17,7 +17,7 @@ import sys
 
 
 def post_process_singleshot_conductivity_dc(filename="output.h5"):
-    """Read the HDF5-file and process the singlesho_conductivity_dc"""
+    """Read the HDF5-file and process the singleshot_conductivity_dc"""
 
     # open the HDF5-file and read the data
     file = hdf.File(filename, 'r+')

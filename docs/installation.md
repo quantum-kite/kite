@@ -1,16 +1,11 @@
-!!! warning
+KITE is written in C++ with code optimized for large systems and optimal multithreading performance. 
+[Pybinding][pybinding] is KITE's default interface, 
+which is primarily used to build the configuration (HDF5) file for [KITEx].
 
-    Currently, KITE has only be tested on UNIX-based systems, such as GNU/Linux and Mac OS X.
-    There is **no** Windows support.
+The KITE team endeavours to assist researchers run KITE on UNIX-based systems, such as GNU/Linux and Mac OS X.
+Thus, feel free to contact any of our team members if you have any queries (contacts can be found at the bottom of the landing page). 
 
-KITE is written in C++ with code optimisation, including multithreading performance. 
-The Python package [Pybinding][pybinding] is used during pre- and post-processing steps.
-
-!!! tip
-
-    To run the pre-processing tools using Python, run the Python-script from the `#!bash kite/`-directory.
-    By default, [KITE's python interface][kitepython] is only avaible within the `#!bash kite/`-directory.
-
+In what follows, we provide detailed installation instructions and additional tips for both Linux and MAC users. 
 
 ## 1. Download KITE
 
@@ -26,8 +21,6 @@ git clone https://github.com/quantum-kite/kite.git
 
 
 ## 2. Get dependencies
-
-KITE dependends on:
 
 * [Pybinding][pybinding]
 * [Eigen3][eigen3] (version 3.3.7 or newer)
@@ -55,8 +48,7 @@ Install *Eigen3* for various linear algebra tools:
 sudo apt-get install libeigen3-dev
 ```
 
-Ubuntu may not provide the required version of Eigen3, retrieve the [latest stable release][eigen3] of Eigen3.
-Unzip the file and copy the *Eigen* directory to */usr/include/*.
+Make sure you retrieve the [latest stable release][eigen3] of Eigen3. Unzip the file and copy the *Eigen* directory to */usr/include/*.
 
 Hierarchical Data Format (*HDF5*) is used to store the inputs/outputs of the program:
 
@@ -131,7 +123,7 @@ Now **close** the terminal window, and open a **new terminal** window.
 !!! info
     
     1.  The default directory for Homebrew is */usr/local/bin/*.
-        Change this path to the right location if Homebrew was installed in a different directory
+        Correct this path if Homebrew was installed in a different directory
     
     2.  In the following sections, replace **n** with the version of gcc installed by Homebrew as given by `#!bash brew info gcc`.
 
@@ -175,8 +167,7 @@ Pybinding also requires the SciPy packages but pip will resolve all the SciPy de
     ``` bash
     pip3 install git+https://github.com/BertJorissen/pybinding
     ```
-
-Alternatively, you might prefer to follow the instructions on the [Pybinding][pybinding] webpage.
+    Alternatively, you might prefer to follow the instructions on the [Pybinding][pybinding] webpage.
 
 Next, download the source code by the command given in section 1.
 Edit *CMakeLists.txt* in the `#!bash kite/`-directory:
@@ -196,7 +187,7 @@ Edit *CMakeLists.txt* in the `#!bash kite/`-directory:
 where **n** is the version number as used previously.
 
 ## 3. KITEx & KITE-tools
-From within the `#!bash kite/` directory (containing *CMakeLists.txt* and [*kite.py*][kitepython]), run the following commands for [KITEx][kitex]:
+From within the `#!bash kite/` directory (containing *CMakeLists.txt* and [*kite.py*][kitepython]), run the following commands:
 
 ``` bash
 mkdir build
@@ -209,17 +200,7 @@ make
 
     Any warnings appearing during the compilation process can typically be ignored.
 
-For [KITE-tools][kitetools], run the following commands from the `#!bash kite/tools/` directory
-
-``` bash
-mkdir build
-cd build
-cmake ..
-make
-```
-
-If these commands have run successfully, you will now find [KITEx][kitex] in the `#!bash kite/build/` directory and [KITE-tools][kitetools in the
-`#!bash kite/tools/build/` directory, which are now ready to use!
+If these commands have run successfully, you will now find [KITEx][kitex] and [KITE-tools][kitetools]  in the `#!bash kite/build/` directory, which are now ready to use!
 
 
 ## 4. Test KITE
@@ -240,7 +221,7 @@ This first example calculates the density of states (DOS) of pure graphene.
 To obtain the file with the DOS-data, you need to [post-process][kitetools] the output with a tool 
 
 ``` bash
-../tools/build/KITE-tools graphene_lattice-output.h5
+../build/KITE-tools graphene_lattice-output.h5
 ```
 
 that generates the appropriata data file. For more details refer to the [tutorial][tutorial].
@@ -248,7 +229,7 @@ that generates the appropriata data file. For more details refer to the [tutoria
 !!! info
 
     The three command above were run from the `#!bash kite/examples/`-directory. If you didn't build [KITEx][kitex] or [KITE-tools][kitetools] in the
-    `#!bash kite/build/` and `#!bash kite/tools/build/` directories respectively, the commands won't work.
+    `#!bash kite/build/` and `#!bash kite/build/` directories respectively, the commands won't work.
 
 [repository]: https://github.com/quantum-kite/kite
 [eigen3]: https://eigen.tuxfamily.org/

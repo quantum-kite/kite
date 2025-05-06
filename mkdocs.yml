@@ -155,15 +155,15 @@ extra:
       link: https://www.linkedin.com/in/lucian-covaci-1439388a/
       image: covaci.jpg
     - name: "Simão M. João"
-      title: Co-Founder
+      title: Co-Founder (Former Member)
       link: https://scholar.google.pt/citations?user=yvY5oYcAAAAJ&hl=en
       image: simao.jpg
     - name: "Miša Anđelković"
-      title: Co-Founder
+      title: Co-Founder (Former Member)
       link: https://www.linkedin.com/in/misaandelkovic/
       image: misa.jpg
     - name: "João P. Santos Pires"
-      title: Contributor
+      title: Contributor (Former Member)
       link: https://scholar.google.com/citations?user=pmnNcFMAAAAJ&hl=pt-PT
       image: pires.jpg
     - name: "Bert Jorissen"
@@ -179,5 +179,9 @@ extra:
       image: smeyers.jpg
     - name: "João Pinho"
       title: Contributor
+      link: https://www.linkedin.com/in/joao-manuel-pinho-a729401ba
       image: pinho.jpg
+    - name: "Henrique Veiga"
+      title: Contributor
+      image: veiga.jpg
 
