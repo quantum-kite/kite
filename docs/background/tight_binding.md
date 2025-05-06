@@ -9,20 +9,19 @@ $$
 $$
 
 where $i=\{1, \ldots, N\}$ runs over all sites and orbitals.
-The one-particle states $| \psi_\alpha \rangle$ are eigenvectors of the parametrized Hamiltonian matrix (the TB Hamiltonian),
+The one-particle states $| \psi_\alpha \rangle$ are eigenvectors of the Hamiltonian matrix (the TB Hamiltonian),
 $\hat{H} = \sum_{i,j} t_{i,j} |i\rangle \langle j |$.
 The TB matrix elements — encoding on-site energies $(i = j)$ and hopping integrals between different atomic orbitals
-$(i \neq j)$ — can be estimated by means of other methods (e.g., Slater-Koster approach) or by matching the spectrum
+$(i \neq j)$ — can be estimated for example by means of the Slater-Koster approach or by matching the spectrum
 to that obtained by first-principles calculations in a suitable reference system[^1][^2][^3][^4].
 
-Parameterized TB models provide an accurate description of molecular orbitals in molecules and Bloch wavefunctions in many solids.
+Suitably parameterized TB models provide an accurate description of molecular orbitals in molecules and Bloch wavefunctions in many solids.
 The complexity of TB models grows only linearly with the number of atomic orbitals,
 providing a basis for large-scale calculations of a plethora of equilibrium and non-equilibrium physical properties,
 including optical absorption spectra, simulations of amorphous solids, and wave-packet propagation.
 Disorder, interfaces, and defects can be conveniently added to a TB model by modifying on-site energies and hopping integrals,
 and adding auxiliary sites. Such a multi-scale approach has proven very successful in describing impurity scattering[^5][^6],
-moiré patterns[^7], complex interactions induced by ad-atoms[^8], optical conductivity of disordered 2D materials with up to tens
-of millions of atoms[^9], and geometrical properties, vibrational frequencies and interactions of large molecular systems[^10].
+moiré patterns[^7], complex interactions induced by ad-atoms[^8], optical conductivity of disordered 2D materials[^9], and geometrical properties, vibrational frequencies and interactions of large molecular systems[^10].
 
 
 [^1]: Simplified LCAO Method for the Periodic Potential Problem, J. C. Slater and G. F. Koster, [Phys. Rev. 94, 1498 (1954)](https://journals.aps.org/pr/abstract/10.1103/PhysRev.94.1498).
@@ -39,7 +38,7 @@ of millions of atoms[^9], and geometrical properties, vibrational frequencies an
 
 [^7]: Ab initio theory of moiré superlattice bands in layered two-dimensional materials, J. Jung, A. Raoux, Z. Qiao, and A. H. MacDonald, [Phys. Rev. B 89, 205414 (2014)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.89.205414).
 
-[^8]: Impact of complex adatom-induced interactions on quantum spin Hall phases. F. J. dos Santos et al., [pre-print: arXiv:1712.07827 (2017)](https://arxiv.org/abs/1712.07827).
+[^8]: Impact of complex adatom-induced interactions on quantum spin Hall phases. F. J. dos Santos et al., [Phys. Rev. B 98, 081407(R) (2018)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.98.081407).
 
 [^9]: Numerical calculation of the Casimir-Polder interaction between a graphene sheet with vacancies and an atom. T. Cysne et al., [Phys. Rev. B 94, 235405 (2016)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.94.235405).
 
