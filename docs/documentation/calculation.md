@@ -48,20 +48,6 @@ Note that the non-linear optical conductivity functionality is currently restric
   
   :material-close: - Not yet implemented
 
-
-!!! Warning "Processing the output of `#!python singleshot_conductivity_dc`"
-
-     [`#!python singleshot_conductivity_dc()`][calculation-singleshot_conductivity_dc] works different from the other target-functions in that it just requires a single run with [KITEx][kitex]. That is, the post-processing with [KITE-tools][kitetools] is not required, and instead the requested single-shot values of the DC-conductivity can be retrieved directly from 
-     the [HDF5]-file once [KITEx][kitex] has run. You can extract the results from the [HDF5] file [as explained in the tutorial][tutorial-hdf5], with `#!python "output.h5"` the name of the  [HDF5] file processed by [KITEx][kitex]:
-                     
-    ``` python linenums="1"
-        import numpy as np
-        from h5py import File
-        condDC = File("output.h5", "r+")['Calculation']['singleshot_conductivity_dc']['SingleShot']
-        np.savetxt("condDC.dat",condDC)                
-    ``` 
-    Alternatively, you can simply use the python script ('process_single_shot.py') in the `#!bash kite/tools/`-directory.
-
 All target functions require the following parameter:
 
 * `#!python num_moments`

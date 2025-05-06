@@ -59,9 +59,23 @@ For example, the single-shot longitudinal conductivity functionality `#!python s
 To extract the calculated DC conductivity from the *.h5 file, we can use a python script located in the `#!python tools` directory:  `#!python process_single_shot.py`. 
 In the same `#!python tools` directory, users can find another bespoke script which plots the output of a spectral function (ARPES) calculation.
 
+!!! Warning "Processing the output of `#!python singleshot_conductivity_dc`"
 
+     [`#!python singleshot_conductivity_dc()`][calculation-singleshot_conductivity_dc] works different from the other target-functions in that it just requires a single run with [KITEx][kitex]. That is, the post-processing with [KITE-tools][kitetools] is not required, and instead the requested single-shot values of the DC-conductivity can be retrieved directly from 
+     the [HDF5]-file once [KITEx][kitex] has run. You can extract the results from the [HDF5] file [as explained in the tutorial][tutorial-hdf5], with `#!python "output.h5"` the name of the  [HDF5] file processed by [KITEx][kitex]:
+                     
+    ``` python linenums="1"
+        import numpy as np
+        from h5py import File
+        condDC = File("output.h5", "r+")['Calculation']['singleshot_conductivity_dc']['SingleShot']
+        np.savetxt("condDC.dat",condDC)                
+    ``` 
+    Alternatively, you can simply use the python script ('process_single_shot.py') in the `#!bash kite/tools/`-directory.
 
 
 [kitex]: ../api/kitex.md
 [kitetools]: ../api/kite-tools.md
 [API]: ../api/kite-tools.md#advanced-usage
+[calculation-conductivity_dc]: ../api/kite.md#calculation-conductivity_dc
+[calculation-conductivity_optical]: ../api/kite.md#calculation-conductivity_optical
+[calculation-singleshot_conductivity_dc]: ../api/kite.md#calculation-singleshot_conductivity_dc
