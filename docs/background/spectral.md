@@ -160,11 +160,11 @@ The required number of random vectors, $R$, depends on sparsity of the Chebyshev
 For typical tight-binding problems, one has $Z \propto O(1)$. Thus, in the large system limit $(N \gg 1)$, a single random vector is often enough to achieve accuracy of 1% or better[^3].
 In fact, for sparse matrices, the STE relative error has the favorable scaling $1 / \sqrt{R N}$.
 On the other hand, the number of moments required to converge the expansion depends strongly on the desired resolution,
-$\eta$. As a rule of thumb, $M$ should not be smaller than a few times the linear dimension of the system $N^{1/D}$,
-where $D$ is the number of spatial dimensions, which then leads to:
+$\eta$. As a rule of thumb, $M$ should not be smaller than a few times the linear dimension of the system $N^{1/d}$,
+where $d$ is the number of spatial dimensions, which then leads to:
 
 $$
-    P_{\mathrm{DOS}} \propto N^{1+1 / D}, \text { for } N \gg 1,  \quad\quad (11)  \label{eq:11}
+    P_{\mathrm{DOS}} \propto N^{1+1 / d}, \text { for } N \gg 1,  \quad\quad (11)  \label{eq:11}
 $$
 
 allowing a significant reduction in computational time w.r.t. direct diagonalization techniques, especially in $D \geq 2$.
