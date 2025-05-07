@@ -63,19 +63,23 @@ $$
 
 </span>
 
-The spectral decomposition [$(4)$][eq-4] allows straightforward determination of several important quantities, for example, the density of states (DOS):
+A spectral decomposition into Chebyshev polynomials [$(4)$][eq-4] allows straightforward determination of several important quantities, for example, the density of states (DOS):
 
 $$
     \rho(E) \equiv \frac{1}{D} \operatorname{Tr} \delta(E-\hat{H}) \simeq \frac{1}{\pi \sqrt{1-E^{2}}} \sum_{n=0}^{M-1} \mu_{n} T_{n}(E), \quad\quad (7)  \label{eq:7}
 $$
 
 where $M$ is the Chebyshev (truncation) order that controls the accuracy of the spectral expansion (see below). 
-Clearly, the knowledge of the Chebyshev moments allows to reconstruct the DOS over any desired grid of energies (the post-processing stage).
+The Chebyshev moments are easily seen to be determined by traces of the matrix Chebyshev operators according to $\mu_{n}=\text{Tr}\,[T_{n}(\hat{H})]/\chi_{n}$ with $\chi_n=[D\left(1+\delta_{n, 0}\right)] / 2$.
+Clearly, the knowledge of the Chebyshev moments,  $\{\mu_n\}$ ($n=0,1,...$), allows one to reconstruct the DOS over any desired grid of energies (the so-called post-processing stage).
 
-How does one efficiently compute $\{\mu_n\}({n=0,...,M-1})$? The Chebyshev moments $\mu_{n}=\operatorname{Tr} T_{n}(\hat{H}) /\left[D\left(1+\delta_{n, 0}\right) / 2\right]$ are typically evaluated recursively in two steps (note that $\mu_0=1$
-by definition).
-First, a series of matrix-vector multiplications is carried out to construct the Chebyshev matrix polynomials using Eq. [$(6)$][eq-6]. The iteration process usually starts with the application of $\mathcal{T}_{1}(\hat{H})=\hat{H}$ onto some basis ket (or a random vector, see below) 
-$|r_1\rangle$, yielding $\hat{H} |r_1\rangle= |\tilde r_1 \rangle$. This then allows one to compute the first non-trivial Chebyshev moment, $\mu_1$, as detailed below.
+How does one efficiently compute $\{\mu_n\}$? 
+
+Chebyshev moments are typically evaluated recursively in two steps (note that $\mu_0=1$ by definition).
+First, a series of matrix-vector multiplications is carried out to construct the Chebyshev matrix polynomials using Eq. [$(6)$][eq-6]. 
+The iteration process usually starts with the application of $\mathcal{T}_{1}(\hat{H})=\hat{H}$ onto some basis ket (or a random vector, see below) 
+$|r_1\rangle$, yielding $\hat{H} |r_1\rangle= |\tilde r_1 \rangle$. 
+This then allows one to compute the first non-trivial Chebyshev moment, $\mu_1$, as detailed below.
 The process is iterated via [$(6)$][eq-6]  to compute subsequent moments, $\mu_2$,  $\mu_3$, etc. 
 In practice, the iterative procedure is stopped once the desired
 energy resolution has been achieved, and, as such, for some problems, the number of Chebyshev moments $M$ required can be quite large.
@@ -145,7 +149,7 @@ $$
     \rho_{\mathrm{STE}}(E)=\sum_{r=1}^{R}\langle r|\delta(E-\hat{H})| r\rangle,  \quad\quad (9)  \label{eq9}
 $$
 
-with random vectors $|r\rangle=\sum_{i=1}^{D} \chi_{r, i}|i\rangle$. Here, $\{|i\rangle\}$ ($i=1,...,D$) are a complete basis set of the lattice model.
+with random vectors $|r\rangle=\sum_{i=1}^{D} \chi_{r, i}|i\rangle$. Here, $\{|i\rangle\}$ ($i=1,...,D$) are a complete orthonormal basis set of the lattice model (typically position kets).
 The random variables $\chi_{r,i}$ can be real- or complex-valued and fulfill "white noise" statistics:
 $\left\langle\left\langle\chi_{r, i}\right\rangle\right\rangle=0, \quad\left\langle\left\langle\chi_{r, i} \chi_{r^{\prime}, i^{\prime}}\right\rangle\right\rangle=0$ and $\left\langle\left\langle\chi_{r, i}^{*} \chi_{r^{\prime}, i^{\prime}}\right\rangle\right\rangle=\delta_{r, r^{\prime}} \delta_{i, i^{\prime}}$.
 The STE is extremely accurate for sparse matrices of large dimension (only a few random vectors are needed to converge to many decimal places),
@@ -160,14 +164,14 @@ The required number of random vectors, $R$, depends on sparsity of the Chebyshev
 For typical tight-binding problems, one has $Z \propto O(1)$. Thus, in the large system limit $(N \gg 1)$, a single random vector is often enough to achieve accuracy of 1% or better[^3].
 In fact, for sparse matrices, the STE relative error has the favorable scaling $1 / \sqrt{R N}$.
 On the other hand, the number of moments required to converge the expansion depends strongly on the desired resolution,
-$\eta$. As a rule of thumb, $M$ should not be smaller than a few times the linear dimension of the system $N^{1/D}$,
-where $D$ is the number of spatial dimensions, which then leads to:
+$\eta$. As a rule of thumb, $M$ should not be smaller than a few times the linear dimension of the system $N^{1/d}$,
+where $d$ is the number of spatial dimensions, which then leads to:
 
 $$
-    P_{\mathrm{DOS}} \propto N^{1+1 / D}, \text { for } N \gg 1,  \quad\quad (11)  \label{eq:11}
+    P_{\mathrm{DOS}} \propto N^{1+1 / d}, \text { for } N \gg 1,  \quad\quad (11)  \label{eq:11}
 $$
 
-allowing a significant reduction in computational time w.r.t. direct diagonalization techniques, especially in $D \geq 2$.
+allowing a significant reduction in computational time w.r.t. direct diagonalization techniques, especially in $d \geq 2$.
 
 [^1]: Chebyshev and Fourier spectral methods, John P. Boyd, [2nd Ed. Dover 5, New York (2001)](https://depts.washington.edu/ph506/Boyd.pdf).
 

@@ -79,8 +79,6 @@ pip3 install pybinding
     pip3 install git+https://github.com/BertJorissen/pybinding
     ```
 
-Alternatively, you might prefer to follow the instructions on the [Pybinding][pybinding] webpage.
-
 To construct the HDF5-files, KITE requires *h5py*: 
 
 ``` bash
@@ -89,22 +87,13 @@ pip3 install h5py
 
 ### 2.2 For Mac OS X users
 
-The installation of KITE's dependencies on Apple machines is slightly more evolved, mainly due to the need to enforce usage of the  correct C++ standard when compiling HDF5. We provide below a recipe that should work in all Apple machines, but users are encouraged to contact the KITE team shall they encounter any difficulties.  
+The installation of KITE's dependencies on Apple machines is slightly more evolved. We provide below a recipe that has been tested on some Mac OS X systems, but users are encouraged to contact the KITE team shall they encounter any difficulties.  
 
 The *Xcode* command-line tools from Apple Developer are required.  Install these using the terminal:
 
 ``` bash
 xcode-select --install
 ```
-
-
-!!! info
-
-    On machines from the *Apple Silicon lineup* (M1, M1Max, etc.) you may have to use the *Rosetta* translator while
-    a few remaining incompatibility issues are resolved.
-    *Rosetta* simulates an *Intel-x64* system and translates existing software for use with *Apple Silicon*.
-    
-    To load *Rosetta*, run `#!bash arch -x86_64 zsh` when starting a **new terminal**.
 
 KITE requires an open-source software package management system like [Homebrew][homebrew] or [MacPorts][ports]. We provide here step-by-step instructions for Homebrew (pointers for MacPorts users are given below). To install HomeBrew, run the following command in the terminal and follow the subsequent instructions provided by software:
 
@@ -217,19 +206,37 @@ It creates a file named *graphene_lattice-output.h5* that is used as an input fo
 ../build/KITEx graphene_lattice-output.h5
 ```
 
-This first example calculates the density of states (DOS) of pure graphene.
-To obtain the file with the DOS-data, you need to [post-process][kitetools] the output with a tool 
+This first example calculates the density of states (DOS) of pristine graphene.
+To obtain the file with the DOS-data, you need to [post-process][kitetools] the output with  
 
 ``` bash
 ../build/KITE-tools graphene_lattice-output.h5
 ```
 
-that generates the appropriata data file. For more details refer to the [tutorial][tutorial].
+which generates the appropriate data file. For more details refer to the [tutorial][tutorial].
+ 
 
-!!! info
+## 5. Common issues
 
-    The three command above were run from the `#!bash kite/examples/`-directory. If you didn't build [KITEx][kitex] or [KITE-tools][kitetools] in the
-    `#!bash kite/build/` and `#!bash kite/build/` directories respectively, the commands won't work.
+### 5.1 Finding Eigen3 with CMake
+
+If experiencing difficulties running `#!bash cmake..` due to CMake not being able to locate Eigen3, you may opt for the following solution. Extract [Eigen3][eigen3] from source and then run
+the following command from Eigen3's directory
+
+``` bash
+mkdir build
+cd build
+cmake ..
+make
+```
+You may now wish to try and re-compile KITEx and KITE-tools following the steps of Sec. 3.
+
+### 5.2 Apple Silicon (ARM) architecture 
+
+On machines from the *Apple Silicon lineup* (M1, M1Max, etc.) you may have to use the *Rosetta* translator if experiencing
+architecture compatibility issues. *Rosetta* simulates an *Intel-x64* system and translates existing software for use with *Apple Silicon*. 
+To load *Rosetta*, run `#!bash arch -x86_64 zsh` when starting a **new terminal**.
+
 
 [repository]: https://github.com/quantum-kite/kite
 [eigen3]: https://eigen.tuxfamily.org/
@@ -237,7 +244,7 @@ that generates the appropriata data file. For more details refer to the [tutoria
 [gcc]: https://gcc.gnu.org/
 [h5py]: https://www.h5py.org/
 [calculation-gaussian_wave_packet]: api/kite.md#calculation-gaussian_wave_packet
-[hdf5]: https://www.hdfgroup.org/
+[hdf5]: https://github.com/HDFGroup/
 [openmp]: https://gcc.gnu.org/onlinedocs/libgomp/
 [homebrew]: https://brew.sh/
 [ports]: https://www.macports.org 

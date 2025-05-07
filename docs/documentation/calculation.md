@@ -58,7 +58,7 @@ Other common parameters are:
 * `#!python num_random`
   : Defines the number of random vectors used in the stochastic trace evaluation.
 * `#!python num_disorder`
-  : Defines the number of disorder realizations (and automatically specifies the boundary twist angles if the `#!python "random"` boundary mode is chosen).
+  : Defines the number of disorder realizations (and automatically specifies the boundary twist angles if the `#!python "random"` boundary mode is chosen; see [Settings][settings]).
 
 Some functions also require the following parameters:
 
@@ -206,6 +206,7 @@ python plot_dos.py                # display the data
 [modifications]: index.md
 [disorder]: index.md
 [Examples]: examples/graphene.md
+[settings]: settings.md
 
 [configuration]: ../api/kite.md#configuration
 [configuration-divisions]: ../api/kite.md#configuration-divisions
