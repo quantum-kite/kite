@@ -214,11 +214,7 @@ To obtain the file with the DOS-data, you need to [post-process][kitetools] the 
 ```
 
 which generates the appropriate data file. For more details refer to the [tutorial][tutorial].
-
-!!! info
-
-    The three command above were run from the `#!bash kite/examples/`-directory. If you didn't build [KITEx][kitex] or [KITE-tools][kitetools] in the
-    `#!bash kite/build/` and `#!bash kite/build/` directories respectively, the commands won't work.
+ 
 
 ## 5. Common issues
 

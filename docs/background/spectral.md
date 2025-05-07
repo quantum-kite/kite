@@ -6,22 +6,18 @@ Among these, spectral methods have recently become popular  for enabling the rec
 exact fashion at a fraction of the computational cost of exact diagonalization methods.
 In the spectral approach, the quantity (target function) of interest is decomposed into a spectral series
 
-<span id="eq-1">
-
 $$
     f(x) \propto \sum\limits_{n=0}^\infty f_n P_n(x),\quad\quad   (1) \label{eq:1}
 $$
 
-</span>
-
 where $P_n(x)$ are orthogonal polynomials (basis functions) and $x$ is some argument like the Fermi energy or frequency.
 
-The elegance and power of spectral decompositions like Eq. [$(1)$](#eq-1) lie in the fact that the expansion moments $f_n$ can be obtained by means of
+The elegance and power of spectral decompositions like Eq. (1) lie in the fact that the expansion moments $f_n$ can be obtained by means of
 a highly-efficient and stable recursive scheme. Once these moments are determined (to some desired precision), the target function $f(x)$ can be easily and quickly reconstructed over the desired range of $x$. 
 
 Consider, for example, the Chebyshev polynomials of the first kind:
 
-<span id="eq-2">
+<span id="eq-1">
 
 $$
     T_0(x) = 1, T_1(x) = x, T_2(x) = 2x^2 − 1, ..., T_{n+1}(x) = 2xT_n(x) − T_{n−1}(x), \quad x \in [−1:1] \equiv \mathcal{L}, \quad\quad  (2) \label{eq:2}
@@ -33,25 +29,17 @@ which are widely used basis functions to approximate generic (non-periodic) func
 finite intervals given their unique convergence properties and intimate relation to the Fourier transform[^1].
 It is easy to verify that the Chebyshev polynomials of first kind satisfy the orthogonality relations:
 
-<span id="eq-3">
-
 $$
     \int_{\mathcal{L}} dx \omega(x) T_n(x) T_m(x) = \dfrac{1 + \delta_{n,0}}{2} \delta_{n,m}, \quad \text{with } \omega(x) = \dfrac{1}{\pi \sqrt{1 - x^2}}, \quad\quad (3) \label{eq:3}
 $$
 
-</span>
-
 and thus form a complete set on $\mathcal{L}$. 
 
-The orthogonality relations [$(3)$](#eq-3) allow one to define the numerically convenient spectral decomposition
-
-<span id="eq-4">
+The orthogonality relations [$(3)$][eq-3] allow one to define the numerically convenient spectral decomposition
 
 $$
 f(x)=\omega(x)\sum\limits_{n=0}^\infty \frac{2 \mu_n}{1+ \delta_n} T_n(x)\ , \quad\quad (4) \label{eq:4}
 $$
-
-</span>
 
 where $\mu_n$ are the so-called Chebyshev moments defined as the overlaps $\mu_n = \int_\mathcal{L} dx f(x) T_n(x)$.
 
@@ -59,18 +47,14 @@ The extension of these concepts to operators (matrices) allows full quantum-mech
 bypassing direct diagonalization.
 For example, the Chebyshev expansion of the familiar spectral operator, $\delta(E−\hat{H})$, at the heart of many calculations in condensed matter physics is given by[^2]:
 
-<span id="eq-5">
-
 $$
     \delta(E-\hat{H})=\frac{1}{\pi \sqrt{1-E^{2}}} \sum_{n=0}^{\infty} \frac{2}{1+\delta_{n, 0}} T_{n}(E) \mathcal{T}_{n}(\hat{H})\ , \quad\quad (5) \label{eq:5}
 $$
 
-</span>
-
 where $||\hat{H}|| \leq 1$ has been re-scaled to guarantee that its spectrum falls into the spectral interval $E \in [−1:1]$.
 In the above, the operators $T_n(\hat{H})$ are defined by the matrix version of the standard Chebyshev recursion relations
 
-<span id="eq-6">
+<span id="eq-2">
 
 $$
     \mathcal{T}_{0}=1, \quad \mathcal{T}_{1}(\hat{H})=\hat{H}, 
@@ -79,24 +63,24 @@ $$
 
 </span>
 
-A spectral decomposition into Chebyshev polynomials [$(4)$](#eq-4) allows straightforward determination of several important quantities, for example, the density of states (DOS):
-
-<span id="eq-7">
+A spectral decomposition into Chebyshev polynomials [$(4)$][eq-4] allows straightforward determination of several important quantities, for example, the density of states (DOS):
 
 $$
     \rho(E) \equiv \frac{1}{D} \operatorname{Tr} \delta(E-\hat{H}) \simeq \frac{1}{\pi \sqrt{1-E^{2}}} \sum_{n=0}^{M-1} \mu_{n} T_{n}(E), \quad\quad (7)  \label{eq:7}
 $$
 
-</span>
-
 where $M$ is the Chebyshev (truncation) order that controls the accuracy of the spectral expansion (see below). 
-Clearly, the knowledge of the Chebyshev moments allows to reconstruct the DOS over any desired grid of energies (the post-processing stage).
+The Chebyshev moments are easily seen to be determined by traces of the matrix Chebyshev operators according to $\mu_{n}=\text{Tr}\,[T_{n}(\hat{H})]/\chi_{n}$ with $\chi_n=[D\left(1+\delta_{n, 0}\right)] / 2$.
+Clearly, the knowledge of the Chebyshev moments,  $\{\mu_n\}$ ($n=0,1,...$), allows one to reconstruct the DOS over any desired grid of energies (the so-called post-processing stage).
 
-How does one efficiently compute $\{\mu_n\}({n=0,...,M-1})$? The Chebyshev moments $\mu_{n}=\operatorname{Tr} T_{n}(\hat{H}) /\left[D\left(1+\delta_{n, 0}\right) / 2\right]$ are typically evaluated recursively in two steps (note that $\mu_0=1$
-by definition).
-First, a series of matrix-vector multiplications is carried out to construct the Chebyshev matrix polynomials using Eq. [$(6)$](#eq-6). The iteration process usually starts with the application of $\mathcal{T}_{1}(\hat{H})=\hat{H}$ onto some basis ket (or a random vector, see below) 
-$|r_1\rangle$, yielding $\hat{H} |r_1\rangle= |\tilde r_1 \rangle$. This then allows one to compute the first non-trivial Chebyshev moment, $\mu_1$, as detailed below.
-The process is iterated via [$(6)$](#eq-6)  to compute subsequent moments, $\mu_2$,  $\mu_3$, etc. 
+How does one efficiently compute $\{\mu_n\}$? 
+
+Chebyshev moments are typically evaluated recursively in two steps (note that $\mu_0=1$ by definition).
+First, a series of matrix-vector multiplications is carried out to construct the Chebyshev matrix polynomials using Eq. [$(6)$][eq-6]. 
+The iteration process usually starts with the application of $\mathcal{T}_{1}(\hat{H})=\hat{H}$ onto some basis ket (or a random vector, see below) 
+$|r_1\rangle$, yielding $\hat{H} |r_1\rangle= |\tilde r_1 \rangle$. 
+This then allows one to compute the first non-trivial Chebyshev moment, $\mu_1$, as detailed below.
+The process is iterated via [$(6)$][eq-6]  to compute subsequent moments, $\mu_2$,  $\mu_3$, etc. 
 In practice, the iterative procedure is stopped once the desired
 energy resolution has been achieved, and, as such, for some problems, the number of Chebyshev moments $M$ required can be quite large.
 
@@ -105,7 +89,7 @@ energy resolution has been achieved, and, as such, for some problems, the number
 For typical sparse Hamiltonian matrices, 
 the algorithmic complexity of each Chebyshev step scales favourably as $Z \times D$, with $Z$ the lattice coordination.
 Efficient numerical implementations of the spectral method, such as KITE, evaluate these moments "on-the-fly" exploiting both the sparseness of real-space lattice models and the
-stability of the Chebyshev recursive procedure [$(1)$](#eq-1) (which does not suffer from loss of orthogonality or other numerical instabilities commonly found in other iterative methods). 
+stability of the Chebyshev recursive procedure [$(1)$][eq-1] (which does not suffer from loss of orthogonality or other numerical instabilities commonly found in other iterative methods). 
 Moreover, Chebyshev expansions enjoy from uniform resolution due to errors being distributed uniformly on $\mathcal{L}$[^1].
 In principle, the spectral resolution is only limited by the number of moments retained in the expansion.
 As a rule of thumb, the resolution is inversely proportional to the number of moments used. For functions of $E$ (like the DOS), this results into
@@ -125,14 +109,10 @@ and thus has been employed to damp Gibbs oscillations in spectral decomposition 
 A powerful alternative is given by the Chebyshev polynomial Green's function (CPGF) method[^3],
 which is based on the following exact spectral decomposition of the lattice resolvent operator:
 
-<span id="eq-8">
-
 $$
     \hat{\mathcal{G}}(E+i \eta)=\sum_{n=0}^{\infty} g_{n}(E+i \eta) \mathcal{T}_{n}(\hat{H}), 
-    \quad \text { with } g_{n}(z) \equiv \frac{2 i^{-1}}{1+\delta_{n, 0}} \frac{\left(z-i \sqrt{1-z^{2}}\right)^{n}}{\sqrt{1-z^{2}}}.  \quad\quad (8)  \label{eq:8}
+\quad \text { with } g_{n}(z) \equiv \frac{2 i^{-1}}{1+\delta_{n, 0}} \frac{\left(z-i \sqrt{1-z^{2}}\right)^{n}}{\sqrt{1-z^{2}}}.  \quad\quad (8)  \label{eq:8}
 $$
-
-</span>
 
 Differently from the KPM, the spectral coefficients now depend on the energy. The energy resolution $\eta$ also enters directly into these
 coefficients, which allows to set the target resolution from the outset of the calculation. 
@@ -165,13 +145,9 @@ simulations of Kubo formulas, have paved the way to yet larger systems and finer
 
 To speed up the evaluation of the $n$-body trace operation $\operatorname{Tr}\{T_n(\hat{H})...T_m(\hat{H})\}$ (in the DOS example above, $\operatorname{Tr}\{T_n(\hat{H})\}$), KITE implements the stochastic trace evaluation technique (STE)[^2]:
 
-<span id="eq-9">
-
 $$
     \rho_{\mathrm{STE}}(E)=\sum_{r=1}^{R}\langle r|\delta(E-\hat{H})| r\rangle,  \quad\quad (9)  \label{eq9}
 $$
-
-</span>
 
 with random vectors $|r\rangle=\sum_{i=1}^{D} \chi_{r, i}|i\rangle$. Here, $\{|i\rangle\}$ ($i=1,...,D$) are a complete orthonormal basis set of the lattice model (typically position kets).
 The random variables $\chi_{r,i}$ can be real- or complex-valued and fulfill "white noise" statistics:
@@ -180,13 +156,9 @@ The STE is extremely accurate for sparse matrices of large dimension (only a few
 which allows substantial savings in computational time.
 For example, the evaluation of Chebyshev moments of the DOS function for a tight-binding model (where $D=N$, where $N$ is the total number of orbitals or sites in the lattice) requires a total number of operations scaling as
 
-<span id="eq-10">
-
 $$
     P_\text{DOS} = Z \times N \times M \times R.  \quad\quad (10)  \label{eq:10}
 $$
-
-</span>
 
 The required number of random vectors, $R$, depends on sparsity of the Chebyshev polynomial matrices $T_n(\hat{H})$.
 For typical tight-binding problems, one has $Z \propto O(1)$. Thus, in the large system limit $(N \gg 1)$, a single random vector is often enough to achieve accuracy of 1% or better[^3].
@@ -195,13 +167,9 @@ On the other hand, the number of moments required to converge the expansion depe
 $\eta$. As a rule of thumb, $M$ should not be smaller than a few times the linear dimension of the system $N^{1/d}$,
 where $d$ is the number of spatial dimensions, which then leads to:
 
-<span id="eq-11">
-
 $$
     P_{\mathrm{DOS}} \propto N^{1+1 / d}, \text { for } N \gg 1,  \quad\quad (11)  \label{eq:11}
 $$
-
-</span>
 
 allowing a significant reduction in computational time w.r.t. direct diagonalization techniques, especially in $d \geq 2$.
 
@@ -218,3 +186,15 @@ allowing a significant reduction in computational time w.r.t. direct diagonaliza
 [^6]: High-resolution real-space evaluation of the self-energy operator of disordered lattices: Gade singularity, spin–orbit effects and p-wave superconductivity, S M João, J. M. Viana Parente Lopes, and A. Ferreira, [J. Phys. Mater. 5 045002 (2022)](https://iopscience.iop.org/article/10.1088/2515-7639/ac91f9).
 
 [^7]: Fast Fourier-Chebyshev approach to real-space simulations of the Kubo Formula, S. G. de Castro, J. M. V. P. Lopes, A. Ferreira, and D. A. Bahamon, [Phys. Rev. Lett. **132**, 076302  (2024)](https://doi.org/10.1103/PhysRevLett.132.076302)
+
+[eq-1]: #eq-1
+[eq-2]: #eq-2
+[eq-3]: #eq-3
+[eq-4]: #eq-4
+[eq-5]: #eq-5
+[eq-6]: #eq-6
+[eq-7]: #eq-7
+[eq-8]: #eq-8
+[eq-9]: #eq-9
+[eq-10]: #eq-10
+[eq-11]: #eq-11

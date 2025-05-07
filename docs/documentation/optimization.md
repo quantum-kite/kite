@@ -62,13 +62,13 @@ $$
 
 : For these functions, analytical forms of the Chebyshev expansion coefficients are known[^2][^3][^4][^5][^6][^7] and used in KITE. In the user interface, the truncation order $M$ is specified by the parameter `#!python num_moments`, and always impacts the validity of the expanded results. Nevertheless, its precise effect depends crucially on the specific case, as shown in the Figure below. In particular, one has the following cases:
 
-## Dirac-$\delta$ Function
+## Dirac-delta Function
 
 : An order-$M$ expansion (regularized by the Jackson kernel) produces a Gaussian approximation of $\delta(\lambda\!-\!\mathcal{H})$ endowed by a width $\sigma_{\lambda}\!\approx\!\delta \varepsilon\,\pi/M$ in $\lambda$[^2][^7]. The choice of $M$ then fixes the effective spectral broadening, $\sigma_{\lambda}$, which must be sufficiently narrow to accurately describe all relevant features of the calculated property. However, if it becomes too narrow ($M$ too high), the discrete eigenvalues of the SPH are well-resolved and the obtained data start suffering from large (finite-size) fluctuations. For information on other available kernels see Weisse *et al.*[^2].
 
     !!! Info "Rule of Thumb"
 
-        If $\Delta\varepsilon$ is the mean-level spacing of the simulated system (that depends on the system size), then $M$ must be kept **smaller than** $\frac{\pi\,\delta\varepsilon}{\Delta\varepsilon}$ in order to avoid resolving individual energy levels. Simultaneously, for obtaining high-resolution results, the arificial broadening much remain much smaller than the total bandwidth, *i.e.*, $M\gg \pi\,\delta\varepsilon$.
+        If $\Delta\varepsilon$ is the mean-level spacing of the simulated system (that depends on the system size), then $M$ must be kept **smaller than** $\frac{\pi\,\delta\varepsilon}{\Delta\varepsilon}$ in order to avoid resolving individual energy levels. Simultaneously, for obtaining high-resolution results, the arificial broadening much remain much smaller than the total bandwidth.
 
 ## Single-Particle Green's Functions
 
@@ -76,7 +76,7 @@ $$
 
     !!! Info "Rule of Thumb"
 
-        Since the energy resolution is fixed by $\eta$, the number of polynomials must be larger enough to resolve such a broadening. As shown below, in Figure (b), an apt rule of thumb is to have $M\gtrsim 100/\eta$.
+        Since the energy resolution is fixed by $\eta$, the number of polynomials must be larger enough to resolve such a broadening. As shown below, in Figure (b), an apt rule of thumb is to have $M \gtrsim 10*\delta \varepsilon / \eta$.
 
 ## Quantum Time-Evolution Operators
 
