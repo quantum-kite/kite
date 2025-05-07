@@ -144,14 +144,17 @@ struc_disorder.add_vacancy('B') # add a vacancy to a selected sublattice
     disorder_structural = [struc_disorder_A, struc_disorder_B]
     ```
 
-### Example 2: mixed on-site/bond disorder
+### Example 2: Mixed on-site/bond disorder
 
 
 The following example illustrates KITE's most general type of short-range disorder, which includes both atomic defects (vacancies)
 and bond modifications.
 This type of disorder can be added as an object of the class [`#!python kite.StructuralDisorder`][structural_disorder].
 The procedure is analogous to adding a hopping term to the
-[Pybinding lattice object][lattice].
+[Pybinding lattice object][lattice]. This functionality is rather general and hence allows users to define bespoke local modifications to their lattice models,
+while benefiting from KITE's efficient domain decomposition approach. However, [KITEx][kitex] assumes by default that
+any extra hoppings due to defects/impurities are of nearest or next-nearest neighbor type, as in the example below. To relax this constraint, the users must adjust
+the NGHOSTS parameter in `#!bash kite/Src/Generic.hpp` and recompile [KITEx][kitex], otherwise an error message is output and the KITE program exits. 
 
 For the sake of clarity, let us first define sublattices that will compose the disorder.
 In this case we are not restricted to a single unit cell:
