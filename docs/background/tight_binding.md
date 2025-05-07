@@ -24,22 +24,22 @@ and adding auxiliary sites. Such a multi-scale approach has proven very successf
 moiré patterns[^7], complex interactions induced by ad-atoms[^8], optical conductivity of disordered 2D materials[^9], and geometrical properties, vibrational frequencies and interactions of large molecular systems[^10].
 
 
-[^1]: Simplified LCAO Method for the Periodic Potential Problem, J. C. Slater and G. F. Koster, [Phys. Rev. 94, 1498 (1954)](https://journals.aps.org/pr/abstract/10.1103/PhysRev.94.1498).
+[^1]: Simplified LCAO Method for the Periodic Potential Problem, J. C. Slater and G. F. Koster, [Phys. Rev. 94, 1498 (1954)](https://journals.aps.org/pr/abstract/10.1103/PhysRev.94.1498)
 
-[^2]: Elementary prediction of linear combination of atomic orbitals matrix elements, S. Froyen and W.A. Harrison, [Phys. Rev. B 20, 2420 (1979)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.20.2420).
+[^2]: Elementary prediction of linear combination of atomic orbitals matrix elements, S. Froyen and W.A. Harrison, [Phys. Rev. B 20, 2420 (1979)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.20.2420)
 
-[^3]: Tight-binding modelling of materials, C. M. Goringe, D. R. Bowler, and E. Hernández, [Rep. Prog. Phys. 60, 1447 (1997)](https://iopscience.iop.org/article/10.1088/0034-4885/60/12/001/pdf).
+[^3]: Tight-binding modelling of materials, C. M. Goringe, D. R. Bowler, and E. Hernández, [Rep. Prog. Phys. 60, 1447 (1997)](https://iopscience.iop.org/article/10.1088/0034-4885/60/12/001/pdf)
 
-[^4]: The Slater–Koster tight-binding method: a computationally efficient and accurate approach, D. A. Papaconstantopoulos and M. J. Mehl, [Journal of Physics: Condensed Matter 15, R413 (2003)](https://iopscience.iop.org/article/10.1088/0953-8984/15/10/201).
+[^4]: The Slater–Koster tight-binding method: a computationally efficient and accurate approach, D. A. Papaconstantopoulos and M. J. Mehl, [Journal of Physics: Condensed Matter 15, R413 (2003)](https://iopscience.iop.org/article/10.1088/0953-8984/15/10/201)
 
-[^5]: Resonant scattering by realistic impurities in graphene, T. O. Wehling et al. [Phys. Rev. Lett. 105, 056802 (2010)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.105.056802). 
+[^5]: Resonant scattering by realistic impurities in graphene, T. O. Wehling et al. [Phys. Rev. Lett. 105, 056802 (2010)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.105.056802)
 
-[^6]: Unified description of the dc conductivity of monolayer and bilayer graphene at finite densities based on resonant scatterers, A. Ferreira et al., [Phys. Rev. B 83, 165402 (2011)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.83.165402).
+[^6]: Unified description of the dc conductivity of monolayer and bilayer graphene at finite densities based on resonant scatterers, A. Ferreira et al., [Phys. Rev. B 83, 165402 (2011)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.83.165402)
 
-[^7]: Ab initio theory of moiré superlattice bands in layered two-dimensional materials, J. Jung, A. Raoux, Z. Qiao, and A. H. MacDonald, [Phys. Rev. B 89, 205414 (2014)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.89.205414).
+[^7]: Ab initio theory of moiré superlattice bands in layered two-dimensional materials, J. Jung, A. Raoux, Z. Qiao, and A. H. MacDonald, [Phys. Rev. B 89, 205414 (2014)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.89.205414)
 
-[^8]: Impact of complex adatom-induced interactions on quantum spin Hall phases. F. J. dos Santos et al., [Phys. Rev. B 98, 081407(R) (2018)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.98.081407).
+[^8]: Impact of complex adatom-induced interactions on quantum spin Hall phases. F. J. dos Santos et al., [Phys. Rev. B 98, 081407(R) (2018)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.98.081407)
 
-[^9]: Numerical calculation of the Casimir-Polder interaction between a graphene sheet with vacancies and an atom. T. Cysne et al., [Phys. Rev. B 94, 235405 (2016)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.94.235405).
+[^9]: Numerical calculation of the Casimir-Polder interaction between a graphene sheet with vacancies and an atom. T. Cysne et al., [Phys. Rev. B 94, 235405 (2016)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.94.235405)
 
-[^10]: A Robust and Accurate Tight-Binding Quantum Chemical Method for Structures, Vibrational Frequencies, and Noncovalent Interactions of Large Molecular Systems Parametrized for All spd-Block Elements (Z = 1−86), S. Grimme , C. Bannwarth, and P. Shushkov, [J. Chem. Theory Comput., 13 , 1989 (2017)](https://pubs.acs.org/doi/full/10.1021/acs.jctc.7b00118).
+[^10]: A Robust and Accurate Tight-Binding Quantum Chemical Method for Structures, Vibrational Frequencies, and Noncovalent Interactions of Large Molecular Systems Parametrized for All spd-Block Elements (Z = 1−86), S. Grimme , C. Bannwarth, and P. Shushkov, [J. Chem. Theory Comput., 13 , 1989 (2017)](https://pubs.acs.org/doi/full/10.1021/acs.jctc.7b00118)
