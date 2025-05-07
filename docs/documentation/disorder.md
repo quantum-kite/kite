@@ -151,12 +151,15 @@ The following example illustrates KITE's most general type of short-range disord
 and bond modifications.
 This type of disorder can be added as an object of the class [`#!python kite.StructuralDisorder`][structural_disorder].
 The procedure is analogous to adding a hopping term to the
-[Pybinding lattice object][lattice]. This functionality is rather general and hence allows users to define bespoke local modifications to their lattice models,
-while benefiting from KITE's efficient domain decomposition approach. However, [KITEx][kitex] assumes by default that
-any extra hoppings due to defects/impurities are of nearest or next-nearest neighbor type, as in the example below. To relax this constraint, the users must adjust
+[Pybinding lattice object][lattice]. 
+
+An important remark is in order. KITE's structural disorder functionality is rather general and allows users to create bespoke disorder landscapes for their simulations,
+while benefiting from KITE's efficient domain decomposition algorithm. However, as mentioned in [Sec. 2 - Lattice][tutorial-lattice], it is assumed by default that all hopping terms in the model
+connect sites that belong to either the same unit cell or neighboring cells that are separated by at most 2 lattice spacings along a given direction. This applies equally to the disorder patterns
+as they are an inherent part of the lattice model. To relax this constraint, the users must adjust 
 the NGHOSTS parameter in `#!bash kite/Src/Generic.hpp` and recompile [KITEx][kitex], otherwise an error message is output and the KITE program exits. 
 
-For the sake of clarity, let us first define sublattices that will compose the disorder.
+For the sake of clarity, let us first define sublattices that will compose the disorder pattern in our example.
 In this case we are not restricted to a single unit cell:
 
 ``` python

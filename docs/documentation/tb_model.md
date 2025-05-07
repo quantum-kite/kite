@@ -3,6 +3,10 @@ Thus, we will being by constructing a periodic [`#!python pb.Lattice`][lattice] 
 and calculate its band structure using [`#!python pb.Solver`][lattice] (also from [Pybinding]). 
 In the following sections, we will then see how to use [KITEx][kitex] to both being able to significantly scale up the simulations and make interesting modifications to the lattice model. 
 
+For efficiency, the default options of KITE's core code ([KITEx][kitex]) assume that the lattice model has a certain degree of interconnectivity or hopping range. 
+Specifically, the default is that the tight-binding Hamiltonian has non-zero matrix elements between orbitals that belong to unit cells 
+that are separated by at most 2 lattice spacings along a given direction (for example, in a simple single-orbital 1D chain this would allow defining models
+with up to second-nearest neighbors). To relax this constraint and thus be able to simulate more complex lattice models, users must adjust the NGHOSTS parameter in `#!bash kite/Src/Generic.hpp` and recompile [KITEx][kitex], otherwise an error message is output and the KITE program exits.
 
 !!! Info
 
