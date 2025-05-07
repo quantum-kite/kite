@@ -6,18 +6,22 @@ Among these, spectral methods have recently become popular  for enabling the rec
 exact fashion at a fraction of the computational cost of exact diagonalization methods.
 In the spectral approach, the quantity (target function) of interest is decomposed into a spectral series
 
+<span id="eq-1">
+
 $$
     f(x) \propto \sum\limits_{n=0}^\infty f_n P_n(x),\quad\quad   (1) \label{eq:1}
 $$
 
+</span>
+
 where $P_n(x)$ are orthogonal polynomials (basis functions) and $x$ is some argument like the Fermi energy or frequency.
 
-The elegance and power of spectral decompositions like Eq. (1) lie in the fact that the expansion moments $f_n$ can be obtained by means of
+The elegance and power of spectral decompositions like Eq. [$(1)$][eq-1] lie in the fact that the expansion moments $f_n$ can be obtained by means of
 a highly-efficient and stable recursive scheme. Once these moments are determined (to some desired precision), the target function $f(x)$ can be easily and quickly reconstructed over the desired range of $x$. 
 
 Consider, for example, the Chebyshev polynomials of the first kind:
 
-<span id="eq-1">
+<span id="eq-2">
 
 $$
     T_0(x) = 1, T_1(x) = x, T_2(x) = 2x^2 − 1, ..., T_{n+1}(x) = 2xT_n(x) − T_{n−1}(x), \quad x \in [−1:1] \equiv \mathcal{L}, \quad\quad  (2) \label{eq:2}
@@ -29,17 +33,25 @@ which are widely used basis functions to approximate generic (non-periodic) func
 finite intervals given their unique convergence properties and intimate relation to the Fourier transform[^1].
 It is easy to verify that the Chebyshev polynomials of first kind satisfy the orthogonality relations:
 
+<span id="eq-3">
+
 $$
     \int_{\mathcal{L}} dx \omega(x) T_n(x) T_m(x) = \dfrac{1 + \delta_{n,0}}{2} \delta_{n,m}, \quad \text{with } \omega(x) = \dfrac{1}{\pi \sqrt{1 - x^2}}, \quad\quad (3) \label{eq:3}
 $$
+
+</span>
 
 and thus form a complete set on $\mathcal{L}$. 
 
 The orthogonality relations [$(3)$][eq-3] allow one to define the numerically convenient spectral decomposition
 
+<span id="eq-4">
+
 $$
 f(x)=\omega(x)\sum\limits_{n=0}^\infty \frac{2 \mu_n}{1+ \delta_n} T_n(x)\ , \quad\quad (4) \label{eq:4}
 $$
+
+</span>
 
 where $\mu_n$ are the so-called Chebyshev moments defined as the overlaps $\mu_n = \int_\mathcal{L} dx f(x) T_n(x)$.
 
@@ -47,14 +59,18 @@ The extension of these concepts to operators (matrices) allows full quantum-mech
 bypassing direct diagonalization.
 For example, the Chebyshev expansion of the familiar spectral operator, $\delta(E−\hat{H})$, at the heart of many calculations in condensed matter physics is given by[^2]:
 
+<span id="eq-5">
+
 $$
     \delta(E-\hat{H})=\frac{1}{\pi \sqrt{1-E^{2}}} \sum_{n=0}^{\infty} \frac{2}{1+\delta_{n, 0}} T_{n}(E) \mathcal{T}_{n}(\hat{H})\ , \quad\quad (5) \label{eq:5}
 $$
 
+</span>
+
 where $||\hat{H}|| \leq 1$ has been re-scaled to guarantee that its spectrum falls into the spectral interval $E \in [−1:1]$.
 In the above, the operators $T_n(\hat{H})$ are defined by the matrix version of the standard Chebyshev recursion relations
 
-<span id="eq-2">
+<span id="eq-6">
 
 $$
     \mathcal{T}_{0}=1, \quad \mathcal{T}_{1}(\hat{H})=\hat{H}, 
@@ -65,9 +81,13 @@ $$
 
 A spectral decomposition into Chebyshev polynomials [$(4)$][eq-4] allows straightforward determination of several important quantities, for example, the density of states (DOS):
 
+<span id="eq-7">
+
 $$
     \rho(E) \equiv \frac{1}{D} \operatorname{Tr} \delta(E-\hat{H}) \simeq \frac{1}{\pi \sqrt{1-E^{2}}} \sum_{n=0}^{M-1} \mu_{n} T_{n}(E), \quad\quad (7)  \label{eq:7}
 $$
+
+</span>
 
 where $M$ is the Chebyshev (truncation) order that controls the accuracy of the spectral expansion (see below). 
 The Chebyshev moments are easily seen to be determined by traces of the matrix Chebyshev operators according to $\mu_{n}=\text{Tr}\,[T_{n}(\hat{H})]/\chi_{n}$ with $\chi_n=[D\left(1+\delta_{n, 0}\right)] / 2$.
@@ -109,10 +129,14 @@ and thus has been employed to damp Gibbs oscillations in spectral decomposition 
 A powerful alternative is given by the Chebyshev polynomial Green's function (CPGF) method[^3],
 which is based on the following exact spectral decomposition of the lattice resolvent operator:
 
+<span id="eq-8">
+
 $$
     \hat{\mathcal{G}}(E+i \eta)=\sum_{n=0}^{\infty} g_{n}(E+i \eta) \mathcal{T}_{n}(\hat{H}), 
-\quad \text { with } g_{n}(z) \equiv \frac{2 i^{-1}}{1+\delta_{n, 0}} \frac{\left(z-i \sqrt{1-z^{2}}\right)^{n}}{\sqrt{1-z^{2}}}.  \quad\quad (8)  \label{eq:8}
+    \quad \text { with } g_{n}(z) \equiv \frac{2 i^{-1}}{1+\delta_{n, 0}} \frac{\left(z-i \sqrt{1-z^{2}}\right)^{n}}{\sqrt{1-z^{2}}}.  \quad\quad (8)  \label{eq:8}
 $$
+
+</span>
 
 Differently from the KPM, the spectral coefficients now depend on the energy. The energy resolution $\eta$ also enters directly into these
 coefficients, which allows to set the target resolution from the outset of the calculation. 
@@ -145,9 +169,13 @@ simulations of Kubo formulas, have paved the way to yet larger systems and finer
 
 To speed up the evaluation of the $n$-body trace operation $\operatorname{Tr}\{T_n(\hat{H})...T_m(\hat{H})\}$ (in the DOS example above, $\operatorname{Tr}\{T_n(\hat{H})\}$), KITE implements the stochastic trace evaluation technique (STE)[^2]:
 
+<span id="eq-9">
+
 $$
     \rho_{\mathrm{STE}}(E)=\sum_{r=1}^{R}\langle r|\delta(E-\hat{H})| r\rangle,  \quad\quad (9)  \label{eq9}
 $$
+
+</span>
 
 with random vectors $|r\rangle=\sum_{i=1}^{D} \chi_{r, i}|i\rangle$. Here, $\{|i\rangle\}$ ($i=1,...,D$) are a complete orthonormal basis set of the lattice model (typically position kets).
 The random variables $\chi_{r,i}$ can be real- or complex-valued and fulfill "white noise" statistics:
@@ -156,9 +184,13 @@ The STE is extremely accurate for sparse matrices of large dimension (only a few
 which allows substantial savings in computational time.
 For example, the evaluation of Chebyshev moments of the DOS function for a tight-binding model (where $D=N$, where $N$ is the total number of orbitals or sites in the lattice) requires a total number of operations scaling as
 
+<span id="eq-10">
+
 $$
     P_\text{DOS} = Z \times N \times M \times R.  \quad\quad (10)  \label{eq:10}
 $$
+
+</span>
 
 The required number of random vectors, $R$, depends on sparsity of the Chebyshev polynomial matrices $T_n(\hat{H})$.
 For typical tight-binding problems, one has $Z \propto O(1)$. Thus, in the large system limit $(N \gg 1)$, a single random vector is often enough to achieve accuracy of 1% or better[^3].
@@ -167,9 +199,13 @@ On the other hand, the number of moments required to converge the expansion depe
 $\eta$. As a rule of thumb, $M$ should not be smaller than a few times the linear dimension of the system $N^{1/d}$,
 where $d$ is the number of spatial dimensions, which then leads to:
 
+<span id="eq-11">
+
 $$
     P_{\mathrm{DOS}} \propto N^{1+1 / d}, \text { for } N \gg 1,  \quad\quad (11)  \label{eq:11}
 $$
+
+</span>
 
 allowing a significant reduction in computational time w.r.t. direct diagonalization techniques, especially in $d \geq 2$.
 
