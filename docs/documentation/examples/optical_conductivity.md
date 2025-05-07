@@ -42,10 +42,10 @@ Export the KITE model and run [Kitex][kitex] as costumary.
 The post-processing step is similar to that of other examples (see [post-processing tools documentation](../postprocessing.md)). For example, you may run
 
 ``` bash
-./build/KITE-tools name_of_IO_file_here.h5 --CondOpt -F 2.5 -T 0.025 -S 0.01 -O 0.1 12
+./build/KITE-tools name_of_IO_file_here.h5 --CondOpt -F 2.5 -T 0.025 -S 0.01 -O 0.1 12 250
 ```
 
-which selects a Fermi energy of `2.5` eV, a temperature of  `25` meV, an energy resolution of `10` meV and a frequency range of `[0.1:12]` eV.
+which outputs the complex optical conductivity in a uniform grid with $250$ points covering the frequency range `[0.1:12]` eV for a Fermi energy of `2.5` eV and a temperature of  `25` meV. The requested energy resolution is set to `10` meV.
 
 ### Visualization
 The results of the real and imaginary parts of the optical conductivity presented in the first figure were obtained on a normal desktop with calculations that took 8 minutes for a system with `N=512 x 512` units cells  and a total of `512 x 512` expansion moments (`#!python num_moments=512`).
@@ -56,7 +56,7 @@ For systems sizes of `N=1536 x 1536` unit cells and two different Gaussian width
 
 ![optcond_Re](../../assets/images/optical_conductivity/optcond_Re.png)
 
-The complete python script for this calculation can be found [here](https://gist.github.com/quantum-kite/bab11b55ad6672f59f15a85aac800a3a).
+The complete python script for this calculation can be found [here](https://github.com/quantum-kite/kite/blob/65ad6aa84c6c735e4a23d2ffa9a8cb5ba36a70f9/examples/dos_optcond_gaussian_disorder.py).
 
 
 [^1]: Shengjun Yuan, Rafael Roldán, Hans De Raedt, Mikhail I. Katsnelson, [Phys. Rev. B **84**, 195418 (2011)](https://link.aps.org/doi/10.1103/PhysRevB.84.195418)
