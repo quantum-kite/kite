@@ -68,7 +68,7 @@ $$
 
     !!! Info "Rule of Thumb"
 
-        If $\Delta\varepsilon$ is the mean-level spacing of the simulated system (that depends on the system size), then $M$ must be kept **smaller than** $\frac{\pi\,\delta\varepsilon}{\Delta\varepsilon}$ in order to avoid resolving individual energy levels. Simultaneously, for obtaining high-resolution results, the arificial broadening much remain much smaller than the total bandwidth, *i.e.*, $M\gg \pi\,\delta\varepsilon$.
+        If $\Delta\varepsilon$ is the mean-level spacing of the simulated system (that depends on the system size), then $M$ must be kept **smaller than** $\frac{\pi\,\delta\varepsilon}{\Delta\varepsilon}$ in order to avoid resolving individual energy levels. Simultaneously, for obtaining high-resolution results, the arificial broadening much remain much smaller than the total bandwidth.
 
 ## Single-Particle Green's Functions
 
@@ -76,7 +76,7 @@ $$
 
     !!! Info "Rule of Thumb"
 
-        Since the energy resolution is fixed by $\eta$, the number of polynomials must be larger enough to resolve such a broadening. As shown below, in Figure (b), an apt rule of thumb is to have $M\gtrsim 100/\eta$.
+        Since the energy resolution is fixed by $\eta$, the number of polynomials must be larger enough to resolve such a broadening. As shown below, in Figure (b), an apt rule of thumb is to have $M \gtrsim 10*\delta \varepsilon / \eta$.
 
 ## Quantum Time-Evolution Operators
 

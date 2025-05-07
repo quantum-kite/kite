@@ -70,10 +70,10 @@ $$
 $$
 
 where $M$ is the Chebyshev (truncation) order that controls the accuracy of the spectral expansion (see below). 
-Clearly, the knowledge of the Chebyshev moments allows to reconstruct the DOS over any desired grid of energies (the post-processing stage).
+The Chebyshev moments are easily seen to be determined by traces of the matrix Chebyshev operators according to $\mu_{n}=\operatorname{Tr} T_{n}(\hat{H}) /\left[D\left(1+\delta_{n, 0}\right) / 2\right]$.
+Clearly, the knowledge of the Chebyshev moments,  $\{\mu_n\}$, allows one to reconstruct the DOS over any desired grid of energies (the post-processing stage).
 
-How does one efficiently compute $\{\mu_n\}({n=0,...,M-1})$? The Chebyshev moments $\mu_{n}=\operatorname{Tr} T_{n}(\hat{H}) /\left[D\left(1+\delta_{n, 0}\right) / 2\right]$ are typically evaluated recursively in two steps (note that $\mu_0=1$
-by definition).
+How does one efficiently compute $\{\mu_n\}$? These moments are typically evaluated recursively in two steps (note that $\mu_0=1$ by definition).
 First, a series of matrix-vector multiplications is carried out to construct the Chebyshev matrix polynomials using Eq. [$(6)$][eq-6]. The iteration process usually starts with the application of $\mathcal{T}_{1}(\hat{H})=\hat{H}$ onto some basis ket (or a random vector, see below) 
 $|r_1\rangle$, yielding $\hat{H} |r_1\rangle= |\tilde r_1 \rangle$. This then allows one to compute the first non-trivial Chebyshev moment, $\mu_1$, as detailed below.
 The process is iterated via [$(6)$][eq-6]  to compute subsequent moments, $\mu_2$,  $\mu_3$, etc. 
