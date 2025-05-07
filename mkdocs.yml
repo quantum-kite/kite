@@ -55,6 +55,7 @@ nav:
       - Addtitional scripts: 'api/kite_tools_readme.md'
   - FAQ: 'faq.md'
   - About:
+    - Recent Publications: 'about/publications.md'
     - About KITE: 'about/index.md'
     - LICENSE.md: 'about/LICENSE.md'
     - VERSION.md: 'about/VERSION.md'
@@ -133,8 +134,8 @@ markdown_extensions:
   - attr_list
   - meta
   - pymdownx.emoji:
-      emoji_index: !!python/name:materialx.emoji.twemoji
-      emoji_generator: !!python/name:materialx.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
 extra:
   team:
@@ -170,13 +171,6 @@ extra:
       title: Contributor
       link: https://bertjorissen.be
       image: jorissen.jpg
-    - name: "Emile Aerts"
-      title: Contributor
-      image: aerts.jpg
-    - name: "Robin Smeyers"
-      title: Contributor
-      link: https://be.linkedin.com/in/robin-smeyers-293bb8209/
-      image: smeyers.jpg
     - name: "João Pinho"
       title: Contributor
       link: https://www.linkedin.com/in/joao-manuel-pinho-a729401ba
@@ -184,4 +178,12 @@ extra:
     - name: "Henrique Veiga"
       title: Contributor
       image: veiga.jpg
+  acknowledgement:
+    - name: "Emile Aerts"
+      title: Contributor
+      image: aerts.jpg
+    - name: "Robin Smeyers"
+      title: Contributor
+      link: https://be.linkedin.com/in/robin-smeyers-293bb8209/
+      image: smeyers.jpg
 

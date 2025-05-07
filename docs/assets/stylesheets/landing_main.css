@@ -18,8 +18,9 @@
  *  11. about
  *  12. pricing
  *  13. testimonials *
- *  14. download
- *  15. footer styles
+ *  14. acknowledgement *
+ *  15. download
+ *  16. footer styles
  *
  * =================================================================== */
 /* ===================================================================
@@ -871,7 +872,7 @@ button.stroke:hover,
 .button.stroke:hover,
 button.strokefill:hover,
 .button.strokefill:hover {
-    border: 0.3rem solid #89a314;
+    border: 0.2rem solid #89a314;
     color: #89a314;
 }
 
@@ -1538,12 +1539,20 @@ h1.intro-header::before {
     text-align: center;
 }
 
+.home-content-left .buttons {
+    text-align: center;
+}
+
 .home-content-left .button.stroke,
 .home-content-left .button.strokefill {
     min-width: 188px;
 }
 
-.home-content-left .button.stroke{
+.home-content-left .button.strokefill {
+    color: #822855;
+}
+
+.home-content-left .button.stroke {
     color: rgba(255, 255, 255, 0.8) !important;
 }
 
@@ -1930,6 +1939,7 @@ html[data-useragent*='MSIE 10.0'] .home-scrolldown,
 
 .about-features .features-list {
     padding-top: 5.4rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.07);
 }
 
 .about-features .feature {
@@ -2379,7 +2389,7 @@ html[data-useragent*='MSIE 10.0'] .home-scrolldown,
 #testimonials {
     /* background: #1e1f20; */
     background: white;
-    padding: 15rem 0 9rem;
+    padding: 4rem 0 9rem;
     text-align: center;
     min-height: 600px;
 }
@@ -2436,11 +2446,11 @@ html[data-useragent*='MSIE 10.0'] .home-scrolldown,
 }
 
 #testimonial-slider .testimonial-author img {
-    width: 7.4rem;
-    height: 7.4rem;
+    width: 15rem;
+    height: 15rem;
     margin: 0 auto 1.2rem auto;
     display: block;
-    border-radius: 50%;
+    border-radius: 1.5rem;
 }
 
 #testimonial-slider .testimonial-author .author-info {
@@ -2550,38 +2560,9 @@ html[data-useragent*='MSIE 10.0'] .home-scrolldown,
  * testimonials
  * ------------------------------------------------------------------- */
 
-@media only screen and (max-width: 1024px) {
-    #testimonial-slider p {
-        font-size: 3rem;
-    }
-}
-
-@media only screen and (max-width: 920px) {
-    #testimonial-slider p {
-        font-size: 2.6rem;
-    }
-
-    #testimonial-slider .testimonial-author img {
-        width: 6.6rem;
-        height: 6.6rem;
-    }
-
-    #testimonial-slider .testimonial-author .author-info {
-        font-size: 1.8rem;
-    }
-
-    #testimonial-slider .testimonial-author .author-info span {
-        font-size: 1.5rem;
-    }
-}
-
 @media only screen and (max-width: 600px) {
     #testimonials .owl-wrap {
         width: 90%;
-    }
-
-    #testimonial-slider p {
-        font-size: 2.4rem;
     }
 }
 
@@ -2589,9 +2570,201 @@ html[data-useragent*='MSIE 10.0'] .home-scrolldown,
     #testimonials .owl-wrap {
         width: 100%;
     }
+}
 
-    #testimonial-slider p {
-        font-size: 2rem;
+
+/* ===================================================================
+ *  13a. testimonials - (_layout.scss)
+ *
+ * ------------------------------------------------------------------- */
+
+#acknowledgement {
+    /* background: #1e1f20; */
+    background: white;
+    padding: 0rem 0 9rem;
+    text-align: center;
+    min-height: 600px;
+}
+
+#acknowledgement .col-1-5 {
+    min-width: 20%;
+}
+#acknowledgement h1::before {
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    transform: translateX(-50%);
+}
+
+#acknowledgement .owl-wrap {
+    width: 80%;
+    max-width: 900px;
+    margin: 4.2rem auto 0;
+}
+
+#acknowledgement-slider {
+    margin: 0 0 3rem 0;
+    position: relative;
+}
+
+#acknowledgement-slider .slides {
+    padding-bottom: 3rem;
+}
+
+#acknowledgement-slider p {
+    font-family: "muli-regular", sans-serif;
+    font-size: 3.2rem;
+    line-height: 1.5;
+    color: #303030;
+}
+
+#acknowledgement-slider p::before,
+#acknowledgement-slider p::after {
+    display: inline-block;
+    font-family: "muli-regular", serif;
+    font-size: 3.6rem;
+    line-height: 1;
+    position: relative;
+    top: .3rem;
+}
+
+#acknowledgement-slider p::before {
+    content: '\201C';
+}
+
+#acknowledgement-slider p::after {
+    content: '\201D';
+}
+
+#acknowledgement-slider .acknowledgement-author {
+    margin-top: 4.2rem;
+    min-width: 20%;
+}
+
+#acknowledgement-slider .acknowledgement-author img {
+    width: 7.6rem;
+    height: 7.6rem;
+    margin: 0 auto 1.2rem auto;
+    display: block;
+    border-radius: 50%;
+}
+
+#acknowledgement-slider .acknowledgement-author .author-info {
+    display: inline-block;
+    vertical-align: middle;
+    text-align: center;
+    font-family: "LatoLatin-semibold", sans-serif;
+    font-size: 1.4rem;
+    margin-top: .9rem;
+    margin-bottom: 3rem;
+    color: #5f5f5f;
+}
+
+#acknowledgement-slider .acknowledgement-author .author-info span {
+    display: block;
+    font-family: "muli-bold", sans-serif;
+    font-size: 1.4rem;
+    line-height: 1.313;
+    letter-spacing: 0;
+    text-transform: none;
+    color: rgba(0, 0, 0, 0.5);
+    margin-top: .3rem;
+}
+
+
+/* owl dots */
+
+#acknowledgement-slider .owl-nav {
+    margin-top: 1.8rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#acknowledgement-slider .owl-nav [class*='owl-'] {
+    color: #1e1f20;
+    font-family: "LatoLatin-regular", sans-serif;
+    font-size: 1.4rem;
+    height: 3rem;
+    line-height: 3rem;
+    margin: .6rem;
+    padding: 0 10px;
+    background: rgba(0, 0, 0, 0.5);
+    display: inline-block;
+    cursor: pointer;
+    border-radius: 3px;
+    -webkit-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+}
+
+#acknowledgement-slider .owl-nav [class*='owl-']:hover {
+    background: rgba(0, 0, 0, 0.7);
+    color: #1e1f20;
+    text-decoration: none;
+}
+
+#acknowledgement-slider .owl-nav .disabled {
+    background: rgba(0, 0, 0, 0.2);
+    cursor: default;
+}
+
+#acknowledgement-slider .owl-nav.disabled+.owl-dots {
+    margin-top: 1.8rem;
+}
+
+#acknowledgement-slider .owl-dots {
+    text-align: center;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#acknowledgement-slider .owl-dots .owl-dot {
+    display: inline-block;
+    zoom: 1;
+    *display: inline;
+}
+
+#acknowledgement-slider .owl-dots .owl-dot span {
+    width: 9px;
+    height: 9px;
+    background-color: #959595;
+    margin: 9px 9px;
+    display: block;
+    -webkit-backface-visibility: visible;
+    backface-visibility: visible;
+    transition: opacity 200ms ease;
+    border-radius: 50%;
+    -webkit-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+}
+
+#acknowledgement-slider .owl-dots .owl-dot.active span,
+#acknowledgement-slider .owl-dots .owl-dot:hover span {
+    background-color: #cccccc;
+}
+
+/* Add the parallax effect to the background of the main page */
+.parallax {
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-image: url("assets/images/background.jpg");
+}
+
+/* -------------------------------------------------------------------
+ * responsive:
+ * testimonials
+ * ------------------------------------------------------------------- */
+
+@media only screen and (max-width: 600px) {
+    #acknowledgement .owl-wrap {
+        width: 90%;
+    }
+}
+
+@media only screen and (max-width: 400px) {
+    #acknowledgement .owl-wrap {
+        width: 100%;
     }
 }
 

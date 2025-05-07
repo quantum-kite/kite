@@ -32,6 +32,8 @@
     <link href="assets/stylesheets/landing_vendor.css" rel="stylesheet">
     <link href="assets/stylesheets/landing_main.css" rel="stylesheet">
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 
     <!-- favicons
 	================================================== -->
@@ -92,8 +94,6 @@
                 <div class="home-content-left">
                     <h1 class="home-content-left">
                         HIGH-PERFORMANCE QUANTUM TRANSPORT SOFTWARE
-
-
                     </h1>
 
 
@@ -105,7 +105,7 @@
                         <a class="button stroke" href="about/">
                             About KITE
                         </a>
-                        <a class="button stroke" href="about/">
+                        <a class="button stroke" href="about/publications/">
                             Publications
                         </a>
                     </div>
@@ -139,10 +139,9 @@
                     KITE code: accurate real-space simulation of quantum condensed matter for the first time scalable to billions of atomic orbitals
                 </p>
                 <ul>
-                    <!-- <p> &#8680; Atomistic modelling of crystals, heterostructures and devices: electronic structure and beyond</p> -->
-                    <p> &#8680; Large-scale multi-orbital models in one-to-one correspondence with real structures </p>
-                    <p> &#8680; Realistic disorder landscapes and disorder statistics </p>
-                    <p> &#8680; Giant lattice sizes <b>=</b> fine spectral resolution, ideal for studies of quantum critical phenomena</p>
+                    <p> <i class="mi mi-RightArrowKeyTime0" style="color: #822855; font-size: 1.2rem"></i> Large-scale multi-orbital models in one-to-one correspondence with real structures </p>
+                    <p> <i class="mi mi-RightArrowKeyTime0" style="color: #822855; font-size: 1.2rem"></i> Realistic disorder landscapes and disorder statistics </p>
+                    <p> <i class="mi mi-RightArrowKeyTime0" style="color: #822855; font-size: 1.2rem "></i> Giant lattice sizes <b>=</b> fine spectral resolution, ideal for studies of quantum critical phenomena</p>
                 </ul>
             </div>
 
@@ -254,13 +253,55 @@
         {% endfor %}
 
     </section> <!-- end testimonials -->
+
+
+    <!-- acknowledgement Section
+================================================== -->
+    <section id="acknowledgement">
+
+        <div class="row">
+            <div class="col-twelve">
+                <h1 class="intro-header" data-aos="fade-up">Acknowledgements</h1>
+            </div>
+        </div>
+
+        {% for acknowledgement_entry in config.extra.acknowledgement %}
+        {% if loop.index % 5 == 1 %}
+        <div class="row owl-wrap">
+            <div id="acknowledgement-slider" data-aos="fade-up">
+                <div class="slides owl-carousel">
+                    <div class="row">
+                        {% endif %}
+                        <div class="col-1-5 tab-full">
+                            <div class="acknowledgement-author">
+                                <img src="assets/images/avatars/{{ acknowledgement_entry.image }}" alt="Image of {{ acknowledgement_entry.name }}">
+                                <div class="author-info">
+                                    <a href="{{ acknowledgement_entry.link }}" style="text-transform: uppercase;">
+                                        {{ acknowledgement_entry.name }}
+                                    </a>
+                                    <span class="position">{{ acknowledgement_entry.title }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% if loop.index % 5 == 0 or loop.index == config.extra.team|length  %}
+                    </div>
+                </div> <!-- end slides -->
+            </div> <!-- end testimonial-slider -->
+        </div> <!-- end flex-container -->
+
+        {% endif %}
+        {% endfor %}
+
+    </section> <!-- end acknowledgement -->
+
+    <!-- footer
+    ================================================== -->
+
     <br>
     <div id="preloader">
         <div id="loader"></div>
     </div>
 
-    <!-- footer
-    ================================================== -->
     <footer class="md-footer">
 
         <!-- Further information -->
