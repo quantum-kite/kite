@@ -1,7 +1,7 @@
 """ Density of states for twisted bilayer graphene
 
     ##########################################################################
-    #                         Copyright 2022, KITE                           #
+    #                         Copyright 2020/22, KITE                        #
     #                         Home page: quantum-kite.com                    #
     ##########################################################################
 
@@ -11,7 +11,7 @@
     Configuration: Periodic boundary conditions, double precision,
                    automatic scaling, size of the system  flexible, with domain decomposition (nx=ny=2)
     Calculation type: Average DOS
-    Last updated: 28/07/2022
+    Last updated: 08/05/2025
 """
 
 __all__ = ["main"]

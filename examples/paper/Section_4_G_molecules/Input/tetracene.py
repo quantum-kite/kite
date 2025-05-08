@@ -1,23 +1,18 @@
-"""       
-        ##############################################################################      
-        #                        KITE | Release  1.1                                 #      
-        #                                                                            #      
-        #                        Kite home: quantum-kite.com                         #           
-        #                                                                            #      
-        #  Developed by: Simao M. Joao, Joao V. Lopes, Tatiana G. Rappoport,         #       
-        #  Misa Andelkovic, Lucian Covaci, Aires Ferreira, 2018-2022                 #      
-        #                                                                            #      
-        ##############################################################################      
-"""
-""" Onsite disorder
+""" DoS for Tetracene
 
-    Lattice : Monolayer graphene;
-    Disorder : Disorder class Deterministic and Uniform at different sublattices,
+    ##########################################################################
+    #                         Copyright 2020/22, KITE                        #
+    #                         Home page: quantum-kite.com                    #
+    ##########################################################################
+
+    Units: Energy in eV
+    Lattice: Graphene Monolayer
+    Disorder: Deterministic and Uniform at different sublattices
     Configuration : size of the system 512x512, without domain decomposition (nx=ny=1), periodic boundary conditions,
-                    double precision, manual scaling;
-    Calculation : dos;
+                    double precision, manual scaling
+    Calculation type: DoS
+    Last updated: 08/05/2025
 """
-
 import kite
 import pybinding as pb
 from math import pi, sqrt

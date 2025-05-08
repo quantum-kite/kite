@@ -2,7 +2,7 @@
     [J. H. Pixley, P. Goswami, and S. das Sarma PRB 93, 085103 (2016)]
 
     ##########################################################################
-    #                         Copyright 2022, KITE                           #
+    #                         Copyright 2020/22, KITE                        #
     #                         Home page: quantum-kite.com                    #
     ##########################################################################
 
@@ -10,7 +10,7 @@
     Lattice: simple cubic lattice (two orbitals per site)
     Configuration: random twisted boundary conditions, double precision, manual rescaling
     Calculation type: Average DOS
-    Last updated: 28/07/2022
+    Last updated: 08/05/2025
 """
 
 __all__ = ["main"]
@@ -54,7 +54,7 @@ def main(anderson_w=3.0):
     """Prepare the input file for KITEx"""
     # load lattice
     lattice = weyl_semimetal()
-    
+
     # add scalar on-site Disorder (Box distribution in [W/2,W/2])
     # Number of Samples controlled by num_disorder
     disorder = kite.Disorder(lattice)
@@ -64,7 +64,7 @@ def main(anderson_w=3.0):
     # Phase Diagram
     # Anderson_W < 2.55 --> Semimetal Phase (AvDoS Zero at Zero Energy)
     # Anderson_W > 2.55 --> Diffusive Metal Phase (Finite AvDoS at Zero Energy)
-    
+
     # number of decomposition parts [nx,ny,nz] in each direction of matrix.
     # This divides the lattice into various sections, each of which is calculated in parallel
     nx = 2

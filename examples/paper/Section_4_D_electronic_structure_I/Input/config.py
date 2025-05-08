@@ -1,16 +1,18 @@
-"""       
-        ##############################################################################      
-        #                        KITE | Release  1.1                                 #      
-        #                                                                            #      
-        #                        Kite home: quantum-kite.com                         #           
-        #                                                                            #      
-        #  Developed by: Simao M. Joao, Joao V. Lopes, Tatiana G. Rappoport,         #       
-        #  Misa Andelkovic, Lucian Covaci, Aires Ferreira, 2018-2022                 #      
-        #                                                                            #      
-        ##############################################################################      
-"""
-""" Bilayer Graphene with Rashba SOC """
+""" Arpes on Bilayer Graphene
 
+    ##########################################################################
+    #                         Copyright 2020/22, KITE                        #
+    #                         Home page: quantum-kite.com                    #
+    ##########################################################################
+
+    Units: Energy in eV
+    Lattice: Bilayer Graphene (Rashba SOC)
+    Disorder: Vacancies
+    Configuration: Periodic boundary conditions, double precision,
+                    given rescaling, size of the system flexible, with domain decomposition (nx=ny=4)
+    Calculation type: Arpes
+    Last updated: 08/05/2025
+"""
 import pybinding as pb
 from math import sqrt
 import kite
@@ -35,7 +37,7 @@ c0 = 0.335                                # [nm] interlayer spacing
 def bilayer_graphene_rashba():
 
   lat = pb.Lattice(
-      a1=[a/2,  a/2 * sqrt(3)], 
+      a1=[a/2,  a/2 * sqrt(3)],
       a2=[-a/2, a/2 * sqrt(3)])
 
   lat.add_sublattices(
@@ -173,7 +175,7 @@ moments = int(sys.argv[2])
 LIM = 10
 nx = ny = 4
 lx = ly = int(sys.argv[1])
-weights = [float(sys.argv[4]), float(sys.argv[5]), float(sys.argv[6]), float(sys.argv[7]), 
+weights = [float(sys.argv[4]), float(sys.argv[5]), float(sys.argv[6]), float(sys.argv[7]),
            float(sys.argv[8]), float(sys.argv[9]), float(sys.argv[10]), float(sys.argv[11])]
 
 configuration = kite.Configuration(divisions=[nx, ny], length=[lx, ly], boundaries=["periodic", "periodic"],
