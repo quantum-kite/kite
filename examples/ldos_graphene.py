@@ -1,7 +1,7 @@
 """ Local Density of states of graphene
 
     ##########################################################################
-    #                         Copyright 2022, KITE                           #
+    #                         Copyright 2020/22, KITE                        #
     #                         Home page: quantum-kite.com                    #
     ##########################################################################
 
@@ -10,7 +10,7 @@
     Configuration: Periodic boundary conditions, double precision,
                     manual rescaling, size of the system 128x128, with domain decomposition (nx=ny=1)
     Calculation type: Average DOS
-    Last updated: 28/07/2022
+    Last updated: 08/05/2025
 """
 
 __all__ = ["main"]
@@ -81,7 +81,7 @@ def analyze_results(filename, lattice):
 
     # create colors for the different LDOS values
     values_max = np.max(np.abs(values))
-    
+
     fig = plt.figure(figsize=(8, 5))
     ax_sctr = fig.add_axes([0.1, 0.05, 0.7, 0.9])
     sctr = ax_sctr.scatter(xs[:, 0], xs[:, 1], c=values, s=70, vmin=-values_max, vmax=values_max)

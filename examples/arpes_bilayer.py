@@ -1,15 +1,18 @@
-"""       
-        ##############################################################################      
-        #                        KITE | Release  1.1                                 #      
-        #                                                                            #      
-        #                        Kite home: quantum-kite.com                         #           
-        #                                                                            #      
-        #  Developed by: Simao M. Joao, Joao V. Lopes, Tatiana G. Rappoport,         #       
-        #  Misa Andelkovic, Lucian Covaci, Aires Ferreira, 2018-2022                 #      
-        #                                                                            #      
-        ##############################################################################      
+""" Bilayer Graphene with Rashba SOC (ARPES)
+
+    ##########################################################################
+    #                         Copyright 2020/2022, KITE                      #
+    #                         Home page: quantum-kite.com                    #
+    ##########################################################################
+
+    Units: Energy in eV, Length in nm
+    Lattice: honeycomb
+    Configuration: Periodic boundary conditions, double precision,
+                   manually scaling, size of the system 128x128, with domain decomposition (nx=ny=2)
+    Disorder: Disorder class Uniform at different sublattices
+    Calculation type:  one-particle spectral function of relevance to ARPES
+    Last updated: 28/07/2022
 """
-""" Bilayer Graphene with Rashba SOC """
 
 import pybinding as pb
 from math import sqrt

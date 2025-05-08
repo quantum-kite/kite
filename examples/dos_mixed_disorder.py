@@ -1,7 +1,7 @@
 """ Density of states of graphene with On-site and vacancy disorder
 
     ##########################################################################
-    #                         Copyright 2022, KITE                           #
+    #                         Copyright 2020/22, KITE                        #
     #                         Home page: quantum-kite.com                    #
     ##########################################################################
 
@@ -13,7 +13,7 @@
                StructuralDisorder class vacancy and bond disorder
     Calculation type: Average DOS
     Note: automatic scaling is not supported when bond disorder is present
-    Last updated: 28/07/2022
+    Last updated: 08/05/2025
 """
 
 __all__ = ["main"]

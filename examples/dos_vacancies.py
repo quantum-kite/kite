@@ -1,7 +1,7 @@
 """ Honeycomb lattice with vacancy disorder
 
     ##########################################################################
-    #                         Copyright 2022, KITE                           #
+    #                         Copyright 2020/22, KITE                        #
     #                         Home page: quantum-kite.com                    #
     ##########################################################################
 
@@ -11,7 +11,7 @@
                     automatic scaling, size of the system 512x512, without domain decomposition (nx=ny=1)
     Disorder: StructuralDisorder, vacancy with concentration 0.1 inside A and 0.05 inside B sublattices
     Calculation type: Average DOS
-    Last updated: 28/07/2022
+    Last updated: 08/05/2025
 """
 
 __all__ = ["main"]

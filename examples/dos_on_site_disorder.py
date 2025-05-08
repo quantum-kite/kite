@@ -1,7 +1,7 @@
 """ Density of states of graphene with On-site disorder
 
     ##########################################################################
-    #                         Copyright 2022, KITE                           #
+    #                         Copyright 2020/22, KITE                        #
     #                         Home page: quantum-kite.com                    #
     ##########################################################################
 
@@ -11,7 +11,7 @@
                     manual scaling, size of the system 256x256, with domain decomposition (nx=ny=2),
     Disorder: Disorder class Deterministic and Uniform at different sublattices
     Calculation type: Average DOS
-    Last updated: 28/07/2022
+    Last updated: 08/05/2025
 """
 
 __all__ = ["main"]
