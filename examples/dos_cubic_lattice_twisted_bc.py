@@ -1,13 +1,14 @@
 """ Density of states of a cubic lattice model (twisted boundary conditions)
 
     ##########################################################################
-    #                         Copyright 2022, KITE                           #
+    #                         Copyright 2020/2022, KITE                      #
     #                         Home page: quantum-kite.com                    #
     ##########################################################################
 
-    Units: Energy in units of hopping, |t| = 1
+    Units: Energy in units of hopping, |t| = 1, Length in units of lattice parameter, |a| = 1
     Lattice: Simple cubic lattice
-    Configuration: twisted boundary conditions, double precision, automatic rescaling
+    Configuration: random twisted boundary conditions, double precision, automatic rescaling,
+                   size of the system 128x128x128, with domain decomposition (nx=ny=2, nz=1)
     Calculation type: Average DOS
     Last updated: 18/07/2022
 """
@@ -56,7 +57,7 @@ def main(onsite=(0, 0, 0), t=1):
     nx = ny = 2
     nz = 1
     # number of unit cells in each direction.
-    lx = ly = lz = 64
+    lx = ly = lz = 128
 
     # make config object which caries info about
     # - the number of decomposition parts [nx, ny, nz],

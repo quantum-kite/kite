@@ -1,17 +1,17 @@
 """ Density of States and DC conductivity of the Haldane model
 
     ##########################################################################
-    #                         Copyright 2022, KITE                           #
+    #                         Copyright 2020/2022, KITE                      #
     #                         Home page: quantum-kite.com                    #
     ##########################################################################
 
-    Units: Energy in units of hopping, |t| = 1
+    Units: Energy in units of hopping, |t| = 1, Length in nm
     Lattice: Honeycomb
-    Configuration: Periodic boundary conditions, double precision,
-                    automatic scaling, size of the system 256x256, with domain decomposition (nx=ny=2)
+    Configuration: Periodic boundary conditions, float precision,
+                   manually scaling, size of the system 128x128, with domain decomposition (nx=ny=2)
     Disorder: Disorder class Uniform at different sublattices
     Calculation type: Average DOS and DC conductivity (xy)
-    Last updated: 28/07/2022
+    Last updated: 06/05/2025
 """
 
 __all__ = ["main"]
@@ -112,7 +112,7 @@ def main(onsite=(0, 0), t=1):
     calculation.conductivity_dc(
         num_points=1000,
         num_moments=256,
-        num_random=1,
+        num_random=10,
         num_disorder=1,
         direction='xy',
         temperature=0.05

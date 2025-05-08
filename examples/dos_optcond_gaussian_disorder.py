@@ -1,17 +1,17 @@
-""" Optical conductivity of disordered graphene lattice
+""" Average DOS and Optical conductivity of disordered graphene lattice
 
     ##########################################################################
-    #                         Copyright 2020/22, KITE                        #
+    #                         Copyright 2020/2022, KITE                      #
     #                         Home page: quantum-kite.com                    #
     ##########################################################################
 
     Units: Energy in eV
     Lattice: Honeycomb
     Configuration: Periodic boundary conditions, double precision,
-                    automatic scaling, size of the system 512x512, with domain decomposition (nx=ny=2)
+                   manually scaling, size of the system 512x512, with domain decomposition (nx=ny=2)
     Disorder: Disorder class Gaussian at different sublattices
     Calculation type: Average DOS and optical conductivity (xx)
-    Last updated: 08/05/2025
+    Last updated: 28/07/2022
 """
 
 __all__ = ["main"]
