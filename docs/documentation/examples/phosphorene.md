@@ -9,7 +9,7 @@ This is a fast numerical calculation, that is set to run in a normal laptop for 
 It can reproduce qualitatively the expected anisotropic conductivity along xx and yy directions.
 
 Here, we highlight parts of the python script.
-The full script can be retrieved from [KITE's Github repository](https://github.com/quantum-kite/kite/blob/80a028026956c088f0c8fa4a019155b3b1bdcb78/examples/dccond_phosphorene.py).
+_The full script can be retrieved from [KITE's Github repository](https://github.com/quantum-kite/kite/blob/80a028026956c088f0c8fa4a019155b3b1bdcb78/examples/dccond_phosphorene.py)._
 
 ### Lattice
 

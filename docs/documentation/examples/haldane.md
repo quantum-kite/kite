@@ -26,7 +26,7 @@ def haldane(onsite=(0, 0), t=1):
     t2 = t/10
 
     # define lattice vectors
-    a1 = a * np.array([a, 0])
+    a1 = a * np.array([1, 0])
     a2 = a * np.array([1 / 2, 1 / 2 * np.sqrt(3)])
 
     # create a lattice with 2 primitive vectors
@@ -86,7 +86,7 @@ calculation.conductivity_dc(num_points=1000,
 
 ### Disorder
 We can include [different types of disorder][disorder].
-For simplicity, we consider onsite uniform disorder distribution with width of `#!python 0.4 eV` and zero average onsite energy (Anderson disorder):
+For simplicity, we consider onsite uniform disorder distribution with width of `#!python 0.4` and zero average onsite energy (Anderson disorder):
 
 ``` python
 disorder = kite.Disorder(lattice)
