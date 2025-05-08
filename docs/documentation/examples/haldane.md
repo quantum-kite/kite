@@ -1,3 +1,6 @@
+
+
+
 ## The Haldane model
 
 The Haldane Hamiltonian is a single-orbital tight-binding model on a honeycomb lattice with a sublattice-staggered
@@ -6,6 +9,9 @@ magnetic field configuration with vanishing total flux through the unit cell [^1
 
 This model describes a Chern insulator (or a quantum anomalous Hall insulator) because it hosts an integer quantum Hall effect
 in the absence of any applied external magnetic fields. This characteristic makes Haldane model ideal for illustrating another capability of KITE: the calculation of transverse conductivities reflecting the quantum geometry of wavefunctions [^2] [^3].
+
+Let us use KITE to compute the dc conductivity tensor of the Haldane model. 
+_The full script for this example can be found [here](https://github.com/quantum-kite/kite/blob/313a00e54a9f9aa33b22886eaf97ce62aaec3996/examples/dos_dccond_haldane.py)._
 
 ### Lattice
 Let us begin with the definition of the Hamiltonian for the case of purely imaginary next-nearest-neighbor hoppings:

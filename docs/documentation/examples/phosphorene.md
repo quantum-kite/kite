@@ -4,12 +4,12 @@ To this end, we consider a simplified tight-binding model for single layer phosp
 Even though this model is very simple, it captures the anisotropic band structure of phosphorene, which is Dirac like in one direction and Schrödinger like in the other direction.
 This behaviour results in highly anisotropic transport properties [^2].
 
-We calculate the longitudinal conductivity (`singleshot_conductivity_dc`) via the efficient single-shot algorithm [^3] in the vicinity of the band gap.
+Here, we calculate the longitudinal conductivity (`singleshot_conductivity_dc`) via the efficient single-shot algorithm [^3] in the vicinity of the band gap.
 This is a fast numerical calculation, that is set to run in a normal laptop for about 3-4 minutes.
 It can reproduce qualitatively the expected anisotropic conductivity along xx and yy directions.
 
-Here, we highlight parts of the python scripts.
-The complete scripts can be retrieved from [KITE's Github repository ](https://github.com/quantum-kite/kite/blob/80a028026956c088f0c8fa4a019155b3b1bdcb78/examples/dccond_phosphorene.py).
+Here, we highlight parts of the python script.
+The full script can be retrieved from [KITE's Github repository](https://github.com/quantum-kite/kite/blob/80a028026956c088f0c8fa4a019155b3b1bdcb78/examples/dccond_phosphorene.py).
 
 ### Lattice
 

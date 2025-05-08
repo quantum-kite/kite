@@ -84,7 +84,7 @@ def main(onsite=(0, 0)):
         boundaries=[mode, mode],
         is_complex=False,
         precision=1,
-        spectrum_range=[-3.01*t, 3.01*t]
+        spectrum_range=[-3.01*t, 3.01*t] #graphene's bandwidth inclusive of a small safety buffer of +/- 0.1*t
     )
 
     # specify calculation type
