@@ -138,6 +138,17 @@ markdown_extensions:
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
 extra:
+  news:
+    - title: First point of kite
+      link: york.ac.uk
+      date: 2023-10-01
+      image: aerts.jpg
+      text: "KITE is a free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation - version 3. Copyright © 2023 KITE"
+    - title: First point of kite
+      link: york.ac.uk
+      date: 2023-10-01
+      image: ferreira.jpg
+      text: "KITE is a free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation - version 3. Copyright © 2023 KITE"
   team:
     - name: "Aires Ferreira"
       title: Co-Founder
@@ -156,15 +167,15 @@ extra:
       link: https://www.linkedin.com/in/lucian-covaci-1439388a/
       image: covaci.jpg
     - name: "Simão M. João"
-      title: Co-Founder (Former Member)
+      title: Co-Founder<br>(Former Member)
       link: https://scholar.google.pt/citations?user=yvY5oYcAAAAJ&hl=en
       image: simao.jpg
     - name: "Miša Anđelković"
-      title: Co-Founder (Former Member)
+      title: Co-Founder<br>(Former Member)
       link: https://www.linkedin.com/in/misaandelkovic/
       image: misa.jpg
     - name: "João P. Santos Pires"
-      title: Contributor (Former Member)
+      title: Contributor<br>(Former Member)
       link: https://scholar.google.com/citations?user=pmnNcFMAAAAJ&hl=pt-PT
       image: pires.jpg
     - name: "Bert Jorissen"

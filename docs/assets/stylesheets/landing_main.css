@@ -2379,8 +2379,136 @@ html[data-useragent*='MSIE 10.0'] .home-scrolldown,
         margin-right: 0;
     }
 }
+/* ===================================================================
+ * 13.0 News - (_layout.scss)
+ *
+ * ------------------------------------------------------------------- */
+
+#news {
+    background: white;
+    padding: 4rem 0 9rem;
+    text-align: left;
+}
+
+#news .entry-list {
+    border-left: 1px solid rgba(0, 0, 0, 0.07);
+}
+
+#news .entry {
+    margin-bottom: 2rem;
+}
+
+#news .entry .icon {
+    margin-bottom: 1.5rem;
+    display: inline-block;
+}
+
+#news .entry .icon i {
+    color: #822855;
+    font-size: 4.8rem;
+}
+
+#news .entry h3 {
+    font-family: "LatoLatin-regular", sans-serif;
+    font-size: 1.9rem;
+    color: #404040;
+    margin-bottom: 1rem;
+}
+
+#news .entry h3 a {
+    color: #822855;
+}
+
+#news .entry h3 a:hover {
+    color: #89a314;
+}
+
+#news .entry .news-date {
+    font-family: "muli-bold", sans-serif;
+    font-size: 1.6rem;
+    line-height: 1.313;
+    letter-spacing: 0;
+    text-transform: none;
+    color: rgba(0, 0, 0, 0.5);
+    margin-bottom: 1rem;
+}
+
+#news .entry .news-text {
+    font-family: "muli-regular", sans-serif;
+    font-size: 1.6rem;
+    line-height: 1.875;
+    color: #505050;
+    margin: 0;
+}
+
+#news .entry .img-link,
+#news .entry .span-link {
+    display: block;
+    margin: 0 auto 1.2rem auto;
+    border-radius: 1.5rem;
+    width: 15rem;
+    height: 15rem;
+    overflow: hidden;
+}
 
 
+#news .entry .img-link {
+    background: #89a314;
+}
+
+#news .entry img,
+#news .entry .icon {
+    margin: 0 auto 1.2rem auto;
+    display: block;
+    webkit-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+    height: 100%;
+    width: 100%;
+    border-radius: 1.5rem;
+}
+
+#news .entry .icon {
+    text-align: center;
+    padding-top: 5.1rem;
+}
+
+#news .entry .img-link img:hover,
+#news .entry .span-link .icon:hover{
+    background: #89a314;
+    opacity: .5;
+    webkit-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+}
+
+@media only screen and (max-width: 1024px) {
+    #news [class*="col"] {
+        width: 100% !important;
+        float: none !important;
+        clear: both !important;
+        margin-left: 0;
+        margin-right: 0;
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    #news [class*="col"] {
+        width: 100% !important;
+        float: none !important;
+        clear: both !important;
+        margin-left: 0;
+        margin-right: 0;
+    }
+}
+
+@media only screen and (max-width: 600px) {
+    #news [class*="col"] {
+        width: 100% !important;
+        float: none !important;
+        clear: both !important;
+        margin-left: 0;
+        margin-right: 0;
+    }
+}
 /* ===================================================================
  *  13. testimonials - (_layout.scss)
  *
@@ -2445,12 +2573,47 @@ html[data-useragent*='MSIE 10.0'] .home-scrolldown,
     margin-top: 4.2rem;
 }
 
+#testimonial-slider .testimonial-author .author-info .author-name {
+    text-transform: uppercase;
+    font-size: 1.9rem;
+}
+
+#testimonial-slider .testimonial-author .author-info .author-name a {
+    color: #822855;
+    webkit-transition: all .3s ease-in-out;
+    transition: all .3s ease-in-out;
+}
+
+#testimonial-slider .testimonial-author .author-info .author-name a:hover{
+    color: #89a314;
+    webkit-transition: all .3s ease-in-out;
+    transition: all .3s ease-in-out;
+}
+
+#testimonial-slider .testimonial-author .img-link {
+    display: block;
+    margin: 0 auto 1.2rem auto;
+    border-radius: 1.5rem;
+    width: 15rem;
+    height: 15rem;
+    overflow: hidden;
+    background: #89a314;
+}
+
 #testimonial-slider .testimonial-author img {
     width: 15rem;
     height: 15rem;
     margin: 0 auto 1.2rem auto;
     display: block;
     border-radius: 1.5rem;
+    webkit-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+}
+
+#testimonial-slider .testimonial-author .img-link img:hover {
+    opacity: .5;
+    webkit-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
 }
 
 #testimonial-slider .testimonial-author .author-info {
@@ -2647,6 +2810,24 @@ html[data-useragent*='MSIE 10.0'] .home-scrolldown,
     margin: 0 auto 1.2rem auto;
     display: block;
     border-radius: 50%;
+    webkit-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+}
+
+#acknowledgement-slider .acknowledgement-author .img-link {
+    display: block;
+    margin: 0 auto 1.2rem auto;
+    border-radius: 50%;
+    width: 7.6rem;
+    height: 7.6rem;
+    overflow: hidden;
+    background: #89a314;
+}
+
+#acknowledgement-slider .acknowledgement-author .img-link img:hover {
+    opacity: .5;
+    webkit-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
 }
 
 #acknowledgement-slider .acknowledgement-author .author-info {
@@ -2669,6 +2850,17 @@ html[data-useragent*='MSIE 10.0'] .home-scrolldown,
     text-transform: none;
     color: rgba(0, 0, 0, 0.5);
     margin-top: .3rem;
+}
+#acknowledgement-slider .acknowledgement-author .author-info a {
+    color: #822855;
+    webkit-transition: all .3s ease-in-out;
+    transition: all .3s ease-in-out;
+}
+
+#acknowledgement-slider .acknowledgement-author .author-info a:hover{
+    color: #89a314;
+    webkit-transition: all .3s ease-in-out;
+    transition: all .3s ease-in-out;
 }
 
 
