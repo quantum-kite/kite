@@ -141,12 +141,12 @@ extra:
   news:
     - title: First point of kite
       link: york.ac.uk
-      date: 2023-10-01
+      date: 2025-02-01
       image: veiga.jpg
       text: "KITE is a free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation - version 3. Copyright © 2023 KITE"
     - title: First point of kite
       link: york.ac.uk
-      date: 2023-10-01
+      date: 2024-02-01
       image: pinho.jpg
       text: "KITE is a free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation - version 3. Copyright © 2023 KITE"
   team:
