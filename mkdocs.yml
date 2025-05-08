@@ -142,12 +142,12 @@ extra:
     - title: First point of kite
       link: york.ac.uk
       date: 2023-10-01
-      image: aerts.jpg
+      image: veiga.jpg
       text: "KITE is a free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation - version 3. Copyright © 2023 KITE"
     - title: First point of kite
       link: york.ac.uk
       date: 2023-10-01
-      image: ferreira.jpg
+      image: pinho.jpg
       text: "KITE is a free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation - version 3. Copyright © 2023 KITE"
   team:
     - name: "Aires Ferreira"
