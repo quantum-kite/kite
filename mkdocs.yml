@@ -55,7 +55,7 @@ nav:
       - Addtitional scripts: 'api/kite_tools_readme.md'
   - FAQ: 'faq.md'
   - About:
-    - Recent Publications: 'about/publications.md'
+    - Publications: 'about/publications.md'
     - About KITE: 'about/index.md'
     - LICENSE.md: 'about/LICENSE.md'
     - VERSION.md: 'about/VERSION.md'
