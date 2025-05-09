@@ -142,13 +142,8 @@ extra:
     - title: First point of kite
       link: york.ac.uk
       date: 2023-10-01
-      image: aerts.jpg
-      text: "KITE is a free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation - version 3. Copyright © 2023 KITE"
-    - title: First point of kite
-      link: york.ac.uk
-      date: 2023-10-01
       image: ferreira.jpg
-      text: "KITE is a free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation - version 3. Copyright © 2023 KITE"
+      text: "KITE is a free software: you can redistribute KITE is a free software: you can redistribute KITE is a free software: you can redistribute KITE is a free software: you can redistribute KITE is a free software: you can redistribute KITE is a free software: you can redistribute KITE is a free software: you can redistribute KITE is a free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation - version 3. Copyright © 2023 KITE"
   team:
     - name: "Aires Ferreira"
       title: Co-Founder
@@ -190,6 +185,20 @@ extra:
       title: Contributor
       image: veiga.jpg
   acknowledgement:
+    - name: "Emile Aerts"
+      title: Contributor
+      image: aerts.jpg
+    - name: "Robin Smeyers"
+      title: Contributor
+      link: https://be.linkedin.com/in/robin-smeyers-293bb8209/
+      image: smeyers.jpg
+    - name: "Emile Aerts"
+      title: Contributor
+      image: aerts.jpg
+    - name: "Robin Smeyers"
+      title: Contributor
+      link: https://be.linkedin.com/in/robin-smeyers-293bb8209/
+      image: smeyers.jpg
     - name: "Emile Aerts"
       title: Contributor
       image: aerts.jpg
