@@ -128,18 +128,6 @@ After running KITEx no post-processing is required for the singleshot conductivi
 ``` python linenums="1"
 import h5py
 import matplotlib.pyplot as plt
-import matplotlib as mpl
-import seaborn as sns
-
-mpl.rcParams['figure.dpi'] = 100
-mpl.rcParams['savefig.dpi'] = 100
-sns.set_style("white")
-# Kite color scheme
-colors = ["dusty purple", "faded green", "windows blue", "amber", "greyish"]
-current_palette = sns.xkcd_palette(colors)
-sns.set_palette(current_palette)
-sns.set_style("ticks")
-sns.set_context("talk", font_scale=1.1)
 
 file_name = 'phxx.h5'
 
