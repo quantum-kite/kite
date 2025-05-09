@@ -55,8 +55,10 @@ The same type of strategy can be used to calculate the optical conductivity for 
 ## Other cases: bespoke post processing
 
 Some functionalities do not require postprocessing or use bespoke postprocessing tools that are not included in [KITE-tools][kitetools]. 
-For example, the single-shot longitudinal conductivity functionality `#!python singleshot_conductivity_dc` _does not_ store Chebyshev moments in the *.h5 file, rather it requests [KITEx][kitex] to directly calculate the dc-conductivity for specified values of the Fermi energy. 
-To extract the calculated DC conductivity from the *.h5 file, we can use a python script located in the `#!python tools` directory:  `#!python process_single_shot.py`. Specifically, one runs
+For example, the single-shot longitudinal conductivity functionality `#!python singleshot_conductivity_dc` **does not** 
+store Chebyshev moments in the HDF file, rather it requests [KITEx][kitex] to directly calculate the dc-conductivity for specified values of the Fermi energy. 
+
+To extract the calculated DC conductivity, we can use a python script located in the `#!python tools` directory:  `#!python process_single_shot.py`, using
 
 
 ``` bash
