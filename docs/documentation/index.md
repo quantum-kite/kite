@@ -1,5 +1,5 @@
 This tutorial covers the basic aspects that are necessary to start using KITE.
-You will learn about the different steps in KITE's workflow and how to tweak the different parameters.
+You will learn about the different steps in KITE's workflow and how to adjust the different parameters.
 
 The tutorial is structured as follows:
 
@@ -8,13 +8,13 @@ The tutorial is structured as follows:
 3. How to define the settings for KITE simulations
 4. How to calculate the different target functions 
 5. Post-processing the results with [*KITE-tools*][kitetools]
-6. Adding disorder or magnetic field to the tight-binding model
+6. Adding disorder or a magnetic field to the tight-binding model
 7. How to edit the [HDF5]-file
 8. Optimizing the settings for various calculations
 
 !!! Example "First calculation with KITE"
     
-    Let us do a simple first calculation with KITE.
+    Let us perform a simple first calculation with KITE.
     *(Do not worry about the fine details just now, these will be covered later in the tutorial.)*
 
     !!! Tip

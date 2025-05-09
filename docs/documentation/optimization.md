@@ -1,7 +1,7 @@
 !!! Info
     
-    Here, we briefly introduce the **main concepts** that underlie all spectral methods currently implemented in KITE.
-    Focus is placed on the role of the simulation parameters that can be adjusted by the end-user in order to suit its specific purposes.
+    Here, we briefly introduce the **main concepts** underlying all spectral methods currently implemented in KITE.
+    The focus is placed on the role of the simulation parameters that can be adjusted by the end user in order to suit their specific purposes.
 
 # The Ground Rules for Spectral Methods
 
@@ -12,7 +12,7 @@ to all the non-periodic terms that realize disordered potentials, specific bound
 complex structural defects and external magnetic fields.
 
 Any finite-dimensional SPH has a bounded real-valued spectrum which must be shifted and rescaled to suitably fit within $[-1,1]$, the convergence interval of the method. This conversion is performed internally by KITE, which transforms $H\to\mathcal{H}=(H\!-\!\varepsilon_{0})/\delta\varepsilon$ and rescales all energy variables by $\delta\varepsilon$.
-This step requires an early (over)estimation of $H$'s spectral bandwidth, which can be set manually (using [`#!python spectrum_range`][configuration-spectrum_range] = $[\,\varepsilon_{0}\!-\!\delta\varepsilon/2$,$\,\varepsilon_{0}\!+\!\delta\varepsilon/2]$ in [`#!python kite.Configuration()`][configuration]) or be automatically done by KITE upon generation of the hdf5 configuration file. At this stage, the user must also specify:
+This step requires an early (over)estimation of $H$'s spectral bandwidth, which can be set manually (using [`#!python spectrum_range`][configuration-spectrum_range] = $[\,\varepsilon_{0}\!-\!\delta\varepsilon/2$,$\,\varepsilon_{0}\!+\!\delta\varepsilon/2]$ in [`#!python kite.Configuration()`][configuration]), or be automatically done by KITE upon generation of the hdf5 configuration file. At this stage, the user must also specify:
 
 1. The dimensions of the simulated lattice, `#!python length=[lx,ly,(lz)]`;
 2. The number of subdivisions for parallelization of the matrix-vector operation, `#!python divisions=[nx,ny,(nz)]`,
@@ -29,17 +29,18 @@ $$
 \end{cases}\,\,\, ,
 $$
 
-where $\mathcal{O}_{j}$ are sparse lattice operators (e.g., identities, velocity operators or spin operators) and $F_{j}$ are functions of $\mathcal{H}$, as well as other scalar parameters $\left\{ \lambda_{i}^{j}\right\} _{i=i_{min},...,i_{max}}^{j=1,...,N}$, such as the temperature or a frequency. Furthermore, the $\left|\Psi\right\rangle$ in the second line of the above equation is a specific state/basis vector that depends on the observable that is being computed. Hence, there are two district categories of observables that can be computed with  [`#!bash KITEx`](../api/kitex.md), namely
+where $\mathcal{O}_{j}$ are sparse lattice operators (e.g., identities, velocity operators or spin operators) and $F_{j}$ are functions of $\mathcal{H}$, as well as other scalar parameters 
+$\left\{ \lambda_{i}^{j}\right\} _{i=i_{min},...,i_{max}}^{j=1,...,N}$, such as the temperature or frequency. Furthermore, the $\left|\Psi\right\rangle$ in the second line of the above equation is a specific state/basis vector that depends on the observable that is being computed. Hence, there are two distinct categories of observables that can be computed with  [`#!bash KITEx`](../api/kitex.md), as shown below.
 
-## Traces Over The Entire Hilbert Space
+## Traces Over The Full Hilbert Space
 
-:  This includes global observables such as the Density of States (DoS) and DC-conductivity, as well as the $1^{\text{st}}$- and $2^{\text{nd}}$-order optical conductivity (see João *et al.*[^1] for further details). For all these cases, the trace is evaluated stochastically as an average of expectation values for $R$ normalized random vectors[^2], i.e.,
+:  Complete traces of operators are needed to investigate global observables, such as the Density of States (DoS) and DC-conductivity, as well as the $1^{\text{st}}$- and $2^{\text{nd}}$-order optical conductivity (see João *et al.*[^1] for further details). For all these cases, the trace is evaluated stochastically as an average of expectation values for $R$ normalized random vectors[^2], i.e.,
 
 $$
   \text{Tr}\left[\cdots\right]\approx\frac{1}{R}\sum_{r=1}^{R}\left\langle\xi_{r}\right|\cdots\left|\xi_{r}\right\rangle .
 $$
 
-:  Within the user interface, the number of independent random vectors is specified by the parameter `#!python num_random`, which must be large enough to ensure a well-estimated trace. The associated error scales as $1/\sqrt{R\,D}$, and thus requires very few random vectors if the simulated system is very large[^2]. On top of this averaging, if $\mathcal{H}$ has a random component (by hosting disorder or featuring randomly twisted boundaries), it is often the case that the results are to be averaged over an ensemble of random Hamiltonians. Such averaging is also done inside  [`#!bash KITEx`](../api/kitex.md) and the number of random configurations is specified by user with the parameter `#!python num_disorder`.
+:  Within the user interface, the number of independent random vectors is specified by the parameter `#!python num_random`, which must be large enough to ensure a well-estimated trace. The associated error scales as $1/\sqrt{R\,D}$, and thus requires very few random vectors if the simulated system is very large[^2]. On top of this averaging, if $\mathcal{H}$ has some random component (e.g., by hosting disorder or featuring randomly twisted boundaries), it is often the case that the results need to be averaged over an ensemble of random Hamiltonians. Such averaging is also done inside  [`#!bash KITEx`](../api/kitex.md) and the number of random configurations is specified by user with the parameter `#!python num_disorder`.
 
 ## Diagonal Matrix Elements
 
@@ -60,33 +61,37 @@ $$
   2. Broadened Single-Particle Green's Functions.—$F_{j}(\lambda_{1}^{j},\lambda_{2}^{j};\mathcal{H})\to\left[\lambda+i\eta-\mathcal{H}\right]^{-1}$
   3. Quantum Time-Evolution Operators.—$F_{j}\left(\lambda_{1}^{j},\mathcal{H}\right)\to\exp\left(\frac{i\,t\,\mathcal{H}}{\hbar}\right)$
 
-: For these functions, analytical forms of the Chebyshev expansion coefficients are known[^2][^3][^4][^5][^6][^7] and used in KITE. In the user interface, the truncation order $M$ is specified by the parameter `#!python num_moments`, and always impacts the validity of the expanded results. Nevertheless, its precise effect depends crucially on the specific case, as shown in the Figure below. In particular, one has the following cases:
+: For these functions, analytical forms of the Chebyshev expansion coefficients are known[^2][^3][^4][^5][^6][^7] and used in KITE. In the user interface, the truncation order $M$ is specified by the parameter `#!python num_moments`, and always impacts the validity of the expanded results. Nevertheless, its precise effect depends crucially on the specific case, as shown in Fig. 1 below. We will now discuss three common cases. 
 
 ## Dirac-delta Function
 
-: An order-$M$ expansion (regularized by the Jackson kernel) produces a Gaussian approximation of $\delta(\lambda\!-\!\mathcal{H})$ endowed by a width $\sigma_{\lambda}\!\approx\!\delta \varepsilon\,\pi/M$ in $\lambda$[^2][^7]. The choice of $M$ then fixes the effective spectral broadening, $\sigma_{\lambda}$, which must be sufficiently narrow to accurately describe all relevant features of the calculated property. However, if it becomes too narrow ($M$ too high), the discrete eigenvalues of the SPH are well-resolved and the obtained data start suffering from large (finite-size) fluctuations. For information on other available kernels see Weisse *et al.*[^2].
+: An order-$M$ expansion (regularized by the Jackson kernel) produces a Gaussian approximation of $\delta(\lambda\!-\!\mathcal{H})$ endowed by a width $\sigma_{\lambda}\!\approx\!\delta \varepsilon\,\pi/M$ in $\lambda$[^2][^7]. 
+The choice of $M$ then fixes the effective spectral width, $\sigma_{\lambda}$, which must be sufficiently narrow to accurately describe all relevant features of the calculated property. 
+However, if $\sigma_{\lambda}$ becomes too narrow ($M$ too high), the discrete eigenvalues of the SPH are well-resolved and the obtained data suffers from large (finite-size) fluctuations. For information on other available kernels see Weisse *et al.*[^2].
 
     !!! Info "Rule of Thumb"
 
-        If $\Delta\varepsilon$ is the mean-level spacing of the simulated system (that depends on the system size), then $M$ must be kept **smaller than** $\frac{\pi\,\delta\varepsilon}{\Delta\varepsilon}$ in order to avoid resolving individual energy levels. Simultaneously, for obtaining high-resolution results, the arificial broadening much remain much smaller than the total bandwidth.
+        If $\Delta\varepsilon$ is the mean-level spacing of the simulated system, then $M$ must be kept **smaller than** $\frac{\pi\,\delta\varepsilon}{\Delta\varepsilon}$ in order to avoid resolving individual energy levels. Simultaneously, for obtaining high-resolution results, the artificial broadening must remain much smaller than the lattice bandwidth.
 
 ## Single-Particle Green's Functions
 
-: No kernel is required here[^3][^4] as singularities of the Green's function must be broadened by a finite $\eta$ due to discrete nature of the energy spectrum of lattice models with a finite number of sites. An exact spectral decomposition of broadened lattice Green's functions exists and is the basis of the Chebyshev polynomial Green's function method [^3] implemented in KITE. Provided $\eta$ exceeds the spacing between eigenvalues of the SPH, the truncation order may be arbitrarily increased and convergence is achieved **when the data ceases to depend on M**. Calculations with fine values of $\eta$ approaching the mean level spacing typically require higher values of $M$ to converge, but are crucial in some problems.
+: No kernel is required for lattice Green's functions [^3][^4]. Note that these functions _must_ be broadened by a finite $\eta$ due to the discrete nature of the energy spectrum of finite systems. An exact spectral decomposition of broadened lattice Green's functions exists and is the basis of the Chebyshev polynomial Green's function method [^3] implemented in KITE. Provided $\eta$ exceeds the spacing between eigenvalues of the SPH, the truncation order may be arbitrarily increased, and convergence is achieved **when the data ceases to depend on M**. 
 
     !!! Info "Rule of Thumb"
 
-        Since the energy resolution is fixed by $\eta$, the number of polynomials must be larger enough to resolve such a broadening. As shown below, in Figure (b), an apt rule of thumb is to have $M \gtrsim 10*\delta \varepsilon / \eta$.
+        Since the energy resolution is fixed by $\eta$, the number of polynomials must be larger enough to resolve such a broadening. As shown below in Fig. 1(b), an apt rule of thumb is to have $M \gtrsim 10*\delta \varepsilon / \eta$.
 
 ## Quantum Time-Evolution Operators
 
-: The truncation error introduced here translates into a limitation of the available time-interval of accurate unitary time-evolution. In the panels of Figure (c) it is demonstrated that the time-evolution operator is converged as long as $t\!\lesssim\!\hbar\,M/\delta\varepsilon$.
+: In time evolution problems, Chebyshev truncation errors propagate and limit the computation accuracy after some finite time has elapsed. 
+In Fig. 1(c), it is demonstrated that the time evolution operator is converged as long as $t\!\lesssim\!\hbar\,M/\delta\varepsilon$.
 
     !!! Info "Rule of Thumb"
 
         A safe empirical rule of thumb (used in Santos Pires *et al.*[^6]) is to have $M\!\gtrsim\!8\,\delta\varepsilon\,\hbar^{-1}t_{\text{max}}\!\!$, where $t\!<\!t_{\text{max}}$ is the length of the time-interval intended for the evolution.
 
-: For some target functions, the output of KITE will be a function of energy (*e.g.*, the DoS) with maybe additional spacial coordinates (as it happens with the LDoS or the ARPES response). In contrast, most response functions are not properties of the Fermi level (zero-temperature DC conductivities and other pure Fermi-surface properties are an exception here) and therefore require that the raw output of KITE is numerically integrated in energy (typically weighted by the Fermi-Dirac distribution at a given finite temperature). This step is always done at the post-processing level by [`#!python KITE-tools`](../api/kite-tools.md).
+: For some target functions, the output of [`#!bash KITEx`](../api/kitex.md) will span energy and spatial coordinates (as is the case with the LDoS or the spectral function).
+Note that some response functions (such as the transverse conductivity) will reflect the properties of both the Fermi surface and the Fermi sea of occupied states, and therefore require the raw output of KITE to be numerically integrated over energy. This integration procedure is always done at the post-processing level by [`#!bash KITE-tools`](../api/kite-tools.md).
 
 	!!! Warning "Post-Processing Integration"
 	
@@ -95,7 +100,7 @@ $$
     <div>
       <figure>
         <img src="../../assets/images/tutorial/conv.png" style="width: 40em;" />
-        <figcaption>Convergence of the Chebyshev series for (a) a Dirac-$\delta$ function, (b) a single-particle Green's function (real part as inset), and (c)  the time-evolution operator at two different energies (top: 0.5 and bottom: 0.8).</figcaption>
+        <figcaption>Figure 1: Convergence of the Chebyshev series for (a) a Dirac-$\delta$ function, (b) a single-particle Green's function (real part as inset), and (c)  the time-evolution operator at two different energies (top: 0.5 and bottom: 0.8).</figcaption>
       </figure>
     </div>
 
