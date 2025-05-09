@@ -26,7 +26,7 @@ nav:
     - 4. Calculation: 'documentation/calculation.md'
     - 5. Post-processing: 'documentation/postprocessing.md'
     - 6. Disorder: 'documentation/disorder.md'
-    - 7. Magnetic Field: 'documentation/magnetic.md'
+    - 7. Magnetic Fields: 'documentation/magnetic.md'
     - 8. Editing an HDF5 file: 'documentation/editing_hdf_files.md'
     - In Depth Examples:
       - About the examples: 'documentation/examples/index.md'
@@ -144,7 +144,7 @@ extra:
       date: 2025-05-09
       image: KITE_spring_workshop.jpg
       text: "York hosted this year's KITE Developers week (6-8 May) which aimed to improve and expand the project's documentation. 
-      From left to right: Daniela Gonçalves (York), Henrique Veiga (Porto/York) and Zulekha Samiullah (Bristol/York)."
+      From left to right: Daniela Gonçalves (York), Henrique Veiga (Porto/York) and Zulekha Samiullah (Bristol/York). Behind them is Newton's tree!"
 
     - title: Two new KITE members!
       # link: york.ac.uk
