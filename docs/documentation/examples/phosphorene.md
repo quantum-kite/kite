@@ -109,7 +109,7 @@ calculation.singleshot_conductivity_dc(epoints,
 Now it is time to save the configuration in a hdf file:
 
 ``` python
-    kite.config_system(lattice, configuration, calculation, filename='phxx.h5')
+kite.config_system(lattice, configuration, calculation, filename='phxx.h5')
 ```
 
 Export the KITE model to an HDF file:
@@ -146,6 +146,8 @@ plt.title('Phosphorene')
 plt.tight_layout()
 plt.show()
 ```
+
+Alternatively, the single-shot post-processing python tool in the `#!python tools` directory can be used to produce the data in a more streamlined fashion (see Sec. [Post-Processing][postprocessing]). 
 
 ![cond](../../assets/images/phosphorene/cond.png)
 
@@ -185,3 +187,4 @@ In the next figure, we repeat the calculation for 300 energy points and 10 rando
 [lattice]: https://docs.pybinding.site/en/stable/_api/pybinding.Lattice.html
 [kitex]: ../../api/kitex.md
 [kitetools]: ../../api/kite-tools.md
+[postprocessing]:../postprocessing.md
