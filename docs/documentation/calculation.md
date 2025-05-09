@@ -1,9 +1,8 @@
-The [`#!python kite.Calculation`][calculation] object carries the information about the to-be-calculated quantities,
-i.e. the *target functions*.
+The [`#!python kite.Calculation`][calculation] object contains the information required to calculate desired quantities, i.e. the *target functions*.
 Key parameters of the calculation are included here, such as the Chebyshev expansion order and number of disorder realizations.
-These are used by [KITEx] to calculate the spectral coefficients subsequently used by [KITE-tools][kitetools]
-at the post-processing stage, e.g. to reconstruct the full energy dependence of the desired target function (see [Workflow][Workflow]).
-The parameters given in the [Examples] are optimized for relatively small systems and thus ideal to run KITE on a standard desktop computer or laptop.
+These are used by [KITEx] to calculate the spectral coefficients. Subsequently, 
+at the post-processing stage, [KITE-tools][kitetools] can be used, e.g. to reconstruct the full energy dependence of the desired target function (see [Workflow][Workflow]).
+The parameters given in the [Examples] are optimized for relatively small systems and are therefore ideal to run KITE with a standard desktop computer or laptop.
 
 The target functions currently available are:
 
@@ -152,7 +151,7 @@ To [run the code][kitex] and to [post-process][kitetools] it, run from the `#!ba
 
 ## Visualizing the Output Data
 
-After calculating the quantity of interest and post-processing the data, we can plot the resulting data with the following script:
+After calculating and post-processing the target functions, we can plot the resulting data with the following script:
 
 ``` py linenums="1"
 data=np.loadtxt('dos.dat')
@@ -168,7 +167,7 @@ plt.ylabel('DOS (a.u)')
   </figure>
 </div>
 
-If you want to go through these steps in a more streamlined fashion, you can use a Bash script, for example:
+A more streamlined approach would be to use a Bash script, for example:
 
 ``` bash linenums="1"
 #!/bin/bash
