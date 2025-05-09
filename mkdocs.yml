@@ -27,7 +27,7 @@ nav:
     - 5. Post-processing: 'documentation/postprocessing.md'
     - 6. Disorder: 'documentation/disorder.md'
     - 7. Magnetic Field: 'documentation/magnetic.md'
-    - 8. Editing the HDF5 file: 'documentation/editing_hdf_files.md'
+    - 8. Editing an HDF5 file: 'documentation/editing_hdf_files.md'
     - In Depth Examples:
       - About the examples: 'documentation/examples/index.md'
       - Graphene: 'documentation/examples/graphene.md'
