@@ -142,15 +142,15 @@ extra:
     - title: KITE Spring Workshop @ York
       # link: york.ac.uk
       date: 2025-05-09
-      image: kite_black.jpg
-      text: "York hosted this year's KITE developers week (6-8 May) aimed to improve and expand the project's documentation. 
+      image: KITE_spring_workshop.jpg
+      text: "York hosted this year's KITE Developers week (6-8 May) which aimed to improve and expand the project's documentation. 
       From left to right: Daniela Gonçalves (York), Henrique Veiga (Porto/York) and Zulekha Samiullah (Bristol/York)."
 
     - title: Two new KITE members!
       # link: york.ac.uk
       date: 2025-05-01
       image: kite_black.jpg
-      text: "A warm welcome to João Pinho (U Porto) and Henrique Veiga (U Porto/York) who are joining our team to work on new KITE functionalities."
+      text: "A warm welcome to João Pinho (Porto) and Henrique Veiga (Porto/York) who are joining our team to develop new KITE functionalities."
   team:
     - name: "Aires Ferreira"
       title: Co-Founder
