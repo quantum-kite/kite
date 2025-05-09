@@ -1,7 +1,7 @@
 """ Density of states of a square lattice
 
     ##########################################################################
-    #                         Copyright 2022, KITE                           #
+    #                         Copyright 2020/22, KITE                        #
     #                         Home page: quantum-kite.com                    #
     ##########################################################################
 
@@ -9,7 +9,7 @@
     Lattice: Square lattice
     Configuration: Periodic boundary conditions, double precision, automatic rescaling
     Calculation type: Average DOS
-    Last updated: 28/07/2022
+    Last updated: 08/05/2025
 """
 
 __all__ = ["main"]

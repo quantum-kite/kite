@@ -2,13 +2,14 @@
     [L. Fu, C.L. Kane and E. J. Mele, PRL 98, 106803 (2007)]
 
     ##########################################################################
-    #                         Copyright 2022, KITE                           #
+    #                         Copyright 2020/2022, KITE                      #
     #                         Home page: quantum-kite.com                    #
     ##########################################################################
 
     Units: Energy in units of fixed nearest neighbour hopping, |t| = |lambda_SO| = 1
     Lattice: face-centered cubic lattice (Diamond Structure)
     Configuration: random twisted boundary conditions, double precision, automatic rescaling
+                   size of the system 64x64x64, with domain decomposition (nx=2, ny=nz=1)
     Calculation type: Average DOS
     Last updated: 28/07/2022
 """
@@ -139,7 +140,7 @@ def main(dt_plus=0.1, dt_minus=0.1):
     calculation = kite.Calculation(configuration)
     calculation.dos(
         num_points=1001,
-        num_moments=1024,
+        num_moments=128,
         num_random=1,
         num_disorder=5
     )

@@ -1,14 +1,14 @@
 """ Phosphorene DC-conductivity 'xx'/'yy'
 
     ##########################################################################
-    #                         Copyright 2022, KITE                           #
+    #                         Copyright 2020/2022, KITE                      #
     #                         Home page: quantum-kite.com                    #
     ##########################################################################
 
-    Units: Energy in eV
+    Units: Energy in eV, Length in nm
     Lattice: Bilayer phosphorene
     Configuration: Periodic boundary conditions, double precision,
-                    automatic scaling, size of the system 512x512, with domain decomposition (nx=ny=2)
+                   manually scaling, size of the system 256x256, with domain decomposition (nx=ny=2)
     Calculation: singleshot_conductivity_dc xx/yy
     Last updated: 28/07/2022
 """
@@ -42,10 +42,10 @@ def phosphorene_lattice(num_hoppings=4):
     # add sublattices
     lat.add_sublattices(
         # name, position, and onsite potential
-        ('A', [-s / 2, -ay / 2, h], 0),
-        ('B', [s / 2, -ay / 2, 0], 0),
-        ('C', [-s / 2 + ax / 2, 0, 0], 0),
-        ('D', [s / 2 + ax / 2, 0, h], 0)
+        ('A', [         -s / 2, -ay / 2, h], 0),
+        ('B', [          s / 2, -ay / 2, 0], 0),
+        ('C', [-s / 2 + ax / 2,       0, 0], 0),
+        ('D', [ s / 2 + ax / 2,       0, h], 0)
     )
     
     # Add hopping energies
@@ -141,8 +141,8 @@ def main(direction='xx', num_hoppings=4):
     )
 
     # define energy grid
-    num_points = 15
-    energy = np.linspace(0, 3, num_points)
+    num_points = 25
+    energy = [(1.0 / npoints * i) * 3.5  for i in range(npoints)] 
 
     # specify calculation type
     calculation = kite.Calculation(configuration)

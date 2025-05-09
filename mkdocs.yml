@@ -27,7 +27,7 @@ nav:
     - 5. Post-processing: 'documentation/postprocessing.md'
     - 6. Disorder: 'documentation/disorder.md'
     - 7. Magnetic Field: 'documentation/magnetic.md'
-    - 8. Editing the HDF5 file: 'documentation/editing_hdf_files.md'
+    - 8. Editing an HDF5 file: 'documentation/editing_hdf_files.md'
     - In Depth Examples:
       - About the examples: 'documentation/examples/index.md'
       - Graphene: 'documentation/examples/graphene.md'
@@ -55,6 +55,7 @@ nav:
       - Addtitional scripts: 'api/kite_tools_readme.md'
   - FAQ: 'faq.md'
   - About:
+    - Publications: 'about/publications.md'
     - About KITE: 'about/index.md'
     - LICENSE.md: 'about/LICENSE.md'
     - VERSION.md: 'about/VERSION.md'
@@ -133,10 +134,23 @@ markdown_extensions:
   - attr_list
   - meta
   - pymdownx.emoji:
-      emoji_index: !!python/name:materialx.emoji.twemoji
-      emoji_generator: !!python/name:materialx.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
 extra:
+  news:
+    - title: KITE Spring Workshop @ York
+      # link: york.ac.uk
+      date: 2025-05-09
+      image: KITE_spring_workshop.jpg
+      text: "York hosted this year's KITE Developers week (6-8 May) which aimed to improve and expand the project's documentation. 
+      From left to right: Daniela Gonçalves (York), Henrique Veiga (Porto/York) and Zulekha Samiullah (Bristol/York)."
+
+    - title: Two new KITE members!
+      # link: york.ac.uk
+      date: 2025-05-01
+      image: kite_black.jpg
+      text: "A warm welcome to João Pinho (Porto) and Henrique Veiga (Porto/York) who are joining our team to develop new KITE functionalities."
   team:
     - name: "Aires Ferreira"
       title: Co-Founder
@@ -155,28 +169,21 @@ extra:
       link: https://www.linkedin.com/in/lucian-covaci-1439388a/
       image: covaci.jpg
     - name: "Simão M. João"
-      title: Co-Founder (Former Member)
+      title: Co-Founder<br>(Former Member)
       link: https://scholar.google.pt/citations?user=yvY5oYcAAAAJ&hl=en
       image: simao.jpg
     - name: "Miša Anđelković"
-      title: Co-Founder (Former Member)
+      title: Co-Founder<br>(Former Member)
       link: https://www.linkedin.com/in/misaandelkovic/
       image: misa.jpg
     - name: "João P. Santos Pires"
-      title: Contributor (Former Member)
+      title: Contributor<br>(Former Member)
       link: https://scholar.google.com/citations?user=pmnNcFMAAAAJ&hl=pt-PT
       image: pires.jpg
     - name: "Bert Jorissen"
       title: Contributor
       link: https://bertjorissen.be
       image: jorissen.jpg
-    - name: "Emile Aerts"
-      title: Contributor
-      image: aerts.jpg
-    - name: "Robin Smeyers"
-      title: Contributor
-      link: https://be.linkedin.com/in/robin-smeyers-293bb8209/
-      image: smeyers.jpg
     - name: "João Pinho"
       title: Contributor
       link: https://www.linkedin.com/in/joao-manuel-pinho-a729401ba
@@ -184,4 +191,12 @@ extra:
     - name: "Henrique Veiga"
       title: Contributor
       image: veiga.jpg
+  acknowledgement:
+    - name: "Emile Aerts"
+      title: Contributor
+      image: aerts.jpg
+    - name: "Robin Smeyers"
+      title: Contributor
+      link: https://be.linkedin.com/in/robin-smeyers-293bb8209/
+      image: smeyers.jpg
 

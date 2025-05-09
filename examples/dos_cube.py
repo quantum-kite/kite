@@ -1,14 +1,14 @@
 """ Density of states of a cubic lattice
 
     ##########################################################################
-    #                         Copyright 2022, KITE                           #
+    #                         Copyright 2020/2022, KITE                      #
     #                         Home page: quantum-kite.com                    #
     ##########################################################################
 
-    Units: Energy in eV
+    Units: Energy in units of hopping, |t| = 1, Length in units of lattice parameter, |a| = 1
     Lattice: cubic
     Configuration: Periodic boundary conditions, double precision,
-                    manual rescaling, size of the system 512x512, with domain decomposition (nx=ny=2)
+                    manual rescaling, size of the system 256x256x256, with domain decomposition (nx=ny=nz=1)
     Calculation type: Average DOS
     Last updated: 28/07/2022
 """

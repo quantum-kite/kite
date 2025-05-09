@@ -1,17 +1,18 @@
-"""       
-        ##############################################################################      
-        #                        KITE | Release  1.1                                 #      
-        #                                                                            #      
-        #                        Kite home: quantum-kite.com                         #           
-        #                                                                            #      
-        #  Developed by: Simao M. Joao, Joao V. Lopes, Tatiana G. Rappoport,         #       
-        #  Misa Andelkovic, Lucian Covaci, Aires Ferreira, 2018-2022                 #      
-        #                                                                            #      
-        ##############################################################################      
-"""
-""" Honeycomb lattice with Kane-Mele and Rashba SOC model
-"""
+""" Time-Evolution of Wave-Packet with magnetic impurities
 
+    ##########################################################################
+    #                         Copyright 2020/22, KITE                        #
+    #                         Home page: quantum-kite.com                    #
+    ##########################################################################
+
+    Units: Energy in eV
+    Lattice: Honeycomb (Kane-Mele and Rashba SOC)
+    Disorder: Gaussian
+    Configuration: Periodic boundary conditions, double precision,
+                    given rescaling, size of the system flexible, with domain decomposition (nx=ny=4)
+    Calculation type: Time Propagation of a wave-packet
+    Last updated: 08/05/2025
+"""
 import kite
 import numpy as np
 import pybinding as pb

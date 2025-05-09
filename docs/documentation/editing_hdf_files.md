@@ -1,25 +1,25 @@
 ## What is an HDF file?
 
-Some extracts from the HDF group [HDF](https://support.hdfgroup.org/documentation/index.html):
+The following description of an HDF file has been adapted from [HDF](https://support.hdfgroup.org/documentation/index.html):
 
 Hierarchical Data Format 5 (HDF5) is a unique open source technology suite for managing data collections of all sizes and complexity. HDF5 has features of other formats, but it can do much more.
 HDF5 is similar to XML in that HDF5 files are self-describing and allow users to specify complex data relationships and dependencies.
 In contrast to XML documents, HDF5 files can contain binary data (in many representations) and allow direct access to part of the file without first parsing the entire contents.
 
-**HDF5 also allows hierarchical data objects to be expressed in a natural manner (similar to directories and files)**, in contrast to the tables in a relational database.
+HDF5 also allows hierarchical data objects to be expressed in a natural manner (similar to directories and files), in contrast to the tables in a relational database.
 Whereas relational databases support tables, HDF5 supports n-dimensional datasets and each element in the dataset may itself be a complex object.
 Relational databases offer excellent support for queries based on field matching,
 but are not well-suited for sequentially processing all records in the database or for selecting a subset of the data based on coordinate-style lookup.
 
 ## Editing the file
 
-Thanks to its underlying (Chebyshev) machinery, KITE can easily re-calculate a physical quantity for different choices of parameters at the post-processing level, i.e. without the need for re-calculating Chebyshev moments.
-As explained in the [Post-processing tools documentation](postprocessing.md), this can be done by via the several options available in [KITE-tools][kitetools]. Here, we discuss an alternative (more advanced) approach, based upon the editing of the HDF file. 
-Suppose we would like to change the post-processing parameters first specified when first creating the HDF file (e.g., the temperature or number of energy points of a conductivity calculation). For that purpose, we provide a simple python script that rewrites specific parts of our .h5 files.
+Leveraging its underlying Chebyshev approach, KITE can easily recalculate a physical quantity for different choices of parameters at the post-processing level, i.e. without the need for recalculating Chebyshev moments.
+As explained in the [Post-processing tools documentation](postprocessing.md), this can be done via several options available in [KITE-tools][kitetools]. Here, we discuss an alternative (more advanced) approach, based on the editing of the HDF file. 
+Suppose we would like to change the post-processing parameters specified when first creating the HDF file (e.g., the temperature or number of energy points of a conductivity calculation). For that purpose, we provide a simple Python script that rewrites specific parts of our .h5 files.
 As discussed above, the .h5 contains hierarchical data objects that are similar to the structure of directories and files.
 
-When modifying a parameter like temperature, we need to locate in the .h5 file the quantity that is going to be calculated and modify its value.
-The script describes how to list the parameters associated to each quantity and how to edit one parameter.
+When modifying a parameter, such as temperature, we begin by locating it in the HDF file.
+The script below describes how to list and edit the parameters in an HDF file.
 
 ``` python linenums="1"
 file_name = 'archive.h5'

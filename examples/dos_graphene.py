@@ -1,16 +1,16 @@
 """ Density of states of monolayer graphene
 
     ##########################################################################
-    #                         Copyright 2022, KITE                           #
+    #                         Copyright 2020/2022, KITE                      #
     #                         Home page: quantum-kite.com                    #
     ##########################################################################
 
-    Units: Energy in eV
+    Units: Energy in eV, Length in nm
     Lattice: honeycomb
     Configuration: Periodic boundary conditions, double precision,
                     manual rescaling, size of the system 512x512, with domain decomposition (nx=ny=2)
     Calculation type: Average DOS
-    Last updated: 02/05/2025
+    Last updated: 06/05/2025
 """
 
 __all__ = ["main"]
@@ -20,13 +20,12 @@ import numpy as np
 import pybinding as pb
 
 
-def graphene_lattice(onsite=(0, 0)):
+def graphene_lattice(onsite=(0, 0), t=2.8): #t in eV
     """Return lattice specification for a honeycomb lattice with nearest neighbor hoppings"""
 
     # parameters
     a = 0.24595  # [nm] unit cell length
     a_cc = 0.142  # [nm] carbon-carbon distance
-    t = 2.8  # eV
 
     # define lattice vectors
     a1 = a * np.array([1, 0])
@@ -53,10 +52,10 @@ def graphene_lattice(onsite=(0, 0)):
     return lat
 
 
-def main(onsite=(0, 0)):
+def main(onsite=(0, 0), t=2.8):
     """Prepare the input file for KITEx"""
     # load lattice
-    lattice = graphene_lattice(onsite)
+    lattice = graphene_lattice(onsite, t)
 
     # number of decomposition parts [nx,ny] in each direction of matrix.
     # This divides the lattice into various sections, each of which is calculated in parallel
@@ -84,7 +83,7 @@ def main(onsite=(0, 0)):
         boundaries=[mode, mode],
         is_complex=False,
         precision=1,
-        spectrum_range=[-3.01*t, 3.01*t]
+        spectrum_range=[-3.01*t, 3.01*t] #this is graphene's spectral bandwidth inclusive of a safety buffer of +/- 0.1*t
     )
 
     # specify calculation type

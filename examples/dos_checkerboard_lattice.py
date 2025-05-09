@@ -1,13 +1,14 @@
 """ Density of states of a checkerboard lattice
 
     ##########################################################################
-    #                         Copyright 2022, KITE                           #
+    #                         Copyright 2020/2022, KITE                      #
     #                         Home page: quantum-kite.com                    #
     ##########################################################################
 
-    Units: Energy in units of hopping, |t| = 1
+    Units: Energy in units of hopping, |t| = 1, Length in units of lattice parameter, |a| = 1
     Lattice: Checkerboard lattice
-    Configuration: Periodic boundary conditions, double precision, automatic rescaling
+    Configuration: Periodic boundary conditions, double precision, automatic rescaling,
+                   size of the system 512x512, with domain decomposition (nx=ny=2)
     Calculation type: Average DOS
     Last updated: 28/07/2022
 """

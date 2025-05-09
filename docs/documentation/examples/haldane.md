@@ -1,11 +1,16 @@
+
+
+
 ## The Haldane model
 
-The Haldane Hamiltonian is a single-orbital tight-binding model on a honeycomb lattice with a sublattice-staggered
-on-site potential (orbital mass) and complex hoppings between next-nearest-neighbor sites that produce a staggered
-magnetic field configuration with vanishing total flux through the unit cell [^1].
+The Haldane Hamiltonian is a single-orbital tight-binding model on a honeycomb lattice with a sublattice-staggered on-site potential (orbital mass). 
+Complex hoppings between next-nearest-neighbor sites produce a staggered magnetic field configuration with vanishing total flux through the unit cell [^1].
 
 This model describes a Chern insulator (or a quantum anomalous Hall insulator) because it hosts an integer quantum Hall effect
 in the absence of any applied external magnetic fields. This characteristic makes Haldane model ideal for illustrating another capability of KITE: the calculation of transverse conductivities reflecting the quantum geometry of wavefunctions [^2] [^3].
+
+Let us use KITE to compute the dc conductivity tensor of the Haldane model. 
+_The full script for this example can be found [here](https://github.com/quantum-kite/kite/blob/313a00e54a9f9aa33b22886eaf97ce62aaec3996/examples/dos_dccond_haldane.py)._
 
 ### Lattice
 Let us begin with the definition of the Hamiltonian for the case of purely imaginary next-nearest-neighbor hoppings:
@@ -20,7 +25,7 @@ def haldane(onsite=(0, 0), t=1):
     t2 = t/10
 
     # define lattice vectors
-    a1 = a * np.array([a, 0])
+    a1 = a * np.array([1, 0])
     a2 = a * np.array([1 / 2, 1 / 2 * np.sqrt(3)])
 
     # create a lattice with 2 primitive vectors
@@ -80,7 +85,7 @@ calculation.conductivity_dc(num_points=1000,
 
 ### Disorder
 We can include [different types of disorder][disorder].
-For simplicity, we consider onsite uniform disorder distribution with width of `#!python 0.4 eV` and zero average onsite energy (Anderson disorder):
+For simplicity, we consider on-site uniform disorder distribution with width of `#!python 0.4` and zero average on-site energy (Anderson disorder):
 
 ``` python
 disorder = kite.Disorder(lattice)
@@ -90,23 +95,23 @@ disorder.add_disorder('B', 'Uniform', +0.0, 0.4)
 
 ### Calculation and post-processing
 
-Export the KITE model to an HDF file as costumary (see Sec. [Calculation][calculation]) and run the [KITEx][kitex] program.
+Export the KITE model to an HDF file (see Sec. [Calculation][calculation]) and run the [KITEx][kitex] program.
 
-This is a _full spectral_ calculation where KITEx calculates the coefficients of the Chebyshev expansion and KITE-tools
+This is a _full spectral_ calculation where KITEx calculates the coefficients of the Chebyshev expansion, and KITE-tools
 uses those moments to retrieve the transverse conductivity over the full energy range.
-Both `#!python temperature` and `#!python num_points` are parameters used by KITE-tools and is possible to modify
+Both `#!python temperature` and `#!python num_points` are parameters used by KITE-tools, and it is possible to modify
 them without running KITEx again.
 This type of calculation typically requires more RAM memory than DOS or single-shot DC conductivity,
-which imposes limitations to the sizes of the systems (that still can reach large scales with available memory).
-This has implications for the stochastic trace evaluation (STE) done by KITE, whose relative error typically scales with `#!python 1/\sqrt(NR * D)` (here, 
-`#!python NR` is the number of random vectors and `#!python D` is the total number of sites). The STE errors 
+which imposes limitations to the sizes of the systems (that can still reach large scales with available memory).
+This has implications for the stochastic trace evaluation (STE) done by KITE, whose relative error typically scales with $1/\sqrt{N_R D}$  (here, 
+$N_R$ is the number of random vectors and $D$ is the total number of sites). The STE errors 
  can thus be significant, especially at large Chebyshev orders (required to achieve fine energy resolutions). More generally, the relative error of the STE also depends on the lattice model, type of disorder and the calculated quantities.
-Transverse conductivities have more fluctuations, at least in part of the spectrum outside the topological gap, and this tutorial illustrates this issue.
+Transverse conductivities have strong fluctuations outside of the topological gap. This tutorial aims to illustrate this issue.
 
-Figure 1 below shows the longitudinal and transverse conductivity for a small lattice of Haldane model in a calculation that took only 3 minutes on a standard laptop.
+Fig. 1 below shows the longitudinal and transverse conductivity for a small lattice of Haldane model in a calculation that took a few minutes on a laptop.
 KITEx captures the anomalous quantum Hall plateau extremely well, with a relative error of less than 0.1%.
 But it is also clear that the transverse conductivity presents significantly more fluctuations outside the plateau than the longitudinal conductivity, and we already considered 50 random vectors. 
-Better results can be easily obtained by running the simulation for larger systems and/or increasing the number of random vectors used in the STE (see below).
+A finer energy resolution can be obtained by running the simulation for larger systems and/or increasing the number of random vectors used in the STE (see below).
 
 This figure can be reproduced using KITE-tools while specifying some additional parameters (refer to the [post-processing tools documentation](../postprocessing.md) if you need more details). To this end, run the following line
 
@@ -114,9 +119,8 @@ This figure can be reproduced using KITE-tools while specifying some additional 
 ./build/KITE-tools haldane.h5 --CondDC -F -4 4 1000
 ```
 
-which calculates the DC conductivity for 1000 equidistant Fermi energies in the range `#!python [-4, 4]`.
-The result can be plotted by using the minimal python script below.
-This script can be easily modified to plot both the longitudinal and transverse conductivity on one figure. 
+which calculates the `#!python xy` conductivity of the system specified above for 1000 equidistant Fermi energies in the range `#!python [-4, 4]`.
+The result can be plotted by using the brief Python script below. (The computation and visualization of the longitudinal conductivity follows identical steps.)
 
 ### Visualisation
 ``` python
@@ -131,7 +135,7 @@ plt.show()
 <div>
   <figure>
     <img src="../../../assets/images/haldane/cond.png" style="width: 40em;" />
-    <figcaption> </figcaption>
+    <figcaption> Figure 1</figcaption>
   </figure>
 </div>
 
@@ -143,7 +147,7 @@ This is illustrated in Fig. 2.
 <div>
   <figure>
     <img src="../../../assets/images/haldane/trans_cond.png" style="width: 40em;" />
-    <figcaption> </figcaption>
+    <figcaption>Figure 2 </figcaption>
   </figure>
 </div>
 

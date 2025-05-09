@@ -92,8 +92,6 @@
                 <div class="home-content-left">
                     <h1 class="home-content-left">
                         HIGH-PERFORMANCE QUANTUM TRANSPORT SOFTWARE
-
-
                     </h1>
 
 
@@ -105,7 +103,7 @@
                         <a class="button stroke" href="about/">
                             About KITE
                         </a>
-                        <a class="button stroke" href="about/">
+                        <a class="button stroke" href="about/publications/">
                             Publications
                         </a>
                     </div>
@@ -130,7 +128,7 @@
 
         <div class="row about-intro">
 
-            <div class="col-four">
+            <div class="col-four" data-aos="fade-up">
                 <h1 class="intro-header">OPEN-SOURCE INITIATIVE</h1>
             </div>
             <div class="col-eight">
@@ -138,11 +136,10 @@
                 <p class="lead" data-aos="fade-up">
                     KITE code: accurate real-space simulation of quantum condensed matter for the first time scalable to billions of atomic orbitals
                 </p>
-                <ul>
-                    <!-- <p> &#8680; Atomistic modelling of crystals, heterostructures and devices: electronic structure and beyond</p> -->
-                    <p> &#8680; Large-scale multi-orbital models in one-to-one correspondence with real structures </p>
-                    <p> &#8680; Realistic disorder landscapes and disorder statistics </p>
-                    <p> &#8680; Giant lattice sizes <b>=</b> fine spectral resolution, ideal for studies of quantum critical phenomena</p>
+                <ul data-aos="fade-up">
+                    <p> <i class="mi mi-RightArrowKeyTime0"></i> Large-scale multi-orbital models </p>
+                    <p> <i class="mi mi-RightArrowKeyTime0"></i> Realistic disorder landscapes and disorder statistics </p>
+                    <p> <i class="mi mi-RightArrowKeyTime0"></i> Fine spectral resolution, ideal for studies of quantum critical phenomena</p>
                 </ul>
             </div>
 
@@ -214,8 +211,48 @@
     </section> <!-- end about -->
 
 
+    {% for news_entry in config.extra.news %}
+    {% if loop.index == 1 %}
+    <section id="news">
+
+        <div class="row">
+            <div class="col-four" data-aos="fade-up">
+                <h1 class="intro-header">NEWS &<br> UPDATES</h1>
+            </div>
+            <div class="col-eight entry-list">
+                {% endif %}
+                <div class="row entry" data-aos="fade-up">
+                    <div class="col-three">
+                            {%if news_entry.image %}
+                                {% if news_entry.link %}<a href="{{ news_entry.link }}" class="img-link">{% endif %}
+                                    <img src="assets/images/news/{{ news_entry.image }}" alt="Image of {{ news_entry.title }}">
+                                {% if news_entry.link %}</a>{% endif %}
+                            {% else %}
+                                {% if news_entry.link %}<a href="{{ news_entry.link }}" class="span-link">{% endif %}
+                                    <span class="icon"><i class="mi mi-Calendar"></i></span>
+                                {% if news_entry.link %}</a>{% endif %}
+                            {% endif %}
+                    </div>
+                    <div class="col-nine">
+                        {% if news_entry.link %}
+                            <h3><a href="{{ news_entry.link }}"><i class="mi mi-Link"></i> {{ news_entry.title }}</a></h3>
+                        {% else %}
+                            <h3>{{ news_entry.title }}</h3>
+                        {% endif %}
+                        <p class="news-date">{{ news_entry.date }}</p>
+                        <p class="news-text">{{ news_entry.text }}</p>
+                    </div>
+                </div>
+                {% if loop.index == config.extra.news|length  %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+    {% endfor %}
 
 
+    {% for team_member in config.extra.team %}
+    {% if loop.index == 1 %}
     <!-- Testimonials Section
     ================================================== -->
     <section id="testimonials">
@@ -225,8 +262,7 @@
                 <h1 class="intro-header" data-aos="fade-up">Our Team</h1>
             </div>
         </div>
-
-        {% for team_member in config.extra.team %}
+    {% endif %}
             {% if loop.index % 4 == 1 %}
             <div class="row owl-wrap">
                 <div id="testimonial-slider" data-aos="fade-up">
@@ -235,11 +271,20 @@
             {% endif %}
                             <div class="col-1-4 tab-full">
                                 <div class="testimonial-author">
+                                    {% if team_member.link %}<a href="{{ team_member.link }}" class="img-link">{% endif %}
                                     <img src="assets/images/avatars/{{ team_member.image }}" alt="Image of {{ team_member.name }}">
+                                    {% if team_member.link %}</a>{% endif %}
                                     <div class="author-info">
-                                        <a href="{{ team_member.link }}" style="text-transform: uppercase;">
-                                            {{ team_member.name }}
-                                        </a>
+                                        <span class="author-name">
+                                        {% if team_member.link %}
+                                            <a href="{{ team_member.link }}" class="span-link">
+                                            <i class="mi mi-Link"></i>
+                                        {% endif %}
+                                        {{ team_member.name }}
+                                        {% if team_member.link %}
+                                            </a>
+                                        {% endif %}
+                                        </span>
                                         <span class="position">{{ team_member.title }}</span>
                                     </div>
                                 </div>
@@ -251,16 +296,70 @@
             </div> <!-- end flex-container -->
 
             {% endif %}
-        {% endfor %}
-
+    {% if loop.index == config.extra.team|length  %}
     </section> <!-- end testimonials -->
+    {% endif %}
+    {% endfor %}
+
+
+    {% for acknowledgement_entry in config.extra.acknowledgement %}
+    {% if loop.index == 1 %}
+    <!-- acknowledgement Section
+================================================== -->
+    <section id="acknowledgement">
+
+        <div class="row">
+            <div class="col-twelve">
+                <h1 class="intro-header" data-aos="fade-up">Acknowledgements</h1>
+            </div>
+        </div>
+
+    {% endif %}
+        {% if loop.index % 5 == 1 %}
+        <div class="row owl-wrap">
+            <div id="acknowledgement-slider" data-aos="fade-up">
+                <div class="slides owl-carousel">
+                    <div class="row">
+                        {% endif %}
+                        <div class="col-1-5 tab-full">
+                            <div class="acknowledgement-author">
+                                {% if acknowledgement_entry.link %}<a href="{{ acknowledgement_entry.link }}" class="img-link">{% endif %}
+                                <img src="assets/images/avatars/{{ acknowledgement_entry.image }}" alt="Image of {{ acknowledgement_entry.name }}">
+                                {% if acknowledgement_entry.link %}</a>{% endif %}
+                                <div class="author-info">
+                                    {% if acknowledgement_entry.link %}
+                                        <a href="{{ acknowledgement_entry.link }}" class="span-link">
+                                        <i class="mi mi-Link"></i>
+                                    {% endif %}
+                                    {{ acknowledgement_entry.name }}
+                                    {% if acknowledgement_entry.link %}
+                                        </a>
+                                    {% endif %}
+                                    <span class="position">{{ acknowledgement_entry.title }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% if loop.index % 5 == 0 or loop.index == config.extra.team|length  %}
+                    </div>
+                </div> <!-- end slides -->
+            </div> <!-- end testimonial-slider -->
+        </div> <!-- end flex-container -->
+
+        {% endif %}
+
+    {% if loop.index == config.extra.acknowledgement|length  %}
+    </section> <!-- end acknowledgement -->
+    {% endif %}
+    {% endfor %}
+
+    <!-- footer
+    ================================================== -->
+
     <br>
     <div id="preloader">
         <div id="loader"></div>
     </div>
 
-    <!-- footer
-    ================================================== -->
     <footer class="md-footer">
 
         <!-- Further information -->

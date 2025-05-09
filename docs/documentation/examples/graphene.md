@@ -1,23 +1,23 @@
-*(This example uses graphene to show how to construct a lattice with sublattices and perform a basic calculation using KITE.)*
 ## The TB-model for Graphene
 
-The electronic structure of graphene is well described by a simple tight-binding model that only uses one $p_z$ orbital
+The electronic structure of graphene is well-described by a simple tight-binding model that only uses one $p_z$ orbital
 in a hexagonal unit cell with two equivalent carbon atoms.
-These atoms are located on the different subbattices, *A* and *B*, and don't have an on-site energy term.
+These atoms are located on the different sublattices, *A* and *B*, and don't have an on-site energy term.
 
-Though the model is relative simple, it is used suite often in the literature.
+Although this model is relatively simple, it is used often within the literature. The example below uses graphene to show how to construct a lattice with sublattices and perform a basic calculation using KITE.
+The script for this example can be found [here](https://github.com/quantum-kite/kite/blob/313a00e54a9f9aa33b22886eaf97ce62aaec3996/examples/dos_graphene.py)
 
 ### Lattice
-The code below illustrates the building of the [`#!python pb.lattice`][lattice] for graphene:
+We start by building the [`#!python pb.lattice`][lattice] for graphene:
 
-* define the parameter ($t$ in eV)
-* define the vectors of the unit-cell ($\vec a_1$ and $\vec a_2$ in units of $a$, length of the unit-cell)
-* create a [`#!python pb.lattice`][lattice]-object
-* define the on-site energies
-* define the hopping parameters
+* Define the parameter ($t$ in eV)
+* Define the vectors of the unit-cell ($\vec a_1$ and $\vec a_2$ in units of $a$, length of the unit-cell)
+* Create a [`#!python pb.lattice`][lattice]-object
+* Define the on-site energies
+* Define the hopping parameters
     * 1 *normal* hopping within the unit cell
     * 2 *rotated* hopping $\pm 2 \pi/3$ to neighbouring cells
-* return the [`#!python pb.lattice`][lattice]-object to be used by KITE
+* Return the [`#!python pb.lattice`][lattice]-object to be used by KITE
 
 ``` python linenums="1"
 def graphene_lattice(onsite=(0, 0)):
@@ -64,13 +64,13 @@ plt.show()
 <div>
   <figure>
     <img src="../../../assets/images/getting_started/graphene_example.png" style="width: 40em;"/>
-    <figcaption>A visualization for the defined lattice for graphene.</figcaption>
+    <figcaption>A visualization for the defined lattice of graphene.</figcaption>
   </figure>
 </div>
 
 ## KITEx calculation
-### Settings and Calculation
-We can make the [`#!python kite.Calculation`][calculation]-object
+### Settings and calculation
+We can make the [`#!python kite.Calculation`][calculation] object
 ``` python linenums="1"
 configuration = kite.Configuration(
   divisions=[64, 64],
@@ -112,7 +112,7 @@ plt.show()
 </div>
 
 [tutorial]: ../index.md
-[calculation]: ../../api/kite.md#calculation
+[calculation]: ../calculation.md
 [getting_started]: ../index.md
 [lattice]: https://docs.pybinding.site/en/stable/_api/pybinding.Lattice.html
 [kitex]: ../../api/kitex.md

@@ -18,8 +18,9 @@
  *  11. about
  *  12. pricing
  *  13. testimonials *
- *  14. download
- *  15. footer styles
+ *  14. acknowledgement *
+ *  15. download
+ *  16. footer styles
  *
  * =================================================================== */
 /* ===================================================================
@@ -187,7 +188,7 @@ p img {
 
 p.lead {
     font-family: "muli-light", sans-serif;
-    font-size: 2.1rem;
+    font-size: 2.6rem;
     line-height: 1.857;
     color: #606060;
     margin-bottom: 3.6rem;
@@ -871,7 +872,7 @@ button.stroke:hover,
 .button.stroke:hover,
 button.strokefill:hover,
 .button.strokefill:hover {
-    border: 0.3rem solid #89a314;
+    border: 0.2rem solid #89a314;
     color: #89a314;
 }
 
@@ -1506,7 +1507,7 @@ h1.intro-header::before {
 }
 
 .home-content-left {
-    padding: 10rem 0 12rem 40px;
+    padding: 10rem 0 12rem 0;
     position: relative;
     width: 100%;
 }
@@ -1538,12 +1539,20 @@ h1.intro-header::before {
     text-align: center;
 }
 
+.home-content-left .buttons {
+    text-align: center;
+}
+
 .home-content-left .button.stroke,
 .home-content-left .button.strokefill {
     min-width: 188px;
 }
 
-.home-content-left .button.stroke{
+.home-content-left .button.strokefill {
+    color: #822855;
+}
+
+.home-content-left .button.stroke {
     color: rgba(255, 255, 255, 0.8) !important;
 }
 
@@ -1930,6 +1939,7 @@ html[data-useragent*='MSIE 10.0'] .home-scrolldown,
 
 .about-features .features-list {
     padding-top: 5.4rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.07);
 }
 
 .about-features .feature {
@@ -2043,6 +2053,16 @@ html[data-useragent*='MSIE 10.0'] .home-scrolldown,
     margin-right: auto;
 }
 
+.about-intro ul p {
+    font-size: 1.8rem;
+}
+
+.about-intro ul p i {
+    color: #822855;
+    font-size: 3rem;
+    vertical-align: -.95rem;
+    padding-right: 1rem;
+}
 /* -------------------------------------------------------------------
  * responsive:
  * about
@@ -2369,8 +2389,136 @@ html[data-useragent*='MSIE 10.0'] .home-scrolldown,
         margin-right: 0;
     }
 }
+/* ===================================================================
+ * 13.0 News - (_layout.scss)
+ *
+ * ------------------------------------------------------------------- */
+
+#news {
+    background: white;
+    padding: 4rem 0 9rem;
+    text-align: left;
+}
+
+#news .entry-list {
+    border-left: 1px solid rgba(0, 0, 0, 0.07);
+}
+
+#news .entry {
+    margin-bottom: 2rem;
+}
+
+#news .entry .icon {
+    margin-bottom: 1.5rem;
+    display: inline-block;
+}
+
+#news .entry .icon i {
+    color: #822855;
+    font-size: 4.8rem;
+}
+
+#news .entry h3 {
+    font-family: "LatoLatin-regular", sans-serif;
+    font-size: 1.9rem;
+    color: #404040;
+    margin-bottom: 1rem;
+}
+
+#news .entry h3 a {
+    color: #822855;
+}
+
+#news .entry h3 a:hover {
+    color: #89a314;
+}
+
+#news .entry .news-date {
+    font-family: "muli-bold", sans-serif;
+    font-size: 1.6rem;
+    line-height: 1.313;
+    letter-spacing: 0;
+    text-transform: none;
+    color: rgba(0, 0, 0, 0.5);
+    margin-bottom: 1rem;
+}
+
+#news .entry .news-text {
+    font-family: "muli-regular", sans-serif;
+    font-size: 1.6rem;
+    line-height: 1.875;
+    color: #505050;
+    margin: 0;
+}
+
+#news .entry .img-link,
+#news .entry .span-link {
+    display: block;
+    margin: 0 auto 1.2rem auto;
+    border-radius: 1.5rem;
+    width: 15rem;
+    height: 15rem;
+    overflow: hidden;
+}
 
 
+#news .entry .img-link {
+    background: #89a314;
+}
+
+#news .entry img,
+#news .entry .icon {
+    margin: 0 auto 1.2rem auto;
+    display: block;
+    webkit-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+    height: 100%;
+    width: 100%;
+    border-radius: 1.5rem;
+}
+
+#news .entry .icon {
+    text-align: center;
+    padding-top: 5.1rem;
+}
+
+#news .entry .img-link img:hover,
+#news .entry .span-link .icon:hover{
+    background: #89a314;
+    opacity: .5;
+    webkit-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+}
+
+@media only screen and (max-width: 1024px) {
+    #news [class*="col"] {
+        width: 100% !important;
+        float: none !important;
+        clear: both !important;
+        margin-left: 0;
+        margin-right: 0;
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    #news [class*="col"] {
+        width: 100% !important;
+        float: none !important;
+        clear: both !important;
+        margin-left: 0;
+        margin-right: 0;
+    }
+}
+
+@media only screen and (max-width: 600px) {
+    #news [class*="col"] {
+        width: 100% !important;
+        float: none !important;
+        clear: both !important;
+        margin-left: 0;
+        margin-right: 0;
+    }
+}
 /* ===================================================================
  *  13. testimonials - (_layout.scss)
  *
@@ -2379,7 +2527,7 @@ html[data-useragent*='MSIE 10.0'] .home-scrolldown,
 #testimonials {
     /* background: #1e1f20; */
     background: white;
-    padding: 15rem 0 9rem;
+    padding: 4rem 0 9rem;
     text-align: center;
     min-height: 600px;
 }
@@ -2435,12 +2583,47 @@ html[data-useragent*='MSIE 10.0'] .home-scrolldown,
     margin-top: 4.2rem;
 }
 
+#testimonial-slider .testimonial-author .author-info .author-name {
+    text-transform: uppercase;
+    font-size: 1.9rem;
+}
+
+#testimonial-slider .testimonial-author .author-info .author-name a {
+    color: #822855;
+    webkit-transition: all .3s ease-in-out;
+    transition: all .3s ease-in-out;
+}
+
+#testimonial-slider .testimonial-author .author-info .author-name a:hover{
+    color: #89a314;
+    webkit-transition: all .3s ease-in-out;
+    transition: all .3s ease-in-out;
+}
+
+#testimonial-slider .testimonial-author .img-link {
+    display: block;
+    margin: 0 auto 1.2rem auto;
+    border-radius: 1.5rem;
+    width: 15rem;
+    height: 15rem;
+    overflow: hidden;
+    background: #89a314;
+}
+
 #testimonial-slider .testimonial-author img {
-    width: 7.4rem;
-    height: 7.4rem;
+    width: 15rem;
+    height: 15rem;
     margin: 0 auto 1.2rem auto;
     display: block;
-    border-radius: 50%;
+    border-radius: 1.5rem;
+    webkit-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+}
+
+#testimonial-slider .testimonial-author .img-link img:hover {
+    opacity: .5;
+    webkit-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
 }
 
 #testimonial-slider .testimonial-author .author-info {
@@ -2550,38 +2733,9 @@ html[data-useragent*='MSIE 10.0'] .home-scrolldown,
  * testimonials
  * ------------------------------------------------------------------- */
 
-@media only screen and (max-width: 1024px) {
-    #testimonial-slider p {
-        font-size: 3rem;
-    }
-}
-
-@media only screen and (max-width: 920px) {
-    #testimonial-slider p {
-        font-size: 2.6rem;
-    }
-
-    #testimonial-slider .testimonial-author img {
-        width: 6.6rem;
-        height: 6.6rem;
-    }
-
-    #testimonial-slider .testimonial-author .author-info {
-        font-size: 1.8rem;
-    }
-
-    #testimonial-slider .testimonial-author .author-info span {
-        font-size: 1.5rem;
-    }
-}
-
 @media only screen and (max-width: 600px) {
     #testimonials .owl-wrap {
         width: 90%;
-    }
-
-    #testimonial-slider p {
-        font-size: 2.4rem;
     }
 }
 
@@ -2589,9 +2743,230 @@ html[data-useragent*='MSIE 10.0'] .home-scrolldown,
     #testimonials .owl-wrap {
         width: 100%;
     }
+}
 
-    #testimonial-slider p {
-        font-size: 2rem;
+
+/* ===================================================================
+ *  13a. testimonials - (_layout.scss)
+ *
+ * ------------------------------------------------------------------- */
+
+#acknowledgement {
+    /* background: #1e1f20; */
+    background: white;
+    padding: 0rem 0 9rem;
+    text-align: center;
+    min-height: 600px;
+}
+
+#acknowledgement .col-1-5 {
+    min-width: 20%;
+}
+#acknowledgement h1::before {
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    transform: translateX(-50%);
+}
+
+#acknowledgement .owl-wrap {
+    width: 80%;
+    max-width: 900px;
+    margin: 4.2rem auto 0;
+}
+
+#acknowledgement-slider {
+    margin: 0 0 3rem 0;
+    position: relative;
+}
+
+#acknowledgement-slider .slides {
+    padding-bottom: 3rem;
+}
+
+#acknowledgement-slider p {
+    font-family: "muli-regular", sans-serif;
+    font-size: 3.2rem;
+    line-height: 1.5;
+    color: #303030;
+}
+
+#acknowledgement-slider p::before,
+#acknowledgement-slider p::after {
+    display: inline-block;
+    font-family: "muli-regular", serif;
+    font-size: 3.6rem;
+    line-height: 1;
+    position: relative;
+    top: .3rem;
+}
+
+#acknowledgement-slider p::before {
+    content: '\201C';
+}
+
+#acknowledgement-slider p::after {
+    content: '\201D';
+}
+
+#acknowledgement-slider .acknowledgement-author {
+    margin-top: 4.2rem;
+    min-width: 20%;
+}
+
+#acknowledgement-slider .acknowledgement-author img {
+    width: 7.6rem;
+    height: 7.6rem;
+    margin: 0 auto 1.2rem auto;
+    display: block;
+    border-radius: 50%;
+    webkit-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+}
+
+#acknowledgement-slider .acknowledgement-author .img-link {
+    display: block;
+    margin: 0 auto 1.2rem auto;
+    border-radius: 50%;
+    width: 7.6rem;
+    height: 7.6rem;
+    overflow: hidden;
+    background: #89a314;
+}
+
+#acknowledgement-slider .acknowledgement-author .img-link img:hover {
+    opacity: .5;
+    webkit-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+}
+
+#acknowledgement-slider .acknowledgement-author .author-info {
+    display: inline-block;
+    vertical-align: middle;
+    text-align: center;
+    font-family: "LatoLatin-semibold", sans-serif;
+    font-size: 1.4rem;
+    margin-top: .9rem;
+    margin-bottom: 3rem;
+    color: #5f5f5f;
+}
+
+#acknowledgement-slider .acknowledgement-author .author-info span {
+    display: block;
+    font-family: "muli-bold", sans-serif;
+    font-size: 1.4rem;
+    line-height: 1.313;
+    letter-spacing: 0;
+    text-transform: none;
+    color: rgba(0, 0, 0, 0.5);
+    margin-top: .3rem;
+}
+#acknowledgement-slider .acknowledgement-author .author-info a {
+    color: #822855;
+    webkit-transition: all .3s ease-in-out;
+    transition: all .3s ease-in-out;
+}
+
+#acknowledgement-slider .acknowledgement-author .author-info a:hover{
+    color: #89a314;
+    webkit-transition: all .3s ease-in-out;
+    transition: all .3s ease-in-out;
+}
+
+
+/* owl dots */
+
+#acknowledgement-slider .owl-nav {
+    margin-top: 1.8rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#acknowledgement-slider .owl-nav [class*='owl-'] {
+    color: #1e1f20;
+    font-family: "LatoLatin-regular", sans-serif;
+    font-size: 1.4rem;
+    height: 3rem;
+    line-height: 3rem;
+    margin: .6rem;
+    padding: 0 10px;
+    background: rgba(0, 0, 0, 0.5);
+    display: inline-block;
+    cursor: pointer;
+    border-radius: 3px;
+    -webkit-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+}
+
+#acknowledgement-slider .owl-nav [class*='owl-']:hover {
+    background: rgba(0, 0, 0, 0.7);
+    color: #1e1f20;
+    text-decoration: none;
+}
+
+#acknowledgement-slider .owl-nav .disabled {
+    background: rgba(0, 0, 0, 0.2);
+    cursor: default;
+}
+
+#acknowledgement-slider .owl-nav.disabled+.owl-dots {
+    margin-top: 1.8rem;
+}
+
+#acknowledgement-slider .owl-dots {
+    text-align: center;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#acknowledgement-slider .owl-dots .owl-dot {
+    display: inline-block;
+    zoom: 1;
+    *display: inline;
+}
+
+#acknowledgement-slider .owl-dots .owl-dot span {
+    width: 9px;
+    height: 9px;
+    background-color: #959595;
+    margin: 9px 9px;
+    display: block;
+    -webkit-backface-visibility: visible;
+    backface-visibility: visible;
+    transition: opacity 200ms ease;
+    border-radius: 50%;
+    -webkit-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+}
+
+#acknowledgement-slider .owl-dots .owl-dot.active span,
+#acknowledgement-slider .owl-dots .owl-dot:hover span {
+    background-color: #cccccc;
+}
+
+/* Add the parallax effect to the background of the main page */
+.parallax {
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-image: url("assets/images/background.jpg");
+}
+
+/* -------------------------------------------------------------------
+ * responsive:
+ * testimonials
+ * ------------------------------------------------------------------- */
+
+@media only screen and (max-width: 600px) {
+    #acknowledgement .owl-wrap {
+        width: 90%;
+    }
+}
+
+@media only screen and (max-width: 400px) {
+    #acknowledgement .owl-wrap {
+        width: 100%;
     }
 }
 
