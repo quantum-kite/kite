@@ -104,8 +104,8 @@ Both `#!python temperature` and `#!python num_points` are parameters used by KIT
 them without running KITEx again.
 This type of calculation typically requires more RAM memory than DOS or single-shot DC conductivity,
 which imposes limitations to the sizes of the systems (that still can reach large scales with available memory).
-This has implications for the stochastic trace evaluation (STE) done by KITE, whose relative error typically scales with `#!python 1/\sqrt(NR * D)` (here, 
-`#!python NR` is the number of random vectors and `#!python D` is the total number of sites). The STE errors 
+This has implications for the stochastic trace evaluation (STE) done by KITE, whose relative error typically scales with $1/\sqrt{N_R D}$  (here, 
+$N_R$ is the number of random vectors and $D$ is the total number of sites). The STE errors 
  can thus be significant, especially at large Chebyshev orders (required to achieve fine energy resolutions). More generally, the relative error of the STE also depends on the lattice model, type of disorder and the calculated quantities.
 Transverse conductivities have more fluctuations, at least in part of the spectrum outside the topological gap, and this tutorial illustrates this issue.
 
