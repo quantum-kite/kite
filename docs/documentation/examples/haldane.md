@@ -120,9 +120,8 @@ This figure can be reproduced using KITE-tools while specifying some additional 
 ./build/KITE-tools haldane.h5 --CondDC -F -4 4 1000
 ```
 
-which calculates the DC conductivity for 1000 equidistant Fermi energies in the range `#!python [-4, 4]`.
-The result can be plotted by using the minimal python script below.
-This script can be easily modified to plot both the longitudinal and transverse conductivity on one figure. 
+which calculates the `#!python xy` conductivity of the system specified above for 1000 equidistant Fermi energies in the range `#!python [-4, 4]`.
+The result can be plotted by using the minimal python script below. (The computation and visualization of the longitudinal conductivity follows identical steps.)
 
 ### Visualisation
 ``` python
