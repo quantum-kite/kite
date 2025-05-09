@@ -188,7 +188,7 @@ p img {
 
 p.lead {
     font-family: "muli-light", sans-serif;
-    font-size: 2.1rem;
+    font-size: 2.6rem;
     line-height: 1.857;
     color: #606060;
     margin-bottom: 3.6rem;
@@ -1507,7 +1507,7 @@ h1.intro-header::before {
 }
 
 .home-content-left {
-    padding: 10rem 0 12rem 40px;
+    padding: 10rem 0 12rem 0;
     position: relative;
     width: 100%;
 }
@@ -2053,6 +2053,14 @@ html[data-useragent*='MSIE 10.0'] .home-scrolldown,
     margin-right: auto;
 }
 
+.about-intro ul p {
+    font-size: 1.8rem;
+}
+
+.about-intro ul p i {
+    color: #822855;
+    font-size: 2.56rem;
+}
 /* -------------------------------------------------------------------
  * responsive:
  * about
