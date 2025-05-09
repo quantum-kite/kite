@@ -2059,7 +2059,9 @@ html[data-useragent*='MSIE 10.0'] .home-scrolldown,
 
 .about-intro ul p i {
     color: #822855;
-    font-size: 2.56rem;
+    font-size: 3rem;
+    vertical-align: -.95rem;
+    padding-right: 1rem;
 }
 /* -------------------------------------------------------------------
  * responsive:
