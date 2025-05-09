@@ -79,7 +79,7 @@ Below, we explain each of the arguments in the [`#!python kite.Configuration`][c
 
     ### Random BC
 
-    Random BCs are defined using `mode = 'random'`. No extra arguments are required, but this option implicitely assumes that many random vectors (and/or disorder configurations) will be used  (see Sec. [Calculation][calculation]). For a single system realization, this option is equivalent to a mere twisted-BC simulation with randomly chosen twist-angles along `#!python x, y` and `#!python z` lattice directions.
+    Random BCs are defined using `mode = 'random'`. No extra arguments are required, but this option implicitly assumes that many random vectors (and/or disorder configurations) will be used  (see Sec. [Calculation][calculation]). For a single system realization, this option is equivalent to a mere twisted-BC simulation with randomly chosen twist-angles along `#!python x, y` and `#!python z` lattice directions.
 
 
 ## [Complex][configuration-is_complex]
@@ -94,8 +94,8 @@ Below, we explain each of the arguments in the [`#!python kite.Configuration`][c
   Use `#!python 0` for float, `#!python 1` for double, and `#!python 2` for long double.
 
 ## [Spectrum Range][configuration-spectrum_range]
-: The optional [`#!python spectrum_range`][configuration-spectrum_range] is an array of reals.
-  By default, KITE executes an automated rescaling of the Hamiltonian, see the [Documentation][documentation].
+: The optional [`#!python spectrum_range`][configuration-spectrum_range] is an array of real values.
+  By default, KITE executes an automated rescaling of the Hamiltonian (Sec. [Documentation][documentation]).
   Advanced users are encouraged to override this feature and specify the energy interval manually using `#!python spectrum_range=[Emin,Emax]`, where `#!python Emin, Emax` are the minimum, maximum energy eigenvalues.
   
 
