@@ -1,13 +1,17 @@
-"""       
-        ##############################################################################      
-        #                        KITE | Release  1.1                                 #      
-        #                                                                            #      
-        #                        Kite home: quantum-kite.com                         #           
-        #                                                                            #      
-        #  Developed by: Simao M. Joao, Joao V. Lopes, Tatiana G. Rappoport,         #       
-        #  Misa Andelkovic, Lucian Covaci, Aires Ferreira, 2018-2022                 #      
-        #                                                                            #      
-        ##############################################################################      
+""" Local Density of states (LDoS) for the Haldane model
+
+    ##########################################################################
+    #                         Copyright 2020/22, KITE                        #
+    #                         Home page: quantum-kite.com                    #
+    ##########################################################################
+
+    Units: Energy in eV
+    Lattice: Honeycomb
+    Disorder: Vacancies
+    Configuration: Periodic boundary conditions, double precision,
+                    given rescaling, size of the system flexible, with domain decomposition (nx=ny=4)
+    Calculation type: LDoS
+    Last updated: 08/05/2025
 """
 import pybinding as pb
 import sys
@@ -15,8 +19,6 @@ import kite
 import numpy as np
 # import matplotlib.pyplot as plt
 from math import pi, sqrt
-"""Calculate the band structure of Haldane model with sublattice symmetry breaking"""
-# the gaps have different sizes in K and K'!
 
 def tmd(signsoc):
     """Return the lattice specification for monolayer graphene"""
@@ -218,7 +220,7 @@ struc_disorder_3 = kite.StructuralDisorder(lattice, position=[[d1,d2]])
 struc_disorder_1.add_vacancy('M1')
 struc_disorder_2.add_vacancy('M2')
 struc_disorder_3.add_vacancy('M3')
-disorder_structural = [struc_disorder_1, struc_disorder_2, struc_disorder_3]  
+disorder_structural = [struc_disorder_1, struc_disorder_2, struc_disorder_3]
 
 
 nx = ny = 4
@@ -228,4 +230,3 @@ calculation = kite.Calculation(configuration)
 calculation.ldos(energy=np.linspace(-0.1, 0.1, 3), num_moments=N, num_disorder=1, position=pos_matrix, sublattice=sub_matrix)
 calculation.dos(num_points=512, num_moments=512, num_random=1, num_disorder=1)
 kite.config_system(lattice, configuration, calculation, filename='config.h5', disorder_structural=disorder_structural)
-

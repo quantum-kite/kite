@@ -1,7 +1,7 @@
 """ Optical Conductivity of a T-Symmetric Cubic Weyl Semimetal with Anderson Disorder
 
     ##########################################################################
-    #                         Copyright 2022, KITE                           #
+    #                         Copyright 2020/22, KITE                        #
     #                         Home page: quantum-kite.com                    #
     ##########################################################################
 
@@ -9,7 +9,7 @@
     Lattice: simple cubic lattice (two orbitals per site)
     Configuration: random twisted boundary conditions, double precision, manual rescaling
     Calculation type: Linear Optical Conductivity (sigma_xx) [Heavily Paralellized Example]
-    Last updated: 28/07/2022
+    Last updated: 08/05/2025
 """
 
 __all__ = ["main"]
@@ -54,7 +54,7 @@ def main(anderson_w=0):
     """Prepare the input file for KITEx"""
     # load lattice
     lattice = weyl_semimetal()
-    
+
     # add scalar on-site Disorder (Box distribution in [W/2,W/2])
     # Number of Samples controlled by num_disorder
     disorder = kite.Disorder(lattice)

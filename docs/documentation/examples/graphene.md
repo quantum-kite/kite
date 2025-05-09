@@ -1,11 +1,12 @@
-*(This example uses graphene to show how to construct a lattice with sublattices and perform a basic calculation using KITE.)*
+*(This example uses graphene to show how to construct a lattice with sublattices and perform a basic calculation using KITE. 
+The script for this example can be found [here](https://github.com/quantum-kite/kite/blob/313a00e54a9f9aa33b22886eaf97ce62aaec3996/examples/dos_graphene.py).)*
 ## The TB-model for Graphene
 
 The electronic structure of graphene is well described by a simple tight-binding model that only uses one $p_z$ orbital
 in a hexagonal unit cell with two equivalent carbon atoms.
 These atoms are located on the different subbattices, *A* and *B*, and don't have an on-site energy term.
 
-Though the model is relative simple, it is used suite often in the literature.
+Though the model is relative simple, it is used suite often in the literature. 
 
 ### Lattice
 The code below illustrates the building of the [`#!python pb.lattice`][lattice] for graphene:
@@ -112,7 +113,7 @@ plt.show()
 </div>
 
 [tutorial]: ../index.md
-[calculation]: ../../api/kite.md#calculation
+[calculation]: ../calculation.md
 [getting_started]: ../index.md
 [lattice]: https://docs.pybinding.site/en/stable/_api/pybinding.Lattice.html
 [kitex]: ../../api/kitex.md

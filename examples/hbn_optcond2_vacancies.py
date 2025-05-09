@@ -1,30 +1,31 @@
-"""       
-        ##############################################################################      
-        #                        KITE | Release  1.1                                 #      
-        #                                                                            #      
-        #                        Kite home: quantum-kite.com                         #           
-        #                                                                            #      
-        #  Developed by: Simao M. Joao, Joao V. Lopes, Tatiana G. Rappoport,         #       
-        #  Misa Andelkovic, Lucian Covaci, Aires Ferreira, 2018-2022                 #      
-        #                                                                            #      
-        ##############################################################################      
+""" Optical Conductivity of Hexagonal Boron Nitride
+
+    ##########################################################################
+    #                         Copyright 2020/22, KITE                        #
+    #                         Home page: quantum-kite.com                    #
+    ##########################################################################
+
+    Units: Energy in eV
+    Lattice: Honeycomb
+    Disorder: Vacancies
+    Configuration: Periodic boundary conditions, double precision,
+                    given rescaling, size of the system flexible, with domain decomposition (nx=ny=2)
+    Calculation type: Optical Conductivity
+    Last updated: 08/05/2025
 """
-""" hexagonal Boron Nitride """
-
-
 import pybinding as pb
 import numpy as np
 import kite
 
 
 def hbn():
-    t = -1.0                                 
+    t = -1.0
     a_cc = 1                              # [nm] carbon-carbon distance
     a = a_cc*np.sqrt(3)                   # [nm] unit cell length
     gap = 0.2                             # [t] gap
 
     lat = pb.Lattice(
-        a1=[a/2,  a/2 * np.sqrt(3)], 
+        a1=[a/2,  a/2 * np.sqrt(3)],
         a2=[a/2, -a/2 * np.sqrt(3)])
 
     lat.add_sublattices(
@@ -61,19 +62,19 @@ def main():
 
 
     configuration = kite.Configuration(
-            divisions=[nx, ny], 
-            length=[lx, ly], 
-            boundaries=["periodic", "periodic"], 
-            is_complex=True, 
-            precision=1, 
+            divisions=[nx, ny],
+            length=[lx, ly],
+            boundaries=["periodic", "periodic"],
+            is_complex=True,
+            precision=1,
             spectrum_range=[-LIM,LIM])
 
     calculation = kite.Calculation(configuration)
     calculation.conductivity_optical_nonlinear(
             "xxy",
-            num_points=512, 
-            num_moments=N, 
-            num_random=1, 
+            num_points=512,
+            num_moments=N,
+            num_random=1,
             num_disorder=1,
             special=1
             )

@@ -1,3 +1,6 @@
+
+
+
 ## The Haldane model
 
 The Haldane Hamiltonian is a single-orbital tight-binding model on a honeycomb lattice with a sublattice-staggered
@@ -6,6 +9,9 @@ magnetic field configuration with vanishing total flux through the unit cell [^1
 
 This model describes a Chern insulator (or a quantum anomalous Hall insulator) because it hosts an integer quantum Hall effect
 in the absence of any applied external magnetic fields. This characteristic makes Haldane model ideal for illustrating another capability of KITE: the calculation of transverse conductivities reflecting the quantum geometry of wavefunctions [^2] [^3].
+
+Let us use KITE to compute the dc conductivity tensor of the Haldane model. 
+_The full script for this example can be found [here](https://github.com/quantum-kite/kite/blob/313a00e54a9f9aa33b22886eaf97ce62aaec3996/examples/dos_dccond_haldane.py)._
 
 ### Lattice
 Let us begin with the definition of the Hamiltonian for the case of purely imaginary next-nearest-neighbor hoppings:
@@ -20,7 +26,7 @@ def haldane(onsite=(0, 0), t=1):
     t2 = t/10
 
     # define lattice vectors
-    a1 = a * np.array([a, 0])
+    a1 = a * np.array([1, 0])
     a2 = a * np.array([1 / 2, 1 / 2 * np.sqrt(3)])
 
     # create a lattice with 2 primitive vectors
@@ -80,7 +86,7 @@ calculation.conductivity_dc(num_points=1000,
 
 ### Disorder
 We can include [different types of disorder][disorder].
-For simplicity, we consider onsite uniform disorder distribution with width of `#!python 0.4 eV` and zero average onsite energy (Anderson disorder):
+For simplicity, we consider onsite uniform disorder distribution with width of `#!python 0.4` and zero average onsite energy (Anderson disorder):
 
 ``` python
 disorder = kite.Disorder(lattice)

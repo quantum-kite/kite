@@ -1,25 +1,19 @@
-"""       
-        ##############################################################################      
-        #                        KITE | Release  1.1                                 #      
-        #                                                                            #      
-        #                        Kite home: quantum-kite.com                         #           
-        #                                                                            #      
-        #  Developed by: Simao M. Joao, Joao V. Lopes, Tatiana G. Rappoport,         #       
-        #  Misa Andelkovic, Lucian Covaci, Aires Ferreira, 2018-2022                 #      
-        #                                                                            #      
-        ##############################################################################      
-"""
-""" Phosphorene DOS, same script can be used for conductivity xx and xy
+""" Phosphorene DoS
+    ##########################################################################
+    #                         Copyright 2020/22, KITE                        #
+    #                         Home page: quantum-kite.com                    #
+    ##########################################################################
 
-    Lattice : Bilayer phosphorene;
-    Disorder : None;
-    Configuration : size of the system 14336x14336, 
-                    without domain decomposition (nx=7 ny=4), 
+    Units: Energy in eV
+    Lattice : Bilayer phosphorene
+    Disorder : None
+    Configuration : size of the system 14336x14336,
+                    without domain decomposition (nx=7 ny=4),
                     periodic boundary conditions,
-                    double precision, automatic scaling;
-    Calculation : DOS;
+                    double precision, automatic scaling
+    Calculation : DOS
+    Last updated: 08/05/2025
 """
-
 import kite
 import pybinding as pb
 from math import pi, sin, cos
