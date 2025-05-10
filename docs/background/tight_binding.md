@@ -16,15 +16,15 @@ $(i \neq j)$ — can be estimated for example by means of the Slater-Koster appr
 to that obtained by first-principles calculations in a suitable reference system[^1][^2][^3][^4].
 
 Suitably parameterized TB models provide an accurate description of molecular orbitals in molecules and Bloch wavefunctions in many solids.
-The complexity of TB models grows only linearly with the number of atomic orbitals,
+The complexity of TB models only grows linearly with the number of atomic orbitals,
 providing a basis for large-scale calculations of a plethora of equilibrium and non-equilibrium physical properties,
 including optical absorption spectra, simulations of amorphous solids, and wave-packet propagation.
 Disorder, interfaces, and defects can be conveniently added to a TB model by modifying on-site energies and hopping integrals,
 and adding auxiliary sites. Such a multi-scale approach has proven very successful in describing impurity scattering[^5][^6],
-moiré patterns[^7], complex interactions induced by ad-atoms[^8], optical conductivity of disordered 2D materials[^9], and geometrical properties, vibrational frequencies and interactions of large molecular systems[^10].
+moiré patterns[^7], complex scattering potentials induced by ad-atoms[^8], optical conductivity of disordered 2D materials[^9], and geometrical properties, vibrational frequencies and non-covalent interactions of large molecular systems[^10].
 
 
-[^1]: Simplified LCAO Method for the Periodic Potential Problem, J. C. Slater and G. F. Koster, [Phys. Rev. 94, 1498 (1954)](https://journals.aps.org/pr/abstract/10.1103/PhysRev.94.1498)
+[^1]: Simplified LCAO method for the periodic potential problem, J. C. Slater and G. F. Koster, [Phys. Rev. 94, 1498 (1954)](https://journals.aps.org/pr/abstract/10.1103/PhysRev.94.1498)
 
 [^2]: Elementary prediction of linear combination of atomic orbitals matrix elements, S. Froyen and W.A. Harrison, [Phys. Rev. B 20, 2420 (1979)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.20.2420)
 
@@ -42,4 +42,4 @@ moiré patterns[^7], complex interactions induced by ad-atoms[^8], optical condu
 
 [^9]: Numerical calculation of the Casimir-Polder interaction between a graphene sheet with vacancies and an atom. T. Cysne et al., [Phys. Rev. B 94, 235405 (2016)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.94.235405)
 
-[^10]: A Robust and Accurate Tight-Binding Quantum Chemical Method for Structures, Vibrational Frequencies, and Noncovalent Interactions of Large Molecular Systems Parametrized for All spd-Block Elements (Z = 1−86), S. Grimme , C. Bannwarth, and P. Shushkov, [J. Chem. Theory Comput., 13 , 1989 (2017)](https://pubs.acs.org/doi/full/10.1021/acs.jctc.7b00118)
+[^10]: A robust and accurate tight-binding quantum chemical method for structures, vibrational frequencies, and noncovalent interactions of large molecular systems parametrized for all spd-block elements (Z = 1−86), S. Grimme , C. Bannwarth, and P. Shushkov, [J. Chem. Theory Comput., 13 , 1989 (2017)](https://pubs.acs.org/doi/full/10.1021/acs.jctc.7b00118)
