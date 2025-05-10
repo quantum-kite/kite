@@ -1,19 +1,18 @@
 ## Phosphorene
 This is a small tutorial to illustrate the use of KITE to investigate materials with anisotropic electrical conductivity.
 To this end, we consider a simplified tight-binding model for single layer phosphorene [^1].
-Even though this model is very simple, it captures the anisotropic band structure of phosphorene, which is Dirac like in one direction and Schrödinger like in the other direction.
+Even though this model is very simple, it captures the anisotropic band structure of phosphorene, which is Dirac-like in one direction and Schrödinger-like in the other direction.
 This behaviour results in highly anisotropic transport properties [^2].
 
-Here, we calculate the longitudinal conductivity (`singleshot_conductivity_dc`) via the efficient single-shot algorithm [^3] in the vicinity of the band gap.
-This is a fast numerical calculation, that is set to run in a normal laptop for about 3-4 minutes.
-It can reproduce qualitatively the expected anisotropic conductivity along xx and yy directions.
+Here, we calculate the longitudinal conductivity (`singleshot_conductivity_dc`) via the efficient single-shot CPGF algorithm [^3] in the vicinity of the band gap.
+This is a fast numerical calculation that is set to easily run on a standard laptop, which qualitatively reproduces the expected anisotropic conductivity along xx and yy directions.
 
-Here, we highlight parts of the python script.
+Here, we highlight parts of the Python script.
 _The full script can be retrieved from [KITE's Github repository](https://github.com/quantum-kite/kite/blob/80a028026956c088f0c8fa4a019155b3b1bdcb78/examples/dccond_phosphorene.py)._
 
 ### Lattice
 
-After the imports that are necessary for KITE, we define the lattice, with [Pybinding](http://docs.pybinding.site/en/stable/tutorial/lattice.html):
+After the imports that are necessary for KITE, we define the lattice with [Pybinding](http://docs.pybinding.site/en/stable/tutorial/lattice.html):
 
 ``` python linenums="1"
 from numpy import cos, sin, pi
@@ -78,7 +77,7 @@ def monolayer_4band(num_hoppings=4):
     return lat
 ```
 
-Note that this lattice model, as given above, can be used with different number of hoppings.
+Note that the lattice model given above can be used with different numbers of hoppings.
 The user can decide the number that is used in the calculation when defining the lattice:
 
 ``` python
@@ -88,9 +87,9 @@ lattice=monolayer_4band(num_hoppings=4)
 ## KITEx part
 ### Settings
 To use the large-scale single-shot algorithm for direct evaluation of zero-temperature DC conductivities, the resolvent operator requires a nonzero broadening (resolution) parameter `eta`, which is given in the specified units (eV in the example above).
-As this type of calculation is energy dependent, it is also necessary to provide a list of desired energy points to the calculation object.
-In the single shot calculations, the computational time scales linearly with the energy points.
-For this example, that is intended to run in a normal desktop, we consider a small number of points and the energy range is set in the vicinity of the band gap.
+As this type of calculation is energy-dependent, it is also necessary to provide a list of desired energy points to the calculation object.
+In the single-shot calculations, the computational time scales linearly with the energy points.
+For this example, we consider a small number of points and the energy range is set in the vicinity of the band gap.
 
 The number of points and the list of energy points can be created when calling the calculation, as illustrated here:
 
@@ -123,7 +122,7 @@ python3 script_name_here.py
 Run the [KITEx][kitex] program.
 
 ### Visualization
-After running KITEx no post-processing is required for the singleshot conductivity calculation. The result can be extracted and plotted with the following script:
+After running [KITEx][kitex], no post-processing is required for the single-shot conductivity calculation. The result can be extracted and plotted with the following script:
 
 ``` python linenums="1"
 import h5py
@@ -149,12 +148,17 @@ plt.show()
 
 Alternatively, the single-shot post-processing python tool in the `#!python tools` directory can be used to produce the data in a more streamlined fashion (see Sec. [Post-Processing][postprocessing]). 
 
-![cond](../../assets/images/phosphorene/cond.png)
+<div>
+  <figure>
+    <img src="../../../assets/images/phosphorene/cond.png" style="width: 35em;"/>
+    <figcaption>Figure 1: Longitudinal DC conductivity as a function of Fermi energy for a small system computed with the single-shot CPGF algorithm.</figcaption>
+  </figure>
+</div>
 
 It is not possible to request the same type of calculation (target function) in a single call.
 In this case, we want to calculate the conductivity in xx and yy directions where the type of the calculation is the same, which means we need another HDF file for yy conductivity.
 
-Let's repeat the procedure for another direction (or alternative use the streamlined approach of the example on the [KITE repository](https://github.com/quantum-kite/kite/blob/80a028026956c088f0c8fa4a019155b3b1bdcb78/examples/dccond_phosphorene.py)):
+Let's repeat the procedure for another direction (one may also use the streamlined approach of the example on the [KITE repository](https://github.com/quantum-kite/kite/blob/80a028026956c088f0c8fa4a019155b3b1bdcb78/examples/dccond_phosphorene.py)):
 
 ``` python linenums="1"
     calculation.singleshot_conductivity_dc(epoints,
@@ -166,14 +170,25 @@ Let's repeat the procedure for another direction (or alternative use the streaml
     kite.config_system(lattice, configuration, calculation, filename='phyy.h5')
 ```
 
-The result of this fast calculation can be seen in the figure below, for ``lx=ly=512``.
-To get a feeling of how KITE works, we suggest modifying parameters like ``eta`` and ``num_random``.
+The result of this fast calculation can be seen in Fig. 2 below, for ``lx=ly=512``.
+To gain confidence with using KITE, we suggest modifying parameters like ``eta`` and ``num_random``.
 
-![cond_xx_yy](../../assets/images/phosphorene/cond_xx_yy.png)
+<div>
+  <figure>
+    <img src="../../../assets/images/phosphorene/cond_xx_yy.png" style="width: 35em;"/>
+    <figcaption>Figure 2: Longitudinal and transverse components of the DC conductivity tensor and the DoS as a function of Fermi energy.</figcaption>
+  </figure>
+</div>
 
-In the next figure, we repeat the calculation for 300 energy points and 10 random vectors and a large energy window.
+In Fig. 3, we repeat the calculation for 300 energy points and 10 random vectors with a large energy window.
 
-![cond_xx_yy_large](../../assets/images/phosphorene/cond_xx_yy_large.png)
+
+<div>
+  <figure>
+    <img src="../../../assets/images/phosphorene/cond_xx_yy_large.png" style="width: 35em;"/>
+    <figcaption>Figure 2: Similar to Fig. 1, but over a larger energy window and with lower statistical fluctuations.</figcaption>
+  </figure>
+</div>
 
 [^1]: Alexander N. Rudenko, Mikhail I. Katsnelson, [Phys. Rev. B 89, 201408 (2014)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.89.201408).
 

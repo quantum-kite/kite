@@ -5,7 +5,7 @@ in a hexagonal unit cell with two equivalent carbon atoms.
 These atoms are located on the different sublattices, *A* and *B*, and don't have an on-site energy term.
 
 Although this model is relatively simple, it is used often within the literature. The example below uses graphene to show how to construct a lattice with sublattices and perform a basic calculation using KITE.
-The script for this example can be found [here](https://github.com/quantum-kite/kite/blob/313a00e54a9f9aa33b22886eaf97ce62aaec3996/examples/dos_graphene.py)
+_The script for this example can be found [here](https://github.com/quantum-kite/kite/blob/313a00e54a9f9aa33b22886eaf97ce62aaec3996/examples/dos_graphene.py)._
 
 ### Lattice
 We start by building the [`#!python pb.lattice`][lattice] for graphene:

@@ -31,8 +31,8 @@ More advanced examples covering:
   * Weyl semi-metal calculations
   * Fu-Kane-Mele model calculations
 
-These python scripts return a HDF5-file. These files can then be passed to the KITEx-executable to do the core calculation.
-Finally, the raw output data are analyzed using the KITE-tools-executable.
+These Python scripts return a HDF5-file. These files can then be passed to the KITEx-executable to perform the core calculation.
+Finally, the raw output data can be analyzed using the KITE-tools-executable.
 Depending on the type of calculation, various output files will be created in the folder where the code was executed from.
 
 All the results can be generated automatically by running
