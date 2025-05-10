@@ -44,7 +44,7 @@ Finally, a convenient *post-processing tool* ($\texttt{KITE-tools}$), developed 
 
 [^5]: Efficient multiscale lattice simulations of strained and disordered graphene, N. Leconte, A. Ferreira, and J. Jung. [Semiconductors and Semimetals 95, 35 (2016)](https://www.sciencedirect.com/science/article/abs/pii/S0080878416300047)
 
-[^6]: Real-Space Calculation of the Conductivity Tensor for Disordered Topological Matter, J. H. García, L. Covaci, and T. G. Rappoport, [Phys. Rev. Lett. 114, 116602 (2015)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.114.116602)
+[^6]: Real-space calculation of the conductivity tensor for disordered topological matter, J. H. García, L. Covaci, and T. G. Rappoport, [Phys. Rev. Lett. 114, 116602 (2015)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.114.116602)
 
 [^7]: Numerical calculation of the Casimir-Polder interaction between a graphene sheet with vacancies and an atom, T. P. Cysne, T. G. Rappoport, A.Ferreira, J. M. Viana Parente Lopes, and N. M. R. Peres, [Phys. Rev. B 94, 235405 (2016)](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.94.235405)
 
