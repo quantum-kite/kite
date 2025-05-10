@@ -1,10 +1,10 @@
 The physical properties of condensed matter systems are encoded in the eigenvalues and eigenfunctions
 of Hamiltonian matrices $\hat{H}$ with typically very large dimension $D$. 
-These systems are thus challenging to investigate using exact diagonalization (due to the exponential scaling of compute resources with the system size), 
-but a wide range of many-body methods and approximations are available that can help understand particular aspects of certain systems and even predict new phenomena.
-Among these, spectral methods have recently become popular  for enabling the reconstruction of key physical quantities and observables in an unbiased, numerically
+These systems are thus challenging to investigate using exact diagonalization (due to the exponential scaling of computer resources with the system size), 
+but a wide range of many-body methods and approximations are available that can help us to understand particular aspects of certain systems and even predict new phenomena.
+In particular, spectral methods have recently become popular  for enabling the reconstruction of key physical quantities and observables in an unbiased, numerically
 exact fashion at a fraction of the computational cost of exact diagonalization methods.
-In the spectral approach, the quantity (target function) of interest is decomposed into a spectral series
+In the spectral approach, the quantity of interest (target function) is decomposed into a spectral series
 
 <span id="eq-1">
 
@@ -14,12 +14,10 @@ $$
 
 </span>
 
-where $P_n(x)$ are orthogonal polynomials (basis functions) and $x$ is some argument like the Fermi energy or frequency.
-
-The elegance and power of spectral decompositions like Eq. [$(1)$][eq-1] lie in the fact that the expansion moments $f_n$ can be obtained by means of
+where $P_n(x)$ are orthogonal polynomials (basis functions) and $x$ is the argument, such as the Fermi energy or frequency. The elegance and power of spectral decompositions such as Eq. [$(1)$][eq-1] lie in the fact that the expansion moments $f_n$ can be obtained by means of
 a highly-efficient and stable recursive scheme. Once these moments are determined (to some desired precision), the target function $f(x)$ can be easily and quickly reconstructed over the desired range of $x$. 
 
-Consider, for example, the Chebyshev polynomials of the first kind:
+For example, consider the Chebyshev polynomials of the first kind:
 
 <span id="eq-2">
 
@@ -29,21 +27,21 @@ $$
 
 </span>
 
-which are widely used basis functions to approximate generic (non-periodic) functions defined on
-finite intervals given their unique convergence properties and intimate relation to the Fourier transform[^1].
+which are basis functions widely used to approximate generic (non-periodic) functions defined on
+finite intervals given their unique convergence properties and close relation to the Fourier transform[^1].
 It is easy to verify that the Chebyshev polynomials of first kind satisfy the orthogonality relations:
 
 <span id="eq-3">
 
 $$
-    \int_{\mathcal{L}} dx \omega(x) T_n(x) T_m(x) = \dfrac{1 + \delta_{n,0}}{2} \delta_{n,m}, \quad \text{with } \omega(x) = \dfrac{1}{\pi \sqrt{1 - x^2}}, \quad\quad (3) \label{eq:3}
+    \int_{\mathcal{L}} dx \omega(x) T_n(x) T_m(x) = \dfrac{1 + \delta_{n,0}}{2} \delta_{n,m}, \quad \text{with  } \omega(x) = \dfrac{1}{\pi \sqrt{1 - x^2}}, \quad\quad (3) \label{eq:3}
 $$
 
 </span>
 
 and thus form a complete set on $\mathcal{L}$. 
 
-The orthogonality relations [$(3)$][eq-3] allow one to define the numerically convenient spectral decomposition
+The orthogonality relations [$(3)$][eq-3] allow us to define the numerically convenient spectral decomposition
 
 <span id="eq-4">
 
@@ -79,7 +77,7 @@ $$
 
 </span>
 
-A spectral decomposition into Chebyshev polynomials [$(4)$][eq-4] allows straightforward determination of several important quantities, for example, the density of states (DOS):
+A spectral decomposition into Chebyshev polynomials [$(4)$][eq-4] allows straightforward determination of several important quantities, for example, the density of states (DoS):
 
 <span id="eq-7">
 
@@ -91,34 +89,32 @@ $$
 
 where $M$ is the Chebyshev (truncation) order that controls the accuracy of the spectral expansion (see below). 
 The Chebyshev moments are easily seen to be determined by traces of the matrix Chebyshev operators according to $\mu_{n}=\text{Tr}\,[T_{n}(\hat{H})]/\chi_{n}$ with $\chi_n=[D\left(1+\delta_{n, 0}\right)] / 2$.
-Clearly, the knowledge of the Chebyshev moments,  $\{\mu_n\}$ ($n=0,1,...$), allows one to reconstruct the DOS over any desired grid of energies (the so-called post-processing stage).
+Clearly, the knowledge of the Chebyshev moments,  $\{\mu_n\}$ ($n=0,1,...$), allows us to reconstruct the DoS over any desired grid of energies (the so-called post-processing stage).
 
-How does one efficiently compute $\{\mu_n\}$? 
-
-Chebyshev moments are typically evaluated recursively in two steps (note that $\mu_0=1$ by definition).
+We will now discuss how to efficiently compute $\{\mu_n\}$. Chebyshev moments are typically evaluated recursively in two steps (note that $\mu_0=1$ by definition).
 First, a series of matrix-vector multiplications is carried out to construct the Chebyshev matrix polynomials using Eq. [$(6)$][eq-6]. 
-The iteration process usually starts with the application of $\mathcal{T}_{1}(\hat{H})=\hat{H}$ onto some basis ket (or a random vector, see below) 
+The iteration process usually starts with the application of $\mathcal{T}_{1}(\hat{H})=\hat{H}$ onto some basis vector (or a random vector, see the STE part below) 
 $|r_1\rangle$, yielding $\hat{H} |r_1\rangle= |\tilde r_1 \rangle$. 
-This then allows one to compute the first non-trivial Chebyshev moment, $\mu_1$, as detailed below.
+This then allows us to compute the first non-trivial Chebyshev moment, $\mu_1$, as detailed below.
 The process is iterated via [$(6)$][eq-6]  to compute subsequent moments, $\mu_2$,  $\mu_3$, etc. 
-In practice, the iterative procedure is stopped once the desired
+In practice, the iterative procedure is terminated once the desired
 energy resolution has been achieved, and, as such, for some problems, the number of Chebyshev moments $M$ required can be quite large.
 
 
 
 For typical sparse Hamiltonian matrices, 
-the algorithmic complexity of each Chebyshev step scales favourably as $Z \times D$, with $Z$ the lattice coordination.
-Efficient numerical implementations of the spectral method, such as KITE, evaluate these moments "on-the-fly" exploiting both the sparseness of real-space lattice models and the
+the algorithmic complexity of each Chebyshev step scales favourably as $Z \times D$, where $Z$ is the lattice coordination.
+Efficient numerical implementations of the spectral method, such as those within KITE, evaluate these moments "on-the-fly" exploiting both the sparseness of real-space lattice models and the
 stability of the Chebyshev recursive procedure [$(1)$][eq-1] (which does not suffer from loss of orthogonality or other numerical instabilities commonly found in other iterative methods). 
-Moreover, Chebyshev expansions enjoy from uniform resolution due to errors being distributed uniformly on $\mathcal{L}$[^1].
+Moreover, Chebyshev expansions benefit from a uniform resolution due to errors being distributed uniformly on $\mathcal{L}$[^1].
 In principle, the spectral resolution is only limited by the number of moments retained in the expansion.
-As a rule of thumb, the resolution is inversely proportional to the number of moments used. For functions of $E$ (like the DOS), this results into
+As a rule of thumb, the resolution is inversely proportional to the number of moments used. For functions of $E$ (such as the DoS), this results into
 $\delta E \propto \Delta / M$, where $\Delta$ is the original spectrum bandwidth (prior to re-scaling). 
 
 It is well known that truncated spectral representations often present spurious features known as Gibbs oscillations (Fourier expansions) and Runge phenomenon (polynomial expansions).
-A well-known example is the "ringing" artifact in the Fourier expansion of a square wave signal. Gibbs oscillations can be cured using specialized filtering techniques.
+A well-known example is the "ringing artifact" in the Fourier expansion of a square wave signal. Gibbs oscillations can be cured using specialized filtering techniques.
 An increasingly popular approach in quantum chemistry and computational condensed matter physics is the kernel polynomial method (KPM)[^2].
-As its name suggests, the KPM makes uses of convolutions with a kernel to attenuate the Gibbs oscillations,
+As its name suggests, the KPM makes use of convolutions with a kernel to attenuate the Gibbs oscillations,
 e.g., for the DOS, $\mu_n \rightarrow \mu_n \times g_n$.
 A proper kernel $g_n$ must satisfy specific criteria to guarantee that the approximate function $f_M(x)$ converges
 to the target function $f(x)$ uniformly as $M \rightarrow \infty$.
@@ -139,21 +135,25 @@ $$
 </span>
 
 Differently from the KPM, the spectral coefficients now depend on the energy. The energy resolution $\eta$ also enters directly into these
-coefficients, which allows to set the target resolution from the outset of the calculation. 
+coefficients, which allows us to set the target resolution from the outset of the calculation. 
 Also, being an exact asymptotic expansion, the convergence of the $M$th-order approximation to $G(E)$ to a given accuracy
 is guaranteed provided $M$ is large enough.
-Figure 1 shows the convergence of the DOS at the band center $E = 0$ of a giant honeycomb lattice with 3.6 billion sites and dilute random defects (vacancies).
+The figure below shows the convergence of the DOS at the band center $E = 0$ of a giant honeycomb lattice with 3.6 billion sites and dilute random defects (vacancies).
 The CPGF method is seen to converge significantly faster than the KPM. More importantly,
 the CPGF expansion converges asymptotically at all energies (by contrast, the Lorentz kernel may lead to small errors away from the band centre).
-
-
+<br>
+<br>
+<br>
+<br>
 ![convergence](convergence.png)
-*Fig 1. Convergence of $M$-order approximation to the DOS at the band center of a giant honeycomb lattice with
+*Convergence of $M$-order approximation to the DOS at the band center of a giant honeycomb lattice with
 $60000 \times 60000$ sites and vacancy defect concentration of 0.4% at selected values of energy resolution.
 As a guide to the eye, we plot the DOS normalized to its converged value (to 0.1% accuracy).
 As comparison, the DOS obtained from a KPM expansion with a Lorentz kernel is shown (with effective resolution $\eta=1$ meV).*
-
-
+<br>
+<br>
+<br>
+<br>
 The number of required moments $M$ increases quickly as electronic states are probed with finer energy resolutions.
 This poses difficulties when evaluating more complex quantities, such as linear response functions given by products of two Green functions (e.g., longitudinal conductivity[^4]),
 especially at finite temperature/frequency (where off-Fermi surface processes are relevant)[^5] or when the system approaches a quantum phase transition[^3].
@@ -182,7 +182,7 @@ The random variables $\chi_{r,i}$ can be real- or complex-valued and fulfill "wh
 $\left\langle\left\langle\chi_{r, i}\right\rangle\right\rangle=0, \quad\left\langle\left\langle\chi_{r, i} \chi_{r^{\prime}, i^{\prime}}\right\rangle\right\rangle=0$ and $\left\langle\left\langle\chi_{r, i}^{*} \chi_{r^{\prime}, i^{\prime}}\right\rangle\right\rangle=\delta_{r, r^{\prime}} \delta_{i, i^{\prime}}$.
 The STE is extremely accurate for sparse matrices of large dimension (only a few random vectors are needed to converge to many decimal places),
 which allows substantial savings in computational time.
-For example, the evaluation of Chebyshev moments of the DOS function for a tight-binding model (where $D=N$, where $N$ is the total number of orbitals or sites in the lattice) requires a total number of operations scaling as
+For example, the evaluation of Chebyshev moments of the DOS function for a tight-binding model (where $D=N$, and $N$ is the total number of orbitals or sites in the lattice) requires a total number of operations scaling as
 
 <span id="eq-10">
 
