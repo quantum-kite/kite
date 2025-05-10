@@ -168,18 +168,6 @@ extra:
       title: Co-Founder
       link: https://www.linkedin.com/in/lucian-covaci-1439388a/
       image: covaci.jpg
-    - name: "Simão M. João"
-      title: Co-Founder<br>(Former Member)
-      link: https://scholar.google.pt/citations?user=yvY5oYcAAAAJ&hl=en
-      image: simao.jpg
-    - name: "Miša Anđelković"
-      title: Co-Founder<br>(Former Member)
-      link: https://www.linkedin.com/in/misaandelkovic/
-      image: misa.jpg
-    - name: "João P. Santos Pires"
-      title: Contributor<br>(Former Member)
-      link: https://scholar.google.com/citations?user=pmnNcFMAAAAJ&hl=pt-PT
-      image: pires.jpg
     - name: "Bert Jorissen"
       title: Contributor
       link: https://bertjorissen.be
@@ -191,6 +179,18 @@ extra:
     - name: "Henrique Veiga"
       title: Contributor
       image: veiga.jpg
+    - name: "Miša Anđelković"
+      title: Co-Founder<br>(Former Member)
+      link: https://www.linkedin.com/in/misaandelkovic/
+      image: misa.jpg
+    - name: "Simão M. João"
+      title: Co-Founder<br>(Former Member)
+      link: https://scholar.google.pt/citations?user=yvY5oYcAAAAJ&hl=en
+      image: simao.jpg
+    - name: "João P. Santos Pires"
+      title: Contributor<br>(Former Member)
+      link: https://scholar.google.com/citations?user=pmnNcFMAAAAJ&hl=pt-PT
+      image: pires.jpg
   acknowledgement:
     - name: "Emile Aerts"
       title: Contributor
