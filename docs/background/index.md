@@ -1,37 +1,38 @@
 KITE is a user-friendly open source software suite for simulating electronic structure and quantum transport properties of large-scale molecular and condensed systems with up to tens of billions of atomic orbitals ($N\sim 10^{10}$). 
 In a nutshell, KITE takes real-space tight-binding models of arbitrary complexity as an input that can be promptly defined by the user through its versatile Python interface. 
-Then, its memory-efficient and heavily-parallelized C++ code employs extremely accurate Chebyshev spectral expansions[^1] in order to study *equilibrium electronic properties* (DOS, LDOS and spectral functions), *response functions* (linear and nonlinear conductivities) or even *dynamical effects* arising from the time-evolution of electronic wave-packets. 
-KITE’s scope is not limited to periodic systems but, instead, its true power in unveiled through the study of more realistic lattice models, which may include randomly distributed dilute impurities, structural defects, ad-atoms, mechanical strain and external magnetic fields. Some illustrative examples may be found in KITE’s presentation paper[^2]. See the [Tutorial][tutorial] section for a quick-start guide.
+Then, its memory-efficient and heavily-parallelized C++ code employs extremely accurate Chebyshev spectral expansions[^1] in order to study *equilibrium electronic properties* (DOS, LDOS and spectral functions), *response functions* (linear and nonlinear conductivities) and even *dynamical effects* arising from the time-evolution of electronic wave-packets.
+The scope of KITE extends beyond periodic systems, with its true power revealed through the study of more realistic lattice models. These systems include randomly distributed dilute impurities, structural defects, ad-atoms, mechanical strain and external magnetic fields.
+Some illustrative examples may be found in KITE’s presentation paper[^2]. See the [Tutorial][tutorial] section for a quick-start guide.
 
 KITE's latest release (version 1.1) contains the following functionalities:
 
-* Average density of states (DOS) and local DOS;
-* $\mathbf{k}$-space spectral functions and ARPES response;
-* Linear DC conductivity tensor (using the Kubo-Greenwood formula);
-* First and second-order optical (AC) Conductivities;
-* Spin Dynamics by time-evolution of gaussian wave-packets.
+* Average density of states (DOS) and local DOS
+* $\mathbf{k}$-space spectral functions and ARPES response
+* Linear DC conductivity tensor (using the Kubo-Greenwood formula)
+* First and second-order optical (AC) conductivities
+* Spin dynamics by time-evolution of gaussian wave-packets
 
 These calculations can now be applied to arbitrary two- and three-dimensional tight-binding models that have:
 
-* Generic multi-orbital local (on-site) and bond disorder;
-* User-defined local potential profile and structural disorder;
-* Different boundary conditions (periodic, open and twisted);
-* Applied perpendicular magnetic field (limited use in 3D);
+* Generic multi-orbital local (on-site) and bond disorder
+* User-defined local potential profile and structural disorder
+* Different boundary conditions (periodic, open and twisted)
+* Applied perpendicular magnetic field (limited use in 3D)
 
-For more details about the current release refer to the documentation section.
+Refer to the [About section][about] for more information about the current release.
 
 # A Short Background Story
 
-The seeds for KITE’s project were laid in 2014, when an exact spectral expansion of the broadened lattice Green's function was discovered by **Aires Ferreira** (University of York, UK) in collaboration with Eduardo R. Mucciolo (University of Central Florida)[^3] and, independently, by A. Braun and P. Schmitteckert (Karlsruhe Institute of Technology)[^4]. 
-**Aires Ferreira** then developed a large-RAM "single-shot" recursive algorithm that enabled for the first time the study of huge tight-binding systems containing billions of atomic orbitals entirely in real space (previous approaches had been limited to a few million atoms). 
-At that time, this method proved essential to numerically demonstrate that zero-energy modes in graphene with dilute vacancy defects enjoy from a finite (non-zero) conductivity  in the large system limit, thereby overcoming Anderson localization [^3].
+The seeds for KITE’s project were planted in 2014, when an exact spectral expansion of the broadened lattice Green's function was discovered by Aires Ferreira (University of York, UK) in collaboration with Eduardo R. Mucciolo (University of Central Florida)[^3] and, independently, by A. Braun and P. Schmitteckert (Karlsruhe Institute of Technology)[^4]. 
+Aires Ferreira then developed a large-RAM "single-shot" recursive algorithm that enabled for the first time the study of huge tight-binding systems containing billions of atomic orbitals entirely in real space (previous approaches had been limited to a few million atoms). 
+At the time, this method proved essential to numerically demonstrate that zero-energy modes in graphene with dilute vacancy defects benefit from a finite (non-zero) conductivity  in the large system limit, thereby overcoming Anderson localization [^3].
 
-In the following years, the usefulness of real-space spectral methods[^5] has been extended to studies of the linear conductivity tensor at finite temperature/frequency[^6] [^7] (proposed by **L. Covaci** and **T. G. Rappoport** in collaboration with José H. García (ICN2)) and the non-linear optical response (proposed by **S. M. João** and **J. M. Viana Parente Lopes**[^8]). It was the conjunction of all these proposals that put forward the joint venture that led to the pre-release of KITE in 2018  and its official release (v1.0) in 2020 [^2].
+In the following years, the utility of real-space spectral methods[^5] has been extended to studies of the linear conductivity tensor at finite temperature/frequency[^6] [^7] (proposed by L. Covaci and T. G. Rappoport in collaboration with José H. García (ICN2)) and the non-linear optical response (proposed by S. M. João and J. M. Viana Parente Lopes[^8]). It was the conjunction of all these proposals that resulted in the joint venture that led to the pre-release of KITE in 2018  and its official release (v1.0) in 2020 [^2].
 
-From its inception, KITE was built to handle real-space models of realistic complexity and sizes. Thereby, its architecture allies a versatile and user-friendly $\texttt{python}$ interface, with an efficient $\texttt{C++}$ code (developed by **J. M. Viana Parente Lopes**) that handles the heavy spectral computations. The interface is based on Pybinding’s syntax[^9] that allows the user to input an arbitrary (2D or 3D) lattice model decorated with a myriad of non-periodic perturbations, such as on-site disorder, personalized structural defects, and strain. 
-The model Hamiltonian is then passed to the $\texttt{C++}$ code ($\texttt{KITEx}$) that implements a *matrix-free* Chebyshev iteration combining a domain-decomposition of the lattice with a *"tile-by-tile"* matrix-vector multiplication strategy in order to minimize memory-transfer overheads and thus boost the parallelization and calculational efficiency[^2]. 
-Such an approach has allowed unprecedented large-scale studies of electronic structure and non-equilibrium phenomena in a variety of systems, including disordered semi-metals, topological insulators, and superconductors, among others [^10] [^11]. 
-Finally, a convenient *post-processing tool* ($\texttt{KITE-tools}$), developed by **S. M. João**, was also included in the package thereby turning KITE into an all-round, ready-to-use tool for practical applications.
+From its inception, KITE was built to handle real-space models of realistic complexity and sizes. Thereby, its architecture allies a versatile and user-friendly $\texttt{Python}$ interface, with an efficient $\texttt{C++}$ code (developed by J. M. Viana Parente Lopes) that handles the heavy spectral computations. The interface is based on Pybinding’s syntax[^9] which allows the user to input an arbitrary (2D or 3D) lattice model decorated with a myriad of non-periodic perturbations, such as on-site disorder, personalized structural defects, and strain. 
+The model Hamiltonian is then passed to the $\texttt{C++}$ code ($\texttt{KITEx}$) which implements a *matrix-free* Chebyshev iteration. It combines a domain-decomposition of the lattice with a *"tile-by-tile"* matrix-vector multiplication strategy in order to minimize memory-transfer overheads and thus boost the parallelization and calculational efficiency[^2]. 
+Such an approach has enabled unprecedented large-scale studies of electronic structure and non-equilibrium phenomena in a variety of systems, including disordered semi-metals, topological insulators, and superconductors, among others [^10] [^11]. 
+Finally, a convenient *post-processing tool* ($\texttt{KITE-tools}$), developed by S. M. João, was also included in the package, thereby turning KITE into an all-round, ready-to-use tool for practical applications.
 
 [^1]: Kernel polynomial method, A. Weiße, G. Wellein, A. Alvermann and H. Fehske, [Rev. Mod. Phys. 78, 275 (2016)](https://journals.aps.org/rmp/abstract/10.1103/RevModPhys.78.275)
 
@@ -56,3 +57,4 @@ Finally, a convenient *post-processing tool* ($\texttt{KITE-tools}$), developed 
 [^11]: Anomalous Transport Signatures in Weyl Semimetals with Point Defects, J. P. Santos Pires, S. M. João, A. Ferreira, B. Amorim, and J. M. Viana Parente Lopes, [Phys. Rev. Lett. 129, 196601 (2022)](https://doi.org/10.1103/PhysRevLett.129.196601)
 
 [tutorial]: ../documentation/index.md
+[about]:../about
