@@ -12,9 +12,6 @@ A selection of papers using the **Quantum KITE code** for real-space simulations
 - **Fast Fourier-Chebyshev Approach to Real-Space Simulations of the Kubo Formula**,
   S G de Castro, J M V P Lopes, A Ferreira and D A Bahamon, [Phys. Rev. Lett. 132, 076302 (2024)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.132.076302)
 
-- **Decoding disorder signatures of AuCl3 and vacancies in MoS2 films: from synthetic to experimental inversion**,
-  F R Duarte, F Matusalem, D Grasseschi, A R Rocha, L Seixas, C J S de Matos, S Mukim and M S Ferreira, [J. Phys.: Condens. Matter 36 495901 (2024)](https://iopscience.iop.org/article/10.1088/1361-648X/ad7568/meta)
-
 - **Anomalous Transport Signatures in Weyl Semimetals with Point Defects**,
   J P Santos Pires, S M João, A Ferreira, B Amorim, and J M V P Lopes, [Phys. Rev. Lett. 129, 196601 (2022)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.129.196601)
 
@@ -33,5 +30,7 @@ A selection of papers using the **Quantum KITE code** for real-space simulations
 - **Breakdown of universality in three-dimensional Dirac semimetals with random impurities**,
   J P S Pires, B. Amorim, A Ferreira, I Adagideli, E R. Mucciolo, and J M V P Lopes, [Phys. Rev. Research 3, 013183 (2020)](https://journals.aps.org/prresearch/abstract/10.1103/PhysRevResearch.3.013183) 
 
+<!--Decoding disorder signatures of AuCl3 and vacancies in MoS2 films: from synthetic to experimental inversion,-->
+<!--F R Duarte, F Matusalem, D Grasseschi, A R Rocha, L Seixas, C J S de Matos, S Mukim and M S Ferreira, [J. Phys.: Condens. Matter 36 495901 (2024)](https://iopscience.iop.org/article/10.1088/1361-648X/ad7568/meta) -->
 <!-- **Landau levels and magneto-optical transport properties of a semi-Dirac system**,
   P Sinha, S Murakami, and S Basu, [Phys. Rev. B 105, 205407 (2022)](https://doi.org/10.1103/PhysRevB.105.205407) -->
