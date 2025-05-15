@@ -29,7 +29,9 @@ git clone https://github.com/quantum-kite/kite.git
 * [gcc][gcc] (version 4.8.1 or newer)
 * [h5py][h5py]
 
-The compiler **must** support *C++17* (or newer) features and [*OpenMP*][openmp] parallelization.
+(See detailed instructions below.)
+
+The compiler **must** support *C++17* (or newer) features and [*OpenMP*][openmp] parallelization. 
 
 
 To enable KITE's [Gaussian wavepacket propagation][calculation-gaussian_wave_packet] functionality, compile the source code with a recent gcc version
@@ -58,31 +60,29 @@ sudo apt-get install libhdf5-dev
 ```
 
 Calculations on KITE are configured using a python script which interfaces with Pybinding.
-Pybinding requires CMake and pip:
+Pybinding requires CMake:
 
 ``` bash
 sudo apt-get install cmake
-sudo apt-get install pip3
 ```
 
-Pybinding also requires the SciPy packages but pip will resolve all the SciPy dependencies automatically:
+Next, install Pybinding dependencies: 
+
 
 ``` bash
-pip3 install pybinding
+pip install numpy scipy matplotlib pytest
 ```
 
-!!! info
+Install pybinding using pip:
 
-    Due to outdated dependencies, the installation of pybinding might fail.
-    You can install the development version of Pybinding with:
-    ``` bash
-    pip3 install git+https://github.com/BertJorissen/pybinding
-    ```
+``` bash
+pip install -i https://test.pypi.org/simple/ pybinding
+```
 
 To construct the HDF5-files, KITE requires *h5py*: 
 
 ``` bash
-pip3 install h5py
+pip install h5py
 ```
 
 ### 2.2 For Mac OS X users
@@ -149,14 +149,11 @@ Pybinding also requires the SciPy packages but pip will resolve all the SciPy de
 /usr/local/bin/python3 -m pip install numpy h5py pybinding
 ```
 
-!!! info
+Install pybinding using pip:
 
-    Due to outdated dependencies, the installation of pybinding might fail.
-    You can install the development version of Pybinding with:
-    ``` bash
-    pip3 install git+https://github.com/BertJorissen/pybinding
-    ```
-    Alternatively, you might prefer to follow the instructions on the [Pybinding][pybinding] webpage.
+``` bash
+pip install -i https://test.pypi.org/simple/ pybinding
+```
 
 Next, download the source code by the command given in section 1.
 Edit *CMakeLists.txt* in the `#!bash kite/`-directory:
