@@ -1,0 +1,2070 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="KITE: Real-space quantum transport simulator">
+      
+      
+        <meta name="author" content="KITE">
+      
+      
+      
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../tight_binding/">
+      
+      
+      <link rel="icon" href="../../assets/images/site/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.14">
+    
+    
+      
+        <title>Spectral Methods - Quantum KITE</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.342714a4.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+  
+  
+    
+    
+  
+    
+    
+  
+  
+  <style>:root{--md-admonition-icon--declaration-function:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20448%20512%22%3E%3C%21--%21%20Font%20Awesome%20Free%206.7.2%20by%20%40fontawesome%20-%20https%3A//fontawesome.com%20License%20-%20https%3A//fontawesome.com/license/free%20%28Icons%3A%20CC%20BY%204.0%2C%20Fonts%3A%20SIL%20OFL%201.1%2C%20Code%3A%20MIT%20License%29%20Copyright%202024%20Fonticons%2C%20Inc.--%3E%3Cpath%20d%3D%22M96%200C43%200%200%2043%200%2096v320c0%2053%2043%2096%2096%2096h320c17.7%200%2032-14.3%2032-32s-14.3-32-32-32v-64c17.7%200%2032-14.3%2032-32V32c0-17.7-14.3-32-32-32H96m0%20384h256v64H96c-17.7%200-32-14.3-32-32s14.3-32%2032-32m32-240c0-8.8%207.2-16%2016-16h192c8.8%200%2016%207.2%2016%2016s-7.2%2016-16%2016H144c-8.8%200-16-7.2-16-16m16%2048h192c8.8%200%2016%207.2%2016%2016s-7.2%2016-16%2016H144c-8.8%200-16-7.2-16-16s7.2-16%2016-16%22/%3E%3C/svg%3E');--md-admonition-icon--declaration-class:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20448%20512%22%3E%3C%21--%21%20Font%20Awesome%20Free%206.7.2%20by%20%40fontawesome%20-%20https%3A//fontawesome.com%20License%20-%20https%3A//fontawesome.com/license/free%20%28Icons%3A%20CC%20BY%204.0%2C%20Fonts%3A%20SIL%20OFL%201.1%2C%20Code%3A%20MIT%20License%29%20Copyright%202024%20Fonticons%2C%20Inc.--%3E%3Cpath%20d%3D%22M96%200C43%200%200%2043%200%2096v320c0%2053%2043%2096%2096%2096h320c17.7%200%2032-14.3%2032-32s-14.3-32-32-32v-64c17.7%200%2032-14.3%2032-32V32c0-17.7-14.3-32-32-32H96m0%20384h256v64H96c-17.7%200-32-14.3-32-32s14.3-32%2032-32m32-240c0-8.8%207.2-16%2016-16h192c8.8%200%2016%207.2%2016%2016s-7.2%2016-16%2016H144c-8.8%200-16-7.2-16-16m16%2048h192c8.8%200%2016%207.2%2016%2016s-7.2%2016-16%2016H144c-8.8%200-16-7.2-16-16s7.2-16%2016-16%22/%3E%3C/svg%3E');}</style>
+
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/extra.css">
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/monokai.css">
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/colorful.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="kite" data-md-color-primary="indigo" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Quantum KITE" class="md-header__button md-logo" aria-label="Quantum KITE" data-md-component="logo">
+      
+<img alt="logo" src="../../assets/images/site/safari-pinned-tab.svg" style="height:3.3 rem;width:3.3rem;">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Quantum KITE
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Spectral Methods
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="kite" data-md-color-primary="indigo" data-md-color-accent="deep-orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6m0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4M7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="deep-orange"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/quantum-kite/kite" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../installation/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Installation
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../documentation/" class="md-tabs__link">
+          
+  
+  
+  Documentation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+  Background
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../api/" class="md-tabs__link">
+          
+  
+  
+  API
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../faq/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  FAQ
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../about/" class="md-tabs__link">
+          
+  
+  
+  About
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Quantum KITE" class="md-nav__button md-logo" aria-label="Quantum KITE" data-md-component="logo">
+      
+<img alt="logo" src="../../assets/images/site/safari-pinned-tab.svg" style="height:3.3 rem;width:3.3rem;">
+
+    </a>
+    Quantum KITE
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/quantum-kite/kite" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Documentation
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Documentation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Tutorial
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../documentation/optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    0. Ground Rules
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../documentation/workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    1. Workflow
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../documentation/tb_model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    2. Lattice
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../documentation/settings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    3. Settings
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../documentation/calculation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    4. Calculation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../documentation/postprocessing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    5. Post-processing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../documentation/disorder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    6. Disorder
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../documentation/magnetic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    7. Magnetic Fields
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../documentation/editing_hdf_files/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    8. Editing an HDF5 file
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_11" id="__nav_3_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    In Depth Examples
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_11">
+            <span class="md-nav__icon md-icon"></span>
+            In Depth Examples
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../documentation/examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    About the examples
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../documentation/examples/graphene/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Graphene
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../documentation/examples/haldane/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Haldane
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../documentation/examples/phosphorene/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Phosphorene
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../documentation/examples/optical_conductivity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Optical Conductivity
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_12" id="__nav_3_12_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    KITE scripts v.1.1
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_12">
+            <span class="md-nav__icon md-icon"></span>
+            KITE scripts v.1.1
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../documentation/more_examples/additional_examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    About Examples-dir
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_13" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_13" id="__nav_3_13_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Advanced Examples
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_13">
+            <span class="md-nav__icon md-icon"></span>
+            Advanced Examples
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../documentation/more_examples/large_systems/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Large Systems
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../documentation/more_examples/custom_local_potential/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Custom Local Potential
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../documentation/more_examples/paper/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Examples from KITE's Paper
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Background
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Background
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview of KITE
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Spectral Methods
+    
+  </span>
+  
+
+      </a>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tight_binding/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Tight-Binding Models
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    API
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            API
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    KITE (python)
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_2">
+            <span class="md-nav__icon md-icon"></span>
+            KITE (python)
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/kite/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Python package
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    KITEx
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_3">
+            <span class="md-nav__icon md-icon"></span>
+            KITEx
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/kitex/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Main program
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_4" id="__nav_5_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    KITE-tools
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_4">
+            <span class="md-nav__icon md-icon"></span>
+            KITE-tools
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/kite-tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Toolbox
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/kite_tools_readme/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Addtitional scripts
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    FAQ
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    About
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            About
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    About KITE
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/publications/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Publications
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/LICENSE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    LICENSE.md
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/VERSION/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    VERSION.md
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+  <h1>Spectral Methods</h1>
+
+<p>The physical properties of condensed matter systems are encoded in the eigenvalues and eigenfunctions
+of Hamiltonian matrices <span class="arithmatex">\(\hat{H}\)</span> with typically very large dimension <span class="arithmatex">\(D\)</span>. 
+These systems are thus challenging to investigate using exact diagonalization (due to the exponential scaling of computer resources with the system size), 
+but a wide range of many-body methods and approximations are available that can help us to understand particular aspects of certain systems and even predict new phenomena.
+In particular, spectral methods have recently become popular  for enabling the reconstruction of key physical quantities and observables in an unbiased, numerically
+exact fashion at a fraction of the computational cost of exact diagonalization methods.
+In the spectral approach, the quantity of interest (target function) is decomposed into a spectral series</p>
+<p><span id="eq-1"></p>
+<div class="arithmatex">\[
+    f(x) \propto \sum\limits_{n=0}^\infty f_n P_n(x),\quad\quad   (1) \label{eq:1}
+\]</div>
+<p></span></p>
+<p>where <span class="arithmatex">\(P_n(x)\)</span> are orthogonal polynomials (basis functions) and <span class="arithmatex">\(x\)</span> is the argument, such as the Fermi energy or frequency. The elegance and power of spectral decompositions such as Eq. <a href="#eq-1"><span class="arithmatex">\((1)\)</span></a> lie in the fact that the expansion moments <span class="arithmatex">\(f_n\)</span> can be obtained by means of
+a highly-efficient and stable recursive scheme. Once these moments are determined (to some desired precision), the target function <span class="arithmatex">\(f(x)\)</span> can be easily and quickly reconstructed over the desired range of <span class="arithmatex">\(x\)</span>. </p>
+<p>For example, consider the Chebyshev polynomials of the first kind:</p>
+<p><span id="eq-2"></p>
+<div class="arithmatex">\[
+    T_0(x) = 1, T_1(x) = x, T_2(x) = 2x^2 − 1, ..., T_{n+1}(x) = 2xT_n(x) − T_{n−1}(x), \quad x \in [−1:1] \equiv \mathcal{L}, \quad\quad  (2) \label{eq:2}
+\]</div>
+<p></span></p>
+<p>which are basis functions widely used to approximate generic (non-periodic) functions defined on
+finite intervals given their unique convergence properties and close relation to the Fourier transform<sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup>.
+It is easy to verify that the Chebyshev polynomials of first kind satisfy the orthogonality relations:</p>
+<p><span id="eq-3"></p>
+<div class="arithmatex">\[
+    \int_{\mathcal{L}} dx \omega(x) T_n(x) T_m(x) = \dfrac{1 + \delta_{n,0}}{2} \delta_{n,m}, \quad \text{with  } \omega(x) = \dfrac{1}{\pi \sqrt{1 - x^2}}, \quad\quad (3) \label{eq:3}
+\]</div>
+<p></span></p>
+<p>and thus form a complete set on <span class="arithmatex">\(\mathcal{L}\)</span>. </p>
+<p>The orthogonality relations <a href="#eq-3"><span class="arithmatex">\((3)\)</span></a> allow us to define the numerically convenient spectral decomposition</p>
+<p><span id="eq-4"></p>
+<div class="arithmatex">\[
+f(x)=\omega(x)\sum\limits_{n=0}^\infty \frac{2 \mu_n}{1+ \delta_n} T_n(x)\ , \quad\quad (4) \label{eq:4}
+\]</div>
+<p></span></p>
+<p>where <span class="arithmatex">\(\mu_n\)</span> are the so-called Chebyshev moments defined as the overlaps <span class="arithmatex">\(\mu_n = \int_\mathcal{L} dx f(x) T_n(x)\)</span>.</p>
+<p>The extension of these concepts to operators (matrices) allows full quantum-mechanical calculations of lattice models to be carried out for extremely large systems
+bypassing direct diagonalization.
+For example, the Chebyshev expansion of the familiar spectral operator, <span class="arithmatex">\(\delta(E−\hat{H})\)</span>, at the heart of many calculations in condensed matter physics is given by<sup id="fnref:2"><a class="footnote-ref" href="#fn:2">2</a></sup>:</p>
+<p><span id="eq-5"></p>
+<div class="arithmatex">\[
+    \delta(E-\hat{H})=\frac{1}{\pi \sqrt{1-E^{2}}} \sum_{n=0}^{\infty} \frac{2}{1+\delta_{n, 0}} T_{n}(E) \mathcal{T}_{n}(\hat{H})\ , \quad\quad (5) \label{eq:5}
+\]</div>
+<p></span></p>
+<p>where <span class="arithmatex">\(||\hat{H}|| \leq 1\)</span> has been re-scaled to guarantee that its spectrum falls into the spectral interval <span class="arithmatex">\(E \in [−1:1]\)</span>.
+In the above, the operators <span class="arithmatex">\(T_n(\hat{H})\)</span> are defined by the matrix version of the standard Chebyshev recursion relations</p>
+<p><span id="eq-6"></p>
+<div class="arithmatex">\[
+    \mathcal{T}_{0}=1, \quad \mathcal{T}_{1}(\hat{H})=\hat{H}, 
+    \quad \mathcal{T}_{n+1}(\hat{H})=2 \hat{H} \cdot \mathcal{T}_{n}(\hat{H})-\mathcal{T}_{n-1}(\hat{H}). \quad\quad  (6) \label{eq:6}
+\]</div>
+<p></span></p>
+<p>A spectral decomposition into Chebyshev polynomials <a href="#eq-4"><span class="arithmatex">\((4)\)</span></a> allows straightforward determination of several important quantities, for example, the density of states (DoS):</p>
+<p><span id="eq-7"></p>
+<div class="arithmatex">\[
+    \rho(E) \equiv \frac{1}{D} \operatorname{Tr} \delta(E-\hat{H}) \simeq \frac{1}{\pi \sqrt{1-E^{2}}} \sum_{n=0}^{M-1} \mu_{n} T_{n}(E), \quad\quad (7)  \label{eq:7}
+\]</div>
+<p></span></p>
+<p>where <span class="arithmatex">\(M\)</span> is the Chebyshev (truncation) order that controls the accuracy of the spectral expansion (see below). 
+The Chebyshev moments are easily seen to be determined by traces of the matrix Chebyshev operators according to <span class="arithmatex">\(\mu_{n}=\text{Tr}\,[T_{n}(\hat{H})]/\chi_{n}\)</span> with <span class="arithmatex">\(\chi_n=[D\left(1+\delta_{n, 0}\right)] / 2\)</span>.
+Clearly, the knowledge of the Chebyshev moments,  <span class="arithmatex">\(\{\mu_n\}\)</span> (<span class="arithmatex">\(n=0,1,...\)</span>), allows us to reconstruct the DoS over any desired grid of energies (the so-called post-processing stage).</p>
+<p>We will now discuss how to efficiently compute <span class="arithmatex">\(\{\mu_n\}\)</span>. Chebyshev moments are typically evaluated recursively in two steps (note that <span class="arithmatex">\(\mu_0=1\)</span> by definition).
+First, a series of matrix-vector multiplications is carried out to construct the Chebyshev matrix polynomials using Eq. <a href="#eq-6"><span class="arithmatex">\((6)\)</span></a>. 
+The iteration process usually starts with the application of <span class="arithmatex">\(\mathcal{T}_{1}(\hat{H})=\hat{H}\)</span> onto some basis vector (or a random vector, see the STE part below) 
+<span class="arithmatex">\(|r_1\rangle\)</span>, yielding <span class="arithmatex">\(\hat{H} |r_1\rangle= |\tilde r_1 \rangle\)</span>. 
+This then allows us to compute the first non-trivial Chebyshev moment, <span class="arithmatex">\(\mu_1\)</span>, as detailed below.
+The process is iterated via <a href="#eq-6"><span class="arithmatex">\((6)\)</span></a>  to compute subsequent moments, <span class="arithmatex">\(\mu_2\)</span>,  <span class="arithmatex">\(\mu_3\)</span>, etc. 
+In practice, the iterative procedure is terminated once the desired
+energy resolution has been achieved, and, as such, for some problems, the number of Chebyshev moments <span class="arithmatex">\(M\)</span> required can be quite large.</p>
+<p>For typical sparse Hamiltonian matrices, 
+the algorithmic complexity of each Chebyshev step scales favourably as <span class="arithmatex">\(Z \times D\)</span>, where <span class="arithmatex">\(Z\)</span> is the lattice coordination.
+Efficient numerical implementations of the spectral method, such as those within KITE, evaluate these moments "on-the-fly" exploiting both the sparseness of real-space lattice models and the
+stability of the Chebyshev recursive procedure <a href="#eq-1"><span class="arithmatex">\((1)\)</span></a> (which does not suffer from loss of orthogonality or other numerical instabilities commonly found in other iterative methods). 
+Moreover, Chebyshev expansions benefit from a uniform resolution due to errors being distributed uniformly on <span class="arithmatex">\(\mathcal{L}\)</span><sup id="fnref2:1"><a class="footnote-ref" href="#fn:1">1</a></sup>.
+In principle, the spectral resolution is only limited by the number of moments retained in the expansion.
+As a rule of thumb, the resolution is inversely proportional to the number of moments used. For functions of <span class="arithmatex">\(E\)</span> (such as the DoS), this results into
+<span class="arithmatex">\(\delta E \propto \Delta / M\)</span>, where <span class="arithmatex">\(\Delta\)</span> is the original spectrum bandwidth (prior to re-scaling). </p>
+<p>It is well known that truncated spectral representations often present spurious features known as Gibbs oscillations (Fourier expansions) and Runge phenomenon (polynomial expansions).
+A well-known example is the "ringing artifact" in the Fourier expansion of a square wave signal. Gibbs oscillations can be cured using specialized filtering techniques.
+An increasingly popular approach in quantum chemistry and computational condensed matter physics is the kernel polynomial method (KPM)<sup id="fnref2:2"><a class="footnote-ref" href="#fn:2">2</a></sup>.
+As its name suggests, the KPM makes use of convolutions with a kernel to attenuate the Gibbs oscillations,
+e.g., for the DOS, <span class="arithmatex">\(\mu_n \rightarrow \mu_n \times g_n\)</span>.
+A proper kernel <span class="arithmatex">\(g_n\)</span> must satisfy specific criteria to guarantee that the approximate function <span class="arithmatex">\(f_M(x)\)</span> converges
+to the target function <span class="arithmatex">\(f(x)\)</span> uniformly as <span class="arithmatex">\(M \rightarrow \infty\)</span>.
+A typical example is the Lorentz kernel, <span class="arithmatex">\(g^L_n = \sinh(\lambda(1−n/M))/\sinh(\lambda)\)</span>, where <span class="arithmatex">\(\lambda\)</span> is an adjustable parameter.
+It has the property that approximates nascent Dirac-delta functions <span class="arithmatex">\(\delta_\eta(x)\)</span> by a Lorentzian with resolution <span class="arithmatex">\(\eta = \lambda / M\)</span>,
+and thus has been employed to damp Gibbs oscillations in spectral decomposition of broadened Green's functions<sup id="fnref3:2"><a class="footnote-ref" href="#fn:2">2</a></sup>.</p>
+<p>A powerful alternative is given by the Chebyshev polynomial Green's function (CPGF) method<sup id="fnref:3"><a class="footnote-ref" href="#fn:3">3</a></sup>,
+which is based on the following exact spectral decomposition of the lattice resolvent operator:</p>
+<p><span id="eq-8"></p>
+<div class="arithmatex">\[
+    \hat{\mathcal{G}}(E+i \eta)=\sum_{n=0}^{\infty} g_{n}(E+i \eta) \mathcal{T}_{n}(\hat{H}), 
+    \quad \text { with } g_{n}(z) \equiv \frac{2 i^{-1}}{1+\delta_{n, 0}} \frac{\left(z-i \sqrt{1-z^{2}}\right)^{n}}{\sqrt{1-z^{2}}}.  \quad\quad (8)  \label{eq:8}
+\]</div>
+<p></span></p>
+<p>Differently from the KPM, the spectral coefficients now depend on the energy. The energy resolution <span class="arithmatex">\(\eta\)</span> also enters directly into these
+coefficients, which allows us to set the target resolution from the outset of the calculation. 
+Also, being an exact asymptotic expansion, the convergence of the <span class="arithmatex">\(M\)</span>th-order approximation to <span class="arithmatex">\(G(E)\)</span> to a given accuracy
+is guaranteed provided <span class="arithmatex">\(M\)</span> is large enough.
+The figure below shows the convergence of the DOS at the band center <span class="arithmatex">\(E = 0\)</span> of a giant honeycomb lattice with 3.6 billion sites and dilute random defects (vacancies).
+The CPGF method is seen to converge significantly faster than the KPM. More importantly,
+the CPGF expansion converges asymptotically at all energies (by contrast, the Lorentz kernel may lead to small errors away from the band centre).
+<br>
+<br>
+<br>
+<br>
+<img alt="convergence" src="../convergence.png" />
+<em>Convergence of <span class="arithmatex">\(M\)</span>-order approximation to the DOS at the band center of a giant honeycomb lattice with
+<span class="arithmatex">\(60000 \times 60000\)</span> sites and vacancy defect concentration of 0.4% at selected values of energy resolution.
+As a guide to the eye, we plot the DOS normalized to its converged value (to 0.1% accuracy).
+As comparison, the DOS obtained from a KPM expansion with a Lorentz kernel is shown (with effective resolution <span class="arithmatex">\(\eta=1\)</span> meV).</em>
+<br>
+<br>
+<br>
+<br>
+The number of required moments <span class="arithmatex">\(M\)</span> increases quickly as electronic states are probed with finer energy resolutions.
+This poses difficulties when evaluating more complex quantities, such as linear response functions given by products of two Green functions (e.g., longitudinal conductivity<sup id="fnref:4"><a class="footnote-ref" href="#fn:4">4</a></sup>),
+especially at finite temperature/frequency (where off-Fermi surface processes are relevant)<sup id="fnref:5"><a class="footnote-ref" href="#fn:5">5</a></sup> or when the system approaches a quantum phase transition<sup id="fnref2:3"><a class="footnote-ref" href="#fn:3">3</a></sup>.</p>
+<p>To overcome the above challenge, KITE integrates a number of state-of-the-art algorithms. An example is KITE's large-scale single-shot algorithm for direct evaluation of zero-temperature DC response functions at  fixed Fermi energy.
+The algorithm bypasses the expensive recursive calculation of moments and thus can treat giant systems
+(<span class="arithmatex">\(N \propto 10^{10}\)</span>) with fine resolution (<span class="arithmatex">\(M\)</span> up to hundreds thousands). It can be applied to other quantities,
+such as  DOS, local DOS and quasiparticle self-energy; a detailed description is given in Refs.<sup id="fnref3:3"><a class="footnote-ref" href="#fn:3">3</a></sup> and <sup id="fnref:6"><a class="footnote-ref" href="#fn:6">6</a></sup>. Moreover, a Chebyshev-moment approach to the Kubo-Bastin formula developed in<sup id="fnref2:5"><a class="footnote-ref" href="#fn:5">5</a></sup> gives access to finite temperature response functions of large systems
+up to ten millions of orbitals (with <span class="arithmatex">\(M\)</span> up to tens thousands<sup id="fnref4:3"><a class="footnote-ref" href="#fn:3">3</a></sup>); a detailed description of the algorithm is
+given in Ref.<sup id="fnref3:5"><a class="footnote-ref" href="#fn:5">5</a></sup> and its large-scale implementation in Ref.<sup id="fnref5:3"><a class="footnote-ref" href="#fn:3">3</a></sup>. Recent developments, which integrate spectral and domain-and-conquer methods to further boost the efficiency of real-space
+simulations of Kubo formulas, have paved the way to yet larger systems and finer energy resolutions <sup id="fnref:7"><a class="footnote-ref" href="#fn:7">7</a></sup>.</p>
+<p>To speed up the evaluation of the <span class="arithmatex">\(n\)</span>-body trace operation <span class="arithmatex">\(\operatorname{Tr}\{T_n(\hat{H})...T_m(\hat{H})\}\)</span> (in the DOS example above, <span class="arithmatex">\(\operatorname{Tr}\{T_n(\hat{H})\}\)</span>), KITE implements the stochastic trace evaluation technique (STE)<sup id="fnref4:2"><a class="footnote-ref" href="#fn:2">2</a></sup>:</p>
+<p><span id="eq-9"></p>
+<div class="arithmatex">\[
+    \rho_{\mathrm{STE}}(E)=\sum_{r=1}^{R}\langle r|\delta(E-\hat{H})| r\rangle,  \quad\quad (9)  \label{eq9}
+\]</div>
+<p></span></p>
+<p>with random vectors <span class="arithmatex">\(|r\rangle=\sum_{i=1}^{D} \chi_{r, i}|i\rangle\)</span>. Here, <span class="arithmatex">\(\{|i\rangle\}\)</span> (<span class="arithmatex">\(i=1,...,D\)</span>) are a complete orthonormal basis set of the lattice model (typically position kets).
+The random variables <span class="arithmatex">\(\chi_{r,i}\)</span> can be real- or complex-valued and fulfill "white noise" statistics:
+<span class="arithmatex">\(\left\langle\left\langle\chi_{r, i}\right\rangle\right\rangle=0, \quad\left\langle\left\langle\chi_{r, i} \chi_{r^{\prime}, i^{\prime}}\right\rangle\right\rangle=0\)</span> and <span class="arithmatex">\(\left\langle\left\langle\chi_{r, i}^{*} \chi_{r^{\prime}, i^{\prime}}\right\rangle\right\rangle=\delta_{r, r^{\prime}} \delta_{i, i^{\prime}}\)</span>.
+The STE is extremely accurate for sparse matrices of large dimension (only a few random vectors are needed to converge to many decimal places),
+which allows substantial savings in computational time.
+For example, the evaluation of Chebyshev moments of the DOS function for a tight-binding model (where <span class="arithmatex">\(D=N\)</span>, and <span class="arithmatex">\(N\)</span> is the total number of orbitals or sites in the lattice) requires a total number of operations scaling as</p>
+<p><span id="eq-10"></p>
+<div class="arithmatex">\[
+    P_\text{DOS} = Z \times N \times M \times R.  \quad\quad (10)  \label{eq:10}
+\]</div>
+<p></span></p>
+<p>The required number of random vectors, <span class="arithmatex">\(R\)</span>, depends on sparsity of the Chebyshev polynomial matrices <span class="arithmatex">\(T_n(\hat{H})\)</span>.
+For typical tight-binding problems, one has <span class="arithmatex">\(Z \propto O(1)\)</span>. Thus, in the large system limit <span class="arithmatex">\((N \gg 1)\)</span>, a single random vector is often enough to achieve accuracy of 1% or better<sup id="fnref6:3"><a class="footnote-ref" href="#fn:3">3</a></sup>.
+In fact, for sparse matrices, the STE relative error has the favorable scaling <span class="arithmatex">\(1 / \sqrt{R N}\)</span>.
+On the other hand, the number of moments required to converge the expansion depends strongly on the desired resolution,
+<span class="arithmatex">\(\eta\)</span>. As a rule of thumb, <span class="arithmatex">\(M\)</span> should not be smaller than a few times the linear dimension of the system <span class="arithmatex">\(N^{1/d}\)</span>,
+where <span class="arithmatex">\(d\)</span> is the number of spatial dimensions, which then leads to:</p>
+<p><span id="eq-11"></p>
+<div class="arithmatex">\[
+    P_{\mathrm{DOS}} \propto N^{1+1 / d}, \text { for } N \gg 1,  \quad\quad (11)  \label{eq:11}
+\]</div>
+<p></span></p>
+<p>allowing a significant reduction in computational time w.r.t. direct diagonalization techniques, especially in <span class="arithmatex">\(d \geq 2\)</span>.</p>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p>Chebyshev and Fourier spectral methods, John P. Boyd, <a href="https://depts.washington.edu/ph506/Boyd.pdf">2nd Ed. Dover 5, New York (2001)</a>.&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+<li id="fn:2">
+<p>Kernel polynomial method, Alexander Weiße, Gerhard Wellein, Andreas Alvermann, and Holger Fehske. <a href="https://journals.aps.org/rmp/abstract/10.1103/RevModPhys.78.275">Rev. Mod. Phys. 78, 275 (2006)</a>.&#160;<a class="footnote-backref" href="#fnref:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref3:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref4:2" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+<li id="fn:3">
+<p>Critical delocalization of chiral zero energy modes in graphene, A. Ferreira and E. Mucciolo, <a href="https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.115.106601">Phys. Rev. Lett. 115, 106601 (2015)</a>.&#160;<a class="footnote-backref" href="#fnref:3" title="Jump back to footnote 3 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:3" title="Jump back to footnote 3 in the text">&#8617;</a><a class="footnote-backref" href="#fnref3:3" title="Jump back to footnote 3 in the text">&#8617;</a><a class="footnote-backref" href="#fnref4:3" title="Jump back to footnote 3 in the text">&#8617;</a><a class="footnote-backref" href="#fnref5:3" title="Jump back to footnote 3 in the text">&#8617;</a><a class="footnote-backref" href="#fnref6:3" title="Jump back to footnote 3 in the text">&#8617;</a></p>
+</li>
+<li id="fn:4">
+<p>Unified description of the dc conductivity of monolayer and bilayer graphene at finite densities based on resonant scatterers, A. Ferreira et al., <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.83.165402">Phys. Rev. B 83, 165402 (2011)</a>.&#160;<a class="footnote-backref" href="#fnref:4" title="Jump back to footnote 4 in the text">&#8617;</a></p>
+</li>
+<li id="fn:5">
+<p>Real-Space calculation of the conductivity tensor for disordered topological matter, J. H. García, L. Covaci, and T. G. Rappoport, <a href="https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.114.116602">Phys. Rev. Lett. 114, 116602 (2015)</a>.&#160;<a class="footnote-backref" href="#fnref:5" title="Jump back to footnote 5 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:5" title="Jump back to footnote 5 in the text">&#8617;</a><a class="footnote-backref" href="#fnref3:5" title="Jump back to footnote 5 in the text">&#8617;</a></p>
+</li>
+<li id="fn:6">
+<p>High-resolution real-space evaluation of the self-energy operator of disordered lattices: Gade singularity, spin–orbit effects and p-wave superconductivity, S M João, J. M. Viana Parente Lopes, and A. Ferreira, <a href="https://iopscience.iop.org/article/10.1088/2515-7639/ac91f9">J. Phys. Mater. 5 045002 (2022)</a>.&#160;<a class="footnote-backref" href="#fnref:6" title="Jump back to footnote 6 in the text">&#8617;</a></p>
+</li>
+<li id="fn:7">
+<p>Fast Fourier-Chebyshev approach to real-space simulations of the Kubo Formula, S. G. de Castro, J. M. V. P. Lopes, A. Ferreira, and D. A. Bahamon, <a href="https://doi.org/10.1103/PhysRevLett.132.076302">Phys. Rev. Lett. <strong>132</strong>, 076302  (2024)</a>&#160;<a class="footnote-backref" href="#fnref:7" title="Jump back to footnote 7 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <!--
+  Copyright (c) 2025 KITE <support@quantum-kite.com>
+
+  KITE is a free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as
+  published by the Free Software Foundation - version 3
+-->
+
+
+<!-- Footer -->
+<footer class="md-footer">
+
+    <!-- Link to previous and/or next page -->
+    
+    <nav class="md-footer__inner md-grid" aria-label="footer.title">
+
+        <!-- Link to previous page -->
+        
+        
+        <a href="../" class="md-footer__link md-footer__link--prev"
+            aria-label="Previous: Overview of KITE" rel="prev">
+            <div class="md-footer__button md-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+                <div class="md-ellipsis">
+                    <span class="md-footer__direction">
+                        Previous
+                    </span>
+                    Overview of KITE
+                </div>
+            </div>
+        </a>
+        
+
+        <!-- Link to next page -->
+        
+        
+        <a href="../tight_binding/" class="md-footer__link md-footer__link--next"
+            aria-label="Next: Tight-Binding Models" rel="next">
+            <div class="md-footer__title">
+                <div class="md-ellipsis">
+                    <span class="md-footer__direction">
+                        Next
+                    </span>
+                    Tight-Binding Models
+                </div>
+            </div>
+            <div class="md-footer__button md-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+        </a>
+        
+    </nav>
+    
+
+    <!-- Further information -->
+    <div class="md-footer-meta md-typeset">
+        <div class="md-footer-meta__inner md-grid">
+            <!--
+  Copyright (c) 2025 KITE <support@quantum-kite.com>
+
+  KITE is a free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as
+  published by the Free Software Foundation - version 3
+-->
+
+<!-- Copyright and theme information -->
+
+<div class="md-copyright">
+  
+  <div class="md-copyright__highlight">
+    KITE is a free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation - version 3. Copyright © 2023 KITE
+  </div>
+  
+  
+
+  Website powered by
+  <a href="https://www.mkdocs.org" target="_blank" rel="noopener">MkDocs</a>,
+  <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">Material for MkDocs</a> and
+  <a href="http://www.styleshout.com/" target="_blank" rel="noopener">styleshout</a>.
+  
+</div>
+
+            <!-- Social links -->
+            
+        </div>
+    </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.top", "navigation.sections", "navigation.expand", "navigation.tracking", "toc.integrate", "toc.follow"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.13a4f30d.min.js"></script>
+      
+        <script src="../../assets/javascripts/mathjax-config.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@7.1.2/dist/mermaid.min.js"></script>
+      
+    
+  </body>
+</html>
