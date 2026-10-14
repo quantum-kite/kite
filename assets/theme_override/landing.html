@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<!--[if lt IE 9 ]>
+<html class="no-js oldie" lang="en"> <![endif]-->
+<!--[if IE 9 ]>
+<html class="no-js oldie ie9" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+
+<head>
+
+    <!--- basic page needs
+   ================================================== -->
+    <meta charset="utf-8">
+    <title>Quantum Kite</title>
+
+    <meta content="" name="description">
+    <meta content="" name="author">
+
+    <!-- mobile specific metas
+   ================================================== -->
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+
+    <!-- CSS
+   ================================================== -->
+    <link href="assets/stylesheets/extra.css" rel="stylesheet">
+    <link href="assets/stylesheets/monokai.css" rel="stylesheet">
+    <link href="assets/stylesheets/colorful.css" rel="stylesheet">
+
+
+    <link href="assets/stylesheets/landing_base.css" rel="stylesheet">
+    <link href="assets/stylesheets/landing_vendor.css" rel="stylesheet">
+    <link href="assets/stylesheets/landing_main.css" rel="stylesheet">
+
+
+    <!-- favicons
+	================================================== -->
+    <link href="assets/images/site/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180">
+    <link href="assets/images/site/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
+    <link href="assets/images/site/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
+    <link href="site.webmanifest" rel="manifest">
+    <link color="#5bbad5" href="assets/images/site/safari-pinned-tab.svg" rel="mask-icon">
+    <meta content="#ffffff" name="msapplication-TileColor">
+    <meta content="#ffffff" name="theme-color">
+
+    <!-- open graph
+	================================================== -->
+    <meta content="446" property="og:image:height">
+    <meta content="852" property="og:image:width">
+    <meta content="kite is a quantum transport software" property="og:description">
+    <meta content="Quantum Kite " property="og:title">
+    <meta content="https://quantum-kite.com" property="og:url">
+
+</head>
+
+<body id="top">
+
+    <!-- header
+================================================== -->
+    <header id="header">
+
+        <div class="header-logo">
+            <a href="index.html">KITE</a>
+        </div>
+
+
+        {% set class = "" %}
+        <nav id="header-nav-wrap">
+            <ul class="header-main-nav">
+                {% import "partials/tabs-item.html" as item with context %}
+                {% for nav_item in nav %}
+                    {{ item.render(nav_item) }}
+                {% endfor %}
+            </ul>
+        </nav>
+
+        <a class="header-menu-toggle" href="#"><span>Menu</span></a>
+
+    </header> <!-- /header -->
+
+
+    <!-- home
+================================================== -->
+    <section id="home">
+
+
+
+        <div class="home-content">
+
+            <div class="row contents">
+
+                <div class="home-content-left">
+                    <h1 class="home-content-left">
+                        HIGH-PERFORMANCE QUANTUM TRANSPORT SOFTWARE
+                    </h1>
+
+                    <div class="buttons" data-aos="fade-up">
+                        <a class="button strokefill" href="documentation/">
+                            Getting Started
+                        </a>
+                        <a class="button stroke" href="about/">
+                            About KITE
+                        </a>
+                        <a class="button stroke" href="about/publications/">
+                            Publications
+                        </a>
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div> <!-- end home-content -->
+
+
+
+
+
+    </section> <!-- end home -->
+
+
+    <!-- about
+================================================== -->
+    <section id="about">
+
+        <div class="row about-intro">
+
+            <div class="col-four" data-aos="fade-up">
+                <h1 class="intro-header">OPEN-SOURCE INITIATIVE</h1>
+            </div>
+            <div class="col-eight">
+
+                <p class="lead" data-aos="fade-up">
+                    KITE code: real-space simulation of quantum condensed matter for the first time scalable to billions of atomic orbitals
+                </p>
+                <ul data-aos="fade-up">
+                    <p> <i class="mi mi-RightArrowKeyTime0"></i> Large-scale multi-orbital models </p>
+                    <p> <i class="mi mi-RightArrowKeyTime0"></i> Realistic disorder landscapes and disorder statistics </p>
+                    <p> <i class="mi mi-RightArrowKeyTime0"></i> Fine spectral resolution, ideal for studies of quantum critical phenomena</p>
+                </ul>
+            </div>
+
+        </div>
+
+        <div class="row about-features">
+
+            <div class="features-list block-1-3 block-m-1-2 block-mob-full group">
+
+
+                <div class="bgrid feature" data-aos="fade-up">
+
+                    <span class="icon"><i class="mi mi-Bullseye"></i></span>
+
+                    <div class="service-content">
+                        <h3>ACCURACY</h3>
+
+                        <p>Green’s functions are evaluated by means of accurate real-space spectral expansions, which provide fine control over accuracy and energy resolution for
+                            all in-built functions for both pristine and disordered crystals.
+                        </p>
+
+
+                    </div>
+
+                </div> <!-- /bgrid -->
+
+                <div class="bgrid feature" data-aos="fade-up">
+
+                    <span class="icon"><i class="mi mi-Size"></i></span>
+                    <!--<span class="icon"><i class="icon-paint-size"></i></span>-->
+                    <div class="service-content">
+                        <h3>SCALABILITY & SPEED</h3>
+
+                        <p>KITE boasts a suite of fast and highly-scalable spectral algorithms, capable to treat
+                            extremely large
+                            computational domains with up to billions of atomic orbitals at relatively modest computational
+                            costs. Target functions are
+                            evaluated by means of multi-threaded algorithms that can be easily optimized to specific CPU
+                            architectures.
+                        </p>
+
+                    </div>
+
+                </div> <!-- /bgrid -->
+
+                <div class="bgrid feature" data-aos="fade-up">
+
+                    <span class="icon"><i class="mi mi-Settings"></i></span>
+
+                    <div class="service-content">
+                        <h3>VERSATILITY</h3>
+
+                        <p>KITE's target functions span a wide range of physical properties (e.g., local DOS and optical
+                            conductivity) of lattice models with arbitrary complexity. A friendly python interface
+                            allows to easily define/import
+                            model parameters and select desired target functions and algorithms (single-shot, full spectral, etc.).
+                        </p>
+
+                    </div>
+
+                </div> <!-- /bgrid -->
+
+
+            </div> <!-- end features-list -->
+
+        </div> <!-- end about-features -->
+
+
+    </section> <!-- end about -->
+
+
+    {% for news_entry in config.extra.news %}
+    {% if loop.index == 1 %}
+    <section id="news">
+
+        <div class="row">
+            <div class="col-four" data-aos="fade-up">
+                <h1 class="intro-header">NEWS &<br> UPDATES</h1>
+            </div>
+            <div class="col-eight entry-list">
+                {% endif %}
+                <div class="row entry" data-aos="fade-up">
+                    <div class="col-three">
+                            {%if news_entry.image %}
+                                {% if news_entry.link %}<a href="{{ news_entry.link }}" class="img-link">{% endif %}
+                                    <img src="assets/images/news/{{ news_entry.image }}" alt="Image of {{ news_entry.title }}">
+                                {% if news_entry.link %}</a>{% endif %}
+                            {% else %}
+                                {% if news_entry.link %}<a href="{{ news_entry.link }}" class="span-link">{% endif %}
+                                    <span class="icon"><i class="mi mi-Calendar"></i></span>
+                                {% if news_entry.link %}</a>{% endif %}
+                            {% endif %}
+                    </div>
+                    <div class="col-nine">
+                        {% if news_entry.link %}
+                            <h3><a href="{{ news_entry.link }}"><i class="mi mi-Link"></i> {{ news_entry.title }}</a></h3>
+                        {% else %}
+                            <h3>{{ news_entry.title }}</h3>
+                        {% endif %}
+                        <p class="news-date">{{ news_entry.date }}</p>
+                        <p class="news-text">{{ news_entry.text }}</p>
+                    </div>
+                </div>
+                {% if loop.index == config.extra.news|length  %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+    {% endfor %}
+
+
+    {% for team_member in config.extra.team %}
+    {% if loop.index == 1 %}
+    <!-- Testimonials Section
+    ================================================== -->
+    <section id="testimonials">
+
+        <div class="row">
+            <div class="col-twelve">
+                <h1 class="intro-header" data-aos="fade-up">Meet our Core Team</h1>
+            </div>
+        </div>
+    {% endif %}
+            {% if loop.index % 4 == 1 %}
+            <div class="row owl-wrap">
+                <div id="testimonial-slider" data-aos="fade-up">
+                    <div class="slides owl-carousel">
+                        <div class="row">
+            {% endif %}
+                            <div class="col-1-4 tab-full">
+                                <div class="testimonial-author">
+                                    {% if team_member.link %}<a href="{{ team_member.link }}" class="img-link">{% endif %}
+                                    <img src="assets/images/avatars/{{ team_member.image }}" alt="Image of {{ team_member.name }}">
+                                    {% if team_member.link %}</a>{% endif %}
+                                    <div class="author-info">
+                                        <span class="author-name">
+                                        {% if team_member.link %}
+                                            <a href="{{ team_member.link }}" class="span-link">
+                                            <i class="mi mi-Link"></i>
+                                        {% endif %}
+                                        {{ team_member.name }}
+                                        {% if team_member.link %}
+                                            </a>
+                                        {% endif %}
+                                        </span>
+                                        <span class="position">{{ team_member.title }}</span>
+                                    </div>
+                                </div>
+                            </div>
+            {% if loop.index % 4 == 0 or loop.index == config.extra.team|length  %}
+                        </div>
+                    </div> <!-- end slides -->
+                </div> <!-- end testimonial-slider -->
+            </div> <!-- end flex-container -->
+
+            {% endif %}
+    {% if loop.index == config.extra.team|length  %}
+    </section> <!-- end testimonials -->
+    {% endif %}
+    {% endfor %}
+
+
+    {% for acknowledgement_entry in config.extra.acknowledgement %}
+    {% if loop.index == 1 %}
+    <!-- acknowledgement Section
+================================================== -->
+    <section id="acknowledgement">
+
+        <div class="row">
+            <div class="col-twelve">
+                <h1 class="intro-header" data-aos="fade-up">Acknowledgements</h1>
+            </div>
+        </div>
+
+    {% endif %}
+        {% if loop.index % 5 == 1 %}
+        <div class="row owl-wrap">
+            <div id="acknowledgement-slider" data-aos="fade-up">
+                <div class="slides owl-carousel">
+                    <div class="row">
+                        {% endif %}
+                        <div class="col-1-5 tab-full">
+                            <div class="acknowledgement-author">
+                                {% if acknowledgement_entry.link %}<a href="{{ acknowledgement_entry.link }}" class="img-link">{% endif %}
+                                <img src="assets/images/avatars/{{ acknowledgement_entry.image }}" alt="Image of {{ acknowledgement_entry.name }}">
+                                {% if acknowledgement_entry.link %}</a>{% endif %}
+                                <div class="author-info">
+                                    {% if acknowledgement_entry.link %}
+                                        <a href="{{ acknowledgement_entry.link }}" class="span-link">
+                                        <i class="mi mi-Link"></i>
+                                    {% endif %}
+                                    {{ acknowledgement_entry.name }}
+                                    {% if acknowledgement_entry.link %}
+                                        </a>
+                                    {% endif %}
+                                    <span class="position">{{ acknowledgement_entry.title }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% if loop.index % 5 == 0 or loop.index == config.extra.team|length  %}
+                    </div>
+                </div> <!-- end slides -->
+            </div> <!-- end testimonial-slider -->
+        </div> <!-- end flex-container -->
+
+        {% endif %}
+
+    {% if loop.index == config.extra.acknowledgement|length  %}
+    </section> <!-- end acknowledgement -->
+    {% endif %}
+    {% endfor %}
+
+    <!-- footer
+    ================================================== -->
+
+    <br>
+    <div id="preloader">
+        <div id="loader"></div>
+    </div>
+
+    <footer class="md-footer">
+
+        <!-- Further information -->
+        <div class="md-footer-meta md-typeset">
+            <div class="md-footer-meta__inner md-grid">
+
+                <!-- Copyright and theme information -->
+                <div class="md-footer-copyright md-footer-copyright-wrapper">
+                    <div class="md-footer-copyright__highlight md-footer-copyright__highlight-wrapper">
+                       {{ config.copyright }}
+                    </div>
+
+                    Website powered by
+                    <a href="https://www.mkdocs.org">MkDocs</a>,
+                    <a href="https://squidfunk.github.io/mkdocs-material/">Material for MkDocs</a> and
+                    <a href="https://www.styleshout.com/">styleshout</a> .
+                </div>
+
+                <!-- Social links -->
+
+
+            </div>
+        </div>
+    </footer>
+    <!-- Java Script
+================================================== -->
+    <script src="assets/javascripts/jquery-2.1.3.min.js"></script>
+    <script src="assets/javascripts/plugins.js"></script>
+    <script src="assets/javascripts/main.js"></script>
+
+</body>
+
+</html>
